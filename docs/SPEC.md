@@ -1,6 +1,6 @@
 # Number Chef Monsters — Build Spec
 
-Status: design v1.0 (build-ready). Companion files: `CLAUDE.md` (conventions), `docs/DECISIONS.md` (why the design departs from the original proposal), `docs/OPEN_ITEMS.md` (what the owner must supply or decide), `docs/KICKOFF.md` (first prompt).
+Status: design v1.1 (build-ready; skill picker instead of automatic leveling, D22–D26). Companion files: `CLAUDE.md` (conventions), `docs/DECISIONS.md` (why the design departs from the original proposal), `docs/OPEN_ITEMS.md` (what the owner must supply or decide), `docs/KICKOFF.md` (first prompt).
 
 Normative words: **MUST** = acceptance criteria test it; **SHOULD** = default, may deviate with a DECISIONS.md entry.
 
@@ -8,13 +8,13 @@ Normative words: **MUST** = acceptance criteria test it; **SHOULD** = default, m
 
 ## 0. Summary
 
-A static, offline-capable web app (PWA) in which a 5-year-old runs a monster café. A monster arrives and places an order written as a number sentence with a blank (`8 + 5 = ?`). She builds the answer on a serving tray (ten-frames for numbers up to 20, ten-packs and singles above that), presses the serve bell, and the monster eats it with a big reaction. A *service* is 6 monsters (parent-adjustable 4/6/8), about 8–10 minutes, ending at a closing sign.
+A static, offline-capable web app (PWA) in which a 5-year-old runs a monster café. A monster arrives and places an order written as a number sentence with a blank (`8 + 5 = ?`). She builds the answer on a serving tray (ten-frames for numbers up to 20, ten-packs and singles above that), presses the serve bell, and the monster eats it with a big reaction. A *service* is 6 monsters (parent-adjustable 4/6/8), about 8–10 minutes, ending at a closing sign. She (or a parent) picks the skill to practice from the menu board; later services repeat that skill until a different one is picked (D22).
 
 Audience: one child, age 5½ (Grade 1 first semester), reads easy chapter books, little writing practice, good at dragging. Parent is technical and plays the role of tester and configurator.
 
 Targets: iPad Safari (primary), iPhone Safari, Android Chrome; she will use all three at different times. Landscape layout (portrait shows the rotated stage). Progress is stored per device and merged by exported file (§11). Works offline after first load. No backend, accounts, analytics, ads, external links, or purchases. All data local.
 
-Build budget (D20): a **playable game in ≈ 10.5 agentic hours (Tier 1: M0–M3)**, then bonus features (Tier 2: M4–M11) in any order with no upper limit.
+Build budget (D20): a **playable game in ≈ 10 agentic hours (Tier 1: M0–M3)**, then bonus features (Tier 2: M4–M12) in any order with no upper limit.
 
 ### Non-goals (v1)
 Monster designer, rush-hour mode, regrouping (carry/borrow), multiplication, multi-child profile UI, recorded audio, music, localization, handwriting/tracing.
@@ -24,27 +24,27 @@ Monster designer, rush-hour mode, regrouping (carry/borrow), multiplication, mul
 ## 1. Pedagogy (the reasoning the rest depends on)
 
 ### 1.1 Principles
-1. **Concrete → representational → abstract, faded per skill.** Every skill has four *support stages* (§3.2). She moves along them as she succeeds; she never has to pick one.
+1. **Concrete → representational → abstract, faded per skill.** Every skill has four *support stages* (§3.2). In v1 the parent sets the stage per skill (default S3); fading it automatically as she succeeds is the optional leveling milestone M12 (D22, D23). She never has to pick a stage.
 2. **Strategy, not just recall.** The tray makes strategies visible: counting on, doubles, make-a-ten, bridging through ten, count back, tens-and-ones. Demonstrations (§5.4) model them.
 3. **Errors teach, nothing punishes.** No buzzers, no lost coins, no failure screens. A miss triggers a count-together replay, then a worked demonstration, then a follow-me, then the fact is requeued with *more* support.
 4. **First-try correctness is the only diagnostic signal.** Hints and demos are free, but flag the attempt as assisted so mastery stays honest.
-5. **Short, spaced, lightly interleaved.** 6 orders per service; ~20% review; requeue of misses; Leitner-style per-fact boxes.
+5. **Short and spaced.** 6 orders per service; requeue of misses; light per-fact weighting so facts she misses come back sooner. The Leitner-style boxes only affect which fact is drawn inside the chosen skill, never how hard the skill is (D22).
 6. **One consistent model.** Ten-frame layout never changes: 2 rows × 5, filled left→right, top→bottom, first-five/second-five tinted. Same food type within one order.
 7. **Reward effort, not speed or accuracy.** Coins are flat per monster served (§9).
-8. **The ladder matches her school year, with room to spare.** She is 5½ and working through the first half of a Grade 1 book: within-10 and within-20 add/subtract (A2–A8) is her actual curriculum this year, and tens and ones (B1–B2) is likely second-semester work. Expect A1–A5 to carry most of the early play (her book is on number sentences with sums under ten right now, i.e. A1–A3), so quality and variety matter most there. A0 is treated as assumed-known (§4.2). B3 and beyond are headroom.
-9. **Build on what she already owns.** She knows +0, +1 and doubles (1+1 … 9+9) from flash cards. Those are anchor facts: they open sessions, and near-doubles (6+7 = 6+6+1) and 9+x (one from the other) become the first strategies taught for new facts.
+8. **The ladder matches her school year, with room to spare.** She is 5½ and working through the first half of a Grade 1 book: within-10 and within-20 add/subtract (A2–A8) is her actual curriculum this year, and tens and ones (B1–B2) is likely second-semester work. Expect A1–A5 to carry most of the early play (her book is on number sentences with sums under ten right now, i.e. A1–A3), so quality and variety matter most there. A0 is assumed known and is just an optional tile (M5). B3 and beyond are headroom.
+9. **Build on what she already owns.** She knows +0, +1 and doubles (1+1 … 9+9) from flash cards. Those are anchor facts: they come up less often than new facts (box 3 start, §4.2), and near-doubles (6+7 = 6+6+1) and 9+x (one from the other) become the first strategies taught for new facts.
 
 ### 1.2 The ladder (revised; see DECISIONS.md D1 for what changed and why)
 
-Two tracks, no locks. All tiles are always tappable; "Chef's Pick" recommends.
+Two tracks, no locks. All tiles are always tappable; she or a parent picks one for the service, and the tile played last glows (D22). There is no automatic recommendation or progression in v1.
 
 **Little Menu (up to 20)**
 
 | ID | Menu name | Example | Notes |
 |---|---|---|---|
 | A0 | Count It Out | "Bring 7 cookies" | Warm-up + tutorial for the tray. 1–10, then 11–20 using two frames. No equation. |
-| A1 | Little Bites | 3 + 2, 5 − 2 | Within 5. Add and subtract mixed ~55/45. **Chef's Pick starts here** (short warm-up and diagnostic). |
-| A2 | Big Bites | 4 + 5, 9 − 3 | Within 10 (sums 6–10; A1 facts appear as review). Near-doubles (3+4 = 3+3+1) built on her known doubles. |
+| A1 | Little Bites | 3 + 2, 5 − 2 | Within 5. Add and subtract mixed ~55/45 by default; the parent can set addition only or subtraction only (D24). She already knows most A1 addition, so subtraction only is the likely setting. **Highlighted on first run.** |
+| A2 | Big Bites | 4 + 5, 9 − 3 | Within 10 (sums 6–10). Near-doubles (3+4 = 3+3+1) built on her known doubles. |
 | A3 | Perfect Ten | 7 + ? = 10, 10 − 4 | All pairs to 10. Ten-frame centered. |
 | A4 | Missing Munchies | 3 + ? = 8, 7 − ? = 5 | Missing addend and missing subtrahend, within 10. |
 | A5 | Ten and More | 10 + 4, 14 = 10 + ? | Teen numbers as ten + ones, and 1n − 10, 1n − n. |
@@ -174,6 +174,8 @@ interface TrayTask {         // derived from Problem + Stage, pure function
 `toTrayTask(problem, stage)` and `check(trayTask, trayState)` are pure and unit-tested for every pool item at every stage.
 
 ### 3.2 Support stages (per skill)
+
+The stage is a per-skill setting chosen by the parent (default S3), stored as a `skillConfig` event and applied from the next service. It does not change automatically in v1 (D23); automatic fading is milestone M12.
 | Stage | Name | What she sees/does | Tray starts | Voice counting |
 |---|---|---|---|---|
 | S3 | Guided | Frames/packs visible; prefilled groups color-coded to the ticket; running counts pop on items; Pip's hat pulses after 10 s idle | Operand(s) prefilled & locked (add) or full minuend (sub) | Yes (counting on / counting back) |
@@ -209,7 +211,7 @@ MonsterArrive → OrderShown(speak ticket) → Building(attempt=1)
 Building --Serve--> Evaluate
 Evaluate: correct → Eat → Reaction → Coins → MonsterLeave → next
 Evaluate: wrong & attempt=1 → CountTogether (replay; tray stays editable) → Building(attempt=2)
-Evaluate: wrong & attempt=2 → Worked (demo) → FollowMe → ResolvedAssisted → requeue(stage−1) → MonsterLeave → next
+Evaluate: wrong & attempt=2 → Worked (demo) → FollowMe → ResolvedAssisted → requeue(one step more support) → MonsterLeave → next
 Help pressed (any time) → CountTogether if attempt=1, else Worked; marks assisted
 ```
 - "First-try correct" = first Serve press correct **and** Help not used before it.
@@ -255,23 +257,25 @@ Spoken forms (all via `numberToWords`, never raw digits):
 `a + b = ?` → "Eight plus five equals what?"; `a + ? = c` → "Seven plus what equals ten?"; `m − ? = c` → "Seven minus what equals five?"; A0 → "Can I have seven cookies, please?"; A5 `14 = 10 + ?` → "Fourteen equals ten plus what?"
 
 ### 4.1 Session builder (deterministic given seed)
-Inputs: `seed`, `skill | 'pick'`, `orders` (4/6/8), per-fact boxes, per-skill stages, focus list.
+Inputs: `seed`, `skill` (chosen on the menu board), `orders` (4/6/8), the skill's `ops` filter and stage (`skillConfig`, D23, D24), per-fact boxes, focus list.
 1. PRNG: `mulberry32`; seed = hash(`deviceId`, service start time, per-device service counter), injected by the caller. Stored in the `serviceEnd` event so any service can be replayed.
-2. **Selected skill:** ~80% from that skill's pool, ~20% review from recent skills (hats ≥ 1) and requeued facts. At least 1 review item if any exists.
-3. **Chef's Pick:** frontier = first skill in ladder order with hats < 2. Composition for 6: 1 confidence opener (a box ≥ 2 fact, or the easiest in the frontier skill), 3 frontier, 1 review of the previous skill, 1 review of any earlier skill; scaled for 4/8.
+2. **Pool:** the chosen skill's pool, restricted by its `ops` filter (`both` | `add` | `sub`: only forms of that operation; skills with a single operation ignore the filter and do not show it). All orders come from this pool plus requeues; there is no cross-skill review in v1.
+3. **No Chef's Pick in v1 (D22).** Nothing recommends or rotates skills; the service repeats the chosen skill until another is picked. Chef's Pick returns in M12.
 4. Weighted sampling by box: weights `[5,3,2,1,0.5]` for boxes 0–4; new facts weight 5.
-5. **No immediate repeats:** the same `factKey` (commuted partner included) must not appear within the last 4 problems; the same food and the same monster must not appear twice in a row; add/sub ratio inside mixed skills stays within ±1 of the target ratio per service.
+5. **No immediate repeats:** the same `factKey` (commuted partner included) must not appear within the last 4 problems; the same food and the same monster must not appear twice in a row; when `ops` is `both`, the add/sub ratio stays within ±1 of the skill's target ratio per service.
 6. Food: monster's favorite 70% of the time, else random from the allowlist.
-7. **Requeue:** `resolvedAssisted` facts are reinserted 3–5 problems later at stage−1 (min S3) with a different food and swapped operand order where commutative; max 2 requeues per service; leftovers set box = 0 for next time.
+7. **Requeue:** `resolvedAssisted` facts are reinserted 3–5 problems later with one step more support (S0→S1→S2→S3; S3 stays S3) and a different food and swapped operand order where commutative; max 2 requeues per service; leftovers set box = 0 for next time.
 8. Service length = orders + requeues (max orders + 2).
-9. Pool-size guard: if distinct available facts < orders, allow repeats but never adjacent.
+9. Pool-size guard: if distinct available facts < orders (for example A1 with subtraction only has 10 canonical facts), allow repeats but never adjacent.
 
-### 4.2 Mastery and progression (constants live in `engine/config.ts`; tuned by playtest)
+The first-ever service on a device begins with the warm-up order (§5.4, D26) before these orders.
+
+### 4.2 Fact boxes, stage and starting state (constants live in `engine/config.ts`; tuned by playtest)
 - **Fact box (0–4):** first-try correct → box+1; correctAfterHint → stays; resolvedAssisted or wrong-then-fixed → box = 0. Boxes are shared with the commuted partner (canonical key) at half weight.
-- **Stage per skill:** window = last 6 first-attempts at the current stage. Promote (S3→S2→S1→S0) if ≥ 5/6 and ≥ 6 attempts at this stage. **Fast-track:** if the first 6 attempts on a never-played skill are 6/6, jump straight to S1. Demote one stage (silently) if ≤ 2/6 with ≥ 6 attempts. Parent can override any skill's stage (§12).
-- **Chef hats (shown on menu tiles, 0–3):** hat 1 = stage has ever been ≤ 2; hat 2 = stage has ever been ≤ 1 (fast-track earns both); hat 3 = at S0 with ≥ 90% first-try on the last 12 S0 attempts **and** at least `min(30, 70% of canonical facts)` distinct canonical facts at box ≥ 2. (A flat "70% of the pool" is unreachable for B2's 684 facts.) Hats never decrease. Earning a hat gives +10 coins once.
-- Chef's Pick advances past a skill once it has 2 hats (i.e. she can build the answer from an empty tray); fluency at S0 is maintained through the review slots.
-- **Starting state (owner-reported: age 5½, Grade 1 first semester, D16).** She already knows +0, +1 (both orders) and doubles 1+1 … 9+9 from flash cards. She can solve take-away *word problems* but is still learning *number sentences* with sums under ten, so symbolic subtraction counts as new. Default `known` preset: the addition facts above begin at box 3 (openers and review, rarely new work); A0 is `assumedKnown` (start at S1, skipped by Chef's Pick's frontier, still on the menu and used for review slots); Chef's Pick starts at **A1**, which doubles as a short diagnostic and as the first-order tutorial; fast-track (6/6) moves her on to A2 within a service or two. All of this is editable in Parent → Skills → Starting point (M7) and stored as a `known` event.
+- **Stage per skill** is a stored parent setting (`skillConfig` event, default S3), applied from the next service. No automatic promotion, demotion or fast-track in v1 (D23). Every attempt is still logged with skill, stage, outcome and fact, so the leveling milestone (M12) can derive stages from history.
+- **Chef hats are deferred to M12 (D25).** No hats on tiles or in Results, no hat bonus coins. The `hat` event type is reserved (§11.2).
+- **Automatic leveling, hats and Chef's Pick** are the optional late milestone M12 (D22, D25).
+- **Starting state (owner-reported: age 5½, Grade 1 first semester, D16).** She already knows +0, +1 (both orders) and doubles 1+1 … 9+9 from flash cards. She can solve take-away *word problems* but is still learning *number sentences* with sums under ten, so symbolic subtraction counts as new. Default `known` preset: those addition facts start at box 3, so they come up less often than new facts. Every skill's stage starts at S3, and the first-run menu highlights A1. All editable in Parent → Skills (M3: stage and operations per skill; M7: starting-point toggles); the toggles are stored as a `known` event.
 - Never shown to her: percentages, wrong counts, streaks.
 - Stage uses the *same fact pool*; only the representation fades.
 
@@ -280,9 +284,10 @@ Inputs: `seed`, `skill | 'pick'`, `orders` (4/6/8), per-fact boxes, per-skill st
 ## 5. Screens and flow
 
 ```
-Splash(tap to start) → Home ─┬─ "Open the Café" → Service(Chef's Pick) → Results → Home
-                             ├─ Menu board (Little Menu | Big Menu) → Service(skill) → Results
-                             ├─ Shop (decorate)
+Splash(tap to start) → Home ─┬─ "Open the Café" → Menu board (pick a skill) → Service(skill) → Results ─┬─ Another service → Service(same skill)
+                             │                                                                           ├─ Change dish → Menu board
+                             │                                                                           └─ Home
+                             ├─ Shop (decorate; from M4)
                              └─ [hidden corner] Parent gate → Parent area
 ```
 
@@ -290,16 +295,16 @@ Splash(tap to start) → Home ─┬─ "Open the Café" → Service(Chef's Pick
 Full-screen "Tap to start". The tap: unlocks WebAudio (`resume()`), primes `speechSynthesis` (speak a silent/empty utterance), sets `navigator.audioSession.type = 'playback'` if available, calls `navigator.storage.persist()` (best effort), and requests nothing else. No text input anywhere child-facing.
 
 ### 5.2 Home
-The café exterior/interior as the owned shop decorations, Pip the guide, coin jar with count. Three big targets: **Open the Café** (primary, largest), **Menu** (chalkboard), **Decorate** (paintbrush). A 44-px, 30%-opacity gear in the top-right corner: long-press 2 s → gate. When the café is locked (§6.2) Home shows the closed café ("Closed — ask a grown-up to open it!") instead of the three buttons; the gear still works.
+The café exterior/interior as the owned shop decorations, Pip the guide, coin jar with count. Two big targets: **Open the Café** (primary, largest; opens the menu board) and **Decorate** (paintbrush; added with the shop in M4, absent before). The chalkboard is wall decoration, not a separate button. A 44-px, 30%-opacity gear in the top-right corner: long-press 2 s → gate. When the café is locked (§6.2) Home shows the closed café ("Closed — ask a grown-up to open it!") instead of the buttons; the gear still works.
 ### 5.3 Menu board
-Chalkboard with two pages (swipe not required; two big tabs "Little Menu"/"Big Menu"). Each tile 3×3 (9 on Little, 4 on Big): food icon, a sample sentence in chalk, 0–3 chef hats. The Chef's Pick tile glows (frontier skill). Parent-hidden skills do not render. Tapping a tile starts a service with that skill.
+Chalkboard with two pages (swipe not required; two big tabs "Little Menu"/"Big Menu"; a tab with no built skill is hidden). Each tile 3×3 (9 on Little, 4 on Big): food icon and a sample sentence in chalk (it shows an example of the operations the parent allowed, e.g. a subtraction for A1 set to subtraction only). This is the start of every play session: the tile for the skill played last glows, and A1 on first run. Parent-hidden skills do not render. Tapping a tile starts a service with that skill. There is no recommendation, and no hats or levels are shown (D22, D25).
 
 ### 5.4 Service screen layout (safe box 1280×720)
 - Monster stands behind the counter top-center (x 440–840, y 40–300); queue of waiting monsters peeks from the left edge as small silhouettes (one per remaining order) — the natural end-of-service cue.
 - **Ticket** (paper receipt, x 860–1220, y 60–260): equation tokens colored (first operand blue, second orange, result green; also shape-coded by the blank's dashed box so color is never the only cue). Tap ticket → replays spoken sentence. Food icon beside it.
 - **Tray** on the counter (y 310–520), centered.
 - **Bin** bottom-center-left (y 570–700). **Bell** bottom-right. **Pip's hat button (Help)** bottom-left. **Door sign (leave)** top-left, small: opens "Take a break?" with two 160-px buttons, *Keep cooking* / *Close the café*.
-- **First-ever order:** a ghost hand taps the bin once, then the bell once, while Pip says what to do (tutorial; shown only until the first completed order).
+- **First-ever service (tutorial, D26):** before the chosen skill's orders, one warm-up order `2 + 1` (cookies, one ten-frame, S3, whatever skill was picked). If she has not touched anything after 4 s, a ghost hand taps the bin once to show how items are placed; once the item is on the tray, after 4 more idle seconds the ghost hovers over the bell with a tap motion while Pip says what to do. The bell press is always hers (never auto-serve). The order pays the usual 3 coins and writes no `attempt` event. Shown once per device (flag in the `meta` store).
 - S0: number pad replaces bin and tray area (3×4 grid, buttons ≥ 120 px; two digit slots "tens | ones" for ≥ 10). **Peek** replaces Help's role as the concrete reveal.
 
 ### 5.5 Teaching behavior
@@ -324,7 +329,7 @@ Chalkboard with two pages (swipe not required; two big tabs "Little Menu"/"Big M
 Correct serve: bell "ding"; tray slides to the monster; food flies into the mouth in groups (≤ 5 individually counted, > 5 by row/pack with running total spoken at the end, e.g. "Eight!"); 3 chew cycles; reaction chosen from the monster's list (§7.2) with a bigger variant on first-try. Total eat+react ≤ 4 s; any tap skips ahead. Then 3 coins fly into the jar one by one (§9).
 
 ### 5.7 Results (closing time)
-The sign flips to CLOSED. Coin tally counts up with spoken numbers (counting by ones, then by fives for > 10). Shows the monsters served as a row of happy faces (everyone is happy; no scores). Buttons (≥ 160 px): **Another service** (starts Chef's Pick or the same skill; absent when the café is locked, §6), **Decorate** (from M4), **Home**. When the allowance ran out during this service, Results is followed by the locked Home. Hat awards shown here with a one-time celebration. No streaks, no daily login, no "come back" nags.
+The sign flips to CLOSED. Coin tally counts up with spoken numbers (counting by ones, then by fives for > 10). Shows the monsters served as a row of happy faces (everyone is happy; no scores). Buttons (≥ 160 px): **Another service** (the default, highlighted: same skill again; absent when the café is locked, §6), **Change dish** (back to the menu board), **Decorate** (from M4), **Home**. When the allowance ran out during this service, Results is followed by the locked Home. No streaks, no daily login, no "come back" nags.
 
 ### 5.8 Leaving mid-service
 Coins earned so far are kept. The service is recorded as partial (`serviceEnd.partial`, §11.2) and can be resumed from the `resume` snapshot (§11.6). Reopening within 2 h offers "Continue dinner service?" with two big buttons.
@@ -332,25 +337,25 @@ Coins earned so far are kept. The service is recorded as partial (`serviceEnd.pa
 ---
 
 ## 6. Play allowance and lock
-Goal (owner): hand her the device and know she can play for a defined period, not endlessly, until a parent intervenes. (D7 — an earlier draft misread this as a per-service or daily limit.)
+Goal (owner): when a parent wants to hand her the device and walk away, they can turn on a play-time limit, so she plays for a defined period, not endlessly, until a parent intervenes. **The limit is optional and off by default (D27):** a fresh install has no clock, no lock and no cue, and nothing in this section runs until a parent enables it in Settings. (D7 — an earlier draft misread this as a per-service or daily limit.)
 
 ### 6.1 Model
-A **play session** is one allowance of active play time. The allowance is per device and is *not* reset by closing the app, starting another service, or reloading.
-- **Setting** (Parent → Settings, top of the page): Play time per session = none / 5 / **15 (default)** / 10 / 20 minutes. (Default is 15 because the whole point is a safe hand-off; "none" is available.)
-- **State** (per device, stored in the `clock` store, §11.3): `remainingMs`, `state: 'open' | 'locked'`, `lastRefillAt`.
+While the limit is enabled, a **play session** is one allowance of active play time. The allowance is per device and is *not* reset by closing the app, starting another service, or reloading.
+- **Setting** (Parent → Settings, top of the page, per device): Play time limit = **Off (default)** / 5 / 10 / 15 / 20 minutes. Off means no clock, no lock, no cue and no "Start new session" / "Add time" buttons. Choosing a duration (or changing it) starts a fresh session with that full allowance, counting from the moment the parent returns to the child screens. Choosing Off at any time, even while the café is locked, clears the lock and the remaining time.
+- **State** (per device, stored in the `clock` store, §11.3): `remainingMs`, `state: 'open' | 'locked'`, `lastRefillAt`. Unused while the limit is Off.
 - **Counts as play time:** foreground time on any child-facing screen (Home, Menu, Service, Results, Shop). Does **not** count: the parent area, the parent gate, the "Take a break?" dialog, a hidden page, or idle time — the clock pauses after 90 s without any input (she walked away) and resumes on the next touch.
 - The clock is a monotonic accumulator of active time (never wall-clock subtraction), flushed to IndexedDB every 5 s and on `visibilitychange`, so killing the app or changing the device clock does not refund time.
 
 ### 6.2 When time runs out
 1. At `remainingMs ≤ 0`: stop accepting new orders. The monster she is serving finishes (including FollowMe), with a hard cap of 90 s grace; dropped requeues get box 0 for next time.
-2. Results "Closing time!" plays as usual (tally, hats), then the café **locks**: `state='locked'` is persisted immediately.
+2. Results "Closing time!" plays as usual (tally), then the café **locks**: `state='locked'` is persisted immediately.
 3. **Locked screen:** the closed café ("Closed — ask a grown-up to open it!") with sleepy monsters. No Open, Menu or Shop. The hidden gear still works. Relaunching or reloading the app lands on the same locked screen.
-4. A parent unlocks through the gate: **Start new session** (full allowance) or **Add time** (5 / 10 / 15 / 20 minutes on top of what remains, also works before it runs out). Either sets `state='open'`.
+4. A parent unlocks through the gate: **Start new session** (full allowance) or **Add time** (5 / 10 / 15 / 20 minutes on top of what remains, also works before it runs out). Either sets `state='open'`. These two buttons exist only while a limit is enabled; to stop limiting, the parent chooses Off.
 5. While `open` with time left, "Another service" and everything else works normally; a service ends after its orders as usual (the allowance and the service are independent).
 6. When 60 s remain, a gentle non-numeric cue appears (the sign on the door starts swinging). No countdown number is ever shown to her.
 
 ### 6.3 Optional automatic refill
-Setting "Refill": **Parent only (default)** / after 1 hour / after 3 hours / next morning (4 a.m.). The automatic modes refill only a *locked* café, and only using wall-clock time since the lock began (the one place the wall clock is used). Parent only is the setting that matches the stated goal; the others are convenience.
+Setting "Refill" (shown only while a limit is enabled): **Parent only (default)** / after 1 hour / after 3 hours / next morning (4 a.m.). The automatic modes refill only a *locked* café, and only using wall-clock time since the lock began (the one place the wall clock is used). Parent only is the setting that matches the stated goal; the others are convenience.
 
 ### 6.4 Honest limits
 - It is per device. If she picks up the iPhone instead of the iPad, that device has its own allowance. (Merge-by-file never merges allowances.)
@@ -358,7 +363,7 @@ Setting "Refill": **Parent only (default)** / after 1 hour / after 3 hours / nex
 - The parent gate uses multiplication (6–9 × 7–9), which a 5½-year-old cannot do; a determined older sibling could.
 
 ### 6.5 Tests
-Fake monotonic clock: pauses when hidden / idle 90 s / break dialog / parent area; flush and restore across reload; lock persists across reload; finishes current monster and caps grace at 90 s; Add time works from open and locked; refill modes with a fake wall clock; clock changes do not refund time; 60 s cue fires once.
+Default Off: a fresh install never accumulates time, never locks and never shows the cue, however long she plays; choosing a duration starts a full session; choosing Off while locked unlocks and clears the time. With a limit on: fake monotonic clock: pauses when hidden / idle 90 s / break dialog / parent area; flush and restore across reload; lock persists across reload; finishes current monster and caps grace at 90 s; Add time works from open and locked; refill modes with a fake wall clock; clock changes do not refund time; 60 s cue fires once.
 ---
 
 ## 7. Art
@@ -429,14 +434,14 @@ Layered SVG scene: wall, floor, window, lights, counter, counter-top slot, wall 
 | coin | two-tone sine "ting" |
 | buy | coin ×3 + rising chime |
 | arrive | rubber "boing" (sine with pitch envelope) |
-| hat | three ascending chimes |
+| hat | three ascending chimes (M12) |
 Master volume, SFX volume, voice volume settings; defaults 0.8 / 0.7 / 1.0. No background music in v1.
 
 ---
 
 ## 9. Economy
 All numbers live in `engine/economy.ts`.
-- **Coins:** +3 per monster served (flat, regardless of correctness, speed, or hints) · +5 service-complete tip · +10 once per chef hat earned. A 6-monster service yields **23 coins**; with a hat 33.
+- **Coins:** +3 per monster served (flat, regardless of correctness, speed, or hints) · +5 service-complete tip · +10 once per chef hat earned (hats arrive with the leveling milestone M12, D25; there is no hat bonus in v1). A 6-monster service yields **23 coins**.
 - Nothing is ever taken away. Purchases are the only spend; no refunds needed because swapping is free.
 - No streaks, daily rewards, expiring items, ads, loot boxes, timers on rewards, or external links.
 - Coin display: jar with count; counts spoken in Results only.
@@ -462,25 +467,25 @@ Equipped items persist per slot; staff can be multiple (up to 3 visible).
 ## 11. Persistence and multi-device
 
 ### 11.1 Why event-sourced
-She will play on an iPad, an iPhone, and an Android phone, with no backend. Progress would silently fork per device. So everything that counts as progress is an **append-only event log** with unique ids; derived state (fact boxes, stages, hats, wallet, history) is a pure function of the log. Backup = export the log. Syncing devices = **merge** logs (union by id) and replay. (D15)
+She will play on an iPad, an iPhone, and an Android phone, with no backend. Progress would silently fork per device. So everything that counts as progress is an **append-only event log** with unique ids; derived state (fact boxes, wallet, history; per-skill settings are last-writer-wins events) is a pure function of the log. Backup = export the log. Syncing devices = **merge** logs (union by id) and replay. (D15)
 
 ### 11.2 Events
 ```ts
 type Evt = { id: string; t: number; dev: string; v: number } & (   // id = crypto.randomUUID() (fallback: 128 random bits); t = epoch ms
  | { k:'attempt'; svc:string; fact:string; skill:SkillId; stage:Stage; outcome:'first'|'afterHint'|'assisted'; ms:number }
  | { k:'serviceEnd'; svc:string; skill:SkillId|'pick'; seed:number; orders:number; served:number; coins:number; activeMs:number; partial:boolean }
- | { k:'hat'; skill:SkillId; n:1|2|3; coins:number }
+ | { k:'hat'; skill:SkillId; n:1|2|3; coins:number }          // reserved: written from M12 (D25)
  | { k:'buy'; item:string; price:number }
  | { k:'equip'; slot:string; items:string[] }
- | { k:'stageOverride'; skill:SkillId; stage:Stage }
- | { k:'known'; facts:string[]; assumedKnown:SkillId[] }   // starting-point toggles, last writer wins
+ | { k:'skillConfig'; skill:SkillId; stage:Stage; ops:'both'|'add'|'sub' }   // parent's per-skill settings, last writer per skill wins (D23, D24)
+ | { k:'known'; facts:string[] }   // starting-point toggles, last writer wins
  | { k:'focus'; list:string[] } )                          // focus list, last writer wins
 ```
 Rules:
 - `engine/replay.ts`: `replay(events, initial) → Derived` sorts by `(t, id)`. `applyEvent` is the incremental form and MUST equal a full replay (property test).
 - **Coins:** `earned = Σ serviceEnd.coins (distinct svc) + Σ hat.coins (distinct skill+n)`. Amounts live in the events and are never recomputed, so a merge cannot reduce earned coins; two devices that both emit "hat 1 for A2" pay once. `spent = Σ price over distinct purchased items` (the same item bought on two devices is charged once). `balance = max(0, earned − spent)`. Owned items = union of `buy` events. Nothing a merge does can remove an owned item.
-- Stage, fact boxes and the rolling window are derived and may legitimately shift after a merge (adaptation, not reward). Displayed hats = union of derived hats and `hat` events.
-- `equip`, `known`, `focus`: latest `t` wins.
+- Fact boxes are derived and may legitimately shift after a merge (adaptation, not reward). Stage and operations are explicit `skillConfig` events, so a merge does not shift them. Hats (M12): union of derived hats and `hat` events.
+- `equip`, `known`, `focus`, and `skillConfig` (per skill): latest `t` wins.
 - `factKey` format is a persisted identifier: changing it needs a migration.
 - Initial state before any events = the owner preset (§4.2 starting state), applied implicitly and never as events, so two fresh devices do not double-seed.
 
@@ -511,13 +516,13 @@ Safari tabs can have script-writable storage evicted after 7 days of non-use; **
 ## 12. Parent area
 **Gate:** long-press 2 s on the Home gear, then a multiplication question with factors 6–9 × 7–9 (answer by number pad, never spoken). 3 wrong → 30 s lockout. Auto-locks after 5 minutes idle or on leaving. Not reachable during a service.
 
-Tier 1 (M3) ships only: play time + Start new session / Add time, voice/speed/volume, reduced motion, a simple progress list, basic Export JSON, Reset. The full tab set below (Skills, Focus list, merge, heatmap, starting-point editor) lands in M7.
+Tier 1 (M3) ships only: the optional play-time limit (off by default) with Start new session / Add time, **per-skill stage (S3–S0) and operations (both / addition only / subtraction only)**, voice/speed/volume, reduced motion, a simple progress list, basic Export JSON, Reset. The full tab set below (Skills, Focus list, merge, heatmap, starting-point editor) lands in M7.
 
 Tabs (normal scrolling layout; works in portrait too):
-1. **Progress** — per-skill stage, hats, mastery bar; fact heatmap (addition/subtraction grids 0–10 colored by box); "trouble spots" (facts with box 0 after ≥ 3 sightings); last 20 services (date, skill, first-try %, assisted count, minutes); active minutes per day (last 14).
-2. **Skills** — hide/show tiles; set stage per skill (S3–S0); pin Chef's Pick to a skill; "reset this skill"; **Starting point**: "already knows" toggles (+0, +1, doubles) and assumed-known skills (§4.2).
-3. **Settings** — orders per service (4/6/8); **play time per session** (none/5/10/15/20, default 15) and refill mode (parent only / 1 h / 3 h / next morning), with **Start new session** and **Add time** buttons at the very top of the tab (§6); voice, speed, test (voice is per device); master/SFX/voice volume; reduced motion; child's name (optional, used in the greeting only; phrase must degrade if unset); big-text captions; rename monsters.
-4. **Focus list (custom content)** — add up to 30 specific facts or skill ranges (e.g. "8+5", "all 9+x") that mix into Chef's Pick at 25% weight. Validated against the generators (cannot create a nonsense fact). 
+1. **Progress** — per-skill stage and services played; fact heatmap (addition/subtraction grids 0–10 colored by box); "trouble spots" (facts with box 0 after ≥ 3 sightings); last 20 services (date, skill, first-try %, assisted count, minutes); active minutes per day (last 14).
+2. **Skills** — hide/show tiles; set **stage** (S3–S0) and **operations** (both / addition only / subtraction only; skills with one operation do not show it) per skill, shipped in M3 as a minimal list (D23, D24); "reset this skill"; **Starting point**: "already knows" toggles (+0, +1, doubles) (§4.2).
+3. **Settings** — orders per service (4/6/8); **play-time limit** (Off by default; 5/10/15/20) and, only when a limit is on, refill mode (parent only / 1 h / 3 h / next morning) with **Start new session** and **Add time** buttons at the very top of the tab (§6, D27); voice, speed, test (voice is per device); master/SFX/voice volume; reduced motion; child's name (optional, used in the greeting only; phrase must degrade if unset); big-text captions; rename monsters.
+4. **Focus list (custom content)** — add up to 30 specific facts or skill ranges (e.g. "8+5", "all 9+x") that mix at 25% weight into services of the skill each fact belongs to (and into Chef's Pick once it exists). Validated against the generators (cannot create a nonsense fact). 
 5. **Data** — Device label (e.g. "Dad's iPad"), Export, Import (**Merge** default / Replace; §11.6) with a three-line "keep devices in sync" explanation, Back up now, snapshots list (restore), storage persisted/usage, Reset progress (keeps shop), Reset everything (a second, fresh multiplication prompt), app version/build date, install help.
 
 No external links anywhere. An "About" shows plain text only.
@@ -543,7 +548,7 @@ No external links anywhere. An "About" shows plain text only.
 ### 13.4 Unit/property tests (Vitest)
 - Generators: 1,000 seeds × every skill — answers valid; ranges respected.
 - Session builder: determinism (same seed → identical order); no adjacent repeats; no fact within 4 of itself; add/sub balance; requeue positions 3–5 and stage−1; max length; pool-size guard.
-- Mastery: box transitions, stage promotion/demotion/fast-track, hats.
+- Fact boxes: transitions and sampling weights; the operation filter yields only the allowed forms; `skillConfig` last-writer-wins. (Promotion/demotion/fast-track and hat tests move to M12.)
 - Tray model: fill order, holes, auto-bundle, capacity, locked prefill, `check` truth table.
 - `numberToWords` 0–100 exhaustive vs. a hand-typed table of 0–20, tens, and 12 spot checks.
 - Economy: coin totals, price/affordability, purchase idempotence.
@@ -557,7 +562,7 @@ No external links anywhere. An "About" shows plain text only.
 - Projects: Chromium emulating iPad Pro 11 landscape (1194×834), Pixel 7 landscape (915×412), and WebKit emulating iPad (gen 7) landscape (1080×810) and iPhone 13 landscape (844×390), plus portrait variants (iPad 834×1194, iPhone 390×844) for the rotated-stage tests. `hasTouch: true`.
 - Playwright has **no touch drag API**; taps use `page.touchscreen.tap`; drag tests dispatch touch via CDP `Input.dispatchTouchEvent` in the Chromium project only. Everything also works by tapping, so most flows test by tap.
 - Test build flag `VITE_E2E=1` exposes `window.__ncmc` (seed override, fast-forward animations, fake clock, state dump). It is stripped from production builds (test: production bundle contains no `__ncmc`).
-- Flows: first run → one full service per track; wrong→hint→wrong→demo→follow-me→requeue; Help paths; S0 numpad; shop buy/equip persists across reload; parent gate (wrong answers/lockout); allowance runs out → finishes monster → locked Home → survives reload → parent unlock; export→reset→import restores; two-context merge (two browser contexts as two devices); portrait viewports render the rotated stage and taps/drags land on the right targets; back gesture shows the break dialog; offline reload (service worker) works; zero external network requests; no scrollbars / no zoom on double-tap; tap-target size assertions at 844×390.
+- Flows: first run → one full service per track; skill pick → service → Another service repeats the same skill → Change dish returns to the menu; parent sets stage/operations and the next service reflects them; wrong→hint→wrong→demo→follow-me→requeue; Help paths; S0 numpad; shop buy/equip persists across reload; parent gate (wrong answers/lockout); allowance runs out → finishes monster → locked Home → survives reload → parent unlock; export→reset→import restores; two-context merge (two browser contexts as two devices); portrait viewports render the rotated stage and taps/drags land on the right targets; back gesture shows the break dialog; offline reload (service worker) works; zero external network requests; no scrollbars / no zoom on double-tap; tap-target size assertions at 844×390.
 - Screenshots on every milestone into `docs/screens/M<n>/`: Splash, Home, Menu (both pages), Service at S3/S1/S0 for a frame task, a bridging task mid-demo, a B-track task, Results, Shop, Parent progress, in iPad 1194×834 and iPhone 844×390.
 
 ### 13.6 PLAYTEST.md (only the owner can judge)
@@ -568,8 +573,8 @@ Claude Code creates the file with, per milestone, a checklist and blank notes. A
 ## 14. Milestones
 Each milestone ends: `npm run check` green, e2e green, screenshots saved, `PLAYTEST.md` updated, **STOP and wait for owner playtest feedback** before the next. Each milestone also starts by fixing what the previous playtest found. Hours are agentic build estimates. (D20: the owner wants a playable game in ≈ 10 h and bonus features beyond, with no upper limit.)
 
-### Tier 1 — Playable (≈ 10.5 h): M0–M3
-At the end of M3 you can hand her the iPad: she plays A1–A3 (within 5, within 10, make ten) with monsters and sound, her progress is saved, and the play allowance locks the café until a parent unlocks it. That content is exactly what her book is working on (number sentences with sums under ten).
+### Tier 1 — Playable (≈ 10 h): M0–M3
+At the end of M3 you can hand her the iPad: she plays A1–A3 (within 5, within 10, make ten) with monsters and sound, her progress is saved, and, if a parent turns on the optional play-time limit, the café locks when time is up until a parent unlocks it. That content is exactly what her book is working on (number sentences with sums under ten).
 
 #### M0 — Foundations (≈ 2 h)
 Vite/TS/React scaffold, strict TS, ESLint/Prettier, Vitest, Playwright projects, PWA manifest + service worker (`prompt` registration, `cacheId: 'ncmc'`), Andika, stage scaling, **rotated-stage portrait handling with `toStageCoords`** (pure matrix helper, unit-tested), touch-hardening layer incl. back guard, `Storage` interface + memory + IDB skeleton, `git init`, GitHub Actions Pages workflow (`.github/workflows/deploy.yml`), test-hook build flag, namespacing lint (§11.5).
@@ -581,24 +586,24 @@ Pure engine: `numberToWords`, rng, A1–A2 generators, `toTrayTask`/`check`; tra
 **Accept:** unit tests for generators/tray/check/demos pass; all four stages playable for A1 and A2; fill-order/hole/lock rules per §3.3 verified by e2e; no auto-serve; wrong→wrong→demo→follow-me completes; speech never blocks the flow (test with `speechSynthesis` stubbed to never fire `end`); 844×390 tap-target assertions pass; tap and CDP drag work in both landscape and rotated portrait.
 **Owner playtest:** 5 minutes with her on the real iPad: ticket comprehension, bell, tap vs. drag, speed at S0 versus her flash-card pace, take-away tasks (she knows subtraction stories; are number sentences the barrier?).
 
-#### M2 — Café service (≈ 3 h)
-Service loop (6 monsters), session builder with requeue and the owner's starting state (§4.2), monster SVG parts + 6 roster specs + expressions + reactions, eat sequence, all SFX, Home + Menu board (tiles for built skills only), Results with coin tally (coins accrue and show in the jar; nothing to spend yet), Pip, voice lines, **A3 Perfect Ten** generator + demo.
-**Accept:** deterministic service from seed; no adjacent repeats; each monster renders at all expressions (screenshot grid); eat+react ≤ 4 s and skippable; reduced-motion variant verified; 4× CPU throttle keeps ≥ 30 fps; first-run reaches first order in ≤ 2 taps after splash and starts at A1; content table generated.
+#### M2 — Café service (≈ 3.25 h)
+Service loop (6 monsters), session builder with requeue and per-fact weighting (§4.1–4.2), first-ever warm-up order (§5.4), monster SVG parts + 6 roster specs + expressions + reactions, eat sequence, all SFX, Home + Menu board (pick a skill; tiles for built skills only; last-played glows), Results with coin tally and Another service (same skill) / Change dish (coins accrue and show in the jar; nothing to spend yet), Pip, voice lines, **A3 Perfect Ten** generator + demo.
+**Accept:** deterministic service from seed; no adjacent repeats; each monster renders at all expressions (screenshot grid); eat+react ≤ 4 s and skippable; reduced-motion variant verified; 4× CPU throttle keeps ≥ 30 fps; first run reaches the first order in ≤ 2 taps after Splash (Open the Café, then the highlighted A1 tile); Another service repeats the skill and Change dish returns to the menu; content table generated.
 **Owner playtest:** monster appeal, voices on all three devices, length of a service, queue cue.
 
-#### M3 — Hand-off ready (≈ 2 h)
-Single-device persistence on the event log (§11: events, `replay`, stores, migrations, snapshots), Leitner boxes + stage promotion/demotion, Chef's Pick, hats on menu tiles, the **play allowance, lock screen** (§6), parent gate + minimal parent area (play time + Start new session / Add time, voice/speed/volume, reduced motion, simple progress list, basic Export JSON backup, Reset), resume-service.
-**Accept:** `applyEvent` incremental equals full replay (property test); allowance behavior per §6.5 including lock-after-reload; parent gate lockout; reload mid-service offers resume; export→reset→import round trip; migration fixture tests; storage persisted flag and estimate shown; stage override changes the next service; mastery table tests.
-**Owner playtest:** hand her the iPad, set 10 minutes, walk away: does it lock; is unlocking easy; after a few days, does stage progression feel right.
+#### M3 — Hand-off ready (≈ 1.5 h)
+Single-device persistence on the event log (§11: events, `replay`, stores, migrations, snapshots), fact boxes (sampling weights only), per-skill stage and operations settings, the optional **play-time limit and lock screen** (§6, off by default), parent gate + minimal parent area (play-time limit + Start new session / Add time, per-skill stage and operations, voice/speed/volume, reduced motion, simple progress list, basic Export JSON backup, Reset), resume-service.
+**Accept:** `applyEvent` incremental equals full replay (property test); limit off by default (a fresh install never locks); allowance behavior per §6.5 when enabled, including lock-after-reload; parent gate lockout; reload mid-service offers resume; export→reset→import round trip; migration fixture tests; storage persisted flag and estimate shown; per-skill stage and operations settings change the next service (e2e); box-weight tests.
+**Owner playtest:** turn the limit on (10 minutes), hand her the iPad, walk away: does it lock; is unlocking easy; after a few days, are the per-skill stage and operations settings the right knobs, and how often do you want to change them.
 
 ### Tier 2 — Bonus features (no cap; suggested order, any order works)
 
 #### M4 — Economy and shop (≈ 1.75 h)
 Coin spending, shop slots/items with placeholder-quality SVG, preview/buy/confirm, equip, Pip and staff reactions, guest monsters. Purchases are `buy`/`equip` events.
-**Accept:** economy table matches §9/§10 (unit test sums); purchase idempotent and persisted; confirm prevents accidental buy; no code path decreases earned coins; shop screenshots. The shop is play time (covered by the allowance).
+**Accept:** economy table matches §9/§10 (unit test sums); purchase idempotent and persisted; confirm prevents accidental buy; no code path decreases earned coins; shop screenshots. The shop is play time (covered by the limit when it is enabled).
 
 #### M5 — Rest of the Little Menu (≈ 3 h)
-A0 and A4–A8 generators + demos (missing amounts, teens, near-double, bridging, back-through-ten), double-frame layouts, per-skill difficulty ordering, menu tiles live, hats wired.
+A0 and A4–A8 generators + demos (missing amounts, teens, near-double, bridging, back-through-ten), double-frame layouts, per-skill difficulty ordering, menu tiles live.
 **Accept:** pool sizes match §4 exactly; all demos end in expected tray state for all pool items; bridging fills frame 1 first (e2e); content table reviewed by owner; every skill completes a service at each stage in e2e.
 
 #### M6 — (unused; story tickets were declined, D21. Numbering kept stable.)
@@ -621,6 +626,11 @@ Accessibility pass (labels, tab order for parent area, contrast), full e2e matri
 #### M11 — Profiles (≈ 1.5–2 h)
 Profile picker on Splash/Home, `profileId` on events (already reserved), per-profile wallet and café, per-profile known-facts preset (e.g. a toddler profile limited to A0 with 1–5), export/import per profile.
 
+#### M12 — Adaptive leveling (optional, late; ≈ 2.5 h)
+Owner-optional (D22). An "Auto" stage mode per skill alongside the fixed stage: promotion (window of the last 6 first attempts, ≥ 5/6 with ≥ 6 attempts), demotion (≤ 2/6), fast-track, all derived from the `attempt` events; Chef's Pick (frontier skill, composition, review slots); chef hats (criteria in D13) with the +10 coin bonus; hats on menu tiles and a one-time celebration in Results.
+Design notes from the pre-build review that must be addressed here: fast-track must count only attempts on facts outside the `known` preset and must not jump past S2 for subtraction (success at S3 mostly reflects the prefilled tray and spoken counting); add a faster demotion (two assisted outcomes in a row drop one stage); the Chef's Pick opener needs a fallback when no review material exists.
+**Accept:** promotion, demotion, fast-track and hat unit tests; with Auto off, behavior is identical to v1; stages derived by full replay equal the incremental result.
+
 Later ideas, unscheduled: rush-hour mode, monster designer, zero-answer lesson, start-unknown "Mystery Orders", regrouping.
 ---
 
@@ -635,4 +645,4 @@ Later ideas, unscheduled: rush-hour mode, monster designer, zero-answer lesson, 
 ---
 
 ## 16. Assumptions (recorded in DECISIONS.md; owner can veto)
-Landscape layout with portrait handled by rotating the stage; single child profile now (`profileId` reserved, profiles = M11); per-device settings, play allowance and lock; progress mergeable by exported file; US-English voice, chosen per device; emoji foods first; no music; Pip as guide; names of monsters/staff are placeholders; ladder order and stage fading as specified; play allowance default 15 min, parent-only refill; starting state from the owner's report (§4.2); hosting on GitHub Pages (public repo, no personal data).
+Landscape layout with portrait handled by rotating the stage; single child profile now (`profileId` reserved, profiles = M11); per-device settings, optional play-time limit and lock (off by default); progress mergeable by exported file; US-English voice, chosen per device; emoji foods first; no music; Pip as guide; names of monsters/staff are placeholders; ladder order as specified; skill picked from the menu, stage and operations set per skill by the parent, automatic leveling and hats deferred to M12 (D22–D25); play-time limit off by default (parent opts in; default parent-only refill); starting state from the owner's report (§4.2); hosting on GitHub Pages (public repo, no personal data).
