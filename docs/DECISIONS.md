@@ -1,6 +1,6 @@
 # Decisions
 
-Each entry: what was decided, why, how to revisit. D1–D14 were made during design (departures from the original proposal and resolved gaps). Round 2 added D15–D19; round 3 (owner clarifications on hours, the play allowance and story tickets) added D20–D21 and rewrote D7. Round 4 (owner: pick the skill instead of automatic leveling) added D22–D26 and amended D3, D6, D13, D16, D20. Claude Code continues from D27.
+Each entry: what was decided, why, how to revisit. D1–D14 were made during design (departures from the original proposal and resolved gaps). Round 2 added D15–D19; round 3 (owner clarifications on hours, the play allowance and story tickets) added D20–D21 and rewrote D7. Round 4 (owner: pick the skill instead of automatic leveling; play-time limit optional) added D22–D27 and amended D3, D6, D7, D13, D16, D20. Claude Code continues from D28.
 
 **D1. Ladder re-cut into two open tracks.**
 Changes: (a) "within 10" split into A1 within 5 and A2 within 10 (a 5-year-old's within-5 and within-10 are very different jobs; pools of 20 and 70); (b) added A0 Count It Out (tray tutorial and numeral/quantity base); (c) added A6 teens ± ones without crossing, between teen numbers and bridging (the jump from 10+4 to 8+5 is otherwise too big); (d) "missing amounts" kept at A4 for missing addend/subtrahend within 10, but start-unknown (`? + 3 = 8`, `? − 3 = 5`) moved to backlog because it is the hardest word-problem structure; (e) comparing moved out of the "stretch" tail into its own P2 tile (it is a Kindergarten skill; still low priority because she likely does it in school); (f) tens work (B1/B2) is a separate track that does not depend on bridging, so a strong counter can do 30+20 before wrestling with 8+5; (g) no locks. Chef's Pick recommends; every tile is open.
@@ -24,7 +24,8 @@ Items always take the first empty cell; drops anywhere on the tray work; removal
 *Amended by D25: the +10 per hat is deferred with hats (M12); a 6-monster service pays 23 coins.*
 
 **D7. Play allowance with a parent-only unlock (owner clarification).**
-Intent: hand her the device and know she can play for a defined period, not endlessly, without parent intervention to extend. Implemented as an allowance of active play time per device (none/5/10/15/20, default 15) that is not reset by closing the app or starting another service. At zero the current monster finishes, Results plays, and the café locks persistently; only the parent gate can Start new session or Add time (optional auto-refill modes exist but default is parent-only). Never a visible countdown. Two earlier readings (daily cap, then per-service limit) were wrong. Known limits: per device, and clearing site data resets it (SPEC §6.4). No "max services per day" setting (owner declined).
+*Amended by D27: the limit is optional and off by default.*
+Intent: hand her the device and know she can play for a defined period, not endlessly, without parent intervention to extend. Implemented as an allowance of active play time per device (off/5/10/15/20, off by default per D27) that is not reset by closing the app or starting another service. At zero the current monster finishes, Results plays, and the café locks persistently; only the parent gate can Start new session or Add time (optional auto-refill modes exist but default is parent-only). Never a visible countdown. Two earlier readings (daily cap, then per-service limit) were wrong. Known limits: per device, and clearing site data resets it (SPEC §6.4). No "max services per day" setting (owner declined).
 
 **D8. One landscape layout; portrait renders the stage rotated 90°.**
 Owner wants the game to look landscape immediately and only require turning the device. iOS cannot force orientation, so in portrait the stage is CSS-rotated to fill the screen; physically turning the device (counter-clockwise) makes it upright, and the transform drops when the OS rotates. Works under iOS rotation lock. Installed Android PWAs are locked to landscape by the manifest. Cost: all pointer math must use one inverse-transform helper (`toStageCoords`). Replaces an earlier "turn me sideways" overlay.
@@ -84,7 +85,7 @@ How to revisit: if the parent wants it per device, move it to the `settings` sto
 **D24. Per-skill operation filter: both / addition only / subtraction only.**
 What: a parent setting in `skillConfig.ops`, shown only for skills with both operations (A1, A2, A5, A6, B1, B2). The session pool is restricted to the allowed forms; the menu tile's sample sentence matches. The ±1 add/sub balance rule applies only when `ops` is `both`.
 Why: A1 addition is almost entirely known (5 of 6 canonical addition facts are in her preset; only 2+3 is new) while all 10 subtraction facts are new, so a mixed A1 spends about half its orders on facts she knows. Subtraction only is the likely setting.
-Consequence: A1 with subtraction only has 10 canonical facts; a 15-minute allowance (2–3 services) repeats each about twice, which is practice, not a defect. The pool-size guard still prevents adjacent repeats.
+Consequence: A1 with subtraction only has 10 canonical facts; a 15-minute limit, if one is enabled (2–3 services), repeats each about twice, which is practice, not a defect. The pool-size guard still prevents adjacent repeats.
 How to revisit: the focus list (M7) can express the same thing per fact.
 
 **D25. Hats and the hat coin bonus are deferred to M12.**
@@ -97,7 +98,12 @@ What: once per device (flag in `meta`), before the chosen skill's orders, one or
 Why: the draft's scripted gesture ("tap bin once, then bell once") only works for an `n + 1` fact, and the skill is now arbitrary. A scripted ghost bell tap would also be an auto-serve, which the invariants forbid.
 How to revisit: if she does not need a warm-up (older player, profile M11), drop it; it is one flag.
 
-**D27 onward:** reserved for Claude Code.
+**D27. The play-time limit is optional and off by default (owner).**
+What: a fresh install has no limit. Parent → Settings → "Play time limit" is Off / 5 / 10 / 15 / 20 minutes. While Off there is no clock, no lock, no swinging-door cue, and no Start new session / Add time / Refill controls. Choosing a duration starts a full session; choosing Off at any time (even while locked) clears the lock. Everything else in SPEC §6 applies unchanged once a parent enables it.
+Why: the draft (review row 33) defaulted to 15 minutes so the café would lock after a surprise amount of play. The owner wants the limit to be a deliberate hand-off tool that a parent switches on, never something that turns on by itself.
+How to revisit: the default is one constant in `engine/config.ts`; the per-device `settings` store holds the choice.
+
+**D28 onward:** reserved for Claude Code.
 
 ---
 
@@ -148,7 +154,7 @@ How to revisit: if she does not need a warm-up (older player, profile M11), drop
 | 30 | The shop is also play time; leaving it unmetered would defeat the lock | All child-facing screens count |
 | 31 | Allowances are per device, so another device is a loophole | Documented honestly (SPEC §6.4); Guided Access / Screen Pinning suggested |
 | 32 | Tier 1 without a shop gives coins nothing to do | Coins accrue as events and show in the jar; shop is the first Tier 2 item |
-| 33 | Default of "no timer" contradicts the hand-off goal | Default is 15 minutes |
+| 33 | Default of "no timer" contradicts the hand-off goal | Default was 15 minutes; **superseded by D27: off by default, parent opts in** |
 
 ### Residual risks the review could not close (need real devices or playtest)
 - iOS Safari TTS quality/latency and `onend` reliability, silent switch behavior, audio after backgrounding.

@@ -38,7 +38,7 @@ E2E runs against the production build with `VITE_E2E=1`; hooks at `window.__ncmc
 
 ## Child-safety/UX invariants (tests exist; do not weaken)
 - No buzzers, fail screens, red X's, lost coins, countdown visible to the child, streaks, daily-login rewards, ads, or external links.
-- The play allowance lock (SPEC §6) is persistent: reload, relaunch and starting another service never refill it; only the parent gate (or an explicitly chosen auto-refill mode) does. Allowance time is a monotonic active-time accumulator, never wall-clock subtraction.
+- The play-time limit (SPEC §6) is optional and **off by default** (D27); nothing may lock, count down or show a cue unless a parent enabled it. When enabled, the lock is persistent: reload, relaunch and starting another service never refill it; only the parent gate (or an explicitly chosen auto-refill mode) does. Allowance time is a monotonic active-time accumulator, never wall-clock subtraction.
 - Serving is always an explicit bell press; never auto-serve.
 - Coins only ever go down through a confirmed shop purchase.
 - Touch hardening (SPEC §2.3): no zoom, scroll, selection, or long-press menus on the play surface; single active pointer; reduced-motion honored.

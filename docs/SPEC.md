@@ -337,12 +337,12 @@ Coins earned so far are kept. The service is recorded as partial (`serviceEnd.pa
 ---
 
 ## 6. Play allowance and lock
-Goal (owner): hand her the device and know she can play for a defined period, not endlessly, until a parent intervenes. (D7 — an earlier draft misread this as a per-service or daily limit.)
+Goal (owner): when a parent wants to hand her the device and walk away, they can turn on a play-time limit, so she plays for a defined period, not endlessly, until a parent intervenes. **The limit is optional and off by default (D27):** a fresh install has no clock, no lock and no cue, and nothing in this section runs until a parent enables it in Settings. (D7 — an earlier draft misread this as a per-service or daily limit.)
 
 ### 6.1 Model
-A **play session** is one allowance of active play time. The allowance is per device and is *not* reset by closing the app, starting another service, or reloading.
-- **Setting** (Parent → Settings, top of the page): Play time per session = none / 5 / **15 (default)** / 10 / 20 minutes. (Default is 15 because the whole point is a safe hand-off; "none" is available.)
-- **State** (per device, stored in the `clock` store, §11.3): `remainingMs`, `state: 'open' | 'locked'`, `lastRefillAt`.
+While the limit is enabled, a **play session** is one allowance of active play time. The allowance is per device and is *not* reset by closing the app, starting another service, or reloading.
+- **Setting** (Parent → Settings, top of the page, per device): Play time limit = **Off (default)** / 5 / 10 / 15 / 20 minutes. Off means no clock, no lock, no cue and no "Start new session" / "Add time" buttons. Choosing a duration (or changing it) starts a fresh session with that full allowance, counting from the moment the parent returns to the child screens. Choosing Off at any time, even while the café is locked, clears the lock and the remaining time.
+- **State** (per device, stored in the `clock` store, §11.3): `remainingMs`, `state: 'open' | 'locked'`, `lastRefillAt`. Unused while the limit is Off.
 - **Counts as play time:** foreground time on any child-facing screen (Home, Menu, Service, Results, Shop). Does **not** count: the parent area, the parent gate, the "Take a break?" dialog, a hidden page, or idle time — the clock pauses after 90 s without any input (she walked away) and resumes on the next touch.
 - The clock is a monotonic accumulator of active time (never wall-clock subtraction), flushed to IndexedDB every 5 s and on `visibilitychange`, so killing the app or changing the device clock does not refund time.
 
@@ -350,12 +350,12 @@ A **play session** is one allowance of active play time. The allowance is per de
 1. At `remainingMs ≤ 0`: stop accepting new orders. The monster she is serving finishes (including FollowMe), with a hard cap of 90 s grace; dropped requeues get box 0 for next time.
 2. Results "Closing time!" plays as usual (tally), then the café **locks**: `state='locked'` is persisted immediately.
 3. **Locked screen:** the closed café ("Closed — ask a grown-up to open it!") with sleepy monsters. No Open, Menu or Shop. The hidden gear still works. Relaunching or reloading the app lands on the same locked screen.
-4. A parent unlocks through the gate: **Start new session** (full allowance) or **Add time** (5 / 10 / 15 / 20 minutes on top of what remains, also works before it runs out). Either sets `state='open'`.
+4. A parent unlocks through the gate: **Start new session** (full allowance) or **Add time** (5 / 10 / 15 / 20 minutes on top of what remains, also works before it runs out). Either sets `state='open'`. These two buttons exist only while a limit is enabled; to stop limiting, the parent chooses Off.
 5. While `open` with time left, "Another service" and everything else works normally; a service ends after its orders as usual (the allowance and the service are independent).
 6. When 60 s remain, a gentle non-numeric cue appears (the sign on the door starts swinging). No countdown number is ever shown to her.
 
 ### 6.3 Optional automatic refill
-Setting "Refill": **Parent only (default)** / after 1 hour / after 3 hours / next morning (4 a.m.). The automatic modes refill only a *locked* café, and only using wall-clock time since the lock began (the one place the wall clock is used). Parent only is the setting that matches the stated goal; the others are convenience.
+Setting "Refill" (shown only while a limit is enabled): **Parent only (default)** / after 1 hour / after 3 hours / next morning (4 a.m.). The automatic modes refill only a *locked* café, and only using wall-clock time since the lock began (the one place the wall clock is used). Parent only is the setting that matches the stated goal; the others are convenience.
 
 ### 6.4 Honest limits
 - It is per device. If she picks up the iPhone instead of the iPad, that device has its own allowance. (Merge-by-file never merges allowances.)
@@ -363,7 +363,7 @@ Setting "Refill": **Parent only (default)** / after 1 hour / after 3 hours / nex
 - The parent gate uses multiplication (6–9 × 7–9), which a 5½-year-old cannot do; a determined older sibling could.
 
 ### 6.5 Tests
-Fake monotonic clock: pauses when hidden / idle 90 s / break dialog / parent area; flush and restore across reload; lock persists across reload; finishes current monster and caps grace at 90 s; Add time works from open and locked; refill modes with a fake wall clock; clock changes do not refund time; 60 s cue fires once.
+Default Off: a fresh install never accumulates time, never locks and never shows the cue, however long she plays; choosing a duration starts a full session; choosing Off while locked unlocks and clears the time. With a limit on: fake monotonic clock: pauses when hidden / idle 90 s / break dialog / parent area; flush and restore across reload; lock persists across reload; finishes current monster and caps grace at 90 s; Add time works from open and locked; refill modes with a fake wall clock; clock changes do not refund time; 60 s cue fires once.
 ---
 
 ## 7. Art
@@ -516,12 +516,12 @@ Safari tabs can have script-writable storage evicted after 7 days of non-use; **
 ## 12. Parent area
 **Gate:** long-press 2 s on the Home gear, then a multiplication question with factors 6–9 × 7–9 (answer by number pad, never spoken). 3 wrong → 30 s lockout. Auto-locks after 5 minutes idle or on leaving. Not reachable during a service.
 
-Tier 1 (M3) ships only: play time + Start new session / Add time, **per-skill stage (S3–S0) and operations (both / addition only / subtraction only)**, voice/speed/volume, reduced motion, a simple progress list, basic Export JSON, Reset. The full tab set below (Skills, Focus list, merge, heatmap, starting-point editor) lands in M7.
+Tier 1 (M3) ships only: the optional play-time limit (off by default) with Start new session / Add time, **per-skill stage (S3–S0) and operations (both / addition only / subtraction only)**, voice/speed/volume, reduced motion, a simple progress list, basic Export JSON, Reset. The full tab set below (Skills, Focus list, merge, heatmap, starting-point editor) lands in M7.
 
 Tabs (normal scrolling layout; works in portrait too):
 1. **Progress** — per-skill stage and services played; fact heatmap (addition/subtraction grids 0–10 colored by box); "trouble spots" (facts with box 0 after ≥ 3 sightings); last 20 services (date, skill, first-try %, assisted count, minutes); active minutes per day (last 14).
 2. **Skills** — hide/show tiles; set **stage** (S3–S0) and **operations** (both / addition only / subtraction only; skills with one operation do not show it) per skill, shipped in M3 as a minimal list (D23, D24); "reset this skill"; **Starting point**: "already knows" toggles (+0, +1, doubles) (§4.2).
-3. **Settings** — orders per service (4/6/8); **play time per session** (none/5/10/15/20, default 15) and refill mode (parent only / 1 h / 3 h / next morning), with **Start new session** and **Add time** buttons at the very top of the tab (§6); voice, speed, test (voice is per device); master/SFX/voice volume; reduced motion; child's name (optional, used in the greeting only; phrase must degrade if unset); big-text captions; rename monsters.
+3. **Settings** — orders per service (4/6/8); **play-time limit** (Off by default; 5/10/15/20) and, only when a limit is on, refill mode (parent only / 1 h / 3 h / next morning) with **Start new session** and **Add time** buttons at the very top of the tab (§6, D27); voice, speed, test (voice is per device); master/SFX/voice volume; reduced motion; child's name (optional, used in the greeting only; phrase must degrade if unset); big-text captions; rename monsters.
 4. **Focus list (custom content)** — add up to 30 specific facts or skill ranges (e.g. "8+5", "all 9+x") that mix at 25% weight into services of the skill each fact belongs to (and into Chef's Pick once it exists). Validated against the generators (cannot create a nonsense fact). 
 5. **Data** — Device label (e.g. "Dad's iPad"), Export, Import (**Merge** default / Replace; §11.6) with a three-line "keep devices in sync" explanation, Back up now, snapshots list (restore), storage persisted/usage, Reset progress (keeps shop), Reset everything (a second, fresh multiplication prompt), app version/build date, install help.
 
@@ -574,7 +574,7 @@ Claude Code creates the file with, per milestone, a checklist and blank notes. A
 Each milestone ends: `npm run check` green, e2e green, screenshots saved, `PLAYTEST.md` updated, **STOP and wait for owner playtest feedback** before the next. Each milestone also starts by fixing what the previous playtest found. Hours are agentic build estimates. (D20: the owner wants a playable game in ≈ 10 h and bonus features beyond, with no upper limit.)
 
 ### Tier 1 — Playable (≈ 10 h): M0–M3
-At the end of M3 you can hand her the iPad: she plays A1–A3 (within 5, within 10, make ten) with monsters and sound, her progress is saved, and the play allowance locks the café until a parent unlocks it. That content is exactly what her book is working on (number sentences with sums under ten).
+At the end of M3 you can hand her the iPad: she plays A1–A3 (within 5, within 10, make ten) with monsters and sound, her progress is saved, and, if a parent turns on the optional play-time limit, the café locks when time is up until a parent unlocks it. That content is exactly what her book is working on (number sentences with sums under ten).
 
 #### M0 — Foundations (≈ 2 h)
 Vite/TS/React scaffold, strict TS, ESLint/Prettier, Vitest, Playwright projects, PWA manifest + service worker (`prompt` registration, `cacheId: 'ncmc'`), Andika, stage scaling, **rotated-stage portrait handling with `toStageCoords`** (pure matrix helper, unit-tested), touch-hardening layer incl. back guard, `Storage` interface + memory + IDB skeleton, `git init`, GitHub Actions Pages workflow (`.github/workflows/deploy.yml`), test-hook build flag, namespacing lint (§11.5).
@@ -592,15 +592,15 @@ Service loop (6 monsters), session builder with requeue and per-fact weighting (
 **Owner playtest:** monster appeal, voices on all three devices, length of a service, queue cue.
 
 #### M3 — Hand-off ready (≈ 1.5 h)
-Single-device persistence on the event log (§11: events, `replay`, stores, migrations, snapshots), fact boxes (sampling weights only), per-skill stage and operations settings, the **play allowance, lock screen** (§6), parent gate + minimal parent area (play time + Start new session / Add time, per-skill stage and operations, voice/speed/volume, reduced motion, simple progress list, basic Export JSON backup, Reset), resume-service.
-**Accept:** `applyEvent` incremental equals full replay (property test); allowance behavior per §6.5 including lock-after-reload; parent gate lockout; reload mid-service offers resume; export→reset→import round trip; migration fixture tests; storage persisted flag and estimate shown; per-skill stage and operations settings change the next service (e2e); box-weight tests.
-**Owner playtest:** hand her the iPad, set 10 minutes, walk away: does it lock; is unlocking easy; after a few days, are the per-skill stage and operations settings the right knobs, and how often do you want to change them.
+Single-device persistence on the event log (§11: events, `replay`, stores, migrations, snapshots), fact boxes (sampling weights only), per-skill stage and operations settings, the optional **play-time limit and lock screen** (§6, off by default), parent gate + minimal parent area (play-time limit + Start new session / Add time, per-skill stage and operations, voice/speed/volume, reduced motion, simple progress list, basic Export JSON backup, Reset), resume-service.
+**Accept:** `applyEvent` incremental equals full replay (property test); limit off by default (a fresh install never locks); allowance behavior per §6.5 when enabled, including lock-after-reload; parent gate lockout; reload mid-service offers resume; export→reset→import round trip; migration fixture tests; storage persisted flag and estimate shown; per-skill stage and operations settings change the next service (e2e); box-weight tests.
+**Owner playtest:** turn the limit on (10 minutes), hand her the iPad, walk away: does it lock; is unlocking easy; after a few days, are the per-skill stage and operations settings the right knobs, and how often do you want to change them.
 
 ### Tier 2 — Bonus features (no cap; suggested order, any order works)
 
 #### M4 — Economy and shop (≈ 1.75 h)
 Coin spending, shop slots/items with placeholder-quality SVG, preview/buy/confirm, equip, Pip and staff reactions, guest monsters. Purchases are `buy`/`equip` events.
-**Accept:** economy table matches §9/§10 (unit test sums); purchase idempotent and persisted; confirm prevents accidental buy; no code path decreases earned coins; shop screenshots. The shop is play time (covered by the allowance).
+**Accept:** economy table matches §9/§10 (unit test sums); purchase idempotent and persisted; confirm prevents accidental buy; no code path decreases earned coins; shop screenshots. The shop is play time (covered by the limit when it is enabled).
 
 #### M5 — Rest of the Little Menu (≈ 3 h)
 A0 and A4–A8 generators + demos (missing amounts, teens, near-double, bridging, back-through-ten), double-frame layouts, per-skill difficulty ordering, menu tiles live.
@@ -645,4 +645,4 @@ Later ideas, unscheduled: rush-hour mode, monster designer, zero-answer lesson, 
 ---
 
 ## 16. Assumptions (recorded in DECISIONS.md; owner can veto)
-Landscape layout with portrait handled by rotating the stage; single child profile now (`profileId` reserved, profiles = M11); per-device settings, play allowance and lock; progress mergeable by exported file; US-English voice, chosen per device; emoji foods first; no music; Pip as guide; names of monsters/staff are placeholders; ladder order as specified; skill picked from the menu, stage and operations set per skill by the parent, automatic leveling and hats deferred to M12 (D22–D25); play allowance default 15 min, parent-only refill; starting state from the owner's report (§4.2); hosting on GitHub Pages (public repo, no personal data).
+Landscape layout with portrait handled by rotating the stage; single child profile now (`profileId` reserved, profiles = M11); per-device settings, optional play-time limit and lock (off by default); progress mergeable by exported file; US-English voice, chosen per device; emoji foods first; no music; Pip as guide; names of monsters/staff are placeholders; ladder order as specified; skill picked from the menu, stage and operations set per skill by the parent, automatic leveling and hats deferred to M12 (D22–D25); play-time limit off by default (parent opts in; default parent-only refill); starting state from the owner's report (§4.2); hosting on GitHub Pages (public repo, no personal data).
