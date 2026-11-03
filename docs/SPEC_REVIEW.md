@@ -3,6 +3,8 @@
 Reviewed: `CLAUDE.md`, `docs/SPEC.md` (v1.0), `docs/DECISIONS.md` (D1–D21 and review log), `docs/OPEN_ITEMS.md`, `docs/KICKOFF.md`.
 Date: 2026-11-02.
 
+Note: findings that concerned a feature since dropped from the design have been removed from this document (see `DECISIONS.md` D28). Section, row and item numbers were renumbered or left with gaps accordingly.
+
 ---
 
 ## 1. Overall verdict
@@ -11,12 +13,11 @@ This is an unusually strong spec. The core teaching idea holds up: the child bui
 
 I checked every pool size in the §4 table by script. All of them are correct (A1 20, A2 70, A3 36, A4 135, A5 54, A6 108, A7 36/20, A8 36, B1 234, B2 684). The rotation transform in §2.2 is also correct, and the tap-target arithmetic in §2.2 adds up.
 
-The problems I found fall into four groups, roughly in order of importance:
+The problems I found fall into three groups, roughly in order of importance:
 
-1. **The mastery signal is weaker than the spec assumes.** At the two most-supported stages, success shows she can count, not that she can add or subtract. Because of how hats and Chef's Pick are wired, she could climb the ladder much faster than she is actually learning (§2 below). This is the one finding I would fix before any code is written.
-2. **A few rules contradict each other.** Examples: FollowMe auto-rings the bell, which the "never auto-serve" invariant forbids; start-unknown forms appear in A3/A4 although D1 moved them to the backlog; the requeue notation runs backwards. These are cheap to fix now and expensive to discover mid-build.
-3. **Some situations have no rule.** Examples: what Chef's Pick does when the next skill hasn't been built yet, how a resumed service records coins, and what the very first tutorial order should be.
-4. **Tier 1 is very tight for ≈ 10.5 hours.** The scope is good; the estimate is optimistic. A few small cuts or re-sequencings would protect the goal of having a playable game.
+1. **A few rules contradict each other.** Examples: FollowMe auto-rings the bell, which the "never auto-serve" invariant forbids; start-unknown forms appear in A3/A4 although D1 moved them to the backlog; the requeue notation runs backwards. These are cheap to fix now and expensive to discover mid-build.
+2. **Some situations have no rule.** Examples: how a resumed service records coins, and what the very first tutorial order should be.
+3. **Tier 1 is very tight for ≈ 10.5 hours.** The scope is good; the estimate is optimistic. A few small cuts or re-sequencings would protect the goal of having a playable game.
 
 Each finding below gives the spec section, the issue, and a suggested fix. Section 7 is a short prioritized checklist.
 
@@ -28,19 +29,11 @@ Each finding below gives the spec section, the issue, and a suggested fix. Secti
 
 At S3 and S2 (§3.2), the first operand is prefilled and locked, and she adds the second. For `5 + 3`, she places three items and the tray reaches 8 on its own. She never has to know the answer is 8. She only has to count out three. Subtraction result forms work the same way: remove 3 from 8 and 5 is left by construction. Only the missing-amount forms (A3 `7 + ? = 10`, A4) require her to aim at a target.
 
-This matters because three mechanisms treat S3/S2 success as evidence of learning:
+This matters for the **fact boxes** (§4.2): "first-try correct → box+1" applies at every stage. Facts she has only counted out will climb to box 2–3. They then get sampled less often (weights `[5,3,2,1,0.5]`) even though she has not shown she knows them. Because the parent sets the stage and S3 is the default, a skill can stay at S3 for weeks and its boxes would drift up on counting alone.
 
-- **Fact boxes** (§4.2): "first-try correct → box+1" applies at every stage. Facts she has only counted out will climb to box 2–3. They then get sampled less often (weights `[5,3,2,1,0.5]`) and count toward hat 3's "facts at box ≥ 2."
-- **Fast-track** (§4.2): "first 6 attempts on a never-played skill are 6/6 → jump to S1." Any child who can count six items will pass this on almost every skill.
-- **Hat 2 and Chef's Pick advancement** (§4.2): hat 2 is "stage has *ever been* ≤ 1." That means reaching S1, not succeeding there. Chef's Pick then moves past the skill. The spec says this means "she can build the answer from an empty tray," but the rule as written does not check that.
-
-Put together, the likely path is: one or two services at A1, fast-track to S1, hats 1 and 2 (+20 coins), and Chef's Pick moves to A2 before she has answered a single A1 problem without support. Demotion (≤ 2/6 at S1) would eventually catch this, but by then the hats are permanent and the frontier has moved on. In Tier 1, with only A1–A3 built, she could run out of frontier in about a week.
-
-**Suggested fix** (needs a DECISIONS entry, since it adjusts D3/D13):
-- Only S1 and S0 first-try results move fact boxes. S3/S2 results still feed the stage window.
-- Hat 2 = "promoted out of S1" (≥ 5/6 first-try at S1). This makes the hat mean what §4.2 says it means.
-- Keep fast-track, but have it jump to S2 rather than S1, or require 6/6 at S2 to reach S1.
-- Optional, and a bigger change: make S2 diagnostic. After she builds, she taps the total on a small number strip (see §4.4). That ties quantity to numeral, which is exactly the representational step between S2 and S1, and it makes S2 accuracy mean something.
+**Suggested fix** (needs a DECISIONS entry):
+- Only S1 and S0 first-try results move fact boxes.
+- Optional, and a bigger change: make S2 diagnostic. After she builds, she taps the total on a small number strip (see §4.2). That ties quantity to numeral, which is exactly the representational step between S2 and S1, and it makes S2 accuracy mean something.
 
 ### 2.2 "Wrong then fixed" is ambiguous
 
@@ -79,7 +72,6 @@ The spoken forms (§4) use "minus" and "equals what?". Many Grade 1 programs sta
 
 ### 2.8 Smaller pedagogy notes
 
-- **Fluency.** S1 and S0 are only reached through Chef's Pick's two review slots once the frontier moves on (§4.1 step 3). Promotion S1 → S0 and hat 3 will take many services. That is fine if §2.1 is fixed, because the frontier won't move until S1 is solid. Otherwise S0 fluency practice will be thin.
 - **The `+0` "known" toggle** (§4.2, §12 Skills) does nothing, because every `n+0` is excluded from the pools (D11). Remove it, or note that it is reserved for the zero lesson.
 - **Response time** is recorded (`attempt.ms`, §11.2) but never used. A median S0 time per skill in the parent Progress tab is cheap, never shown to her, and the best single sign that a fact has moved from counting to recall.
 - **Spacing.** Boxes only change sampling weights; there are no due dates. That is fine for v1, but §1.1 point 5 claims "spaced" practice. Either add a simple "not seen for N days → weight up" rule, or soften the claim.
@@ -96,57 +88,47 @@ The spoken forms (§4) use "minus" and "equals what?". Many Grade 1 programs sta
 | C4 | §3.3 Frames | "Cells 1–5 of each row are tinted A, 6–10 tinted B," but a row only has 5 cells. | "Top row (cells 1–5) tint A, bottom row (6–10) tint B, in each frame." |
 | C5 | §10 | The shop total is stated as "≈ 1,600 coins". The listed prices add up to **1,340**. | Fix the number. At 23 coins per service it is still about 58 services, so the pacing claim holds. |
 | C6 | §14 M3 acceptance vs. §12 | M3 accepts "stage override changes the next service," but §12 says the Tier 1 parent area has no Skills tab (stage override is M7). | Either add a stage-override control to the M3 parent area (useful while playtesting) or move this criterion to M7. I'd add it; it is small and it helps the owner tune things. |
-| C7 | §14 M2 vs. M3 | M2 requires "Open the Café → … starts at A1," but Chef's Pick does not exist until M3. | State the M2 interim rule (Open the Café = A1 for now). |
 | C8 | §3.1 types | `operands: number[]` "with `null` for the blank" (type should be `(number \| null)[]`); the `Unknown` type is defined but never used. | Tidy the types; the spec says types are authoritative. |
 | C9 | §2.3 vs. §5.8 / §11.6 | §2.3 says a reloaded page resumes the service; §5.8 and §11.6 say the app *offers* "Continue dinner service?". | Use the offer everywhere, and suppress it when the café is locked. |
 | C10 | DECISIONS.md D9 | D9 says profiles are milestone M9; the spec and OPEN_ITEMS say M11 (M9 is stretch skills). | Update D9. |
-| C11 | DECISIONS.md review row 25 | Says "Chef's Pick starts at A2"; D16 and §4.2 say A1. | Mark row 25 as superseded by D16. |
 | C12 | DECISIONS.md residual risks | Still refers to "the 20 h figure." | Update to the Tier 1 ≈ 10.5 h framing (D20). |
 | C13 | §6.1 vs. D7 | Play-time options are listed as "none / 5 / 15 / 10 / 20." | Put them in order. Trivial, but it will be copied into UI code. |
 | C14 | OPEN_ITEMS | The open-items table jumps from #1 to #3. | Renumber. |
+
+(C7 and C11 are omitted; the other row numbers are kept stable for cross-references.)
 
 ---
 
 ## 4. Gaps: situations with no rule yet
 
-### 4.1 Chef's Pick when the next skill doesn't exist
-
-- **Review of the "previous skill"** (§4.1 step 3) when the frontier is A1: the previous skill is A0, which is assumed known (§4.2) and, more importantly, not built until M5. In Tier 1 there is nothing to draw from. Add a fallback: if no earlier built skill exists, use an opener (box ≥ 2 fact) or another frontier item.
-- **Frontier past the last built skill:** once A3 has 2 hats in Tier 1, the "first skill with hats < 2" is A4, which doesn't exist. Rule: the frontier is capped at the highest built and unhidden skill. When she is at the cap, Chef's Pick should mix review across built skills with a bias toward the lowest stage.
-- **Two tracks:** it's not stated whether Chef's Pick ever recommends B1/B2, or how it orders A and B skills. Say so explicitly. My suggestion: Chef's Pick stays on the Little Menu until A5 has 2 hats, then alternates.
-
-### 4.2 When stage changes take effect
-
-A promotion or demotion can happen in the middle of a service (six attempts can fill the window). If it applies right away, the tray changes form between monsters. Suggest: stage changes take effect at the *next* service. A child does better with a stable screen within one sitting, and replays become easier to reason about.
-
-### 4.3 Coins on resume, and coins when the app is killed
+### 4.1 Coins on resume, and coins when the app is killed
 
 - `serviceEnd` carries the service's coins, and earned coins are summed over *distinct* `svc` (§11.2). If she leaves mid-service (a partial `serviceEnd` for `svc X`) and then resumes and finishes, a second `serviceEnd` for `svc X` appears. Which one counts? As written, one set of coins is silently dropped.
 - If iOS kills the app mid-service, no `serviceEnd` is written at all. She saw coins fly into the jar (§5.6), and they vanish. That breaks the spirit of "coins only ever go down through a purchase."
 
 **Suggested fix:** put the per-monster coins on the `attempt` event (or a small `coin` event written in the same transaction as each completed problem, which §11.3 already does). `serviceEnd` then carries only the tip. Coins become exactly what she saw.
 
-### 4.4 The S0 number pad doesn't fit, and its slots leak the answer
+### 4.2 The S0 number pad doesn't fit, and its slots leak the answer
 
 - §5.4 asks for a "3×4 grid, buttons ≥ 120 px" in place of the bin and tray (y ≈ 310–700, about 390 logical px tall). Four rows of 120 px buttons plus gaps need about 500 px. A phone-style keypad doesn't fit. Laid out three rows tall it fits only barely, with no room for the answer display.
 - "Two digit slots 'tens | ones' for ≥ 10" means the number of slots tells her whether the answer is above 9.
 
 **Suggestion:** a single row of ten digit buttons, 0 through 9, left to right (10 × 112 px fits in 1280 with gaps), plus one answer display that always accepts up to two digits, and a backspace. A row of digits in order also works as a small number line, which is pedagogically better than a phone keypad. It also gives you the "tap the total" strip for an optional diagnostic S2 (§2.1 above).
 
-### 4.5 Allowance edge cases (§6)
+### 4.3 Allowance edge cases (§6)
 
 - **The usual hand-off will end mid-service.** A 15-minute allowance with services of 8–10 minutes means the second service gets cut off almost every time. Children handle a predictable ending much better than a sudden one. Suggest a "last customer" rule: when the remaining time is less than about one order's typical length (tune in playtest), the waiting silhouettes wave and leave, the current monster is announced as the last customer, and closing follows naturally. Also consider not starting a new service unless at least half a service of time remains; offer a shorter one instead.
 - **The tip when time runs out:** state that the +5 service tip is paid when the allowance closes the café. Closing time was not her choice.
 - **The 60 s cue** animates the door sign, which is also the leave button (§5.4). Moving it invites her to tap it. Use Pip yawning or the lights dimming instead.
 - **The 90 s grace cap** (§6.2): say what happens when it is reached (the monster leaves happily, no attempt is recorded, the fact keeps its box). Also say how a requeue left pending at the cap is recorded.
 - **Resume while locked:** no "Continue dinner service?" offer while the café is locked. After a parent unlocks, offer it.
-- **Idle with no prompt:** apart from the S3 hat pulse after 10 s, nothing nudges her if she stalls. A gentle repeat of the ticket after about 20 s at every stage would help (spoken only, no countdown).
+- **Idle with no prompt:** apart from Pip's hat (Help button) pulse at S3 after 10 s, nothing nudges her if she stalls. A gentle repeat of the ticket after about 20 s at every stage would help (spoken only, no countdown).
 
-### 4.6 The first tutorial order
+### 4.4 The first tutorial order
 
 The ghost hand taps the bin *once* and then the bell (§5.4). On a random A1 problem such as 3 + 2, that demonstrates a *wrong* serve. Make the tutorial order a designated `n + 1` fact (she knows +1, so it is safe), and keep it out of the mastery data.
 
-### 4.7 Other small gaps
+### 4.5 Other small gaps
 
 - **Capacity in `frames1`:** §3.3 gives a capacity of 20 for the A-track. With one frame on screen, can she overfill past 10, and does a second frame appear? Suggest the single-frame capacity is 10, with the same wobble.
 - **Ticket colors when the blank comes first** (`? + 4 = 14`, A5): §5.4 says "first operand blue," but here the first operand is the blank. Define the color by the tray's *prefilled* group instead of by position.
@@ -176,11 +158,11 @@ The ghost hand taps the bin *once* and then the bell (§5.4). On a random A1 pro
 
 ## 6. Scope and the Tier 1 estimate
 
-The scope of Tier 1 is right: A1–A3, monsters, sound, saved progress, and a working allowance lock. That is a real game that matches her book. The ≈ 10.5-hour estimate is the weak point. M3 alone (2 h) covers the event log, replay, migrations, snapshots, Leitner boxes, stage promotion, Chef's Pick, hats, the allowance clock and lock with all the §6.5 tests, the parent gate, a parent area, export/reset/import and resume. M1 (3.5 h) puts drag, speech, three demos and four stages for two skills behind e2e tests in both orientations. The review log already says "expect M1 to run over."
+The scope of Tier 1 is right: A1–A3, monsters, sound, saved progress, and a working allowance lock. That is a real game that matches her book. The ≈ 10.5-hour estimate is the weak point. M3 alone (2 h) covers the event log, replay, migrations, snapshots, Leitner boxes, the allowance clock and lock with all the §6.5 tests, the parent gate, a parent area, export/reset/import and resume. M1 (3.5 h) puts drag, speech, three demos and four stages for two skills behind e2e tests in both orientations. The review log already says "expect M1 to run over."
 
 Since there is no hard hour cap (D20), the risk isn't the budget. The risk is a milestone that runs long and ends with many half-finished pieces. Suggestions, none of which change what she gets:
 
-- **Split M3** into M3a (persistence, mastery, Chef's Pick, hats) and M3b (allowance, lock, parent gate, minimal parent area, export/reset). Each gets its own playtest stop. M3b is what makes hand-off safe, so it deserves its own check.
+- **Split M3** into M3a (persistence, fact boxes) and M3b (allowance, lock, parent gate, minimal parent area, export/reset). Each gets its own playtest stop. M3b is what makes hand-off safe, so it deserves its own check.
 - **Defer things that only protect future milestones:** the migrations framework (ship `schemaVersion: 1` with an empty migration list and its test harness; the first real migration is when you need it), snapshot rotation (one snapshot is enough for Tier 1), and the easy-reader word-list lint (add in M10).
 - **Narrow the M1 e2e matrix:** the full device matrix and CDP drag in rotated portrait can arrive in M2. In M1, prove tap in landscape on Chromium plus one WebKit iPad project, and unit-test `toStageCoords` for portrait.
 - **Simplify the M2 monsters:** the procedural parts system (§7.2) is a nice idea, but six hand-drawn SVGs with a few expression variants would be faster and probably look better. Keep the `MonsterSpec` shape so it can be swapped later.
@@ -199,7 +181,6 @@ The loop is sound but repetitive: monster arrives, build, bell, eat, coins, six 
 - **A monster album.** A page of monster portraits that fills in as she serves each one (with the two guests as silhouettes until they visit). It gives her a long-term collection goal next to the shop, without streaks or daily pressure.
 - **Make sure purchases appear where she plays.** The service screen should use the decorated café as its background (§7.4 implies this; state it), so what she buys is visible during the game, not only on Home.
 - **Returning-monster story for requeues.** "Blobbo's back — still hungry!" turns a requeued problem into a little story instead of an unexplained repeat.
-- **Bigger hat celebrations.** Hats are the only marker of mastery she sees. A short ceremony with Pip placing the hat on the menu tile, shown on Results (§5.7 already reserves this), is worth the polish.
 
 Leave out anything timed, scored or competitive. The spec is right to exclude them.
 
@@ -208,25 +189,24 @@ Leave out anything timed, scored or competitive. The spec is right to exclude th
 ## 8. Prioritized checklist
 
 **Fix before building (spec edits, about an hour of the owner's time):**
-1. Mastery signal: S3/S2 don't move boxes; hat 2 = promoted out of S1; adjust fast-track (§2.1).
+1. Mastery signal: S3/S2 don't move fact boxes (§2.1).
 2. FollowMe bell: she presses it (C1).
 3. Decide on `? + a = c` forms in A3/A4 (C2).
 4. Requeue notation (C3); outcome definitions and names (§2.2).
-5. Chef's Pick fallbacks for missing previous or next skills (§4.1).
-6. Coins written per completed problem, not only on `serviceEnd` (§4.3).
-7. S0 pad layout: a single 0–9 row with one display (§4.4).
-8. Tutorial order = `n + 1` (§4.6).
-9. Drop 🍒 and 🥞 (§5 item 6).
-10. Answer the device/iOS-version open item.
+5. Coins written per completed problem, not only on `serviceEnd` (§4.1).
+6. S0 pad layout: a single 0–9 row with one display (§4.2).
+7. Tutorial order = `n + 1` (§4.4).
+8. Drop 🍒 and 🥞 (§5 item 6).
+9. Answer the device/iOS-version open item.
 
 **Decide during PLAN.md review:**
-11. Tap-to-count vs. tap-to-remove (§2.5); remove-from-end (§2.4).
-12. "Last customer" ending and tip on allowance close (§4.5).
-13. Split M3; defer migrations, snapshot rotation and word-list lint (§6).
-14. "Take away" vs. "minus" wording, after checking her book (§2.7).
-15. New-fact introduction order and cap (§2.3).
+10. Tap-to-count vs. tap-to-remove (§2.5); remove-from-end (§2.4).
+11. "Last customer" ending and tip on allowance close (§4.3).
+12. Split M3; defer migrations, snapshot rotation and word-list lint (§6).
+13. "Take away" vs. "minus" wording, after checking her book (§2.7).
+14. New-fact introduction order and cap (§2.3).
 
-**Hand to Claude Code as known platform risks** (put them in PLAN.md risks): CSP in dev, back-guard user activation, JSON share type, speech timeout formula, emoji fonts in CI, Safari-vs-Home-Screen storage (§5, §4.7).
+**Hand to Claude Code as known platform risks** (put them in PLAN.md risks): CSP in dev, back-guard user activation, JSON share type, speech timeout formula, emoji fonts in CI, Safari-vs-Home-Screen storage (§5, §4.5).
 
 **Tidy-ups:** C4–C14.
 

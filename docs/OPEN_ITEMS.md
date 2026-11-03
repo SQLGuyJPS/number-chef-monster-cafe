@@ -17,10 +17,9 @@ Claude Code will use the noted default until you answer. Answer in DECISIONS.md 
 | Syncing | Merge by exported file is fine | D15 (M7) |
 | Parent gate | Multiplication question is OK | SPEC §12 |
 | Story tickets | Declined | D21 |
-| Leveling | She or a parent picks the skill each session; next service repeats it by default. Automatic leveling is an optional late milestone | D22 (M12) |
+| Skill choice | She or a parent picks the skill each session; next service repeats it by default | D22 |
 | Stage control | Fixed per skill, parent-set, default S3 | D23 |
 | A1 mix | Parent setting per skill: both / addition only / subtraction only | D24 |
-| Hats | Deferred to the late milestone | D25 |
 
 ## Still open
 | # | Question | Default used |
@@ -30,7 +29,7 @@ Claude Code will use the noted default until you answer. Answer in DECISIONS.md 
 | 4 | **Coin pacing.** 23 coins per 6-monster service; shop ≈ 1,600 total (shop is Tier 2, M4). | As specified |
 | 5 | **Music.** None in v1. | None |
 | 6 | **Voice.** US English; you pick a voice per device in the Parent area after M3. | Auto-pick |
-| 7 | **Which Tier 2 item first?** I'd suggest the shop (M4: gives coins a purpose) and the rest of the Little Menu (M5: A1–A3 will last weeks, not months). M12 (automatic leveling, hats, Chef's Pick) is last and optional. | Shop, then M5 |
+| 7 | **Which Tier 2 item first?** I'd suggest the shop (M4: gives coins a purpose) and the rest of the Little Menu (M5: A1–A3 will last weeks, not months). | Shop, then M5 |
 | 8 | **Service length vs allowance.** The spec says 8–10 min per service; a smooth run of 6 orders looks closer to 4–6 min on paper. If a 15 min limit is enabled that is 2–3 services, and a service cut off by the lock is shorter than 6 orders. | Keep 6 orders; log the median service length at the M2 playtest; no +5 tip on a partial service. Revisit with real numbers. |
 | 9 | **Coins with nothing to buy in Tier 1** (the shop is M4, D20). | As specified; playtest question at M3. If it feels empty, pull a one-slot shop forward. |
 | 10 | **Wrong-then-fixed outcome.** Correct on the second try after CountTogether (which shows the answer). | Logged as `afterHint`, fact box reset to 0, no requeue. |

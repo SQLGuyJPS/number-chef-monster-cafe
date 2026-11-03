@@ -1,6 +1,6 @@
 # Number Chef Monsters — Build Spec
 
-Status: design v1.1 (build-ready; skill picker instead of automatic leveling, D22–D26). Companion files: `CLAUDE.md` (conventions), `docs/DECISIONS.md` (why the design departs from the original proposal), `docs/OPEN_ITEMS.md` (what the owner must supply or decide), `docs/KICKOFF.md` (first prompt).
+Status: design v1.1 (build-ready). Companion files: `CLAUDE.md` (conventions), `docs/DECISIONS.md` (why the design departs from the original proposal), `docs/OPEN_ITEMS.md` (what the owner must supply or decide), `docs/KICKOFF.md` (first prompt).
 
 Normative words: **MUST** = acceptance criteria test it; **SHOULD** = default, may deviate with a DECISIONS.md entry.
 
@@ -14,7 +14,7 @@ Audience: one child, age 5½ (Grade 1 first semester), reads easy chapter books,
 
 Targets: iPad Safari (primary), iPhone Safari, Android Chrome; she will use all three at different times. Landscape layout (portrait shows the rotated stage). Progress is stored per device and merged by exported file (§11). Works offline after first load. No backend, accounts, analytics, ads, external links, or purchases. All data local.
 
-Build budget (D20): a **playable game in ≈ 10 agentic hours (Tier 1: M0–M3)**, then bonus features (Tier 2: M4–M12) in any order with no upper limit.
+Build budget (D20): a **playable game in ≈ 10 agentic hours (Tier 1: M0–M3)**, then bonus features (Tier 2: M4–M11) in any order with no upper limit.
 
 ### Non-goals (v1)
 Monster designer, rush-hour mode, regrouping (carry/borrow), multiplication, multi-child profile UI, recorded audio, music, localization, handwriting/tracing.
@@ -24,19 +24,19 @@ Monster designer, rush-hour mode, regrouping (carry/borrow), multiplication, mul
 ## 1. Pedagogy (the reasoning the rest depends on)
 
 ### 1.1 Principles
-1. **Concrete → representational → abstract, faded per skill.** Every skill has four *support stages* (§3.2). In v1 the parent sets the stage per skill (default S3); fading it automatically as she succeeds is the optional leveling milestone M12 (D22, D23). She never has to pick a stage.
+1. **Concrete → representational → abstract, faded per skill.** Every skill has four *support stages* (§3.2). The parent sets the stage per skill (default S3, D23); she never has to pick a stage.
 2. **Strategy, not just recall.** The tray makes strategies visible: counting on, doubles, make-a-ten, bridging through ten, count back, tens-and-ones. Demonstrations (§5.4) model them.
 3. **Errors teach, nothing punishes.** No buzzers, no lost coins, no failure screens. A miss triggers a count-together replay, then a worked demonstration, then a follow-me, then the fact is requeued with *more* support.
 4. **First-try correctness is the only diagnostic signal.** Hints and demos are free, but flag the attempt as assisted so mastery stays honest.
 5. **Short and spaced.** 6 orders per service; requeue of misses; light per-fact weighting so facts she misses come back sooner. The Leitner-style boxes only affect which fact is drawn inside the chosen skill, never how hard the skill is (D22).
 6. **One consistent model.** Ten-frame layout never changes: 2 rows × 5, filled left→right, top→bottom, first-five/second-five tinted. Same food type within one order.
 7. **Reward effort, not speed or accuracy.** Coins are flat per monster served (§9).
-8. **The ladder matches her school year, with room to spare.** She is 5½ and working through the first half of a Grade 1 book: within-10 and within-20 add/subtract (A2–A8) is her actual curriculum this year, and tens and ones (B1–B2) is likely second-semester work. Expect A1–A5 to carry most of the early play (her book is on number sentences with sums under ten right now, i.e. A1–A3), so quality and variety matter most there. A0 is assumed known and is just an optional tile (M5). B3 and beyond are headroom.
+8. **The ladder matches her school year, with room to spare.** She is 5½ and working through the first half of a Grade 1 book: within-10 and within-20 add/subtract (A2–A8) is her actual curriculum this year, and tens and ones (B1–B2) is likely second-semester work. Expect A1–A5 to carry most of the early play (her book is on number sentences with sums under ten right now, i.e. A1–A3), so quality and variety matter most there. A0 is an optional warm-up tile (M5). B3 and beyond are headroom.
 9. **Build on what she already owns.** She knows +0, +1 and doubles (1+1 … 9+9) from flash cards. Those are anchor facts: they come up less often than new facts (box 3 start, §4.2), and near-doubles (6+7 = 6+6+1) and 9+x (one from the other) become the first strategies taught for new facts.
 
 ### 1.2 The ladder (revised; see DECISIONS.md D1 for what changed and why)
 
-Two tracks, no locks. All tiles are always tappable; she or a parent picks one for the service, and the tile played last glows (D22). There is no automatic recommendation or progression in v1.
+Two tracks, no locks. All tiles are always tappable; she or a parent picks one for the service, and the tile played last glows (D22).
 
 **Little Menu (up to 20)**
 
@@ -175,7 +175,7 @@ interface TrayTask {         // derived from Problem + Stage, pure function
 
 ### 3.2 Support stages (per skill)
 
-The stage is a per-skill setting chosen by the parent (default S3), stored as a `skillConfig` event and applied from the next service. It does not change automatically in v1 (D23); automatic fading is milestone M12.
+The stage is a per-skill setting chosen by the parent (default S3, D23), stored as a `skillConfig` event and applied from the next service.
 | Stage | Name | What she sees/does | Tray starts | Voice counting |
 |---|---|---|---|---|
 | S3 | Guided | Frames/packs visible; prefilled groups color-coded to the ticket; running counts pop on items; Pip's hat pulses after 10 s idle | Operand(s) prefilled & locked (add) or full minuend (sub) | Yes (counting on / counting back) |
@@ -259,8 +259,8 @@ Spoken forms (all via `numberToWords`, never raw digits):
 ### 4.1 Session builder (deterministic given seed)
 Inputs: `seed`, `skill` (chosen on the menu board), `orders` (4/6/8), the skill's `ops` filter and stage (`skillConfig`, D23, D24), per-fact boxes, focus list.
 1. PRNG: `mulberry32`; seed = hash(`deviceId`, service start time, per-device service counter), injected by the caller. Stored in the `serviceEnd` event so any service can be replayed.
-2. **Pool:** the chosen skill's pool, restricted by its `ops` filter (`both` | `add` | `sub`: only forms of that operation; skills with a single operation ignore the filter and do not show it). All orders come from this pool plus requeues; there is no cross-skill review in v1.
-3. **No Chef's Pick in v1 (D22).** Nothing recommends or rotates skills; the service repeats the chosen skill until another is picked. Chef's Pick returns in M12.
+2. **Pool:** the chosen skill's pool, restricted by its `ops` filter (`both` | `add` | `sub`: only forms of that operation; skills with a single operation ignore the filter and do not show it). All orders come from this pool plus requeues.
+3. **One skill per service (D22).** The skill never changes within a service; "Another service" repeats it and "Change dish" returns to the menu board (§5.7).
 4. Weighted sampling by box: weights `[5,3,2,1,0.5]` for boxes 0–4; new facts weight 5.
 5. **No immediate repeats:** the same `factKey` (commuted partner included) must not appear within the last 4 problems; the same food and the same monster must not appear twice in a row; when `ops` is `both`, the add/sub ratio stays within ±1 of the skill's target ratio per service.
 6. Food: monster's favorite 70% of the time, else random from the allowlist.
@@ -272,9 +272,7 @@ The first-ever service on a device begins with the warm-up order (§5.4, D26) be
 
 ### 4.2 Fact boxes, stage and starting state (constants live in `engine/config.ts`; tuned by playtest)
 - **Fact box (0–4):** first-try correct → box+1; correctAfterHint → stays; resolvedAssisted or wrong-then-fixed → box = 0. Boxes are shared with the commuted partner (canonical key) at half weight.
-- **Stage per skill** is a stored parent setting (`skillConfig` event, default S3), applied from the next service. No automatic promotion, demotion or fast-track in v1 (D23). Every attempt is still logged with skill, stage, outcome and fact, so the leveling milestone (M12) can derive stages from history.
-- **Chef hats are deferred to M12 (D25).** No hats on tiles or in Results, no hat bonus coins. The `hat` event type is reserved (§11.2).
-- **Automatic leveling, hats and Chef's Pick** are the optional late milestone M12 (D22, D25).
+- **Stage per skill** is a stored parent setting (`skillConfig` event, default S3, D23), applied from the next service.
 - **Starting state (owner-reported: age 5½, Grade 1 first semester, D16).** She already knows +0, +1 (both orders) and doubles 1+1 … 9+9 from flash cards. She can solve take-away *word problems* but is still learning *number sentences* with sums under ten, so symbolic subtraction counts as new. Default `known` preset: those addition facts start at box 3, so they come up less often than new facts. Every skill's stage starts at S3, and the first-run menu highlights A1. All editable in Parent → Skills (M3: stage and operations per skill; M7: starting-point toggles); the toggles are stored as a `known` event.
 - Never shown to her: percentages, wrong counts, streaks.
 - Stage uses the *same fact pool*; only the representation fades.
@@ -297,8 +295,7 @@ Full-screen "Tap to start". The tap: unlocks WebAudio (`resume()`), primes `spee
 ### 5.2 Home
 The café exterior/interior as the owned shop decorations, Pip the guide, coin jar with count. Two big targets: **Open the Café** (primary, largest; opens the menu board) and **Decorate** (paintbrush; added with the shop in M4, absent before). The chalkboard is wall decoration, not a separate button. A 44-px, 30%-opacity gear in the top-right corner: long-press 2 s → gate. When the café is locked (§6.2) Home shows the closed café ("Closed — ask a grown-up to open it!") instead of the buttons; the gear still works.
 ### 5.3 Menu board
-Chalkboard with two pages (swipe not required; two big tabs "Little Menu"/"Big Menu"; a tab with no built skill is hidden). Each tile 3×3 (9 on Little, 4 on Big): food icon and a sample sentence in chalk (it shows an example of the operations the parent allowed, e.g. a subtraction for A1 set to subtraction only). This is the start of every play session: the tile for the skill played last glows, and A1 on first run. Parent-hidden skills do not render. Tapping a tile starts a service with that skill. There is no recommendation, and no hats or levels are shown (D22, D25).
-
+Chalkboard with two pages (swipe not required; two big tabs "Little Menu"/"Big Menu"; a tab with no built skill is hidden). Each tile 3×3 (9 on Little, 4 on Big): food icon and a sample sentence in chalk (it shows an example of the operations the parent allowed, e.g. a subtraction for A1 set to subtraction only). This is the start of every play session: the tile for the skill played last glows, and A1 on first run. Parent-hidden skills do not render. Tapping a tile starts a service with that skill.
 ### 5.4 Service screen layout (safe box 1280×720)
 - Monster stands behind the counter top-center (x 440–840, y 40–300); queue of waiting monsters peeks from the left edge as small silhouettes (one per remaining order) — the natural end-of-service cue.
 - **Ticket** (paper receipt, x 860–1220, y 60–260): equation tokens colored (first operand blue, second orange, result green; also shape-coded by the blank's dashed box so color is never the only cue). Tap ticket → replays spoken sentence. Food icon beside it.
@@ -434,14 +431,13 @@ Layered SVG scene: wall, floor, window, lights, counter, counter-top slot, wall 
 | coin | two-tone sine "ting" |
 | buy | coin ×3 + rising chime |
 | arrive | rubber "boing" (sine with pitch envelope) |
-| hat | three ascending chimes (M12) |
 Master volume, SFX volume, voice volume settings; defaults 0.8 / 0.7 / 1.0. No background music in v1.
 
 ---
 
 ## 9. Economy
 All numbers live in `engine/economy.ts`.
-- **Coins:** +3 per monster served (flat, regardless of correctness, speed, or hints) · +5 service-complete tip · +10 once per chef hat earned (hats arrive with the leveling milestone M12, D25; there is no hat bonus in v1). A 6-monster service yields **23 coins**.
+- **Coins:** +3 per monster served (flat, regardless of correctness, speed, or hints) · +5 service-complete tip. A 6-monster service yields **23 coins**.
 - Nothing is ever taken away. Purchases are the only spend; no refunds needed because swapping is free.
 - No streaks, daily rewards, expiring items, ads, loot boxes, timers on rewards, or external links.
 - Coin display: jar with count; counts spoken in Results only.
@@ -473,8 +469,7 @@ She will play on an iPad, an iPhone, and an Android phone, with no backend. Prog
 ```ts
 type Evt = { id: string; t: number; dev: string; v: number } & (   // id = crypto.randomUUID() (fallback: 128 random bits); t = epoch ms
  | { k:'attempt'; svc:string; fact:string; skill:SkillId; stage:Stage; outcome:'first'|'afterHint'|'assisted'; ms:number }
- | { k:'serviceEnd'; svc:string; skill:SkillId|'pick'; seed:number; orders:number; served:number; coins:number; activeMs:number; partial:boolean }
- | { k:'hat'; skill:SkillId; n:1|2|3; coins:number }          // reserved: written from M12 (D25)
+ | { k:'serviceEnd'; svc:string; skill:SkillId; seed:number; orders:number; served:number; coins:number; activeMs:number; partial:boolean }
  | { k:'buy'; item:string; price:number }
  | { k:'equip'; slot:string; items:string[] }
  | { k:'skillConfig'; skill:SkillId; stage:Stage; ops:'both'|'add'|'sub' }   // parent's per-skill settings, last writer per skill wins (D23, D24)
@@ -483,8 +478,8 @@ type Evt = { id: string; t: number; dev: string; v: number } & (   // id = crypt
 ```
 Rules:
 - `engine/replay.ts`: `replay(events, initial) → Derived` sorts by `(t, id)`. `applyEvent` is the incremental form and MUST equal a full replay (property test).
-- **Coins:** `earned = Σ serviceEnd.coins (distinct svc) + Σ hat.coins (distinct skill+n)`. Amounts live in the events and are never recomputed, so a merge cannot reduce earned coins; two devices that both emit "hat 1 for A2" pay once. `spent = Σ price over distinct purchased items` (the same item bought on two devices is charged once). `balance = max(0, earned − spent)`. Owned items = union of `buy` events. Nothing a merge does can remove an owned item.
-- Fact boxes are derived and may legitimately shift after a merge (adaptation, not reward). Stage and operations are explicit `skillConfig` events, so a merge does not shift them. Hats (M12): union of derived hats and `hat` events.
+- **Coins:** `earned = Σ serviceEnd.coins (distinct svc)`. Amounts live in the events and are never recomputed, so a merge cannot reduce earned coins. `spent = Σ price over distinct purchased items` (the same item bought on two devices is charged once). `balance = max(0, earned − spent)`. Owned items = union of `buy` events. Nothing a merge does can remove an owned item.
+- Fact boxes are derived and may legitimately shift after a merge (adaptation, not reward). Stage and operations are explicit `skillConfig` events, so a merge does not shift them.
 - `equip`, `known`, `focus`, and `skillConfig` (per skill): latest `t` wins.
 - `factKey` format is a persisted identifier: changing it needs a migration.
 - Initial state before any events = the owner preset (§4.2 starting state), applied implicitly and never as events, so two fresh devices do not double-seed.
@@ -522,7 +517,7 @@ Tabs (normal scrolling layout; works in portrait too):
 1. **Progress** — per-skill stage and services played; fact heatmap (addition/subtraction grids 0–10 colored by box); "trouble spots" (facts with box 0 after ≥ 3 sightings); last 20 services (date, skill, first-try %, assisted count, minutes); active minutes per day (last 14).
 2. **Skills** — hide/show tiles; set **stage** (S3–S0) and **operations** (both / addition only / subtraction only; skills with one operation do not show it) per skill, shipped in M3 as a minimal list (D23, D24); "reset this skill"; **Starting point**: "already knows" toggles (+0, +1, doubles) (§4.2).
 3. **Settings** — orders per service (4/6/8); **play-time limit** (Off by default; 5/10/15/20) and, only when a limit is on, refill mode (parent only / 1 h / 3 h / next morning) with **Start new session** and **Add time** buttons at the very top of the tab (§6, D27); voice, speed, test (voice is per device); master/SFX/voice volume; reduced motion; child's name (optional, used in the greeting only; phrase must degrade if unset); big-text captions; rename monsters.
-4. **Focus list (custom content)** — add up to 30 specific facts or skill ranges (e.g. "8+5", "all 9+x") that mix at 25% weight into services of the skill each fact belongs to (and into Chef's Pick once it exists). Validated against the generators (cannot create a nonsense fact). 
+4. **Focus list (custom content)** — add up to 30 specific facts or skill ranges (e.g. "8+5", "all 9+x") that mix at 25% weight into services of the skill each fact belongs to. Validated against the generators (cannot create a nonsense fact). 
 5. **Data** — Device label (e.g. "Dad's iPad"), Export, Import (**Merge** default / Replace; §11.6) with a three-line "keep devices in sync" explanation, Back up now, snapshots list (restore), storage persisted/usage, Reset progress (keeps shop), Reset everything (a second, fresh multiplication prompt), app version/build date, install help.
 
 No external links anywhere. An "About" shows plain text only.
@@ -548,11 +543,10 @@ No external links anywhere. An "About" shows plain text only.
 ### 13.4 Unit/property tests (Vitest)
 - Generators: 1,000 seeds × every skill — answers valid; ranges respected.
 - Session builder: determinism (same seed → identical order); no adjacent repeats; no fact within 4 of itself; add/sub balance; requeue positions 3–5 and stage−1; max length; pool-size guard.
-- Fact boxes: transitions and sampling weights; the operation filter yields only the allowed forms; `skillConfig` last-writer-wins. (Promotion/demotion/fast-track and hat tests move to M12.)
-- Tray model: fill order, holes, auto-bundle, capacity, locked prefill, `check` truth table.
+- Fact boxes: transitions and sampling weights; the operation filter yields only the allowed forms; `skillConfig` last-writer-wins.- Tray model: fill order, holes, auto-bundle, capacity, locked prefill, `check` truth table.
 - `numberToWords` 0–100 exhaustive vs. a hand-typed table of 0–20, tens, and 12 spot checks.
 - Economy: coin totals, price/affordability, purchase idempotence.
-- Event log: `applyEvent` ≡ full `replay`; merge commutative (A∪B ≡ B∪A) and idempotent; merge never lowers earned coins or removes owned items; duplicate hat/buy/serviceEnd events across devices count once; clock skew between devices does not crash replay.
+- Event log: `applyEvent` ≡ full `replay`; merge commutative (A∪B ≡ B∪A) and idempotent; merge never lowers earned coins or removes owned items; duplicate buy/serviceEnd events across devices count once; clock skew between devices does not crash replay.
 - Storage: migrations with fixtures, export→import round trip, checksum, corrupt input rejected, snapshot rotation, namespace test (§11.5).
 - Play allowance and lock: the cases in §6.5.
 - `toStageCoords` for landscape and rotated portrait, including safe-area remap.
@@ -610,7 +604,7 @@ A0 and A4–A8 generators + demos (missing amounts, teens, near-double, bridging
 
 #### M7 — Full parent area and multi-device merge (≈ 2.5 h)
 Import with **merge** (and Replace), device label, Focus list (custom content), Starting-point editor, skill hide/show, fact heatmap, trouble spots, per-service history, snapshots restore.
-**Accept:** merge commutative and idempotent (A∪B ≡ B∪A; importing twice adds nothing); merging never lowers earned coins or removes an owned item; duplicate hat/buy/serviceEnd events count once; two-context e2e (two browser contexts as two devices); Focus list validated and mixed at 25%.
+**Accept:** merge commutative and idempotent (A∪B ≡ B∪A; importing twice adds nothing); merging never lowers earned coins or removes an owned item; duplicate buy/serviceEnd events count once; two-context e2e (two browser contexts as two devices); Focus list validated and mixed at 25%.
 
 #### M8 — Big Menu (≈ 2 h)
 B1–B2: ten-packs, tens shelf + ones frame, auto-bundle, two-digit numpad, demos. Likely second-semester Grade 1 content.
@@ -626,11 +620,6 @@ Accessibility pass (labels, tab order for parent area, contrast), full e2e matri
 #### M11 — Profiles (≈ 1.5–2 h)
 Profile picker on Splash/Home, `profileId` on events (already reserved), per-profile wallet and café, per-profile known-facts preset (e.g. a toddler profile limited to A0 with 1–5), export/import per profile.
 
-#### M12 — Adaptive leveling (optional, late; ≈ 2.5 h)
-Owner-optional (D22). An "Auto" stage mode per skill alongside the fixed stage: promotion (window of the last 6 first attempts, ≥ 5/6 with ≥ 6 attempts), demotion (≤ 2/6), fast-track, all derived from the `attempt` events; Chef's Pick (frontier skill, composition, review slots); chef hats (criteria in D13) with the +10 coin bonus; hats on menu tiles and a one-time celebration in Results.
-Design notes from the pre-build review that must be addressed here: fast-track must count only attempts on facts outside the `known` preset and must not jump past S2 for subtraction (success at S3 mostly reflects the prefilled tray and spoken counting); add a faster demotion (two assisted outcomes in a row drop one stage); the Chef's Pick opener needs a fallback when no review material exists.
-**Accept:** promotion, demotion, fast-track and hat unit tests; with Auto off, behavior is identical to v1; stages derived by full replay equal the incremental result.
-
 Later ideas, unscheduled: rush-hour mode, monster designer, zero-answer lesson, start-unknown "Mystery Orders", regrouping.
 ---
 
@@ -645,4 +634,4 @@ Later ideas, unscheduled: rush-hour mode, monster designer, zero-answer lesson, 
 ---
 
 ## 16. Assumptions (recorded in DECISIONS.md; owner can veto)
-Landscape layout with portrait handled by rotating the stage; single child profile now (`profileId` reserved, profiles = M11); per-device settings, optional play-time limit and lock (off by default); progress mergeable by exported file; US-English voice, chosen per device; emoji foods first; no music; Pip as guide; names of monsters/staff are placeholders; ladder order as specified; skill picked from the menu, stage and operations set per skill by the parent, automatic leveling and hats deferred to M12 (D22–D25); play-time limit off by default (parent opts in; default parent-only refill); starting state from the owner's report (§4.2); hosting on GitHub Pages (public repo, no personal data).
+Landscape layout with portrait handled by rotating the stage; single child profile now (`profileId` reserved, profiles = M11); per-device settings, optional play-time limit and lock (off by default); progress mergeable by exported file; US-English voice, chosen per device; emoji foods first; no music; Pip as guide; names of monsters/staff are placeholders; ladder order as specified; skill picked from the menu, stage and operations set per skill by the parent (D22–D24); play-time limit off by default (parent opts in; default parent-only refill); starting state from the owner's report (§4.2); hosting on GitHub Pages (public repo, no personal data).
