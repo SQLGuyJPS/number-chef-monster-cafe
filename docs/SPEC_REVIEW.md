@@ -7,6 +7,99 @@ Note: findings that concerned a feature since dropped from the design have been 
 
 ---
 
+## Decision log (owner walk-through in progress)
+
+The owner is working through this review in chat, a few items at a time. Each decision is recorded in the table below as it is made. When every chunk is done, the owner signs off on a summary; only then are the significant design changes written to `DECISIONS.md`. **Status: signed off; the design changes are recorded as D29–D38 in `DECISIONS.md`. Nothing in `SPEC.md`, `OPEN_ITEMS.md`, `CLAUDE.md` or `README.md` has been edited yet:** Claude Code applies every "Edit …" note in the table below as the spec-errata section of `PLAN.md` (the owner approves it in one pass). "D?" in the last column means the item is covered by a D29–D38 entry.
+
+Status: **Accepted** = incorporate as suggested · **Modified** = incorporate with the change noted · **Rejected** = do not incorporate · **Deferred** = decide later / needs outside input. "D?" = needs a `DECISIONS.md` entry at the end.
+
+**Chunk plan** (✅ = done)
+
+| Chunk | Items | Done |
+|---|---|---|
+| 1 | §2.1 box movement, §2.1 diagnostic S2, §2.2 wrong-then-fixed, §2.3 new-fact order | ✅ |
+| 2 | §2.4 remove-from-end, §2.4 "taken away" row, §2.5 tap-to-count, §2.6 feedback after a wrong serve | ✅ |
+| 3 | §2.7 vocabulary, §2.8 `+0` toggle, response time, spacing claim | ✅ |
+| 4 | C1 FollowMe bell, C2 `? + a = c` forms, C6 stage override in M3, C9 resume offer | ✅ |
+| 5 | Tidy-ups C3, C4, C5, C8, C10, C12, C13, C14 (batch) | ✅ |
+| 6 | §4.1 coins on resume, §4.2 S0 number pad, §4.4 tutorial order | ✅ |
+| 7 | §4.3 allowance: last customer, tip on close, 60 s cue | ✅ |
+| 8 | §4.3 allowance: 90 s cap, idle nudge; §4.5 frames1 capacity, ticket colors | ✅ |
+| 9 | §4.5 requeued monster, debug route, word-list source, export checksum | ✅ |
+| 10 | §4.5 Safari vs Home Screen; §5 items 6, 9, 10 (need owner input) | ✅ |
+| 11 | §4.5 iOS baseline / device answers; §5 items 1–5, 7, 8 (platform risks for PLAN.md; batch) | ✅ |
+| 12 | §6 scope and estimate (PLAN.md errata bullet handled in chunk 14) | ✅ |
+| 13 | §7 fun ideas | ✅ |
+| 14 | Summary of all changes, sign-off, then write `DECISIONS.md` | ✅ Signed off; D29–D38 written. `SPEC.md` and other docs not yet edited. |
+
+**Decisions**
+
+| ID | Item | Status | Decision / notes | D? |
+|---|---|---|---|---|
+| 2.1a | Only S1/S0 first-try results raise fact boxes | Accepted | Misses still reset the box at every stage. At the default S3, boxes do not rise until the parent moves a skill to S1/S0, so sampling stays even. Edit `SPEC` §4.2. | D? |
+| 2.1b | Diagnostic S2 (tap the total on a number strip) | Rejected | S2 stays as specified. | |
+| 2.2 | Wrong-then-fixed outcome and naming | Accepted | Four outcomes, persisted spelling everywhere (`SPEC` §3.4, §4.2, §11.2): `first`; `afterHint` (Help pressed before the first serve, then correct; box stays); `fixed` (wrong first serve, then correct; box = 0, no requeue); `assisted` (worked demo + FollowMe; box = 0 + requeue). Help at attempt 1 plays CountTogether and moves to attempt 2, so Help then a wrong serve goes straight to Worked. Supersedes the OPEN_ITEMS #10 default. | D? |
+| 2.3 | New-fact introduction order, cap, shared box | Accepted (cap 3) | New facts are introduced in difficulty order, at most 3 new facts per service. One box per unordered pair; drop the "half weight" wording. Edit `SPEC` §4.1 step 4, §4.2. | D? |
+| 2.4a | Remove always takes the last filled cell | Accepted | The tapped item still flies away, but the frame stays canonical (mirrors D5). Edit `SPEC` §3.3. | D? |
+| 2.4b | Visible "taken away" row for missing-subtrahend forms | Accepted | A3 `10 − ? = a` and A4: removed items stay in a small row by the fridge so the unknown stays on screen; CountTogether and demos point at it. Needs a layout slot (check in the M1 layout mock). | D? |
+| 2.5 | Tap-to-count vs tap-to-remove | Accepted | Add mode: tapping a placed item hops it and says its position number; removal by drag-to-bin or a single "take one back" button. Remove mode: tap still removes. Add "does she count by touching?" to PLAYTEST. | D? |
+| 2.6 | Monster counts her plate aloud after a wrong serve | Accepted | "I see seven… I wanted eight. One more!" before the CountTogether model bubble; no red X or buzzer. Wording goes in the phrase table. | D? |
+| 2.7a | "Take away" / "makes" wording | Rejected | Keep "minus" / "equals what?" as in `SPEC` §4. | |
+| 2.7b | Spoken ticket wrapped in the café frame | Accepted | Spoken only, e.g. "Three plus two cookies, please!"; the written ticket stays numerals. Edit the `SPEC` §4 spoken forms / phrase table. | |
+| 2.8a | `+0` known toggle | Accepted (remove) | Delete from `SPEC` §4.2 and §12 Skills; re-add only if the zero lesson is built. | |
+| 2.8b | Median S0 response time in parent Progress tab | Accepted | Never shown to the child. Parent Progress is Tier 2, so this lands with it; `attempt.ms` keeps being recorded. | |
+| 2.8c | "Spaced practice" claim | Accepted (soften) | Reword `SPEC` §1.1 point 5; no due-date logic added. | |
+| C1 | FollowMe auto-rings the bell | Accepted | The bell pulses and she presses it; no auto-serve anywhere. Edit `SPEC` §5.5 (and the "assisted serve" wording). | |
+| C2 | `? + a = c` forms in A3/A4 | Accepted (keep in) | Addition-only start-unknown (`? + a = 10`, `? + a = c`) stays in v1 as a commuted missing addend. Update D1(d) to say so; change the Mystery Orders backlog example to `? − 3 = 5`. Pools unchanged (A3 = 36, A4 = 135). | D? |
+| C6 | Stage override vs M3 acceptance | Already resolved | D23 and `SPEC` §14 M3 already include per-skill stage and operations settings in the M3 parent area. No action. | |
+| C9 | Resume: automatic vs offered | Accepted | Use the "Continue dinner service?" offer everywhere (fix `SPEC` §2.3 / line 137 wording); suppress the offer while the café is locked and offer it after a parent unlocks. Also settles "resume while locked" from §4.3. | |
+| C3 | Requeue notation "stage−1" | Accepted | Already fixed in `SPEC` §4.1 step 7 and D23; fix the stale "stage−1" in the §13 test list to "one step more support (capped at S3)". | |
+| C4 | Frame tint wording | Accepted | "Top row (cells 1–5) tint A, bottom row (6–10) tint B, in each frame." | |
+| C5 | Shop total | Accepted | "≈ 1,600" → 1,340 in `SPEC` §10 and OPEN_ITEMS #4 (about 58 services at 23 coins). | |
+| C8 | §3.1 types | Accepted | `operands: (number \| null)[]`; remove or use the `Unknown` type. | |
+| C10 | D9 milestone number | Accepted | Profiles are M11, not M9. | |
+| C12 | "20 h figure" in DECISIONS residual risks | Accepted | Reword to the Tier 1 ≈ 10 h framing (D20/D22). | |
+| C13 | Play-time option order | Accepted | "none / 5 / 10 / 15 / 20" in `SPEC` §6.1. | |
+| C14 | OPEN_ITEMS numbering gap | Accepted | Renumber so the table has no gap at #2. | |
+| 4.1 | Coins on resume / app killed | Accepted | A small `coin` event is written in the same transaction as each completed problem (including the D26 warm-up order); `serviceEnd` carries only the tip; coin totals dedupe by event id. Edit `SPEC` §11.2, §11.3 and the §5.6 coin text. Needs a schema note (`coin` event type). | D? |
+| 4.2 | S0 number pad layout | Accepted | One row of ten digit buttons 0–9 in order, one answer display that always accepts up to two digits (no tens/ones slots), and a backspace. Edit `SPEC` §5.4. | D? |
+| 4.3a | "Last customer" wind-down | Accepted (both parts) | When remaining allowance drops below about one order's length (tune in playtest), waiting silhouettes wave and leave and the current monster is announced as the last customer. Also: no full new service when less than about half a service remains; offer a shorter one. Applies only when the limit is enabled (D27). Edit `SPEC` §6; add to §6.5 tests. | D? |
+| 4.3b | Tip when the allowance closes the café | Accepted | The +5 tip is paid when the allowance closes the café mid-service; no tip for a voluntary early exit or Take a break. Supersedes the OPEN_ITEMS #8 default. | D? |
+| 4.3c | 60 s warning cue | Accepted (dim + yawn) | Lights dim and Pip yawns; the door sign never animates. Edit `SPEC` §6 / §5.4. | |
+| 4.3d | What happens at the 90 s grace cap | Accepted | The monster eats happily and leaves; no `attempt` event; the fact's box is unchanged; a pending requeue is dropped without a box reset. Edit `SPEC` §6.2 (and the §4.1 step 7 "leftovers set box = 0" wording to exclude cap cutoffs). | D? |
+| 4.3e | Resume while locked | Covered by C9 | See C9. | |
+| 4.3f | Idle nudge | Accepted | At every stage, after about 20 s idle, repeat the spoken ticket once per order; spoken only, no countdown. | |
+| 4.5a | `frames1` capacity | Accepted | `frames1` capacity 10, `frames2` capacity 20; same bin wobble when over capacity. Edit `SPEC` §3.3. | |
+| 4.5b | Ticket color mapping | Accepted | Blue = prefilled/locked group, orange = the group she adds or removes, green = result; not by position. Edit `SPEC` §5.4. | |
+| 4.5c | Requeued monster identity and coins | Accepted | The same monster returns ("Blobbo's back — still hungry!") and pays 3 coins like any completed problem, so a service with requeues can pay up to 6 coins over the 23 base. Edit `SPEC` §4.1 step 7 and §9. Also covers §7 "returning-monster story" (7e). | D? |
+| 4.5d | Hidden debug route | Accepted | `?debug` query flag read once at boot, available in production builds; not reachable from child-facing UI. Edit M0 acceptance. | |
+| 4.5e | Easy-reader word list | Rejected (drop the lint) | No word list is committed and the easy-reader lint is removed from `SPEC` §13.2 and any milestone that mentions it (M10); child-facing text stays minimal by convention. | D? |
+| 4.5f | Export checksum | Accepted | SHA-256 via SubtleCrypto, hex-encoded in the export header. Edit `SPEC` §11.6. | |
+| 4.5g | Safari tab vs Home Screen storage | Accepted (note only) | Documentation note ("install to the Home Screen before first play") in README/PLAYTEST; no non-standalone detection or banner code. | |
+| 5.6 | 🍒 and 🥞 are not single units | Accepted (swap) | Remove 🍒 and 🥞 from the allowlist; add 🍌 banana and 🍊 tangerine (Unicode 6.0). Mimsy → 🍞 / 🍊, Wobbleton → 🍦 / 🍌. Edit `SPEC` §7.1, §7.2, `scripts/emoji-versions.json` and any food tests. | D? |
+| 5.9 | Static layout mock at the start of M1 | Accepted | First M1 step: static layout mock (1194×834 and 844×390) checking tray busyness, the CountTogether bubble width (≈ 420 px vs 400 px zone) and the "taken away" row slot (2.4b); stop for the owner's OK before building interaction. | |
+| 5.10 | Family details in a public repo | Accepted (generalize fully) | Rewrite wording in current files to "the child", "a younger sibling", "a parent's phone"; drop specific ages, sexes, grade and device ownership (SPEC, DECISIONS D9/D16, OPEN_ITEMS, CLAUDE.md, README). Git history already contains the old wording; not rewritten. D16's design content stays (known facts, level) in generic terms. | D? |
+| 4.5h | iOS version baseline | Accepted (default) | Baseline iOS 15.4+ and a recent Chrome on Android; `navigator.audioSession` (iOS 17+) stays a progressive enhancement. Change `SPEC` §2 "iOS 14+". The owner's actual device list is still not recorded (OPEN_ITEMS "Device details"); revisit if an older device must work. | D? |
+| 5.1 | CSP vs dev server | Accepted | CSP meta tag emitted in production builds only; `build.assetsInlineLimit: 0` (or `font-src 'self' data:`). PLAN.md risk. | |
+| 5.2 | Back guard needs user activation | Accepted | Push the guard history entry from inside a tap (the Splash tap) and again after each in-app navigation. PLAN.md risk; amend D19. | |
+| 5.3 | Sharing / importing the export file | Accepted | `navigator.canShare({files})` check; fall back to text/plain with a `.json` name or a download; permissive `accept` on iOS file inputs. PLAN.md risk. | |
+| 5.4 | Speech timeout formula | Accepted | Replace `clamp(600, 70·chars, 6000)` with about `clamp(1200, 400 + 90·chars/rate, 8000)`; tune on the iPad. Edit `SPEC` §8.1. | |
+| 5.5 | Emoji fonts in CI/screenshots | Accepted | Install Noto Color Emoji in the e2e environment; PLAYTEST says emoji appearance is judged on real devices only. | |
+| 5.7 | Performance gate | Accepted | The 4× CPU-throttle check becomes a report, not a blocking gate; smoothness judged on the iPad at the M2 playtest. | |
+| 5.8 | M0 Home Screen install acceptance | Accepted | Move "installs to Home Screen and launches standalone" from agent acceptance to an owner check in PLAYTEST.md. | |
+| 6a | Split M3 | Accepted | M3a = event log, replay, fact boxes, per-skill stage/ops settings, resume; M3b = optional play-time limit and lock, parent gate, parent area, export/reset/import. Each ends with its own playtest stop. Edit `SPEC` §14 and the Tier 1 estimate (D20). | D? |
+| 6b | Defer migrations framework and snapshot rotation | Accepted | Ship `schemaVersion: 1` with an empty migration list and its test harness; the first real migration is written at the first schema change (CLAUDE.md rule still applies from then). One snapshot in Tier 1; rotation later. Edit `SPEC` §11 and M3 acceptance. | D? |
+| 6c | Narrow M1 e2e; freeze event shapes in M1 | Accepted (both) | M1: tap in landscape on Chromium plus one WebKit iPad project, `toStageCoords` unit-tested for portrait; full device matrix and CDP drag in rotated portrait move to M2. `attempt` and `coin` event shapes (with the 2.2 outcomes) are fixed in M1 so M3 just writes them. Edit M1/M2 acceptance. | D? |
+| 6d | Hand-authored monster SVGs | Accepted | M2: six hand-authored SVGs with expression variants (idle, delight, eat, puzzled, sleepy); keep the `MonsterSpec` data shape so art can be swapped or made procedural later. Edit `SPEC` §7.2 (drop the procedural-parts description from Tier 1). | D? |
+| 7a | Garnish choice after each correct serve | Accepted (Tier 2 backlog) | Add to the "Later ideas" list in `SPEC` §14; revisit after the M2 playtest. | |
+| 7b | Let her name the monsters | Deferred | Keep placeholder names through M2; in-app rename stays with M7 (focus list). OPEN_ITEMS #3 stays open. | |
+| 7c | Monster album | Accepted (Tier 2 backlog) | Later idea, best after the shop/guests (M4). | |
+| 7d | Decorated café as the Service background | Accepted | State in `SPEC` §7.4 that the Service screen uses the decorated café; add "purchases appear on the Service screen" to M4 acceptance. | |
+| 7e | Returning-monster story for requeues | Covered by 4.5c | See 4.5c. | |
+| 4.4 | First tutorial order | Already resolved | D26 already fixes the warm-up as `2 + 1` and writes no `attempt` event. No action. | |
+
+---
+
 ## 1. Overall verdict
 
 This is an unusually strong spec. The core teaching idea holds up: the child builds the answer on a ten-frame, the support fades over four stages, nothing ever punishes her, and coins reward effort. It is grounded in good early-math practice, and the spec explains why each choice was made. The engineering plan is careful too. It covers the iOS quirks that sink most kids' web games: speech that never fires `end`, silent-switch audio, storage eviction, the shared GitHub Pages origin, and the PWA reloading mid-game. Separating the pure engine from the UI, and keeping progress as an event log, are both good calls.

@@ -1,6 +1,6 @@
 # Decisions
 
-Each entry: what was decided, why, how to revisit. D1–D14 were made during design (departures from the original proposal and resolved gaps). Round 2 added D15–D19; round 3 (owner clarifications on hours, the play allowance and story tickets) added D20–D21 and rewrote D7. Round 4 (owner: pick the skill instead of automatic leveling; play-time limit optional) added D22–D27 and amended D3, D6, D7, D13, D16, D20. Round 5 (owner: remove automatic leveling, Chef's Pick and chef hats from the project entirely) added D28 and reduced D13 and D25 to tombstones. Claude Code continues from D29.
+Each entry: what was decided, why, how to revisit. D1–D14 were made during design (departures from the original proposal and resolved gaps). Round 2 added D15–D19; round 3 (owner clarifications on hours, the play allowance and story tickets) added D20–D21 and rewrote D7. Round 4 (owner: pick the skill instead of automatic leveling; play-time limit optional) added D22–D27 and amended D3, D6, D7, D13, D16, D20. Round 5 (owner: remove automatic leveling, Chef's Pick and chef hats from the project entirely) added D28 and reduced D13 and D25 to tombstones. Round 6 (owner walk-through of SPEC_REVIEW.md) added D29–D38. Claude Code continues from D39.
 
 **Reading guide for removed features.** The first draft of the spec contained three linked mechanics that no longer exist anywhere except in this file and in git history: **automatic leveling** (stage promotion, demotion and fast-track driven by recent accuracy), **Chef's Pick** (an automatic "recommended" mode that chose the skill to practice and mixed in review of other skills) and **chef hats** (up to three mastery badges per skill, shown on each menu tile, each paying a coin bonus). Where an entry below mentions them, it describes the first draft, not the current design. See D28.
 
@@ -114,7 +114,64 @@ Not affected: Pip's chef hat (the mouse mascot's costume and the Help button) is
 Why: the owner kept getting Claude Code reports about gaps in these dormant mechanics (missing fallbacks, balance rules, unreachable thresholds) while working on unrelated milestones, and the text leaked into other chats. They will decide whether to revisit after all other milestones are done.
 How to revisit: do not treat the absence as a defect and do not flag it. If the owner reopens it, the first-draft rules are in git history: `git show e943553^:docs/SPEC.md` (§4.1 session composition and Chef's Pick, §4.2 stages, boxes and hats) and `git show e943553^:docs/DECISIONS.md` (D3, D13). Write it as a fresh decision, bump `schemaVersion` with a migration if events are added, and take these review lessons into account: success at S3/S2 mostly reflects the prefilled tray and spoken counting, so fast-track and hats could be earned within minutes (D22 Why); fast-track should count only facts outside the `known` preset and not jump past S2 for subtraction; demotion should react faster; Chef's Pick needs fallbacks when the previous or next skill is not built and a rule for how it treats the Big Menu.
 
-**D29 onward:** reserved for Claude Code.
+**Round 6: owner walk-through of `docs/SPEC_REVIEW.md` (D29–D38).** Each item was decided in chat; the per-item log is the "Decision log" table at the top of `SPEC_REVIEW.md`. At the time these entries were written, `SPEC.md` had **not** yet been edited; Claude Code applies the edits listed in the log (as errata in `PLAN.md`) and, where this file and `SPEC.md` disagree, this file wins until `SPEC.md` is updated. Where an entry amends an earlier one, the earlier entry is not rewritten.
+
+**D29. Fact boxes move only on S1/S0 first-try results; four attempt outcomes; capped new-fact introduction.**
+What: (a) A first-try correct result raises a fact box only at S1 or S0; a miss or assisted resolution resets it to 0 at every stage. (b) Outcomes, spelled the same in the engine (§3.4) and the persisted `attempt` event (§11.2): `first` (right on the first serve, no Help), `afterHint` (Help pressed before the first serve, then correct; box stays), `fixed` (wrong first serve, then right on the second; box = 0, no requeue), `assisted` (worked demo + FollowMe; box = 0, requeue). Help at attempt 1 plays CountTogether and moves her to attempt 2, so Help followed by a wrong serve goes straight to Worked. (c) New facts are introduced in difficulty order, at most 3 per service; one box per unordered pair (the "half weight" wording is dropped).
+Why: at S3/S2 the first operand is prefilled and the answer follows from counting out the second, so first-try success there says little about recall and would push facts out of rotation. "Wrong then fixed" was undefined, and a uniform weight of 5 for all new facts defeated D17's near-doubles-first order.
+Consequence: at the default S3 boxes do not rise until a parent moves a skill to S1/S0, so sampling stays even. Supersedes the OPEN_ITEMS #10 default (which logged the wrong-then-fixed case as `afterHint`).
+How to revisit: thresholds and the cap live in `engine/config.ts`; move S2 into the box rule if S2 turns out to be diagnostic in practice.
+
+**D30. Tray interaction rules: remove from the end, taken-away row, tap-to-count, and a spoken plate count.**
+What: (a) Removal always takes the last filled cell, whichever item she taps (the tapped item still flies away). This amends D5's "removal leaves holes". (b) For missing-subtrahend forms (A3 `10 − ? = a`, A4) the removed items stay in a small "taken away" row so the unknown stays visible; CountTogether and demos point at it. (c) In add mode, tapping a placed item hops it and says its position number; removal there is by dragging it to the bin or a single "take one back" button. In remove mode, tapping still removes. (d) After a wrong serve the monster first counts her plate aloud ("I see seven… I wanted eight. One more!"), then the model bubble plays; no red X or buzzer. (e) `frames1` capacity is 10 (`frames2`: 20), with the same bin wobble. (f) Ticket colors follow the tray: blue = prefilled/locked group, orange = the group she adds or removes, green = result; not by operand position.
+Why: scattered holes break the five-wall subitizing and the back-through-ten demo; young children count by touching; the removed amount is the answer in `7 − ? = 5`; the feedback should name what she actually served.
+How to revisit: PLAYTEST adds "does she count by touching?". The taken-away slot and the CountTogether bubble width are checked in the M1 layout mock (D36).
+
+**D31. Coins are recorded per completed problem; requeues bring back the same monster.**
+What: a small `coin` event is written in the same transaction as each completed problem (including the D26 warm-up order). `serviceEnd` carries only the service tip. Totals dedupe by event id. A requeued problem is the same monster returning ("Blobbo's back — still hungry!") and pays the usual 3 coins, so a service with requeues can pay up to 6 over the 23 base.
+Why: coins were summed from `serviceEnd` per distinct service id, so a resumed service silently lost one set, and an app killed mid-service lost coins she had seen fly into the jar.
+Consequence: a new event type, so the event shape is frozen in M1 (D36); amends D6/D15's wording on where coins live (still "in events, never recomputed").
+How to revisit: if per-problem events are too chatty, batch them per service with a resume-safe id.
+
+**D32. The S0 number pad is one row of digits.**
+What: ten digit buttons 0–9 in order, one answer display that always accepts up to two digits, and a backspace. No separate tens/ones slots.
+Why: the 3×4 keypad with 120 px buttons needs about 500 px of height against about 390 available, and tens|ones slots reveal whether the answer is above nine. An ordered digit row doubles as a small number line.
+How to revisit: if buttons feel cramped on the phone, shrink within the 56 px minimum before changing the layout.
+
+**D33. Allowance ending is predictable (only when the limit is enabled, D27).**
+What: (a) "Last customer": when remaining time falls below about one order's length (tuned in playtest), waiting silhouettes wave and leave and the current monster is announced as the last one; no full new service starts when less than about half a service remains (a shorter one is offered). (b) The +5 tip is paid when the allowance closes the café mid-service, but not for a voluntary early exit or Take a break. Supersedes the OPEN_ITEMS #8 "no tip on a partial service" default for this case. (c) The 60 s cue is the lights dimming and Pip yawning; the door sign never animates. (d) At the 90 s grace cap the monster eats happily and leaves, no `attempt` is recorded, the fact's box is unchanged, and a pending requeue is dropped without a box reset. (e) After about 20 s idle the spoken ticket repeats once per order (all stages; spoken only). (f) The "Continue dinner service?" offer is used everywhere (no silent resume) and is not shown while the café is locked; it appears after a parent unlocks.
+Why: a service of 8–10 minutes against a 15-minute allowance would otherwise be cut off abruptly almost every time; closing time is not her choice and a time cutoff must never count against her.
+How to revisit: the thresholds are constants in `engine/config.ts`; measure real service length at the M2 playtest (OPEN_ITEMS #8).
+
+**D34. Addition-only start-unknown forms (`? + a = c`) stay in v1.**
+What: A3 `? + a = 10` and A4 `? + a = c` remain in the pools (A3 = 36, A4 = 135). This amends D1(d): only the subtraction start-unknown form (`? − 3 = 5`) and the harder word-problem structures stay in the backlog. The Mystery Orders example becomes `? − 3 = 5`.
+Why: `? + a = c` is a commuted missing addend (`a + ? = c`), not a new structure.
+How to revisit: drop the forms and update the pool counts (A3 → 27, A4 → 90) if she finds them confusing.
+
+**D35. Foods must be one obvious unit: 🍒 and 🥞 are replaced.**
+What: 🍒 (two cherries) and 🥞 (a stack) leave the allowlist; 🍌 banana and 🍊 tangerine (Unicode 6.0) are added. Mimsy's favorites become 🍞 / 🍊 and Wobbleton's 🍦 / 🍌. Update SPEC §7.1/§7.2 and `scripts/emoji-versions.json`.
+Why: "seven cherries" on screen would be fourteen cherries to a counting child.
+How to revisit: swap any food; the allowlist is data, and `lint:content` enforces it.
+
+**D36. Tier 1 scope and sequencing changes.**
+What: (a) M3 is split into M3a (event log, replay, fact boxes, per-skill stage/operations settings, resume) and M3b (optional play-time limit and lock, parent gate and parent area, export/reset/import), each with its own playtest stop. (b) Migrations: ship `schemaVersion: 1` with an empty migration list and its test harness; the first real migration is written at the first schema change, after which the CLAUDE.md rule applies as written. One snapshot in Tier 1; rotation later. (c) M1 e2e proves tap in landscape on Chromium plus one WebKit iPad project, with `toStageCoords` unit-tested for portrait; the full device matrix and CDP drag in rotated portrait move to M2. (d) The `attempt` and `coin` event shapes (D29, D31) are fixed in M1. (e) M2 monsters are six hand-authored SVGs with expression variants (idle, delight, eat, puzzled, sleepy); the `MonsterSpec` data shape stays so art can be swapped or made procedural. (f) The easy-reader word-list lint is dropped; no word list is committed and child-facing text stays minimal by convention. (g) The first M1 step is a static layout mock (1194×834 and 844×390) that the owner approves before any interaction is built.
+Why: the Tier 1 estimate was optimistic, and the cuts remove work that only protects later milestones without changing what she plays.
+Consequence: the Tier 1 hour estimate is redone in `PLAN.md` (D20/D22 figures are not authoritative any more).
+How to revisit: reinstate any item when its protection is needed (first schema change, first need for a word list).
+
+**D37. Platform baseline and known platform risks.**
+What: baseline iOS 15.4+ and a recent Chrome on Android; `navigator.audioSession` (iOS 17+) is a progressive enhancement. The owner's actual device list was not provided (OPEN_ITEMS "Device details" stays open). Platform risks go in `PLAN.md`: CSP emitted in production builds only with `assetsInlineLimit: 0`; the back-guard history entry is pushed from inside a tap (amends D19); the export file is shared via `canShare` with a text/plain or download fallback and a permissive `accept` on iOS; speech timeout about `clamp(1200, 400 + 90·chars/rate, 8000)`, tuned on the iPad; Noto Color Emoji in the e2e environment (emoji appearance is judged on real devices only); the 4× CPU-throttle check is a report, not a gate; "installs to Home Screen" is an owner check in PLAYTEST, not agent acceptance. Also decided: `?debug` query flag for the debug screen (production builds too), SHA-256 via SubtleCrypto for the export checksum, a README/PLAYTEST note to install to the Home Screen before first play (no detection code), and the Service screen uses the decorated café so purchases show while she plays.
+Why: the old "iOS 14+" target conflicts with `100dvh` and `crypto.randomUUID`; these are known traps that are cheaper to plan for than to discover.
+How to revisit: raise or lower the baseline once real devices are listed.
+
+**D38. Family details are generalized in the public repo.**
+What: current files say "the child", "a younger sibling" and "a parent's phone" instead of ages, sexes, school grade and who owns which device; D9, D16, OPEN_ITEMS, SPEC §4.2/§15, CLAUDE.md and README are reworded accordingly, keeping the design-relevant content (known facts, level) in generic terms. Git history already contains the old wording and is not rewritten.
+Why: the repo is public (D14) and the docs described the owner's children.
+How to revisit: scrubbing history is a separate, destructive step the owner would have to ask for explicitly.
+
+Also decided in the walk-through without a separate entry (plain corrections or wording; see the log): FollowMe now pulses the bell and she presses it; the spoken ticket includes the food and "please"; the `+0` known toggle is removed; the "spaced practice" claim is softened; median S0 response time joins the Tier 2 Progress tab; tidy-ups C3–C5, C8, C10, C12–C14; garnish choice and monster album are Tier 2 backlog ideas; naming the monsters is deferred (placeholders through M2); diagnostic S2 and "take away" wording were rejected.
+
+**D39 onward:** reserved for Claude Code.
 
 ---
 
