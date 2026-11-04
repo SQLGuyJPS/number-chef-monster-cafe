@@ -5,7 +5,7 @@ A math game for a 5-year-old. The full design is in `docs/SPEC.md` and is the so
 ## Working agreement
 - Build in the milestones listed in SPEC §14. **Tier 1 (M0–M3, ≈ 10 h) is the target for a playable game**; Tier 2 (M4+) is bonus work in any order the owner picks, with no hour cap. **Stop after each milestone** and wait for the owner's playtest feedback. Do not start the next milestone unprompted.
 - First task of the project: write `docs/PLAN.md` (steps, order, risks, hour estimate per milestone) and wait for approval.
-- Record every assumption you make that the spec doesn't cover in `docs/DECISIONS.md` (numbered `D29`, `D30`, … continuing from the existing list, with Why and How-to-revisit).
+- Record every assumption you make that the spec doesn't cover in `docs/DECISIONS.md` (numbered one higher than the highest `D<n>` already in the file, with Why and How-to-revisit).
 - The owner is technical but is the playtester, not the reviewer of every line. Keep explanations short; flag only what needs a decision.
 - Windows 11 host. Scripts must be cross-platform Node (no `rm -rf`, no bash-only syntax in package.json). Use `cross-env` if env vars are needed.
 - `git init` at M0. Commit at the end of each milestone (and sensible checkpoints). Never push unless asked.
