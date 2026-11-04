@@ -8,6 +8,38 @@ Reviewed: `CLAUDE.md`, `docs/SPEC.md` (v1.2), `docs/DECISIONS.md` (D1–D39 and 
 
 ---
 
+## Decision log (owner walk-through in progress)
+
+The owner is deciding every finding in chat, a few at a time. Each decision is recorded here as it is made. Once all chunks are done, the significant design changes go into `DECISIONS.md` (D40+) and the edits are applied to `SPEC.md` and the other docs. **Status: chunk 0 decided; nothing applied to `SPEC.md` yet.**
+
+Status: **Accepted** = apply the fix as suggested · **Modified** = apply with the change noted · **Rejected** = no change · **Pending** = not yet decided.
+
+**Chunk plan** (✅ = done)
+
+| Chunk | Findings | Done |
+|---|---|---|
+| 0 | Q1–Q7 (R2, R1, R7, R10, S6, S9, S11) | ✅ |
+| 1 | Teaching behavior: R3, R4, R5, R6 | |
+| 2 | Engine and settings data: R8, R9, R11, S8 | |
+| 3 | Allowance and screen-flow edges: S1, S2, S3, S5 | |
+| 4 | Process and platform wording: S4, S7, S10, S12 | |
+| 5 | Tier 2: T1–T6 | |
+| 6 | Housekeeping: H1–H10 (batch) | |
+
+**Decisions**
+
+| ID | Finding | Status | Decision |
+|---|---|---|---|
+| R2 / Q1 | Resume offer after unlock | Accepted (default) | The lock clears the `resume` snapshot. Remove the post-unlock "Continue dinner service?" offer from §5.8, §6.2 step 6, §11.6, §6.5 and the §13.5 flow, and amend D33(f) and D39(g). Add: on boot, if a limit is on and `remainingMs ≤ 0`, lock and clear the snapshot. |
+| R1 / Q2 | Requeue position and late misses | Accepted (default) | Requeues are exempt from the "last 4 problems" factKey window; "never adjacent" and "not the same monster twice in a row" still apply. A requeue that does not fit 3–5 problems later is appended to the end of the service (the service gets longer), with at least one other order in between when one exists. State whether a requeue adds a silhouette (§5.4). |
+| R7 / Q3 | Restore in Tier 1 | Accepted (default) | M3b adds a basic Replace-only import (snapshot first; checksum and zod validation). Merge stays in M7. The M3b export→reset→import acceptance stays. |
+| R10 / Q4 | Reset semantics | Accepted (default) | Tier 1 Reset: write a snapshot, then delete everything except the `snapshots` store. A later merge from an older export or another device may bring reset progress back; this is documented in the parent Help, not prevented. A parent-initiated reset is an explicit exception to "coins only go down through a purchase". |
+| S6 / Q5 | Bigger reaction on first-try | Accepted (default) | Keep it. Record in DECISIONS as a deliberate, small exception to §1.1.7 (coins stay flat). |
+| S9 / Q6 | Playtest channel | Accepted (default) | Milestone builds reach the devices by the owner pushing to `main` (the real app). Before real use, the parent resets playtest progress once. |
+| S11 / Q7 | Tier 1 ≈ 10 h | Accepted (default) | ≈ 10 h is a guide; PLAN.md may exceed it. Reword §0, §14, CLAUDE.md and KICKOFF accordingly. |
+
+---
+
 ## Summary
 
 The spec is coherent and ready to build, apart from the items below. Eleven findings affect Tier 1 and should be settled before M0/M1, because PLAN.md and the tests would otherwise encode a contradiction. Most need only a sentence. Five of them need an owner decision; these are collected in §5.
