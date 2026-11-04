@@ -9,7 +9,7 @@ Note: findings that concerned a feature since dropped from the design have been 
 
 ## Decision log (owner walk-through in progress)
 
-The owner is working through this review in chat, a few items at a time. Each decision is recorded in the table below as it is made. When every chunk is done, the owner signs off on a summary; only then are the significant design changes written to `DECISIONS.md`. **Status: signed off; the design changes are recorded as D29–D38 in `DECISIONS.md`. Nothing in `SPEC.md`, `OPEN_ITEMS.md`, `CLAUDE.md` or `README.md` has been edited yet:** Claude Code applies every "Edit …" note in the table below as the spec-errata section of `PLAN.md` (the owner approves it in one pass). "D?" in the last column means the item is covered by a D29–D38 entry.
+The owner is working through this review in chat, a few items at a time. Each decision is recorded in the table below as it is made. When every chunk is done, the owner signs off on a summary; only then are the significant design changes written to `DECISIONS.md`. **Status: signed off; the design changes are recorded as D29–D38 in `DECISIONS.md`, and every "Edit …" note in the table below has been applied to `SPEC.md`, `OPEN_ITEMS.md`, `CLAUDE.md`, `README.md` and `KICKOFF.md` (assumptions in D39).** "D?" in the last column means the item is covered by a D29–D38 entry. OPEN_ITEMS numbers quoted in this document (#3, #4, #8, #10 …) refer to the numbering before the C14 renumbering.
 
 Status: **Accepted** = incorporate as suggested · **Modified** = incorporate with the change noted · **Rejected** = do not incorporate · **Deferred** = decide later / needs outside input. "D?" = needs a `DECISIONS.md` entry at the end.
 
