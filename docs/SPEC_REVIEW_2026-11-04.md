@@ -8,9 +8,9 @@ Reviewed: `CLAUDE.md`, `docs/SPEC.md` (v1.2), `docs/DECISIONS.md` (D1–D39 and 
 
 ---
 
-## Decision log (owner walk-through in progress)
+## Decision log (owner walk-through complete)
 
-The owner is deciding every finding in chat, a few at a time. Each decision is recorded here as it is made. Once all chunks are done, the significant design changes go into `DECISIONS.md` (D40+) and the edits are applied to `SPEC.md` and the other docs. **Status: chunk 0 decided; nothing applied to `SPEC.md` yet.**
+The owner is deciding every finding in chat, a few at a time. Each decision is recorded here as it is made. Once all chunks are done, the significant design changes go into `DECISIONS.md` (D40+) and the edits are applied to `SPEC.md` and the other docs. **Status: every finding decided (2026-11-05); nothing applied to `SPEC.md` or `DECISIONS.md` yet.**
 
 Status: **Accepted** = apply the fix as suggested · **Modified** = apply with the change noted · **Rejected** = no change · **Pending** = not yet decided.
 
@@ -19,12 +19,12 @@ Status: **Accepted** = apply the fix as suggested · **Modified** = apply with t
 | Chunk | Findings | Done |
 |---|---|---|
 | 0 | Q1–Q7 (R2, R1, R7, R10, S6, S9, S11) | ✅ |
-| 1 | Teaching behavior: R3, R4, R5, R6 | |
-| 2 | Engine and settings data: R8, R9, R11, S8 | |
-| 3 | Allowance and screen-flow edges: S1, S2, S3, S5 | |
-| 4 | Process and platform wording: S4, S7, S10, S12 | |
-| 5 | Tier 2: T1–T6 | |
-| 6 | Housekeeping: H1–H10 (batch) | |
+| 1 | Teaching behavior: R3, R4, R5, R6 | ✅ |
+| 2 | Engine and settings data: R8, R9, R11, S8 | ✅ |
+| 3 | Allowance and screen-flow edges: S1, S2, S3, S5 | ✅ |
+| 4 | Process and platform wording: S4, S7, S10, S12 | ✅ |
+| 5 | Tier 2: T1–T6 | ✅ |
+| 6 | Housekeeping: H1–H10 (batch) | ✅ |
 
 **Decisions**
 
@@ -37,6 +37,29 @@ Status: **Accepted** = apply the fix as suggested · **Modified** = apply with t
 | S6 / Q5 | Bigger reaction on first-try | Accepted (default) | Keep it. Record in DECISIONS as a deliberate, small exception to §1.1.7 (coins stay flat). |
 | S9 / Q6 | Playtest channel | Accepted (default) | Milestone builds reach the devices by the owner pushing to `main` (the real app). Before real use, the parent resets playtest progress once. |
 | S11 / Q7 | Tier 1 ≈ 10 h | Accepted (default) | ≈ 10 h is a guide; PLAN.md may exceed it. Reword §0, §14, CLAUDE.md and KICKOFF accordingly. |
+| R3 | S0 help path | Accepted | Worked and FollowMe play on the S3 tray shown under the lifted cloche; FollowMe ends with the child typing the number and pressing the bell. Pip's Help button stays at S0. Peek before the first serve counts as Help (`afterHint` if then correct); fix §3.2's "counts as assisted". The bell is disabled while the display is empty. |
+| R4 | Undo in remove mode | Accepted | In remove mode, tapping the bin (or, for missing-subtrahend forms, the taken-away row) returns the last removed item to the first empty cell. Edit §3.3. |
+| R5 | Doubles / near-doubles / bridge demos | Accepted | Doubles and near-doubles demos are described by the blue and orange groups on the canonical tray ("three blue, three orange: the same"), not "two equal rows". The `doubles` demo is built in M1. Bridge demo reworded as "the first orange items fill the ten". Edit the §5.5 demo table and §14 M1. |
+| R6 | CountTogether for missing amounts | Accepted | For missing-addend and missing-subtrahend forms, after the running count Pip counts the orange group (or the taken-away row) from one and ends on the answer ("one, two, three — three more"). Edit §5.5. |
+| R8 | Parent controls before the gate | Accepted | Until M3a, the `?debug` screen offers stage and operations per skill (so the M1/M2 playtests can use S0 and subtraction only). From M3a the gear opens the Skills list without a gate; M3b puts the gate in front of it. Edit §12 and §14 M1–M3b. |
+| R9 | Operations filter for A3/A4 | Accepted | A3 and A4 get the both / addition only / subtraction only setting. Every skill other than A1 targets its pool's own add/sub share of canonical facts for the ±1 balance rule. Edit D24's list (new decision), §4.1 steps 2 and 5. |
+| R11 | Resume rebuilds a different service | Accepted | The `resume` snapshot stores the planned order list (factKeys, foods, monsters, requeue state). §4.1's replay claim is narrowed to "same seed and same starting state → same service". Edit §4.1 step 1, §11.6. |
+| S8 | Scope of the known preset | Accepted | The preset covers only result forms (`a + b = ?`) that are +1 or doubles, in A1, A2 and A7. Missing-addend forms (e.g. `9 + ? = 10`) count as new. Edit §4.2. |
+| S1 | Time runs out outside a service | Accepted | Outside a service the café locks at once; on Results the tally finishes first, then the lock. In the Shop an open purchase confirm is cancelled (no coins spent). Edit §6.2. |
+| S2 | Grace-cap coins and time base | Modified | The problem cut off at the 90 s grace cap pays **no** coins (no `coin` and no `attempt` event); the monster still eats happily. The cap is 90 s of wall time. Edit §6.2 step 3, §9, §6.5. |
+| S3 | Close the café and the back guard | Accepted | Mid-service, *Close the café* writes a partial `serviceEnd` and goes to Home. On Home, Menu, Results and Shop the dialog only offers *Keep cooking* and dismisses. The back guard covers every child screen. Edit §2.3, §5.4, §5.8. |
+| S5 | Animation lock vs fast taps | Accepted | Placing and removing update the tray model immediately; item flights are visual only and never a lock. Locks apply only to eating, demos and PlateCount. Edit §2.3. |
+| S4 | M0 portrait tap test in M1 | Accepted | The M0 portrait tap e2e test stays green from M0 on; only CDP drag in rotated portrait and the full device matrix wait for M2. Edit §14 M1 and §13.5. |
+| S7 | Difficulty wording and coverage | Accepted | §4 "Difficulty" is reworded as "new-fact introduction order (D29)"; "openers" and "warm-ups" are deleted. When `ops` is both, new add and sub facts alternate. Orderings for A4–A6 are written in M5 and for B1–B2 in M8 (recorded in DECISIONS). |
+| S10 | Service length in §0 | Accepted | §0: "about 5–10 minutes (measured at the M2 playtest)". |
+| S12 | Storage API on iOS < 17 | Accepted | `persist()` and `estimate()` are feature-detected; the parent area says "not available on this device" when missing. M3a acceptance: "shown when available". Edit §11.3, §14 M3a. |
+| T1 | A5 forms where the ten is the unknown | Accepted | For `1n = ? + n` and `1n − 10 = ?` only, the ten is added or removed as one whole frame in a single step, so it always shows as a full frame. A5 pool stays 54. Edit §3.3, §5.5 teens demo. |
+| T2 | FollowMe past 10 steps | Accepted | When the answer is over 10, FollowMe places the first full frame as one step ("ten"), then the ones one by one. Edit §5.5. |
+| T3 | B-track layout | Accepted | M8 starts with a static layout mock for the owner's OK (like M1). Pack removal: the last pack on the shelf flies to the Box-of-10 bin. Edit §3.3, §14 M8. |
+| T4 | B4 compare | Accepted (defer) | B4 moves from P2 to the P3 backlog with the note "needs a response mechanic"; M9 becomes B3 only. Edit §1.2, §14 M9. |
+| T5 | Heatmap coverage | Accepted | The 0–10 addition/subtraction grids cover A1–A4; skills A5 and up show a per-skill fact list colored by box. Edit §12 Progress. |
+| T6 | Auto-refill and the device clock | Accepted | Add to §6.4 "Honest limits": with an auto-refill mode chosen, changing the device clock can refill early; "Parent only" (the default) is unaffected. |
+| H1–H10 | Housekeeping | Accepted (all) | Apply every §4 fix as written. Where an item left a choice, the fix applied is: **H2** the app's name is **Number Chef: Monster Café** (export `app` id `number-chef-monster-cafe`; SPEC, CLAUDE.md and KICKOFF titles change); **H7** `profileId` is a store column only, added to the event shape at M11 with a migration; **H9** the warm-up order belongs to M2, and its "shown once" flag uses the M0 `meta` store skeleton; **H10** big-text captions go to M10, and rename monsters stays in M7 (removed from the §12 Settings list until then). |
 
 ---
 
