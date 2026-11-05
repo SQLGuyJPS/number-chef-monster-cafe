@@ -244,32 +244,36 @@
   box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
   border: 4px solid #e2d8c3;
 }
-.model-bubble::before {
-  /* Tail toward the shrunken monster on the left. */
+.model-bubble::after {
+  /* Tail down toward the shrunken monster below the bubble's right end. */
   content: '';
   position: absolute;
-  left: -22px;
-  top: 150px;
-  border: 14px solid transparent;
-  border-right: 18px solid #e2d8c3;
+  right: 44px;
+  bottom: -18px;
+  width: 30px;
+  height: 30px;
+  background: var(--c-paper);
+  border-right: 4px solid #e2d8c3;
+  border-bottom: 4px solid #e2d8c3;
+  transform: rotate(45deg);
 }
 .bubble-line {
   position: absolute;
   left: 0;
   right: 0;
-  top: 14px;
+  top: 8px;
   text-align: center;
-  font-size: 34px;
+  font-size: 30px;
   font-weight: 700;
 }
 .bubble-count {
   position: absolute;
   left: 0;
   right: 0;
-  top: 176px;
+  top: 142px;
   text-align: center;
   white-space: nowrap;
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 700;
   color: var(--c-role-result);
 }
