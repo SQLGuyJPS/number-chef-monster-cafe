@@ -22,15 +22,18 @@ What the agent cannot verify here (CLAUDE.md, SPEC §13.6). Tick, and add notes.
 ## M0 — Foundations (no child needed)
 Owner action first: in the GitHub repo, Settings → Pages → Source = **GitHub Actions**, then push `main`. The workflow runs `npm run check` and deploys `dist/`. URL: `https://<user>.github.io/number-chef-monster-cafe/`.
 
-- [ ] The Pages URL loads (Splash: monster, "Tap to start").
-- [ ] **iPad:** Share → Add to Home Screen; the icon is the green monster; it launches standalone (no Safari bars).
-- [ ] **iPhone:** same; launches standalone; landscape fills the screen (notch side has no clipped buttons).
-- [ ] **Android:** Chrome menu → Install app; launches standalone and stays landscape.
-- [ ] Portrait (rotation lock on): the café shows sideways with a curved-arrow cue for ~6 s; turning the device makes it upright; buttons work both ways.
-- [ ] Pinch, double-tap and long-press do nothing (no zoom, no text selection, no callout menu).
-- [ ] Android back gesture / iOS edge swipe shows "Take a break?" instead of leaving; *Keep cooking* closes it.
-- [ ] Airplane mode after one visit: the installed app still opens.
-- [ ] `…/number-chef-monster-cafe/?debug` shows the version and "Storage idb" (Persisted / Usage may say "not available on this device" on older iOS; that's expected).
+- [x] The Pages URL loads (Splash: monster, "Tap to start").
+- [x] **iPad:** Share → Add to Home Screen; the icon is the green monster; it launches standalone (no Safari bars).
+- [x] **iPhone:** same; launches standalone; landscape fills the screen (notch side has no clipped buttons).
+- [x] **Android:** Chrome menu → Install app; launches standalone and stays landscape.
+- [x] Portrait (rotation lock on): the café shows sideways with a curved-arrow cue for ~6 s; turning the device makes it upright; buttons work both ways. (iPad, 2026-11-05)
+- [x] Pinch, double-tap and long-press do nothing (no zoom, no text selection, no callout menu).
+- [x] Android back gesture / iOS edge swipe shows "Take a break?" instead of leaving; *Keep cooking* closes it.
+- [x] Airplane mode after one visit: the installed app still opens.
+- [x] `…/number-chef-monster-cafe/?debug` shows the version and "Storage idb" (Persisted / Usage may say "not available on this device" on older iOS; that's expected).
 
 Notes:
+- 2026-11-05 (iPad): Splash → Home → Little Menu → Home all work; art and animation fine for M0.
+- In a Safari tab, landscape shows Safari's tab and address bars and noticeably shrinks the game. The installed Home Screen app has no bars and looks better. Decision: stay landscape and play from the Home Screen app (D8; installing is also what protects storage on iOS, SPEC §11.4).
+- Re-opening the installed app resumes where it was (iOS keeps it in memory); "Tap to start" appears only after a real quit. Expected (SPEC §2.3).
 
