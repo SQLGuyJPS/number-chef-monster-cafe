@@ -5,6 +5,7 @@ import '@fontsource/andika/latin-700.css';
 import './app/theme.css';
 import './app/global.css';
 import { App } from './app/App';
+import { Stage } from './app/Stage';
 import { DebugScreen } from './app/DebugScreen';
 import { parseFlags } from './app/flags';
 import { installTouchHardening } from './game/input/touchHardening';
@@ -31,6 +32,21 @@ if (flags.debug) {
   installAudioResume(window);
 }
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>{flags.debug ? <DebugScreen /> : <App allowRotate={flags.allowRotate} />}</StrictMode>,
-);
+const root = createRoot(document.getElementById('root')!);
+
+// The static M1 layout mock (D36) ships only in VITE_E2E builds (view it in dev with
+// `npx cross-env VITE_E2E=1 vite`); the condition is a build-time constant, so production drops it.
+if (import.meta.env.VITE_E2E === '1' && flags.mock !== null) {
+  const frame = flags.mock;
+  void import('./app/mock/LayoutMock').then(({ LayoutMock }) =>
+    root.render(
+      <Stage allowRotate={flags.allowRotate} background={<div className="cafe-backdrop" />}>
+        <LayoutMock frame={frame} />
+      </Stage>,
+    ),
+  );
+} else {
+  root.render(
+    <StrictMode>{flags.debug ? <DebugScreen /> : <App allowRotate={flags.allowRotate} />}</StrictMode>,
+  );
+}

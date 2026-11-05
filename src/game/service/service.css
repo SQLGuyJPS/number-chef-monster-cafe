@@ -1,0 +1,337 @@
+/* Service screen (SPEC §5.4). Geometry lives in src/app/metrics.ts (SERVICE); this file is look only. */
+
+.service .counter {
+  position: absolute;
+  left: -400px;
+  right: -400px;
+  top: 296px;
+  height: 250px;
+  background: linear-gradient(to bottom, #e3a86c 0 14px, #c98b55 14px 100%);
+  box-shadow: inset 0 -10px 0 rgba(0, 0, 0, 0.08);
+}
+
+.monster-slot,
+.svc-btn,
+.ticket,
+.queue,
+.model-bubble,
+.answer-display,
+.taken-away,
+.cloche-plate {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+/* ---- Ten-frame (SPEC §3.3) ---- */
+.ten-frame {
+  position: absolute;
+  box-sizing: border-box;
+  background: #fffdf6;
+  border-radius: 20px;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+}
+.ten-frame.mini {
+  border-radius: 8px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
+}
+.tf-cell {
+  position: absolute;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  border: 3px solid rgba(43, 43, 58, 0.12);
+}
+.tf-cell.tint-a {
+  background: var(--c-frame-a);
+}
+.tf-cell.tint-b {
+  background: var(--c-frame-b);
+}
+/* Group colour is a ring on the cell, so the five-wall tint stays visible under the food. */
+.tf-cell.role-prefill {
+  border: 5px solid var(--c-role-prefill);
+}
+.tf-cell.role-child {
+  border: 5px solid var(--c-role-child);
+}
+.tf-cell.role-result {
+  border: 5px solid var(--c-role-result);
+}
+.mini .tf-cell {
+  border-width: 2px;
+}
+.mini .tf-cell.filled {
+  border-width: 3px;
+}
+.tf-cell .food {
+  font-family: var(--font-emoji);
+  line-height: 1;
+}
+.tf-cell .pop {
+  position: absolute;
+  top: -0.55em;
+  right: -0.35em;
+  min-width: 1.4em;
+  height: 1.4em;
+  border-radius: 0.7em;
+  display: grid;
+  place-items: center;
+  background: var(--c-paper);
+  color: var(--c-ink);
+  font-weight: 700;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18);
+}
+.tf-cell.pulse {
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+/* ---- Ticket (SPEC §5.4) ---- */
+.ticket {
+  background: var(--c-paper);
+  border-radius: 10px 10px 0 0;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
+  padding: 16px 18px 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  /* Torn-receipt bottom edge. */
+  -webkit-mask: linear-gradient(#000 0 0) top / 100% calc(100% - 12px) no-repeat,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / 24px 12px
+      repeat-x;
+  mask: linear-gradient(#000 0 0) top / 100% calc(100% - 12px) no-repeat,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / 24px 12px
+      repeat-x;
+}
+.ticket-food {
+  font-family: var(--font-emoji);
+  font-size: 56px;
+  line-height: 1;
+}
+.ticket-sentence {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 68px;
+  font-weight: 700;
+  line-height: 1;
+}
+.tok-op {
+  color: var(--c-ink);
+}
+.tok-prefill {
+  color: var(--c-role-prefill);
+}
+.tok-child {
+  color: var(--c-role-child);
+}
+.tok-result {
+  color: var(--c-role-result);
+}
+.tok-blank {
+  display: inline-block;
+  width: 60px;
+  height: 76px;
+  border: 6px dashed currentColor;
+  border-radius: 12px;
+  box-sizing: border-box;
+}
+
+/* ---- Buttons in the service bands ---- */
+.svc-btn {
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius);
+}
+.bell {
+  border-radius: 50%;
+}
+.bell.pulse,
+.pip-hat.pulse {
+  animation: pulse 1.2s ease-in-out infinite;
+}
+.pip-hat {
+  background: rgba(255, 253, 246, 0.7);
+}
+.door-sign {
+  background: rgba(255, 253, 246, 0.6);
+  border-radius: 18px;
+}
+.bin {
+  overflow: hidden;
+}
+.bin-crate {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 0;
+  height: 74px;
+  border-radius: 14px 14px 18px 18px;
+  background: repeating-linear-gradient(to bottom, #b0773f 0 22px, #8a5a35 22px 26px);
+  box-shadow: inset 0 0 0 5px #6f4526;
+}
+.bin-heap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 6px;
+  display: flex;
+  justify-content: center;
+  font-family: var(--font-emoji);
+  font-size: 58px;
+  line-height: 1;
+}
+.bin-heap span {
+  margin: 0 -6px;
+}
+.bin-heap span:nth-child(odd) {
+  transform: translateY(14px) rotate(-12deg);
+}
+.bin-heap span:nth-child(even) {
+  transform: rotate(10deg);
+}
+.take-back {
+  background: var(--c-paper);
+  color: var(--c-role-child);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+  border: 5px solid var(--c-role-child);
+}
+.take-back .tb-food {
+  position: absolute;
+  top: 8px;
+  font-family: var(--font-emoji);
+  font-size: 44px;
+  line-height: 1;
+}
+.take-back .tb-arrow {
+  position: absolute;
+  bottom: 8px;
+  width: 60px;
+  height: 40px;
+}
+
+/* ---- Queue silhouettes ---- */
+.queue-mon {
+  position: absolute;
+  bottom: 0;
+  width: 84px;
+  height: 96px;
+}
+
+/* ---- Taken-away row (SPEC §3.3) ---- */
+.taken-away {
+  border-radius: 18px;
+  outline: 5px dashed var(--c-role-child);
+  outline-offset: 4px;
+}
+.taken-away .ten-frame {
+  background: rgba(255, 253, 246, 0.8);
+  box-shadow: none;
+}
+.taken-away .tf-cell {
+  background: transparent;
+  border-style: dashed;
+}
+.taken-away .tf-cell.filled {
+  background: var(--c-paper);
+  border-style: solid;
+}
+
+/* ---- CountTogether model bubble (SPEC §5.5) ---- */
+.model-bubble {
+  background: var(--c-paper);
+  border-radius: 28px;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
+  border: 4px solid #e2d8c3;
+}
+.model-bubble::before {
+  /* Tail toward the shrunken monster on the left. */
+  content: '';
+  position: absolute;
+  left: -22px;
+  top: 150px;
+  border: 14px solid transparent;
+  border-right: 18px solid #e2d8c3;
+}
+.bubble-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 14px;
+  text-align: center;
+  font-size: 34px;
+  font-weight: 700;
+}
+.bubble-count {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 176px;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--c-role-result);
+}
+
+/* ---- S0 number pad (D32, D48) ---- */
+.digit {
+  background: var(--c-paper);
+  font-size: 64px;
+  font-weight: 700;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+}
+.backspace,
+.peek {
+  background: var(--c-paper);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+  color: var(--c-ink-soft);
+}
+.peek {
+  padding: 10px;
+}
+.answer-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: #fff;
+  border: 6px solid var(--c-role-result);
+  border-radius: var(--radius);
+  font-size: 80px;
+  font-weight: 700;
+  color: var(--c-role-result);
+}
+.answer-display .caret {
+  width: 6px;
+  height: 64px;
+  background: var(--c-role-result);
+  opacity: 0.6;
+}
+.cloche-lid {
+  transform: rotate(-18deg);
+  padding: 8px;
+}
+.lid-badge {
+  position: absolute;
+  right: -6px;
+  bottom: -2px;
+  padding: 2px 10px;
+  border-radius: 14px;
+  background: var(--c-paper);
+  border: 3px solid var(--c-role-result);
+  color: var(--c-role-result);
+  font-size: 28px;
+  font-weight: 700;
+  transform: rotate(18deg);
+}
+.cloche-plate {
+  border-radius: 50%;
+  background: #d7dde6;
+  box-shadow: 0 4px 0 #8b95a5;
+}
+
+.mock-index {
+  padding: 40px;
+  font-size: 32px;
+}

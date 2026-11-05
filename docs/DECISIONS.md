@@ -303,6 +303,11 @@ What: (a) The e2e `overscroll-behavior` assertion is skipped where the engine do
 Why: each is a gap between the spec and what the tools can do on the owner's Windows machine, or wording the spec left open.
 How to revisit: (a) drop the guard if the cloud WebKit reports the property; (d) add subsets if localization is ever wanted.
 
+**D62. M1 layout mock geometry (service screen).**
+What: the service layout is one table, `SERVICE` in `src/app/metrics.ts`. (a) **S0 rows are 112 logical px tall**, not the ≈ 80 px D48 sketched: Peek, the answer display and backspace sit at y 292–404 and the digit row at y 414–526, so every S0 button stays ≥ 56 CSS px at 844×390 (60.7 measured). (b) **Take one back** sits right of the bin (x 650–774, bottom band), add mode only; remove mode has no such button (tapping the bin puts one back, D42). (c) **Taken-away row** is a 2 × 5 grid of 56-px dashed slots right of the centred `frames1` tray (x 916–1240), tapped as one target (175 × 75 CSS px at 844×390); the tray keeps its size and position. (d) **CountTogether** mini frames keep 36-px cells but use a 3 px gap and 4 px padding (200 px per frame), so the two-frame bubble is 432 px wide; it overlaps the monster zone by 32 px and the monster shrinks to its left (x 300–410). (e) Tray group colour is a 5 px ring on the cell, so the five-wall tint stays visible under the emoji. (f) **S0 cloche:** while it is lifted (Peek, Worked, FollowMe) the bin and take-one-back return to the bottom band and the lifted lid sits right of the tray with a "123" badge; tapping the lid lowers the cloche and brings the digits back. After Worked/FollowMe the digits return on their own (D41). (g) The mock is reachable at `?mock=<frame>` only in `VITE_E2E=1` builds (`npx cross-env VITE_E2E=1 vite` for dev); production builds drop it (build test).
+Why: D48's band heights could not hold 112-px buttons; §3.3/§5.4 left the slots and the Peek return path to the mock.
+How to revisit: owner's review of `docs/screens/M1/mock/`; geometry changes are edits to `SERVICE` only.
+
 <!-- New decisions go above this line, numbered one higher than the highest existing D<n>. -->
 
 ---

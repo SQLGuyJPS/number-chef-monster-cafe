@@ -72,6 +72,14 @@ describe('production build', () => {
     expect(leaks).toEqual([]);
   });
 
+  it('the M1 layout mock is not in a production build (D62g)', () => {
+    const leaks = files
+      .filter((f) => TEXT_EXT.test(f))
+      .filter((f) => readFileSync(f, 'utf8').includes('layout-mock'))
+      .map((f) => relative(out, f));
+    expect(leaks).toEqual([]);
+  });
+
   it('manifest is landscape standalone with relative start_url and scope', () => {
     const p = join(out, 'manifest.webmanifest');
     expect(existsSync(p)).toBe(true);
