@@ -1,0 +1,316 @@
+/* SPEC §2.3 touch hardening: no zoom, scroll, selection, callouts or pull-to-refresh. */
+html,
+body,
+#root {
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-family: var(--font-ui);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  touch-action: none;
+}
+
+/* ---- Stage (SPEC §2.2) ---- */
+.stage-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: top left;
+  overflow: hidden;
+  touch-action: none; /* play surface */
+}
+.stage-bleed {
+  position: absolute;
+  inset: 0;
+}
+.safe-box {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: top left;
+}
+.cafe-backdrop {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, var(--c-wall) 0 72%, var(--c-floor) 72% 100%);
+}
+
+.screen {
+  position: absolute;
+  inset: 0;
+}
+
+/* ---- Buttons ---- */
+.btn {
+  min-width: 112px;
+  min-height: 112px;
+  border-radius: var(--radius);
+  font-size: 44px;
+  font-weight: 700;
+  padding: 0 40px;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.18);
+}
+.btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18);
+}
+.btn-primary {
+  background: var(--c-primary);
+  color: var(--c-primary-ink);
+}
+.btn-secondary {
+  background: var(--c-secondary);
+  color: var(--c-secondary-ink);
+}
+
+/* ---- Splash ---- */
+.splash {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.splash-title {
+  font-size: 96px;
+  font-weight: 700;
+  line-height: 1;
+}
+.splash-sub {
+  font-size: 56px;
+  color: var(--c-ink-soft);
+}
+.splash-tap {
+  margin-top: 32px;
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--c-primary);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse {
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+/* ---- Home (SPEC §5.2) ---- */
+.cafe-sign {
+  position: absolute;
+  left: 340px;
+  top: 40px;
+  width: 600px;
+  text-align: center;
+  font-size: 72px;
+  font-weight: 700;
+  background: var(--c-paper);
+  border-radius: var(--radius);
+  padding: 8px 0;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
+}
+.coin-jar {
+  position: absolute;
+  left: 40px;
+  top: 40px;
+  height: 112px;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 28px;
+  border-radius: var(--radius);
+  background: var(--c-paper);
+  font-size: 56px;
+  font-weight: 700;
+}
+.coin-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--c-coin);
+  box-shadow: inset 0 -6px 0 rgba(0, 0, 0, 0.15);
+}
+.home-monster {
+  position: absolute;
+  left: 530px;
+  top: 190px;
+}
+.open-cafe {
+  position: absolute;
+  left: 390px;
+  top: 470px;
+  width: 500px;
+  height: 180px;
+  font-size: 60px;
+}
+.gear {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 44px;
+  height: 44px;
+  opacity: 0.3;
+  display: grid;
+  place-items: center;
+}
+
+/* ---- Menu (SPEC §5.3) ---- */
+.chalkboard {
+  position: absolute;
+  left: 140px;
+  top: 30px;
+  width: 1000px;
+  height: 480px;
+  border-radius: 28px;
+  background: var(--c-chalk);
+  color: var(--c-chalk-ink);
+  border: 16px solid #8a5a35;
+  box-sizing: border-box;
+  padding: 24px 40px;
+}
+.chalk-title {
+  font-size: 56px;
+  font-weight: 700;
+  text-align: center;
+}
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 24px;
+}
+.tile {
+  height: 260px;
+  border: 4px dashed rgba(244, 241, 232, 0.6);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  opacity: 0.7;
+}
+.tile-name {
+  font-size: 40px;
+  font-weight: 700;
+}
+.tile-sample {
+  font-size: 48px;
+}
+.menu-home {
+  position: absolute;
+  left: 40px;
+  bottom: 40px;
+  width: 240px;
+  height: 140px;
+}
+
+/* ---- Dialog (SPEC §5.4) ---- */
+.dialog-scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--c-scrim);
+  display: grid;
+  place-items: center;
+  z-index: 20;
+}
+.dialog {
+  background: var(--c-paper);
+  border-radius: 32px;
+  padding: 48px 64px;
+  text-align: center;
+}
+.dialog-title {
+  font-size: 64px;
+  font-weight: 700;
+  margin-bottom: 32px;
+}
+.dialog-buttons {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+}
+.dialog-btn {
+  min-width: 320px;
+  min-height: 160px;
+}
+
+/* ---- Turn cue (SPEC §2.2) ---- */
+.turn-cue {
+  position: absolute;
+  right: 40px;
+  top: 140px;
+  color: var(--c-primary);
+  pointer-events: none;
+  animation: turn-hint 1.5s ease-in-out infinite;
+  z-index: 10;
+}
+@keyframes turn-hint {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-25deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-tap,
+  .turn-cue {
+    animation: none;
+  }
+  .btn:active {
+    transform: none;
+  }
+}
+
+/* ---- Debug screen (not part of the play surface) ---- */
+html.debug-mode,
+html.debug-mode body,
+html.debug-mode #root {
+  position: static;
+  height: auto;
+  overflow: auto;
+  user-select: text;
+  -webkit-user-select: text;
+  touch-action: auto;
+}
+.debug {
+  padding: 16px;
+  font-size: 16px;
+}
+.debug th {
+  text-align: left;
+  padding-right: 16px;
+  vertical-align: top;
+}
+.debug td {
+  word-break: break-all;
+}

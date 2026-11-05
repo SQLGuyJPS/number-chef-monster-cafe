@@ -1,0 +1,28 @@
+/* Palette (CLAUDE.md: CSS custom properties). Role colours follow the tray, not operand position (D30f). */
+:root {
+  --c-bg: #fff4dc;
+  --c-wall: #ffe2a8;
+  --c-floor: #e9b77a;
+  --c-ink: #2b2b3a;
+  --c-ink-soft: #5b5b70;
+  --c-paper: #fffdf6;
+  --c-primary: #ff8a3d;
+  --c-primary-ink: #ffffff;
+  --c-secondary: #4aa3df;
+  --c-secondary-ink: #ffffff;
+  --c-chalk: #2f4a3a;
+  --c-chalk-ink: #f4f1e8;
+  --c-coin: #f6c445;
+  --c-scrim: rgba(43, 43, 58, 0.45);
+
+  /* Ten-frame "five wall" tints and tray role colours (SPEC §3.3, §5.4). */
+  --c-frame-a: #fff0c9;
+  --c-frame-b: #ffe0e6;
+  --c-role-prefill: #2f7fd8;
+  --c-role-child: #ff8a3d;
+  --c-role-result: #2fa35a;
+
+  --font-ui: 'Andika', system-ui, sans-serif;
+  --font-emoji: 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif;
+  --radius: 24px;
+}

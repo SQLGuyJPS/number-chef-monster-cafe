@@ -1,0 +1,7 @@
+dist
+dist-e2e
+docs
+public
+package-lock.json
+test-results
+playwright-report

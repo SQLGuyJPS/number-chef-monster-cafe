@@ -239,6 +239,70 @@ What: (a) A5 `1n = ? + n` and `1n − 10 = ?`: the ten is added or removed as on
 Why: each closes a contradiction or a gap found in the second review.
 How to revisit: each item is a spec line; supersede with a new decision.
 
+**Round 9: PLAN.md §2 resolutions, approved by the owner with the plan on 2026-11-05 (D48–D59), and assumptions made while building (D60+).**
+
+**D48. S0 number pad lives in the tray band.**
+What: at S0 the ten-digit row sits in the tray band (y ≈ 400–512) with the answer display, backspace and Peek above it (y ≈ 310–390); the bottom band keeps Pip's hat and the bell. When Peek, Worked or FollowMe lifts the cloche, the full S3 tray takes the tray band and the digit row returns for the final typing (D41). The M1 layout mock gets an S0 frame.
+Why: ten 112-px buttons with gaps need ≈ 1192 px, but Pip's hat and the bell leave ≈ 1000 px in the bottom band (§5.4 vs §2.2).
+How to revisit: M1 layout mock; PLAYTEST at M1.
+
+**D49. Playwright pinned to exactly 1.63.0; WebKit installed by the cloud setup script.**
+What: `@playwright/test` is pinned to 1.63.0 so it finds the browsers the cloud environment pre-installs (`npx -y playwright@1.63.0 install --with-deps webkit` next to Chromium). Chromium and WebKit projects both run; the owner's Windows machine is the fallback. A session without WebKit reports it rather than skipping silently.
+Why: only Chromium was pre-installed in the cloud container.
+How to revisit: bumping Playwright means changing the setup-script line too.
+
+**D50. `factKey` scheme for missing-amount forms.**
+What: `skill:form:operands`. Addition result keys sort operands (`A2:+:3,5`); `a+?=c` and `?+a=c` share `A4:?add:a,c` (commuted partners share a box, §4.1 step 4); `10−a=?` is `A3:-:10,a` and `10−?=a` is `A3:?sub:10,a` (separate keys). Consequence: A3's canonical add/sub share is 9 : 18, so with `ops = both` its balance target is about one third addition (D43b).
+Why: §3.1 gives examples but no rule; `factKey` is a persisted identifier (§11.2).
+How to revisit: a change needs a migration.
+
+**D51. Coins stay in memory until M3a.**
+What: M2 keeps the jar in memory (a reload resets it); M3a starts writing the frozen `coin` events. The M2 warm-up "shown once" flag already uses the `meta` store (D47i).
+Why: persistence is M3a's job; writing coin events before the event log exists would need a second migration path.
+How to revisit: PLAYTEST for M2 says so.
+
+**D52. The `?debug` stage/operations picker stores its values in the `settings` store under `debugSkillConfig`.**
+What: survives reloads during M1–M2 playtests; M3a ignores and deletes the key once `skillConfig` events exist.
+Why: the picker needs somewhere per device to live before the event log exists.
+How to revisit: n/a after M3a.
+
+**D53. The Home gear is inert before M3a.**
+What: in M2 the gear renders but its long-press has no target; stage changes go through `?debug`.
+Why: §5.2 gives the gear a target only from M3a.
+
+**D54. The waiting service worker activates on cold launch or after 30 s of Home idle.**
+What: a waiting worker is activated (with reload) while the Splash is still showing (cold launch), or after Home has had no input for 30 s. Never on any other screen.
+Why: §2 and §15 say "on Home when idle" with no threshold.
+How to revisit: one constant in `src/app/pwa.ts`.
+
+**D55. Results tally counts by ones to ten, then by fives, ending on the exact total.**
+What: "…fifteen, twenty, twenty-three!".
+Why: §5.7 did not say where the count ends.
+
+**D56. Tap-to-skip is exempt from the eat animation lock.**
+What: the OPEN_ITEMS #9 default; every other tap is still ignored while the lock is held.
+
+**D57. Tier 1 renders only `frames1`; `frames2` is supported in the model from M1.**
+What: A1–A3 never exceed 10. The tray model, `toTrayTask` and `check` support `frames2` from M1 (tested), and the M1 mock shows the two-frame layout.
+
+**D58. The service worker is registered from app code (`injectRegister: null`, `virtual:pwa-register`).**
+Why: `vite-plugin-pwa`'s default inline registration script would be blocked by the `default-src 'self'` CSP.
+
+**D59. Dev-only dependencies beyond SPEC §2.**
+What: `tsx` (runs the TS scripts cross-platform), `cross-env`, `@vitejs/plugin-react`, `typescript-eslint`, `@eslint/js`, `globals`, `eslint-plugin-react-hooks`, `eslint-config-prettier`, `fake-indexeddb` (IDB unit tests), `workbox-window` (peer of `vite-plugin-pwa`'s register module, bundled), `@types/react*`, `@types/node`. Icons are rasterized with the Playwright Chromium already needed for e2e (no `sharp`). No runtime dependencies beyond §2.
+Why: the spec implies this tooling without listing it; CLAUDE.md asks for one entry.
+How to revisit: remove any that a later milestone stops using.
+
+**D60. Toolchain versions (M0).**
+What: Vite 8, Vitest 5, React 18.3 (spec), ESLint 9 (flat config), TypeScript **6.0** rather than 7.x, all pinned exactly in `package.json`.
+Why: `typescript-eslint` supports TypeScript `< 6.1`; ESLint 10 is new and `eslint-plugin-react-hooks` is fine with 9. Exact pins keep the owner's Windows machine, CI and the cloud session on the same toolchain.
+How to revisit: bump together once `typescript-eslint` supports TS 7.
+
+**D61. M0 test and tooling assumptions.**
+What: (a) The e2e `overscroll-behavior` assertion is skipped where the engine does not support the property: Playwright's Windows WebKit port reports none (Safari 16+ supports it; the CSS is in place either way). (b) The iPhone projects use 844×390 / 390×844 (standalone size, SPEC §2.2) instead of Playwright's Safari-tab 750×342 descriptor. (c) `lint:content` and `content:table` exist from M0 as stubs that print "no content yet", so `npm run check` has its final shape; the real checks land in M1/M2. (d) Fonts ship Andika's Latin subsets only (400 and 700); the app is US-English (SPEC §16). (e) Milestone screenshots come from `tests/e2e/screens.spec.ts`, run with `NCMC_SCREENS=M<n>` (skipped otherwise). (f) The turn cue sits at the stage's right edge for its 6 s; it ignores taps.
+Why: each is a gap between the spec and what the tools can do on the owner's Windows machine, or wording the spec left open.
+How to revisit: (a) drop the guard if the cloud WebKit reports the property; (d) add subsets if localization is ever wanted.
+
 <!-- New decisions go above this line, numbered one higher than the highest existing D<n>. -->
 
 ---

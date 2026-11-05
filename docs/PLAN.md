@@ -1,6 +1,6 @@
 # Build plan — Number Chef: Monster Café
 
-Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions). M0 has not started. Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
+Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05**, waiting for the owner's M0 checks. Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
 
 ---
 
@@ -99,15 +99,15 @@ Order inside each milestone is the order I will work in. Every milestone ends wi
 13. PLAYTEST.md created (M0 owner checks: Pages URL installs and launches standalone on iPad, iPhone, Android); screenshots; commit.
 
 **Accept (SPEC §14 M0)**
-- [ ] `npm run check` green
-- [ ] offline reload works
-- [ ] no zoom / scroll / long-press menu
-- [ ] portrait: stage renders rotated and a tap on a rotated control hits the right target (e2e, portrait viewports)
-- [ ] rotating back removes the transform with no state loss
-- [ ] back gesture / edge-swipe does not leave the game (e2e: `popstate` shows the break dialog)
-- [ ] zero external requests
-- [ ] version shown on the `?debug` screen (production builds too, not reachable from child UI)
-- [ ] ESLint blocks `localStorage.clear`
+- [x] `npm run check` green
+- [x] offline reload works
+- [x] no zoom / scroll / long-press menu
+- [x] portrait: stage renders rotated and a tap on a rotated control hits the right target (e2e, portrait viewports)
+- [x] rotating back removes the transform with no state loss
+- [x] back gesture / edge-swipe does not leave the game (e2e: `popstate` shows the break dialog)
+- [x] zero external requests
+- [x] version shown on the `?debug` screen (production builds too, not reachable from child UI)
+- [x] ESLint blocks `localStorage.clear`
 - [ ] Owner check (PLAYTEST, not agent acceptance): installs to Home Screen on iPad/iPhone/Android and launches standalone
 
 ### M1 — Core loop vertical slice (5.0 h)
