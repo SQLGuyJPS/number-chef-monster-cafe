@@ -1,7 +1,9 @@
 import type { CSSProperties, ReactNode } from 'react';
+import { TapButton } from '../input/TapButton';
 import { FOODS, type FoodId } from '../../engine/foods';
 import type { Rect } from '../../app/metrics';
-import type { ItemRole } from '../tray/TenFrame';
+import { TenFrame, type CellView, type ItemRole } from '../tray/TenFrame';
+import { MINI_CELL, MINI_FRAME, MINI_GAP, MINI_PAD } from '../../app/metrics';
 
 export const at = (r: Rect): CSSProperties => ({ left: r.x, top: r.y, width: r.w, height: r.h });
 
@@ -13,9 +15,9 @@ export interface TicketToken {
 }
 
 /** Paper receipt (SPEC §5.4): tokens coloured by their role on the tray, not by position (D30). */
-export function Ticket({ rect, tokens, food }: { rect: Rect; tokens: TicketToken[]; food: FoodId }) {
+export function Ticket({ rect, tokens, food, onTap }: { rect: Rect; tokens: TicketToken[]; food: FoodId; onTap?: () => void }) {
   return (
-    <div className="ticket" style={at(rect)} data-testid="ticket">
+    <TapButton className="ticket" style={at(rect)} testId="ticket" label="Hear the order" onTap={onTap ?? (() => undefined)}>
       <div className="ticket-food">{FOODS[food].glyph}</div>
       <div className="ticket-sentence">
         {tokens.map((t, i) => (
@@ -31,31 +33,47 @@ export function Ticket({ rect, tokens, food }: { rect: Rect; tokens: TicketToken
           </span>
         ))}
       </div>
-    </div>
+    </TapButton>
   );
 }
 
-function Btn({
-  rect,
-  className,
-  children,
-  testId,
-}: {
+interface BtnProps {
   rect: Rect;
   className: string;
-  children: ReactNode;
+  children?: ReactNode;
   testId?: string;
-}) {
+  onTap?: () => void;
+  label?: string;
+  /** Rendered and tappable, but looks idle (the bell before anything is built wobbles instead). */
+  dim?: boolean;
+  pulsing?: boolean;
+  /** Bumped to replay a one-shot wobble. */
+  wobble?: number;
+}
+
+function Btn({ rect, className, children, testId, onTap, label, dim, pulsing, wobble }: BtnProps) {
+  const cls = ['svc-btn', className, dim ? 'dim' : '', pulsing ? 'pulse' : '', wobble ? `wobble-${wobble % 2}` : '']
+    .filter(Boolean)
+    .join(' ');
   return (
-    <div className={`svc-btn ${className}`} style={at(rect)} data-tap="button" data-testid={testId}>
+    <TapButton
+      className={cls}
+      style={at(rect)}
+      tapKind="button"
+      testId={testId}
+      label={label}
+      onTap={onTap ?? (() => undefined)}
+    >
       {children}
-    </div>
+    </TapButton>
   );
 }
 
-export function Bell({ rect, pulsing }: { rect: Rect; pulsing?: boolean }) {
+export type PartProps = Omit<BtnProps, 'className' | 'children' | 'testId'>;
+
+export function Bell(props: PartProps) {
   return (
-    <Btn rect={rect} className={`bell ${pulsing ? 'pulse' : ''}`} testId="bell">
+    <Btn {...props} className="bell" testId="bell" label="Serve">
       <svg viewBox="0 0 100 100" width="100%" height="100%" aria-hidden="true">
         <ellipse cx="50" cy="86" rx="44" ry="9" fill="#8a5a35" />
         <path d="M14 80 Q14 34 50 30 Q86 34 86 80 Z" fill="#f6c445" stroke="#b88a16" strokeWidth="3" />
@@ -68,10 +86,12 @@ export function Bell({ rect, pulsing }: { rect: Rect; pulsing?: boolean }) {
 }
 
 /** The bin never empties (SPEC §3.3): a crate with a heap of the ordered food. */
-export function Bin({ rect, food }: { rect: Rect; food: FoodId }) {
+export function Bin({ rect, food, handlers, pulsing, wobble }: { rect: Rect; food: FoodId; handlers: Record<string, unknown>; pulsing?: boolean; wobble?: number }) {
   const g = FOODS[food].glyph;
+  // Tap or drag (SPEC §3.3), so not a TapButton: handlers come from dragTapHandlers.
+  const cls = ['svc-btn', 'bin', pulsing ? 'pulse' : '', wobble ? `wobble-${wobble % 2}` : ''].join(' ');
   return (
-    <Btn rect={rect} className="bin" testId="bin">
+    <div className={cls} style={at(rect)} data-tap="button" data-testid="bin" aria-label="Food bin" {...handlers}>
       <div className="bin-heap">
         <span>{g}</span>
         <span>{g}</span>
@@ -80,14 +100,14 @@ export function Bin({ rect, food }: { rect: Rect; food: FoodId }) {
         <span>{g}</span>
       </div>
       <div className="bin-crate" />
-    </Btn>
+    </div>
   );
 }
 
 /** "Take one back" (SPEC §3.3, add mode): removes the last filled unlocked cell. */
-export function TakeBack({ rect, food }: { rect: Rect; food: FoodId }) {
+export function TakeBack({ food, ...props }: PartProps & { food: FoodId }) {
   return (
-    <Btn rect={rect} className="take-back" testId="take-back">
+    <Btn {...props} className="take-back" testId="take-back" label="Take one back">
       <span className="tb-food">{FOODS[food].glyph}</span>
       <svg className="tb-arrow" viewBox="0 0 60 40" aria-hidden="true">
         <path
@@ -104,9 +124,9 @@ export function TakeBack({ rect, food }: { rect: Rect; food: FoodId }) {
 }
 
 /** Pip's hat = Help (SPEC §7.3). */
-export function PipHat({ rect, pulsing }: { rect: Rect; pulsing?: boolean }) {
+export function PipHat(props: PartProps) {
   return (
-    <Btn rect={rect} className={`pip-hat ${pulsing ? 'pulse' : ''}`} testId="help">
+    <Btn {...props} className="pip-hat" testId="help" label="Help">
       <svg viewBox="0 0 120 110" width="100%" height="100%" aria-hidden="true">
         <path
           d="M30 52 Q10 50 14 32 Q18 14 38 20 Q44 4 60 6 Q78 4 82 20 Q102 14 106 32 Q110 50 90 52 L88 64 L32 64 Z"
@@ -127,9 +147,9 @@ export function PipHat({ rect, pulsing }: { rect: Rect; pulsing?: boolean }) {
 }
 
 /** Door sign (leave, SPEC §5.4): small, top-left, never animates (SPEC §6.2 step 9). */
-export function DoorSign({ rect }: { rect: Rect }) {
+export function DoorSign(props: PartProps) {
   return (
-    <Btn rect={rect} className="door-sign" testId="door">
+    <Btn {...props} className="door-sign" testId="door" label="Take a break">
       <svg viewBox="0 0 100 100" width="100%" height="100%" aria-hidden="true">
         <rect x="22" y="12" width="56" height="80" rx="6" fill="#8a5a35" />
         <rect x="30" y="20" width="40" height="64" rx="4" fill="#a8744a" />
@@ -159,9 +179,9 @@ export function Queue({ rect, count }: { rect: Rect; count: number }) {
   );
 }
 
-export function DigitButton({ rect, digit }: { rect: Rect; digit: number }) {
+export function DigitButton({ digit, ...props }: PartProps & { digit: number }) {
   return (
-    <Btn rect={rect} className="digit" testId={`digit-${digit}`}>
+    <Btn {...props} className="digit" testId={`digit-${digit}`} label={String(digit)}>
       {digit}
     </Btn>
   );
@@ -171,15 +191,15 @@ export function DigitButton({ rect, digit }: { rect: Rect; digit: number }) {
 export function AnswerDisplay({ rect, value }: { rect: Rect; value: string }) {
   return (
     <div className="answer-display" style={at(rect)} data-testid="answer-display">
-      <span>{value}</span>
-      <span className="caret" />
+      <span data-testid="answer-value">{value}</span>
+      {value.length < 2 && <span className="caret" />}
     </div>
   );
 }
 
-export function Backspace({ rect }: { rect: Rect }) {
+export function Backspace(props: PartProps) {
   return (
-    <Btn rect={rect} className="backspace" testId="backspace">
+    <Btn {...props} className="backspace" testId="backspace" label="Rub out">
       <svg viewBox="0 0 100 70" width="70%" aria-hidden="true">
         <path d="M30 6 L92 6 L92 64 L30 64 L6 35 Z" fill="none" stroke="currentColor" strokeWidth="7" strokeLinejoin="round" />
         <path d="M46 22 L72 48 M72 22 L46 48" stroke="currentColor" strokeWidth="7" strokeLinecap="round" />
@@ -200,20 +220,59 @@ function ClocheSvg() {
 }
 
 /** Peek (SPEC §5.4): lifts the cloche to show the S3 model; counts as Help (D41). */
-export function PeekButton({ rect }: { rect: Rect }) {
+export function PeekButton(props: PartProps) {
   return (
-    <Btn rect={rect} className="peek" testId="peek">
+    <Btn {...props} className="peek" testId="peek" label="Peek">
       <ClocheSvg />
     </Btn>
   );
 }
 
 /** The lifted lid; tapping it lowers the cloche and brings the digit row back (D62). */
-export function ClocheLid({ rect }: { rect: Rect }) {
+export function ClocheLid(props: PartProps) {
   return (
-    <Btn rect={rect} className="cloche-lid" testId="cloche-lid">
+    <Btn {...props} className="cloche-lid" testId="cloche-lid" label="Close the lid">
       <ClocheSvg />
       <span className="lid-badge">123</span>
     </Btn>
+  );
+}
+
+/** Caption bubble (SPEC §8.1: captions always on). ≤ 8 words by lint (SPEC §13.2). */
+export function Caption({ rect, text }: { rect: Rect; text: string }) {
+  if (!text) return null;
+  return (
+    <div className="caption" style={at(rect)} data-testid="caption" aria-live="polite">
+      {text}
+    </div>
+  );
+}
+
+/**
+ * CountTogether model bubble (SPEC §5.5): non-interactive mini frames, blue then orange, with a
+ * running count. One width for one or two frames so the line never wraps (D63e).
+ */
+export function ModelBubble({ rect, frames, caption }: { rect: Rect; frames: CellView[][]; caption: string }) {
+  const innerW = frames.length * MINI_FRAME.w + (frames.length - 1) * 12;
+  const left = Math.round((rect.w - innerW) / 2);
+  return (
+    <div className="model-bubble" style={at(rect)} data-testid="model-bubble">
+      <div className="bubble-line">Let&apos;s count together!</div>
+      {frames.map((cells, i) => (
+        <TenFrame
+          key={i}
+          cells={cells}
+          cell={MINI_CELL}
+          gap={MINI_GAP}
+          pad={MINI_PAD}
+          x={left + i * (MINI_FRAME.w + 12)}
+          y={58}
+          className="mini"
+        />
+      ))}
+      <div className="bubble-count" data-testid="bubble-count">
+        {caption}
+      </div>
+    </div>
   );
 }

@@ -1,24 +1,54 @@
 import { TapButton } from '../../game/input/TapButton';
+import { isBuilt } from '../../engine/generators';
+import type { SkillId } from '../../engine/types';
+import { configFor, type SkillConfigs } from '../skillConfig';
 
-const PLACEHOLDER_TILES = [
-  { id: 'A1', name: 'Little Bites', sample: '3 + 2' },
-  { id: 'A2', name: 'Big Bites', sample: '4 + 5' },
-  { id: 'A3', name: 'Perfect Ten', sample: '7 + ? = 10' },
+interface Tile {
+  id: SkillId;
+  name: string;
+  /** Sample sentence per allowed operations (SPEC §5.3). */
+  add: string;
+  sub: string;
+}
+
+const LITTLE_MENU: Tile[] = [
+  { id: 'A1', name: 'Little Bites', add: '3 + 2', sub: '5 − 2' },
+  { id: 'A2', name: 'Big Bites', add: '4 + 5', sub: '9 − 3' },
+  { id: 'A3', name: 'Perfect Ten', add: '7 + ? = 10', sub: '10 − 4' },
 ];
 
-/** SPEC §5.3. M0 placeholder: tiles render but start nothing until M1/M2. */
-export function Menu({ onHome }: { onHome: () => void }) {
+/** SPEC §5.3. M1: A1 and A2 start a service; A3 arrives in M2 and stays inert until then. */
+export function Menu({
+  onHome,
+  onPick,
+  configs,
+}: {
+  onHome: () => void;
+  onPick: (skill: SkillId) => void;
+  configs: SkillConfigs;
+}) {
   return (
     <div className="screen menu" data-testid="screen-menu">
       <div className="chalkboard">
         <div className="chalk-title">Little Menu</div>
         <div className="tiles">
-          {PLACEHOLDER_TILES.map((t) => (
-            <div key={t.id} className="tile" data-testid={`tile-${t.id}`}>
-              <span className="tile-name">{t.name}</span>
-              <span className="tile-sample">{t.sample}</span>
-            </div>
-          ))}
+          {LITTLE_MENU.map((t) => {
+            const built = isBuilt(t.id);
+            const sample = configFor(configs, t.id).ops === 'sub' ? t.sub : t.add;
+            return (
+              <TapButton
+                key={t.id}
+                className={`tile ${built ? '' : 'tile-soon'} ${t.id === 'A1' ? 'tile-glow' : ''}`}
+                testId={`tile-${t.id}`}
+                tapKind="button"
+                inert={!built}
+                onTap={() => onPick(t.id)}
+              >
+                <span className="tile-name">{t.name}</span>
+                <span className="tile-sample">{sample}</span>
+              </TapButton>
+            );
+          })}
         </div>
       </div>
       <TapButton className="btn btn-secondary menu-home" testId="menu-home" onTap={onHome}>

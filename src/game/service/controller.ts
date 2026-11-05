@@ -1,0 +1,571 @@
+// Service controller (SPEC §3.4, §5.4–5.6). All teaching decisions come from the engine; this
+// class only sequences them in time, keeps the view model and talks to speech/SFX through injected
+// deps. Scripted parts (PlateCount, CountTogether, Worked, eating) await speech that always
+// resolves (SPEC §8.1), so nothing here can hang on a missing `end` event.
+import { initialAttempt, plateCountLine, stepAttempt, trayEditable, type AttemptState, type Outcome } from '../../engine/attempt';
+import { BELL_GUARD_MS, COINS_PER_PROBLEM, HAT_PULSE_IDLE_MS, TICKET_REPEAT_IDLE_MS } from '../../engine/config';
+import { countTogetherTicks, type ModelCell } from '../../engine/countTogether';
+import { buildDemo, followMeCue, type FollowMeCue } from '../../engine/demos';
+import { attemptEvent, coinEvent, type FrozenEvt } from '../../engine/events';
+import { numberToWords } from '../../engine/numberWords';
+import { phrase, type PhraseKey, type PhraseParams } from '../../engine/phrases';
+import type { Order } from '../../engine/plan';
+import {
+  check,
+  isStartState,
+  removeLast,
+  removedCount,
+  startState,
+  tapBin,
+  tapItem,
+  tapTakenAway,
+  toTrayTask,
+  type TrayEffect,
+  type TrayResult,
+  type TrayState,
+} from '../../engine/tray';
+import type { TrayTask } from '../../engine/types';
+
+/** S0 cloche (D41, D62): down = number pad; peek = the child lifted it; model = Worked/FollowMe. */
+export type Cloche = 'down' | 'peek' | 'model';
+export type Mood = 'arrive' | 'idle' | 'puzzled' | 'delight' | 'leave';
+
+export interface Flight {
+  id: number;
+  from: number; // tray cell index
+  to: 'bin' | 'taken';
+}
+
+interface State {
+  index: number;
+  tray: TrayState;
+  attempt: AttemptState;
+  /** Worked + FollowMe use the S3 tray at every stage (D71). */
+  demoTray: boolean;
+  typed: string;
+  cloche: Cloche;
+  /** S0 FollowMe: the cloche tray is complete; the digits are back for typing (D41). */
+  s0Typing: boolean;
+  glow: number[];
+  caption: string;
+  bubble: ModelCell[] | null;
+  bubbleCount: string;
+  counting: boolean;
+  mood: Mood;
+  fx: { index: number; kind: 'hop' | 'shake' | 'in'; nonce: number } | null;
+  binWobble: number;
+  bellWobble: number;
+  flights: Flight[];
+  hatPulse: boolean;
+  drag: { x: number; y: number } | null;
+  finished: boolean;
+}
+
+/** What the screen renders: the state plus everything derived from the engine. */
+export interface ServiceView extends State {
+  order: Order;
+  task: TrayTask;
+  padMode: boolean;
+  cue: FollowMeCue | null;
+  canServe: boolean;
+  editable: boolean;
+  /** S0 FollowMe typing: the number to enter, for the digit pulse. */
+  correctTyped: string | null;
+  removed: number;
+}
+
+export interface ServiceDeps {
+  speak(text: string): Promise<void>;
+  /** Latest-wins counting voice (SPEC §3.3). */
+  countAloud(text: string): void;
+  hush(): void;
+  sfx: { place(n: number): void; remove(): void; bell(): void; correct(): void; hm(): void; wobble(): void };
+  /** Monotonic ms. */
+  now(): number;
+  /** Epoch ms for event timestamps. */
+  wall(): number;
+  newId(): string;
+  /** Scales scripted waits (1 in normal builds; e2e fast-forward). */
+  timeScale(): number;
+  setTimeout(f: () => void, ms: number): number;
+  clearTimeout(id: number): void;
+}
+
+export interface ServiceOptions {
+  orders: Order[];
+  svc: string;
+  dev: string;
+  onDone: () => void;
+}
+
+const say = (key: PhraseKey, params: PhraseParams = {}) => phrase(key, params);
+
+/** The spoken order: result forms get the café wrapping with the food (SPEC §4). */
+export function ticketLine(o: Order): string {
+  const p = o.problem;
+  const [a, b] = p.operands;
+  if (p.form === 'add') return say('order.add', { a: a!, b: b!, food: o.food });
+  if (p.form === 'sub') return say('order.sub', { a: a!, b: b!, food: o.food });
+  return p.spoken;
+}
+
+export class ServiceController {
+  private s: State;
+  private snap: ServiceView;
+  private listeners = new Set<() => void>();
+  private script = 0; // bumped to cancel the running script
+  private lastBell = -Infinity;
+  private lastInput: number;
+  private ticketRepeated = false;
+  private orderStarted: number;
+  private skipEat: (() => void) | null = null;
+  private nonce = 0;
+  private flightId = 0;
+  private idleTimer: number | null = null;
+  private disposed = false;
+  readonly events: FrozenEvt[] = [];
+
+  constructor(
+    private readonly opts: ServiceOptions,
+    private readonly d: ServiceDeps,
+  ) {
+    this.lastInput = d.now();
+    this.orderStarted = d.now();
+    this.s = this.fresh(0);
+    this.snap = this.derive();
+  }
+
+  // ---------- store ----------
+  subscribe = (f: () => void): (() => void) => {
+    this.listeners.add(f);
+    return () => this.listeners.delete(f);
+  };
+  getView = (): ServiceView => this.snap;
+
+  private set(patch: Partial<State> | ((s: State) => Partial<State>)): void {
+    const p = typeof patch === 'function' ? patch(this.s) : patch;
+    this.s = { ...this.s, ...p };
+    this.maybeStartS0Typing();
+    this.snap = this.derive();
+    this.listeners.forEach((f) => f());
+  }
+
+  private wait(ms: number): Promise<void> {
+    return new Promise((r) => this.d.setTimeout(r, ms * this.d.timeScale()));
+  }
+
+  // ---------- derived ----------
+  private get order(): Order {
+    return this.opts.orders[this.s.index]!;
+  }
+  private get stage() {
+    return this.order.stage;
+  }
+  /** The tray shown: S1 builds the unknown; otherwise (and for every demo) the S3 tray (D71). */
+  private trayTask(s: State = this.s): TrayTask {
+    const o = this.opts.orders[s.index]!;
+    return toTrayTask(o.problem, o.stage === 1 && !s.demoTray ? 1 : o.stage === 0 ? 3 : o.stage);
+  }
+  private entryTask(): TrayTask {
+    return toTrayTask(this.order.problem, this.stage);
+  }
+  private cueOf(s: State): FollowMeCue | null {
+    return s.attempt.phase === 'followMe' && !s.s0Typing ? followMeCue(s.tray, this.trayTask(s).expected.cells) : null;
+  }
+  private correctNow(s: State): boolean {
+    if (this.stage === 0 && (s.cloche === 'down' || s.s0Typing)) {
+      return check(this.entryTask(), { filled: s.tray.filled, typed: s.typed === '' ? null : Number(s.typed) });
+    }
+    return check(this.trayTask(s), s.tray);
+  }
+  private canServe(s: State): boolean {
+    const ph = s.attempt.phase;
+    if (s.counting) return false;
+    if (ph !== 'building' && ph !== 'countTogether' && ph !== 'followMe') return false;
+    // FollowMe: the bell lights only once the tray (or, at S0, the typed number) is right.
+    if (ph === 'followMe') return this.stage === 0 ? s.s0Typing && this.correctNow(s) : this.correctNow(s);
+    if (this.stage === 0) return s.cloche === 'down' && s.typed !== ''; // D41: disabled while empty
+    return !isStartState(s.tray); // SPEC §3.3 anti-mash
+  }
+  private editable(s: State): boolean {
+    if (!trayEditable(s.attempt.phase)) return false;
+    if (this.stage === 0 && s.cloche === 'down') return false;
+    return !(s.attempt.phase === 'followMe' && s.s0Typing);
+  }
+  private derive(): ServiceView {
+    const s = this.s;
+    const followTyping = this.stage === 0 && s.attempt.phase === 'followMe' && s.s0Typing;
+    return {
+      ...s,
+      order: this.order,
+      task: this.trayTask(s),
+      padMode: this.stage === 0 && s.cloche === 'down',
+      cue: this.cueOf(s),
+      canServe: this.canServe(s),
+      editable: this.editable(s),
+      correctTyped: followTyping ? String(this.order.problem.answer) : null,
+      removed: removedCount(s.tray),
+    };
+  }
+
+  /** e2e state dump (SPEC §13.5). */
+  probe() {
+    const v = this.snap;
+    return {
+      index: v.index,
+      orders: this.opts.orders.length,
+      phase: v.attempt.phase,
+      attempt: v.attempt.attempt,
+      stage: v.order.stage,
+      form: v.order.problem.form,
+      display: v.order.problem.display.join(' '),
+      factKey: v.order.problem.factKey,
+      answer: v.order.problem.answer,
+      mode: v.tray.mode,
+      filled: v.tray.filled,
+      prefill: v.tray.prefill,
+      expectedCells: v.task.expected.cells,
+      removed: v.removed,
+      typed: v.typed,
+      cloche: v.cloche,
+      s0Typing: v.s0Typing,
+      counting: v.counting,
+      demoTray: v.demoTray,
+      canServe: v.canServe,
+      cue: v.cue,
+      caption: v.caption,
+      events: this.events,
+    };
+  }
+
+  // ---------- lifecycle ----------
+  private fresh(index: number): State {
+    const o = this.opts.orders[index]!;
+    return {
+      index,
+      tray: startState(toTrayTask(o.problem, o.stage === 0 ? 3 : o.stage)),
+      attempt: initialAttempt(),
+      demoTray: false,
+      typed: '',
+      cloche: 'down',
+      s0Typing: false,
+      glow: [],
+      caption: ticketLine(o),
+      bubble: null,
+      bubbleCount: '',
+      counting: false,
+      mood: 'arrive',
+      fx: null,
+      binWobble: 0,
+      bellWobble: 0,
+      flights: [],
+      hatPulse: false,
+      drag: null,
+      finished: false,
+    };
+  }
+
+  start(): void {
+    this.disposed = false;
+    this.startOrder(0);
+    this.scheduleIdle();
+  }
+
+  dispose(): void {
+    this.disposed = true;
+    this.script++;
+    if (this.idleTimer !== null) this.d.clearTimeout(this.idleTimer);
+    this.d.hush();
+  }
+
+  private startOrder(index: number): void {
+    const my = ++this.script;
+    this.orderStarted = this.d.now();
+    this.lastInput = this.d.now();
+    this.ticketRepeated = false;
+    this.s = this.fresh(index);
+    this.set({});
+    void this.d.speak(ticketLine(this.order));
+    void this.wait(600).then(() => my === this.script && this.set({ mood: 'idle' }));
+  }
+
+  /** Idle cues (SPEC §3.2, §5.4): Pip's hat pulses after 10 s at S3; the ticket repeats once after 20 s. */
+  private scheduleIdle(): void {
+    if (this.disposed) return;
+    this.idleTimer = this.d.setTimeout(() => {
+      const s = this.s;
+      if (s.attempt.phase === 'building' && !s.finished) {
+        const idle = this.d.now() - this.lastInput;
+        if (this.stage === 3 && idle > HAT_PULSE_IDLE_MS && !s.hatPulse) this.set({ hatPulse: true });
+        if (idle > TICKET_REPEAT_IDLE_MS && !this.ticketRepeated) {
+          this.ticketRepeated = true;
+          void this.d.speak(ticketLine(this.order));
+        }
+      }
+      this.scheduleIdle();
+    }, 1000);
+  }
+
+  /** S0 FollowMe: once the cloche tray is complete the digits come back for the final typing (D41). */
+  private maybeStartS0Typing(): void {
+    const s = this.s;
+    if (this.stage !== 0 || s.attempt.phase !== 'followMe' || s.s0Typing) return;
+    if (followMeCue(s.tray, this.trayTask(s).expected.cells) !== 'bell') return;
+    this.s = { ...s, s0Typing: true, cloche: 'down', typed: '', caption: say('follow.type') };
+    void this.d.speak(say('follow.type'));
+  }
+
+  // ---------- scripts ----------
+  private record(outcome: Outcome): void {
+    const ctx = { id: () => this.d.newId(), now: () => this.d.wall(), dev: this.opts.dev };
+    const o = this.order;
+    // In memory until M3a persists them (D51); the shapes are frozen (SPEC §11.2).
+    this.events.push(
+      attemptEvent(ctx, {
+        svc: this.opts.svc,
+        fact: o.problem.factKey,
+        skill: o.problem.skill,
+        stage: o.stage,
+        outcome,
+        ms: this.d.now() - this.orderStarted,
+      }),
+      coinEvent(ctx, { svc: this.opts.svc, n: COINS_PER_PROBLEM }),
+    );
+  }
+
+  private async runEat(my: number): Promise<void> {
+    const n = this.order.problem.answer;
+    this.d.sfx.correct();
+    this.set({ mood: 'delight', caption: say('serve.yum', { n }), bubble: null, counting: false, glow: [] });
+    void this.d.speak(say('serve.yum', { n }));
+    // Eat + react; any tap skips ahead (SPEC §5.6, D56). The full eat sequence is M2 (D66).
+    await Promise.race([this.wait(1600), new Promise<void>((r) => (this.skipEat = r))]);
+    this.skipEat = null;
+    if (my !== this.script) return;
+    this.set((s) => ({ attempt: stepAttempt(s.attempt, { type: 'phaseDone' }), mood: 'leave' }));
+    await this.wait(350);
+    if (my !== this.script) return;
+    const next = this.s.index + 1;
+    if (next < this.opts.orders.length) {
+      this.startOrder(next);
+      return;
+    }
+    this.set({ finished: true, caption: say('service.closed'), mood: 'delight' });
+    await this.d.speak(say('service.closed'));
+    await this.wait(600);
+    if (my === this.script) this.opts.onDone();
+  }
+
+  private async runCountTogether(my: number): Promise<void> {
+    const ticks = countTogetherTicks(this.order.problem);
+    this.set({ counting: true, bubble: ticks[0]!.cells, bubbleCount: '', mood: 'idle', caption: say('ct.start') });
+    await this.d.speak(say('ct.start'));
+    for (const t of ticks.slice(1)) {
+      if (my !== this.script) return;
+      const line = say(t.key, t.params);
+      this.set({ bubble: t.cells, bubbleCount: line });
+      await Promise.all([this.d.speak(line), this.wait(450)]);
+    }
+    if (my !== this.script) return;
+    // The bubble stays up as a model until the next serve (D68); the tray was editable throughout.
+    this.set((s) => ({ counting: false, attempt: stepAttempt(s.attempt, { type: 'phaseDone' }) }));
+  }
+
+  private async runWorked(my: number): Promise<void> {
+    const t3 = toTrayTask(this.order.problem, 3);
+    this.set({
+      demoTray: true,
+      tray: startState(t3),
+      bubble: null,
+      counting: false,
+      glow: [],
+      typed: '',
+      cloche: this.stage === 0 ? 'model' : 'down',
+      mood: 'idle',
+    });
+    for (const step of buildDemo(this.order.problem)) {
+      if (my !== this.script) return;
+      let tray = this.s.tray;
+      if (step.trayOp.op === 'add') {
+        tray = tapBin(tray).state;
+        this.d.sfx.place(tray.filled);
+      } else if (step.trayOp.op === 'remove') {
+        const r = removeLast(tray);
+        tray = r.state;
+        this.d.sfx.remove();
+        this.flyAway(r.effect);
+      }
+      const line = say(step.narrationKey, step.params);
+      this.set({ tray, glow: step.trayOp.op === 'glow' ? step.trayOp.cells : [], caption: line });
+      await Promise.all([this.d.speak(line), this.wait(step.holdMs)]);
+    }
+    if (my !== this.script) return;
+    // FollowMe: the tray resets to the start and the child repeats the steps (SPEC §5.5).
+    this.set((s) => ({
+      attempt: stepAttempt(s.attempt, { type: 'phaseDone' }),
+      tray: startState(t3),
+      glow: [],
+      caption: say('follow.start'),
+    }));
+    void this.d.speak(say('follow.start'));
+  }
+
+  private async runPlate(my: number, served: number, expected: number): Promise<void> {
+    this.d.sfx.hm();
+    const line = plateCountLine(served, expected, this.stage);
+    const text = say(line.key, line.params);
+    this.set({ mood: 'puzzled', caption: text, bubble: null, counting: false });
+    await Promise.all([this.d.speak(text), this.wait(900)]);
+    if (my !== this.script) return;
+    const next = stepAttempt(this.s.attempt, { type: 'phaseDone' });
+    this.set({ attempt: next, mood: 'idle', typed: '' });
+    if (next.phase === 'countTogether') void this.runCountTogether(my);
+    else if (next.phase === 'worked') void this.runWorked(my);
+  }
+
+  // ---------- tray feedback ----------
+  private flyAway(e: TrayEffect): void {
+    if (e.kind !== 'removed') return;
+    const id = ++this.flightId;
+    const to = this.s.tray.takenAwayRow ? 'taken' : 'bin';
+    this.set((s) => ({ flights: [...s.flights, { id, from: e.index, to }] }));
+    this.d.setTimeout(() => this.set((s) => ({ flights: s.flights.filter((f) => f.id !== id) })), 450);
+  }
+
+  private applyTray(r: TrayResult): void {
+    const e = r.effect;
+    // S3 counts aloud (counting on / counting back); S2 and below: tones only (SPEC §3.2).
+    const voice = this.stage === 3;
+    const fx = (kind: 'hop' | 'shake' | 'in', index: number) => ({ index, kind, nonce: ++this.nonce });
+    switch (e.kind) {
+      case 'placed':
+      case 'putBack':
+        this.d.sfx.place(e.count);
+        if (voice) this.d.countAloud(numberToWords(e.count));
+        this.set({ tray: r.state, fx: fx('in', e.index) });
+        break;
+      case 'removed':
+        this.d.sfx.remove();
+        if (voice) this.d.countAloud(numberToWords(e.count));
+        this.set({ tray: r.state });
+        this.flyAway(e);
+        break;
+      case 'count': // counting by touch works at every stage (SPEC §3.3)
+        this.d.countAloud(numberToWords(e.count));
+        this.set({ fx: fx('hop', e.index) });
+        break;
+      case 'shakeLocked':
+        this.d.sfx.wobble();
+        this.set({ fx: fx('shake', e.index) });
+        break;
+      case 'wobbleBin':
+        this.d.sfx.wobble();
+        this.set((s) => ({ binWobble: s.binWobble + 1 }));
+        break;
+      case 'none':
+        break;
+    }
+  }
+
+  private act(f: (s: TrayState) => TrayResult): void {
+    this.touch();
+    if (!this.editable(this.s)) return;
+    this.applyTray(f(this.s.tray));
+  }
+
+  // ---------- actions (bound, so the screen can pass them straight to handlers) ----------
+  touch = (): void => {
+    this.lastInput = this.d.now();
+    if (this.s.hatPulse) this.set({ hatPulse: false });
+  };
+
+  tapBin = (): void => this.act(tapBin);
+  takeBack = (): void => this.act(removeLast);
+  tapItem = (i: number): void => this.act((s) => tapItem(s, i));
+  /** FollowMe: tapping the pulsing empty cell places too. */
+  tapEmpty = (i: number): void =>
+    this.act((s) => (i === s.filled && this.cueOf(this.s) === 'place' ? tapBin(s) : { state: s, effect: { kind: 'none' } }));
+  tapTakenAway = (): void => this.act(tapTakenAway);
+  dragAway = (): void => this.act(removeLast);
+  setDrag = (drag: { x: number; y: number } | null): void => this.set({ drag });
+
+  serve = (): void => {
+    this.touch();
+    const now = this.d.now();
+    if (now - this.lastBell < BELL_GUARD_MS) return;
+    this.lastBell = now;
+    const s = this.s;
+    if (!this.canServe(s)) {
+      this.d.sfx.wobble();
+      this.set({ bellWobble: s.bellWobble + 1 });
+      return;
+    }
+    this.d.sfx.bell();
+    const correct = this.correctNow(s);
+    const next = stepAttempt(s.attempt, { type: 'serve', correct });
+    const my = ++this.script;
+    this.set({ attempt: next, bubble: null, counting: false, glow: [], hatPulse: false });
+    if (next.phase === 'eating') {
+      this.record(next.outcome!);
+      void this.runEat(my);
+    } else if (next.phase === 'plateCount') {
+      const s0 = this.stage === 0;
+      const served = s0 ? Number(s.typed) : s.tray.filled;
+      const expected = s0 ? this.order.problem.answer : this.trayTask(s).expected.cells;
+      void this.runPlate(my, served, expected);
+    }
+  };
+
+  help = (): void => {
+    this.touch();
+    const s = this.s;
+    const next = stepAttempt(s.attempt, { type: 'help' });
+    if (next === s.attempt) return;
+    const my = ++this.script;
+    this.set({ attempt: next, hatPulse: false, cloche: s.cloche === 'peek' ? 'down' : s.cloche });
+    if (next.phase === 'countTogether') void this.runCountTogether(my);
+    else if (next.phase === 'worked') void this.runWorked(my);
+  };
+
+  /** S0 Peek lifts the cloche on the S3 model; counts as Help (D41). */
+  peek = (): void => {
+    this.touch();
+    const s = this.s;
+    if (this.stage !== 0 || s.cloche !== 'down' || s.attempt.phase !== 'building') return;
+    this.set({
+      attempt: stepAttempt(s.attempt, { type: 'peek' }),
+      cloche: 'peek',
+      tray: startState(toTrayTask(this.order.problem, 3)),
+    });
+  };
+
+  lowerCloche = (): void => {
+    this.touch();
+    if (this.s.cloche === 'peek') this.set({ cloche: 'down' });
+  };
+
+  digit = (d: number): void => {
+    this.touch();
+    const s = this.s;
+    const padOpen = s.cloche === 'down' || s.s0Typing;
+    if (this.stage !== 0 || !padOpen || !trayEditable(s.attempt.phase) || s.typed.length >= 2) return;
+    this.d.sfx.place(d === 0 ? 10 : d);
+    // One display that always takes up to two digits (D32); a lone leading zero is replaced.
+    this.set({ typed: s.typed === '0' ? String(d) : s.typed + String(d) });
+  };
+
+  backspace = (): void => {
+    this.touch();
+    const s = this.s;
+    if (this.stage !== 0 || s.typed === '' || !trayEditable(s.attempt.phase)) return;
+    this.d.sfx.remove();
+    this.set({ typed: s.typed.slice(0, -1) });
+  };
+
+  replayTicket = (): void => {
+    this.touch();
+    void this.d.speak(ticketLine(this.order));
+  };
+
+  skip = (): void => this.skipEat?.();
+}

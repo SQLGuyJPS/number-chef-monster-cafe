@@ -314,3 +314,19 @@ html.debug-mode #root {
 .debug td {
   word-break: break-all;
 }
+
+/* ---- Menu tiles (M1: A1/A2 playable) ---- */
+.tile {
+  color: var(--c-chalk-ink);
+}
+.tile.tile-glow {
+  border-style: solid;
+  box-shadow: 0 0 0 6px rgba(246, 196, 69, 0.45);
+}
+.tile.tile-soon {
+  opacity: 0.45;
+}
+.debug-skills select {
+  font-size: 16px;
+  padding: 4px;
+}

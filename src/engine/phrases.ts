@@ -68,6 +68,7 @@ export const PHRASES = {
   'ct.start': { params: {}, text: () => "Hmm! Let's count together." },
   'ct.more': { params: { n: 'n' }, text: (p) => `${N(p, 'n')} more!` },
   'ct.left': { params: { n: 'n' }, text: (p) => `${N(p, 'n')} left!` },
+  'ct.away': { params: { n: 'n' }, text: (p) => `${N(p, 'n')} taken away!` },
   'ct.total': { params: { n: 'n' }, text: (p) => `${N(p, 'n')}!` },
 
   // Worked demos (SPEC §5.5, D42b).

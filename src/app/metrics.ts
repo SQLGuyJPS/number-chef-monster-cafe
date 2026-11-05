@@ -66,6 +66,8 @@ const BUBBLE: Rect = { x: centeredX(BUBBLE_W), y: 8, w: BUBBLE_W, h: 210 };
  */
 export const SERVICE = {
   door: { x: 16, y: 16, w: 112, h: 112 },
+  /** Caption bubble between the door and the monster; clear of the CountTogether bubble (D70). */
+  caption: { x: 144, y: 16, w: 270, h: 124 },
   /** Waiting monsters line up by the door, left of the monster at the counter. */
   queue: { x: 0, y: 150, w: 340, h: 150 },
   monsterZone: MONSTER,
