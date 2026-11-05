@@ -129,7 +129,7 @@ Order inside each milestone is the order I will work in. Every milestone ends wi
 13. Screenshots, PLAYTEST, DECISIONS, commit, stop.
 
 **Accept (SPEC §14 M1)**
-- [ ] layout mock approved by the owner before interaction
+- [x] layout mock approved by the owner before interaction (2026-11-05, rev 4; layout in D62–D65, `SERVICE` in `src/app/metrics.ts`, shots in `docs/screens/M1/mock/`)
 - [ ] unit tests for generators / tray / check / demos pass
 - [ ] all four stages playable for A1 and A2 (incl. S0 help path on the cloche tray)
 - [ ] fill order, remove-from-end and lock rules (§3.3) verified by e2e (Chromium landscape + one WebKit iPad project)
