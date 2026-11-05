@@ -1,12 +1,13 @@
 # Decisions
 
-Each entry: what was decided, why, how to revisit. D1–D14 were made during design (departures from the original proposal and resolved gaps). Round 2 added D15–D19; round 3 (owner clarifications on hours, the play allowance and story tickets) added D20–D21 and rewrote D7. Round 4 (owner: pick the skill instead of automatic leveling; play-time limit optional) added D22–D27 and amended D3, D6, D7, D13, D16, D20. Round 5 (owner: remove automatic leveling, Chef's Pick and chef hats from the project entirely) added D28 and reduced D13 and D25 to tombstones. Round 6 (owner walk-through of SPEC_REVIEW.md) added D29–D38; round 7 (applying them to the docs) added D39. New decisions are appended after the last entry, numbered one higher than the highest existing `D<n>`.
+Each entry: what was decided, why, how to revisit. D1–D14 were made during design (departures from the original proposal and resolved gaps). Round 2 added D15–D19; round 3 (owner clarifications on hours, the play allowance and story tickets) added D20–D21 and rewrote D7. Round 4 (owner: pick the skill instead of automatic leveling; play-time limit optional) added D22–D27 and amended D3, D6, D7, D13, D16, D20. Round 5 (owner: remove automatic leveling, Chef's Pick and chef hats from the project entirely) added D28 and reduced D13 and D25 to tombstones. Round 6 (owner walk-through of SPEC_REVIEW.md) added D29–D38; round 7 (applying them to the docs) added D39. Round 8 (owner walk-through of `SPEC_REVIEW_2026-11-04.md`) added D40–D47. New decisions are appended after the last entry, numbered one higher than the highest existing `D<n>`.
 
 **Reading guide for removed features.** The first draft of the spec contained three linked mechanics that no longer exist anywhere except in this file and in git history: **automatic leveling** (stage promotion, demotion and fast-track driven by recent accuracy), **Chef's Pick** (an automatic "recommended" mode that chose the skill to practice and mixed in review of other skills) and **chef hats** (up to three mastery badges per skill, shown on each menu tile, each paying a coin bonus). Where an entry below mentions them, it describes the first draft, not the current design. See D28.
 
 **D1. Ladder re-cut into two open tracks.**
 Changes: (a) "within 10" split into A1 within 5 and A2 within 10 (a young child's within-5 and within-10 are very different jobs; pools of 20 and 70); (b) added A0 Count It Out (tray tutorial and numeral/quantity base); (c) added A6 teens ± ones without crossing, between teen numbers and bridging (the jump from 10+4 to 8+5 is otherwise too big); (d) "missing amounts" kept at A4 for missing addend/subtrahend within 10, but start-unknown (`? + 3 = 8`, `? − 3 = 5`) moved to backlog because it is the hardest word-problem structure; (e) comparing moved out of the "stretch" tail into its own P2 tile (it is a Kindergarten skill; still low priority because the child likely does it in school); (f) tens work (B1/B2) is a separate track that does not depend on bridging, so a strong counter can do 30+20 before wrestling with 8+5; (g) no locks; every tile is open. *(The first draft also said "Chef's Pick recommends"; Chef's Pick was removed, D28.)*
 *Amended by D34: in (d), only the subtraction start-unknown form `? − 3 = 5` stays in the backlog; the addition form `? + a = c` is a commuted missing addend and is in A3/A4.*
+*Amended by D47: in (e), comparing (B4) moved from P2 to the P3 backlog until it has a response mechanic.*
 Revisit: if the child stalls at a skill, hide or reorder in the parent Skills tab; ladder order is data in `engine/skills.ts`.
 
 **D2. The response is "build the answer", not "tap the food with the right number".**
@@ -59,6 +60,7 @@ The child will play on an iPad, an iPhone and an Android phone, with no backend.
 **D16. Starting state from the owner's report.**
 The child is in the first half of a first-year primary maths book; knows +0, +1 and doubles (1+1 … 9+9) from flash cards. Those facts start at box 3 (+0 is in no pool, D11); the child can solve take-away word problems but is still learning number sentences with sums under ten, so symbolic subtraction is treated as new. The spec's earlier claim that the child would "live in A0–A5" was revised: A2–A8 is this school year's curriculum, B1–B2 likely second-half work (hence the Big Menu is bonus work, M8). Wording generalized by D38. Editable in Parent → Skills → Starting point.
 *Amended by D22/D28: the first draft also marked A0 as assumed-known and had the automatic Chef's Pick start at A1 with a short diagnostic and fast-track; those were removed. What remains of the preset: the known addition facts start at box 3 (less frequent), every skill starts at S3, and the first-run menu highlights A1.*
+*Amended by D43: the preset covers only result forms (`a + b = ?`) in A1, A2 and A7; missing-addend forms count as new.*
 
 **D17. Near-doubles and 9+x are the first strategies for new facts.**
 They build on the child's known doubles and +1. `nearDouble` strategy tag and demo; A2 and A7 difficulty ordering lead with them.
@@ -71,7 +73,7 @@ Android back gesture and iOS Safari edge-swipe would otherwise exit the game mid
 *Amended by D37: the guard history entry is pushed from inside a tap (Chrome skips entries pushed without user activation) and again after each in-app navigation.*
 
 **D20. Build tiers instead of an hour cap (owner decision).**
-The earlier "≈ 20 h" was only a scoping device. Tier 1 = a playable game in ≈ 10.5 h (M0–M3: foundations, core loop with A1–A2, café service with A3, hand-off-ready persistence + play allowance + minimal parent area). Tier 2 = bonus features M4–M11 in any order, no upper limit. *Amended by D22: Tier 1 is now ≈ 10 h (M2 ≈ 3.25, M3 ≈ 1.5).* *Amended by D36: M3 is split into M3a/M3b and the Tier 1 hour estimate is redone in PLAN.md.* Consequence: Tier 1 has no shop (coins accrue and show in the jar), no multi-device merge UI (the event log exists), and only A1–A3, which matches the child's current book.
+The earlier "≈ 20 h" was only a scoping device. Tier 1 = a playable game in ≈ 10.5 h (M0–M3: foundations, core loop with A1–A2, café service with A3, hand-off-ready persistence + play allowance + minimal parent area). Tier 2 = bonus features M4–M11 in any order, no upper limit. *Amended by D22: Tier 1 is now ≈ 10 h (M2 ≈ 3.25, M3 ≈ 1.5).* *Amended by D36: M3 is split into M3a/M3b and the Tier 1 hour estimate is redone in PLAN.md.* *Amended by D44: ≈ 10 h is a guide, not a cap; M3b also gets a Replace-only import.* Consequence: Tier 1 has no shop (coins accrue and show in the jar), no multi-device merge UI (the event log exists), and only A1–A3, which matches the child's current book.
 
 **D21. Story tickets (word-problem phrasing of each order) declined by the owner.**
 Considered: template-driven one-sentence stories beside the equation, to bridge the child's take-away word-problem skill to number sentences (risks: reading load blurring the mastery signal, keyword shortcuts). Removed from the spec; M6 number left unused. Revisit if the child stalls on missing-addend or take-away sentences.
@@ -92,6 +94,7 @@ What: a parent setting in `skillConfig.ops`, shown only for skills with both ope
 Why: A1 addition is almost entirely known (5 of 6 canonical addition facts are in the child's preset; only 2+3 is new) while all 10 subtraction facts are new, so a mixed A1 spends about half its orders on facts the child knows. Subtraction only is the likely setting.
 Consequence: A1 with subtraction only has 10 canonical facts; a 15-minute limit, if one is enabled (2–3 services), repeats each about twice, which is practice, not a defect. The pool-size guard still prevents adjacent repeats.
 How to revisit: the focus list (M7) can express the same thing per fact.
+*Amended by D43: A3 and A4 also get the setting; skills other than A1 target their pool's add/sub share.*
 
 **D25. [Removed] Chef hats and the hat coin bonus.**
 What: chef hats (up to three mastery badges per skill, shown on menu tiles and in Results, +10 coins each) were first deferred to an optional milestone (M12), then removed from the spec entirely by D28. There are no hats on tiles, in Results or the Progress tab, no +10 coins, no `hat` event type, and no hat SFX.
@@ -107,6 +110,7 @@ How to revisit: if the child does not need a warm-up (older player, profile M11)
 What: a fresh install has no limit. Parent → Settings → "Play time limit" is Off / 5 / 10 / 15 / 20 minutes. While Off there is no clock, no lock, no swinging-door cue, and no Start new session / Add time / Refill controls. Choosing a duration starts a full session; choosing Off at any time (even while locked) clears the lock. Everything else in SPEC §6 applies unchanged once a parent enables it.
 Why: the draft (review row 33) defaulted to 15 minutes so the café would lock after a surprise amount of play. The owner wants the limit to be a deliberate hand-off tool that a parent switches on, never something that turns on by itself.
 How to revisit: the default is one constant in `engine/config.ts`; the per-device `settings` store holds the choice.
+*Amended by D33: the "swinging-door cue" became the lights dimming and Pip yawning; the door sign never animates.*
 
 **D28. Automatic leveling, Chef's Pick and chef hats are removed from the project documentation entirely (owner).**
 What: D22 and D25 had deferred these three mechanics to an optional late milestone (M12) while the docs kept describing them. They are now removed outright:
@@ -136,6 +140,7 @@ What: a small `coin` event is written in the same transaction as each completed 
 Why: coins were summed from `serviceEnd` per distinct service id, so a resumed service silently lost one set, and an app killed mid-service lost coins the child had seen fly into the jar.
 Consequence: a new event type, so the event shape is frozen in M1 (D36); amends D6/D15's wording on where coins live (still "in events, never recomputed").
 How to revisit: if per-problem events are too chatty, batch them per service with a resume-safe id.
+*Amended by D40: a problem cut off at the 90 s grace cap is not completed and pays nothing.*
 
 **D32. The S0 number pad is one row of digits.**
 What: ten digit buttons 0–9 in order, one answer display that always accepts up to two digits, and a backspace. No separate tens/ones slots.
@@ -146,6 +151,7 @@ How to revisit: if buttons feel cramped on the phone, shrink within the 56 px mi
 What: (a) "Last customer": when remaining time falls below about one order's length (tuned in playtest), waiting silhouettes wave and leave and the current monster is announced as the last one; no full new service starts when less than about half a service remains (a shorter one is offered). (b) The +5 tip is paid when the allowance closes the café mid-service, but not for a voluntary early exit or Take a break. Supersedes the former OPEN_ITEMS #8 "no tip on a partial service" default for this case (that item is now #7 after the renumbering). (c) The 60 s cue is the lights dimming and Pip yawning; the door sign never animates. (d) At the 90 s grace cap the monster eats happily and leaves, no `attempt` is recorded, the fact's box is unchanged, and a pending requeue is dropped without a box reset. (e) After about 20 s idle the spoken ticket repeats once per order (all stages; spoken only). (f) The "Continue dinner service?" offer is used everywhere (no silent resume) and is not shown while the café is locked; it appears after a parent unlocks.
 Why: a service of 8–10 minutes against a 15-minute allowance would otherwise be cut off abruptly almost every time; closing time is not the child's choice and a time cutoff must never count against the child.
 How to revisit: the thresholds are constants in `engine/config.ts`; measure real service length at the M2 playtest (OPEN_ITEMS #7).
+*Amended by D40: in (f), the lock clears the resume snapshot, so no offer appears after an unlock. Amended by D46: the back guard and "Take a break?" cover every child screen.*
 
 **D34. Addition-only start-unknown forms (`? + a = c`) stay in v1.**
 What: A3 `? + a = 10` and A4 `? + a = c` remain in the pools (A3 = 36, A4 = 135). This amends D1(d): only the subtraction start-unknown form (`? − 3 = 5`) and the harder word-problem structures stay in the backlog. The Mystery Orders example becomes `? − 3 = 5`.
@@ -189,6 +195,49 @@ What:
 - (j) *Housekeeping*: OPEN_ITEMS is renumbered (C14; old #3→#2 … #12→#10) and the former #10 moved to its resolved table; SPEC_REVIEW.md keeps the old numbers and says so. The export `checksum` covers the serialized `events` and `settings`. `scripts/emoji-versions.json` does not exist yet (no code); it is created with `lint:content` using the D35 allowlist.
 Why: each of these closes a gap that D29–D38 left open, with the smallest rule that keeps the decided behavior intact.
 How to revisit: all are spec text and `engine/config.ts` constants; change the spec line and add a decision that supersedes the item above.
+*Amended by D40: in (g), the post-unlock 2 h window is gone (the lock clears the snapshot).*
+
+**Round 8: owner walk-through of `docs/SPEC_REVIEW_2026-11-04.md` (D40–D47).** Each finding was decided in chat; the per-finding log is the "Decision log" table at the top of that file (finding IDs R1–R11, S1–S12, T1–T6, H1–H10). The edits have been applied to `SPEC.md`, `CLAUDE.md`, `OPEN_ITEMS.md`, `KICKOFF.md` and `README.md`. Earlier entries are not rewritten; where one is amended, it carries an "Amended by" line.
+
+**D40. Allowance endings: the lock clears the resume snapshot; lock outside a service; grace-cap problems pay nothing (R2, S1, S2).**
+What: (a) The lock clears the `resume` snapshot (as SPEC §6.2 step 5 already said), so there is **no** "Continue dinner service?" offer after a parent unlocks. This amends D33(f) and D39(g). (b) On boot, if a limit is on and `remainingMs ≤ 0`, the café locks and the snapshot is cleared (covers the app being killed during the wind-down or grace period). (c) If the allowance reaches 0 outside a service, the café locks at once; on Results the tally finishes first; in the Shop an open purchase confirm is cancelled. (d) The problem cut off at the 90 s grace cap pays **no** coins (no `coin` and no `attempt` event); the monster still eats happily, and the +5 closing tip is still paid (D33b). The cap is 90 s of wall time, so it runs even while the idle pause has stopped the allowance clock. This narrows D31's "every completed problem pays 3": a cutoff is not a completed problem.
+Why: the post-unlock offer could never fire (the snapshot was already gone) and an e2e test required it; running out off-service and a kill during grace had no rule; the owner chose no coins for a cutoff.
+How to revisit: keeping the snapshot across a lock is one rule in §6.2 step 5 plus the old D33(f) wording.
+
+**D41. S0 help path (R3).**
+What: at S0, Pip's Help button stays. Worked and FollowMe play on the S3 tray shown under the lifted cloche; FollowMe ends with the child typing the number and pressing the bell. Peek before the first serve counts as Help (`afterHint` if then correct), never as `assisted`. The bell is disabled while the answer display is empty.
+Why: S0 has no tray, but Worked and FollowMe were written to play on one; §3.2 and §5.4 disagreed on what Peek records.
+How to revisit: SPEC §5.4/§5.5; playtest whether the cloche tray is clear at phone size.
+
+**D42. Tray, demo and input rules (R4, R5, R6, S5).**
+What: (a) In remove mode, tapping the bin (or, for missing-subtrahend forms, the taken-away row) returns the last removed item to the first empty cell, so an over-removal can be fixed. (b) Doubles and near-doubles demos are described by the blue and orange groups on the canonical tray ("three blue, three orange: the same"), not "two equal rows"; the `doubles` demo is built in M1. The bridge demo says "the first orange items fill the ten" (canonical placement already puts them there). (c) For missing-addend and missing-subtrahend forms, CountTogether ends by counting the orange group (or the taken-away row) from one and naming that number ("one, two, three — three more"). (d) Placing and removing update the tray model at once; item flights are visual only and never an input lock. Locks apply only to eating, demos and PlateCount.
+Why: remove mode had no undo though PlateCount says "One more!"; the fixed 2×5 fill never shows two equal rows; a running count ends at the total, not at a missing amount; dropping fast taps would break counting by tapping.
+How to revisit: SPEC §2.3, §3.3, §5.5.
+
+**D43. Session builder data (R1, R9, R11, S7, S8).**
+What: (a) Requeues are exempt from the "not within the last 4 problems" factKey window; "never adjacent" and "not the same monster twice in a row" still apply. A requeue that does not fit 3–5 problems later is appended to the end of the service (the service gets longer), with at least one other order in between when one exists; a requeue adds a silhouette when it is queued. (b) A3 and A4 get the both / addition only / subtraction only setting (amends D24's list). For the ±1 balance rule, A1 targets ~55/45 and every other skill targets its pool's own add/sub share of canonical facts. (c) The `resume` snapshot stores the planned order list (factKeys, foods, monsters, requeue state). The replay claim is narrowed to "same seed and same starting state → same service". (d) Difficulty is the new-fact introduction order (D29); the leftover "warm-ups" and "openers" wording is gone. When `ops` is both, new add and sub facts alternate. Orderings for A4–A6 are written in M5 and for B1–B2 in M8. (e) The `known` preset covers only result forms (`a + b = ?`) that are +1 or doubles, in A1, A2 and A7; missing-addend forms such as `9 + ? = 10` count as new (amends D16).
+Why: requeue positions 3 and 4 broke the no-repeat window and late misses had no rule; A3/A4 mix operations; a resumed service rebuilt from the seed came out different because boxes had changed; factKeys include the skill, so the preset's scope had to be named.
+How to revisit: constants and orderings in `engine/config.ts` and `engine/skills.ts`.
+
+**D44. Tier 1 scope, parent access, reset and process (R7, R8, R10, S4, S9, S11, S12).**
+What: (a) M3b adds a basic **Replace-only import** (snapshot first, checksum and zod validation); Merge stays in M7. (b) Until M3a, the `?debug` screen offers stage and operations per skill; from M3a the gear opens the Skills list without a gate; M3b puts the gate in front of it. (c) Tier 1 **Reset** writes a snapshot and then deletes everything except the `snapshots` store. A later merge from an older export or another device may bring reset progress back; that is documented in the parent Help, not prevented. A parent Reset or Replace import may lower the coin balance; this is an explicit parent exception to "coins only go down through a purchase". (d) The M0 portrait tap e2e test stays green from M0 on; only CDP drag in rotated portrait and the full device matrix wait for M2. (e) Milestone builds reach the devices by the owner pushing to `main` (the real app); before real use the parent resets playtest progress once. (f) The Tier 1 ≈ 10 h figure is a guide, not a cap; PLAN.md may exceed it (amends D20/D36). (g) `navigator.storage.persist()`/`estimate()` are feature-detected (missing on Safari before 17); the parent area shows "not available on this device".
+Why: a backup with no restore protects nothing; the Skills settings had no entry point before M3b; deleting events from a mergeable log is undone by the next merge; the indicative hours for M0–M2 already used almost all of 10 h.
+How to revisit: a reset-marker event (M7) if resurrected progress turns out to be a real problem.
+
+**D45. A first-try serve keeps its bigger reaction (S6).**
+What: the monster's reaction after a first-try correct serve stays a little bigger (SPEC §5.6). This is a deliberate, small exception to §1.1 point 7; coins stay flat.
+Why: the owner wants the extra delight; it is visual only and never affects coins.
+How to revisit: pick the bigger variant at random if the child seems to chase it or looks disappointed after a fixed serve.
+
+**D46. Exits and the back guard (S3).**
+What: mid-service, *Close the café* writes a partial `serviceEnd` and goes to Home. On Home, Menu, Results and Shop the "Take a break?" dialog offers only *Keep cooking* and dismisses. The back guard covers every child-facing screen.
+Why: a web app cannot close itself, and the back guard did not cover Results or the Shop.
+How to revisit: SPEC §2.3, §5.4, §5.8.
+
+**D47. Tier 2 fixes, naming and housekeeping (T1–T6, H1–H10).**
+What: (a) A5 `1n = ? + n` and `1n − 10 = ?`: the ten is added or removed as one whole frame in a single step (pool stays 54). (b) FollowMe past 10: the first full frame is placed as one step ("ten"), then the ones one by one. (c) M8 starts with a static layout mock for the owner's OK; removing a pack takes the last pack on the shelf, which flies to the Box-of-10 bin. (d) B4 moves from P2 to the P3 backlog ("needs a response mechanic"); M9 is B3 only (amends D1(e)). (e) The heatmap's 0–10 grids cover A1–A4; A5 and up show a per-skill fact list. (f) §6.4 notes that auto-refill modes can be triggered early by changing the device clock. (g) The app's name is **Number Chef: Monster Café**; the export `app` id is `number-chef-monster-cafe`. (h) `profileId` is a store column only; M11 adds it to the event shape with a migration. (i) The first-ever warm-up order belongs to M2; its "shown once" flag uses the M0 `meta` store skeleton. (j) Big-text captions are M10; renaming monsters stays M7. (k) Plain corrections: the Git repo already exists (no `git init`; OPEN_ITEMS #1 resolved), D27's door-sign wording, stale status lines, playtest lengths, the screenshot list "as built", A0 described as tray practice.
+Why: each closes a contradiction or a gap found in the second review.
+How to revisit: each item is a spec line; supersede with a new decision.
 
 <!-- New decisions go above this line, numbered one higher than the highest existing D<n>. -->
 

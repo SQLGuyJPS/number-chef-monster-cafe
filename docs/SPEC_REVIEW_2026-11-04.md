@@ -10,7 +10,7 @@ Reviewed: `CLAUDE.md`, `docs/SPEC.md` (v1.2), `docs/DECISIONS.md` (D1–D39 and 
 
 ## Decision log (owner walk-through complete)
 
-The owner is deciding every finding in chat, a few at a time. Each decision is recorded here as it is made. Once all chunks are done, the significant design changes go into `DECISIONS.md` (D40+) and the edits are applied to `SPEC.md` and the other docs. **Status: every finding decided (2026-11-05); nothing applied to `SPEC.md` or `DECISIONS.md` yet.**
+The owner is deciding every finding in chat, a few at a time. Each decision is recorded here as it is made. Once all chunks are done, the significant design changes go into `DECISIONS.md` (D40+) and the edits are applied to `SPEC.md` and the other docs. **Status: every finding decided (2026-11-05) and applied: recorded as D40–D47 in `DECISIONS.md`, with the edits made to `SPEC.md` (v1.3), `CLAUDE.md`, `OPEN_ITEMS.md`, `KICKOFF.md`, `README.md` and `SPEC_REVIEW.md`.** The decision-to-entry mapping: R2, S1, S2 → D40; R3 → D41; R4, R5, R6, S5 → D42; R1, R9, R11, S7, S8 → D43; R7, R8, R10, S4, S9, S11, S12 → D44; S6 → D45; S3 → D46; T1–T6, H1–H10 → D47.
 
 Status: **Accepted** = apply the fix as suggested · **Modified** = apply with the change noted · **Rejected** = no change · **Pending** = not yet decided.
 

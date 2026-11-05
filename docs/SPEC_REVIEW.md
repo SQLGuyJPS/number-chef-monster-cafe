@@ -30,7 +30,7 @@ Status: **Accepted** = incorporate as suggested · **Modified** = incorporate wi
 | 11 | §4.5 iOS baseline / device answers; §5 items 1–5, 7, 8 (platform risks for PLAN.md; batch) | ✅ |
 | 12 | §6 scope and estimate (PLAN.md errata bullet handled in chunk 14) | ✅ |
 | 13 | §7 fun ideas | ✅ |
-| 14 | Summary of all changes, sign-off, then write `DECISIONS.md` | ✅ Signed off; D29–D38 written. `SPEC.md` and other docs not yet edited. |
+| 14 | Summary of all changes, sign-off, then write `DECISIONS.md` | ✅ Signed off; D29–D38 written. (The docs were edited afterwards; see D39.) |
 
 **Decisions**
 
