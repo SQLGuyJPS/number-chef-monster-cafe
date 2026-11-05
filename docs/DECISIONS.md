@@ -313,10 +313,15 @@ What: (a) The **ticket** moves to the centre, straight above the tray (x 450–8
 Why: owner feedback 2026-11-05 on the M1 mock: the problem should be centred above the tray, and the bell next to the tray makes "the bell sends the food" obvious.
 How to revisit: positions are the `SERVICE` table in `src/app/metrics.ts`. If the line by the door reads poorly once monsters walk across (M2), the fallback is a small row of plate icons by the door instead of silhouettes.
 
-**D64. Monster just left of centre with the ticket beside it; bell back in the bottom band next to the bin (amends D63).**
+**D64. Monster just left of centre with the ticket beside it; bell back in the bottom band next to the bin (amends D63; monster, ticket and bubble positions superseded by D65).**
 What: (a) The **monster** stands just left of centre (x 360–600) and the **ticket** sits right beside it (x 624–1004), so customer and order read as one. The waiting line stays by the door on the left. (b) The **bell** returns to the bottom band, always next to the bin: right of **take one back** when that button shows (add mode, x 954–1098), otherwise straight right of the bin (remove mode and S0, x 810–954). At S0 there is no bin on screen, but the bell keeps that same spot so it never jumps around between stages. (c) The two-frame tray (M5) is centred again. (d) The CountTogether bubble now sits over the monster's spot (x 200–628, y 8–218); the monster shrinks below its tail. Unchanged from D63: bin centred under the tray, taken-away row and lifted cloche lid left of the tray, one bubble width for one or two frames.
 Why: owner feedback 2026-11-05 on mock rev 2: the child should feel they are serving the monster, so it belongs near the middle; the bell should sit by the basket, not by the tray or at the far right.
 How to revisit: the `SERVICE` table in `src/app/metrics.ts`.
+
+**D65. Monster centred, ticket right beside it; ticket slides right during CountTogether (amends D64).**
+What: (a) The **monster** is centred (x 520–760). (b) The **ticket** (360 wide) sits 24 px to its right (x 784–1144), the same gap as mock rev 3. (c) During **CountTogether** the bubble is centred over the monster's spot (x 426–854) and the ticket slides right to x 904–1264, leaving a 50 px gap; it slides back afterwards. Unchanged from D64: bell in the bottom band next to the bin (after take one back when that shows), waiting line by the door, bin centred under the tray, taken-away row and cloche lid left of the tray.
+Why: owner feedback 2026-11-05 on mock rev 3: the off-centre monster did not feel right; the bubble and ticket were too close.
+How to revisit: `SERVICE` in `src/app/metrics.ts` (`ticket`, `ticketCounting`, `bubble`).
 
 <!-- New decisions go above this line, numbered one higher than the highest existing D<n>. -->
 

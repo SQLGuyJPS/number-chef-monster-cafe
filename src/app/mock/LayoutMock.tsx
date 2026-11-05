@@ -209,7 +209,7 @@ export function LayoutMock({ frame }: { frame: string }) {
         <Chrome>
           <Monster aside />
           <Bubble rect={L.bubble} frames={[numbered(cellsOf('cookie', 5, 3))]} caption="… six, seven, eight!" />
-          <Ticket rect={L.ticket} food="cookie" tokens={[tok('5', 'prefill'), op('+'), tok('3', 'child'), op('='), tok('?', 'result', true)]} />
+          <Ticket rect={L.ticketCounting} food="cookie" tokens={[tok('5', 'prefill'), op('+'), tok('3', 'child'), op('='), tok('?', 'result', true)]} />
           <Frames1 cells={cellsOf('cookie', 5, 2)} />
           <BottomBand food="cookie" />
         </Chrome>
@@ -220,7 +220,7 @@ export function LayoutMock({ frame }: { frame: string }) {
         <Chrome>
           <Monster aside />
           <Bubble rect={L.bubble} frames={[cells.slice(0, 10), cells.slice(10)]} caption="… eleven, twelve, thirteen!" />
-          <Ticket rect={L.ticket} food="strawberry" tokens={[tok('8', 'prefill'), op('+'), tok('5', 'child'), op('='), tok('?', 'result', true)]} />
+          <Ticket rect={L.ticketCounting} food="strawberry" tokens={[tok('8', 'prefill'), op('+'), tok('5', 'child'), op('='), tok('?', 'result', true)]} />
           <Frames2 cells={cellsOf('strawberry', 8, 3)} />
           <BottomBand food="strawberry" />
         </Chrome>

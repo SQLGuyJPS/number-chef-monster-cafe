@@ -53,23 +53,26 @@ const TAKE_BACK: Rect = { x: BIN.x + BIN.w + 20, y: 582, w: 124, h: 112 };
 /** The bell sits right of the bin, or right of "take one back" when that button shows (D64). */
 const bellAfter = (r: Rect): Rect => ({ x: r.x + r.w + 20, y: 562, w: 144, h: 144 });
 const BUBBLE_W = 2 * MINI_FRAME.w + 12 + 16; // two mini frames + gap + padding; used for one frame too
-const MONSTER: Rect = { x: 360, y: 52, w: 240, h: 240 };
-// Top at y 8 so the bubble clears the waiting line's heads (y ≈ 218) on its left.
-const BUBBLE: Rect = { x: MONSTER.x + MONSTER.w - BUBBLE_W + 28, y: 8, w: BUBBLE_W, h: 210 };
+const MONSTER: Rect = { x: centeredX(240), y: 52, w: 240, h: 240 };
+const TICKET_W = 360;
+// Centred over the monster's spot, top at y 8 so it clears the waiting line on the left.
+const BUBBLE: Rect = { x: centeredX(BUBBLE_W), y: 8, w: BUBBLE_W, h: 210 };
 
 /**
- * Service screen layout (SPEC §5.4 as amended by D63/D64; S0 band per D48/D62). Fixed by the M1
- * layout mock. Bands: monster (just left of centre) with the ticket at its right, y 40–300 · tray
- * y 311–519 · bottom y 570–700 (Pip's hat, bin, take one back, bell). The monster stays near the
- * middle so the child feels they are serving it; the ticket sits beside it so order and customer
- * read as one (D64).
+ * Service screen layout (SPEC §5.4 as amended by D63–D65; S0 band per D48/D62). Fixed by the M1
+ * layout mock. Bands: monster (centre) with the ticket right beside it, y 40–300 · tray y 311–519 ·
+ * bottom y 570–700 (Pip's hat, bin, take one back, bell). The monster is in the middle so the child
+ * feels they are serving it; the ticket sits beside it so order and customer read as one (D65).
  */
 export const SERVICE = {
   door: { x: 16, y: 16, w: 112, h: 112 },
   /** Waiting monsters line up by the door, left of the monster at the counter. */
   queue: { x: 0, y: 150, w: 340, h: 150 },
   monsterZone: MONSTER,
-  ticket: { x: MONSTER.x + MONSTER.w + 24, y: 50, w: 380, h: 220 },
+  /** Right beside the centred monster (D65). */
+  ticket: { x: MONSTER.x + MONSTER.w + 24, y: 50, w: TICKET_W, h: 220 },
+  /** During CountTogether the ticket slides right to make room for the bubble (D65). */
+  ticketCounting: { x: STAGE_W - 16 - TICKET_W, y: 50, w: TICKET_W, h: 220 },
   trayFrames1: { x: centeredX(FRAME.w), y: TRAY_TOP, w: FRAME.w, h: FRAME.h },
   trayFrames2: {
     x: centeredX(2 * FRAME.w + FRAMES_GAP),
