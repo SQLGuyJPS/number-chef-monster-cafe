@@ -37,3 +37,23 @@ Notes:
 - In a Safari tab, landscape shows Safari's tab and address bars and noticeably shrinks the game. The installed Home Screen app has no bars and looks better. Decision: stay landscape and play from the Home Screen app (D8; installing is also what protects storage on iOS, SPEC §11.4).
 - Re-opening the installed app resumes where it was (iOS keeps it in memory); "Tap to start" appears only after a real quit. Expected (SPEC §2.3).
 
+
+## M1 — Core loop (5 minutes with the child on the real iPad)
+How to set it up: open `…/number-chef-monster-cafe/?debug`, pick the stage and operations for A1/A2 under **Skills** (applies from the next service), then open the app normally. Menu → **Little Bites** (A1) or **Big Bites** (A2). One placeholder monster, 6 orders, then back to the menu. No coins, eating animation or Results yet (M2).
+
+- [ ] Does the child understand the ticket unaided (S3)? Do they tap the ticket to hear it again?
+- [ ] Is the bell press discoverable? (It looks faded until something is built.)
+- [ ] Tap vs. drag from the bin: which does the child use?
+- [ ] Does the child count by touching the placed items (they hop and say their number)?
+- [ ] Take-away orders (S3, remove mode): does the child tap items to take them away, and find the bin to put one back? Are number sentences the barrier for subtraction?
+- [ ] Wrong serve: is the monster's "I see seven… I wanted eight. One more!" clear and friendly?
+- [ ] CountTogether bubble (after a wrong serve or Pip's hat): readable on the iPad? Does the child watch it?
+- [ ] Worked demo + FollowMe after two misses: too long? Does the child follow the pulsing cell/bin and then press the pulsing bell?
+- [ ] S0 (number pad): speed versus flash-card pace? Does the child find Peek (the cloche) and the lid to go back?
+- [ ] Voices: which voice did the iPad pick, is the rate (0.85) right, are lines clipped by the next line (speech timeout tuning, D37)?
+- [ ] Is anything silent with the silent switch on (SFX need iOS 17+)?
+- [ ] Captions bubble (top left): readable? In the way?
+- [ ] On the iPhone (landscape): are the digits and tray cells comfortable to hit?
+- [ ] On the iPhone/iPad: does the dashed blank on the ticket look whole? (Playwright's WebKit draws it with sparse dashes at phone size; probably an engine quirk.)
+
+Notes:

@@ -323,6 +323,51 @@ What: (a) The **monster** is centred (x 520–760). (b) The **ticket** (360 wide
 Why: owner feedback 2026-11-05 on mock rev 3: the off-centre monster did not feel right; the bubble and ticket were too close.
 How to revisit: `SERVICE` in `src/app/metrics.ts` (`ticket`, `ticketCounting`, `bubble`).
 
+**D66. M1 service scope: a stand-in order plan, a short "Yum!", and back to the menu.**
+What: until the §4.1 session builder (M2), `engine/plan.ts` draws 6 orders uniformly from the skill's filtered pool, with the no-repeat window (§4.1 step 5/9) and no food twice in a row; one placeholder monster serves every order. A correct serve plays a ≈ 1.6 s skippable "Yum! Eight!" instead of the M2 eat sequence; no coins are shown (D51). After the last order the service ends back on the menu board (Results is M2). `attempt` and `coin` events are built with the frozen shapes and kept in memory (visible only through the e2e probe) until M3a writes them. The A3 tile is shown but inert until M2; the A1 tile glows (first-run rule; last-played glow is M2). Close the café writes nothing yet (M3a: partial `serviceEnd`).
+Why: M1 is the core loop; the session builder, eating, Results and persistence are M2/M3a work.
+How to revisit: replaced piece by piece in M2 and M3a.
+
+**D67. S0 Peek marks Help but plays no CountTogether and does not advance the attempt.**
+What: Peek before the first serve makes a correct first serve `afterHint` (D41). It only lifts the cloche on the S3 model, so the attempt stays 1: a wrong serve after Peek still gets PlateCount → CountTogether, and a correct second serve is `fixed`. Help (Pip's hat) keeps §3.4's rule (attempt 1 → CountTogether → attempt 2). While the cloche is up for Peek the bell is disabled; tapping the lid (or Help) lowers it.
+Why: D41 says Peek counts as Help for the outcome, but Peek shows a model, not the CountTogether script, so advancing to attempt 2 would skip CountTogether without having played it.
+How to revisit: `peek` in `engine/attempt.ts`.
+
+**D68. CountTogether details.**
+What: the bell is disabled while Pip is counting; the tray stays editable throughout (SPEC §5.5). When the count ends the bubble stays up as a model until the next serve, which is evaluated as usual. Subtraction result forms count back from the minuend as the orange items fade ("Eight. Seven, six, five. Five left!"); missing-subtrahend forms (M2) end on "Three taken away!" (`ct.away`), missing-addend forms on "Three more!".
+Why: §5.5 does not say whether the bubble stays, whether the child may serve mid-count, or how subtraction is counted.
+How to revisit: `engine/countTogether.ts`, `runCountTogether` in `src/game/service/controller.ts`.
+
+**D69. `TrayTask` refinement for S0.**
+What: at S0 `toTrayTask` returns the S3 tray fields (the cloche model, D41) plus `entry: 'numpad1'` and `expected.typed = answer`; `check` compares the typed number when `entry` is set, otherwise the tray. (SPEC §3.1 allows names and shapes to be refined, not semantics.)
+Why: the S0 task needs both the typed answer and the tray Worked/FollowMe play on.
+How to revisit: `engine/tray.ts`.
+
+**D70. Caption bubble slot.**
+What: captions (SPEC §8.1: always on) sit in one bubble between the door and the monster, `SERVICE.caption` (x 144–414, y 16–140), clear of the CountTogether bubble and the waiting line. Every child-facing caption is ≤ 8 words (lint); ticket lines ≤ 12.
+Why: the approved mock had no caption slot; this is the free space in the top band.
+How to revisit: one rect in `src/app/metrics.ts`.
+
+**D71. Worked and FollowMe always use the S3 tray; FollowMe can only end right.**
+What: (a) at every stage (S1 and S0 included) Worked clears to the S3 start (prefill, or the full minuend) so the strategy is visible, and FollowMe repeats it there; at S0 that is the cloche tray (D41). (b) FollowMe pulses the next target (empty cell + bin, last item, take one back, or the bin for put-back); tapping the pulsing empty cell also places. The bell lights and pulses only when the tray (at S0: the typed number) is right, so a FollowMe serve is always correct; it is never pressed for the child. (c) At S0, once the cloche tray is complete the cloche lowers on its own, the digits return and the correct digit pulses.
+Why: a count-on demo on an empty S1 tray shows no strategy; §5.5 does not say what happens on a wrong FollowMe serve.
+How to revisit: `runWorked` and `canServe` in `src/game/service/controller.ts`.
+
+**D72. A1/A2 strategy tags, difficulty and demo wording.**
+What: addition `a = b` → `doubles`; `|a − b| = 1` → `nearDouble` (1+2 included); otherwise `countOn`; subtraction → `countBack`. Difficulty 1–5: near-doubles 1, then by larger addend (A1: larger − 1, A2: larger − 4); subtraction by minuend (A1: m − 1, A2: m − 5). The doubles line is split in two ("Three orange. The same!" then "Three and three is six.") to keep every caption ≤ 8 words.
+Why: SPEC §4 names the orderings but not the 1–5 mapping; §13.2's 8-word caption limit.
+How to revisit: `engine/generators.ts`, `engine/demos.ts`.
+
+**D73. Layout mock removed; service controller is a plain class.**
+What: (a) the `?mock` screen, its frames and `layout-mock.spec.ts` are deleted now that the real service screen exists; the approved shots stay in `docs/screens/M1/mock/` and all geometry stays in `SERVICE`. The 844×390 tap-size check moved to `tests/e2e/m1-taps.spec.ts` on the live screen. (b) The service is driven by `ServiceController` (`src/game/service/controller.ts`), a plain class with injected speech, SFX, clocks and timers, read by React through `useSyncExternalStore`: the React-hooks lint (v7) forbids reading refs during render, and the class can be unit-tested without a DOM. (c) The e2e hook gains `setTimeScale` (scales speech timeouts and scripted holds), `setSeed`, `setSkillConfig` and a `service()` state dump; all VITE_E2E-only (build test).
+Why: a second copy of the layout would drift; the lint rule is part of `npm run check`.
+How to revisit: n/a.
+
+**D74. CI actions on current majors.**
+What: `actions/checkout@v7`, `actions/setup-node@v7`, `actions/upload-pages-artifact@v5`, `actions/deploy-pages@v5` (all on the Node 24 runtime), clearing the Node 20 deprecation warnings.
+Why: housekeeping before M1; confirmed by the owner's next push to `main`.
+How to revisit: bump majors when GitHub deprecates a runtime again.
+
 <!-- New decisions go above this line, numbered one higher than the highest existing D<n>. -->
 
 ---
