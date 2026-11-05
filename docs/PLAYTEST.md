@@ -30,7 +30,7 @@ Owner action first: in the GitHub repo, Settings → Pages → Source = **GitHub
 - [x] Pinch, double-tap and long-press do nothing (no zoom, no text selection, no callout menu).
 - [x] Android back gesture / iOS edge swipe shows "Take a break?" instead of leaving; *Keep cooking* closes it.
 - [x] Airplane mode after one visit: the installed app still opens.
-- [ ] `…/number-chef-monster-cafe/?debug` shows the version and "Storage idb" (Persisted / Usage may say "not available on this device" on older iOS; that's expected).
+- [x] `…/number-chef-monster-cafe/?debug` shows the version and "Storage idb" (Persisted / Usage may say "not available on this device" on older iOS; that's expected).
 
 Notes:
 - 2026-11-05 (iPad): Splash → Home → Little Menu → Home all work; art and animation fine for M0.

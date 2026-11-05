@@ -108,7 +108,7 @@ Order inside each milestone is the order I will work in. Every milestone ends wi
 - [x] zero external requests
 - [x] version shown on the `?debug` screen (production builds too, not reachable from child UI)
 - [x] ESLint blocks `localStorage.clear`
-- [ ] Owner check (PLAYTEST, not agent acceptance): installs to Home Screen on iPad/iPhone/Android and launches standalone
+- [x] Owner check (PLAYTEST, not agent acceptance): installs to Home Screen on iPad/iPhone/Android and launches standalone
 
 ### M1 — Core loop vertical slice (5.0 h)
 **Step 1 — static layout mock (0.5 h), then STOP for your OK.** Static React screen with no interaction, screenshots at 1194×834 and 844×390 showing: a `frames1` task at S3 with blue prefill, orange added items and emoji on tinted cells; a `frames2` tray (for M5); the CountTogether bubble (one and two 36-px mini frames vs the 400 px monster zone); the **take one back** button slot beside the bin; the **taken-away row** slot beside a `frames1` tray; the ticket with role colours and dashed blank; the **S0 layout** from §2 item 1 with the cloche. Tap-size measurements annotated.
