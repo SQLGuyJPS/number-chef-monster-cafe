@@ -308,10 +308,15 @@ What: the service layout is one table, `SERVICE` in `src/app/metrics.ts`. (a) **
 Why: D48's band heights could not hold 112-px buttons; §3.3/§5.4 left the slots and the Peek return path to the mock.
 How to revisit: owner's review of `docs/screens/M1/mock/`; geometry changes are edits to `SERVICE` only.
 
-**D63. Service layout after the owner's mock review: ticket centred, monster right, bell beside the tray (amends SPEC §5.4 and D62).**
+**D63. Service layout after the owner's mock review: ticket centred, monster right, bell beside the tray (amends SPEC §5.4 and D62; monster, ticket and bell positions superseded by D64).**
 What: (a) The **ticket** moves to the centre, straight above the tray (x 450–830); the **monster** stands at the right (x 880–1240). (b) The **waiting line stays on the left by the door**, so nothing else moves: monsters wait by the door and walk to the counter on the right. (c) The **bell sits beside the tray**, vertically centred on it (frames1: x 920–1064); at S0 it joins the Peek · display · backspace row; for `frames2` (M5) the two-frame tray shifts left (x 40–1056) to make room. (d) With the bell on the right, the **taken-away row** and the **lifted cloche lid** move to the left of the tray; the **bin** is centred under the tray with take one back to its right. (e) The **CountTogether bubble** sits in the monster zone at one width for one or two frames (428 px), so the counting line never wraps; the monster shrinks to 64 px below the bubble's tail. The tail is drawn in the bubble's own colours (the first mock showed a stray grey triangle, a badly drawn tail).
 Why: owner feedback 2026-11-05 on the M1 mock: the problem should be centred above the tray, and the bell next to the tray makes "the bell sends the food" obvious.
 How to revisit: positions are the `SERVICE` table in `src/app/metrics.ts`. If the line by the door reads poorly once monsters walk across (M2), the fallback is a small row of plate icons by the door instead of silhouettes.
+
+**D64. Monster just left of centre with the ticket beside it; bell back in the bottom band next to the bin (amends D63).**
+What: (a) The **monster** stands just left of centre (x 360–600) and the **ticket** sits right beside it (x 624–1004), so customer and order read as one. The waiting line stays by the door on the left. (b) The **bell** returns to the bottom band, always next to the bin: right of **take one back** when that button shows (add mode, x 954–1098), otherwise straight right of the bin (remove mode and S0, x 810–954). At S0 there is no bin on screen, but the bell keeps that same spot so it never jumps around between stages. (c) The two-frame tray (M5) is centred again. (d) The CountTogether bubble now sits over the monster's spot (x 200–628, y 8–218); the monster shrinks below its tail. Unchanged from D63: bin centred under the tray, taken-away row and lifted cloche lid left of the tray, one bubble width for one or two frames.
+Why: owner feedback 2026-11-05 on mock rev 2: the child should feel they are serving the monster, so it belongs near the middle; the bell should sit by the basket, not by the tray or at the far right.
+How to revisit: the `SERVICE` table in `src/app/metrics.ts`.
 
 <!-- New decisions go above this line, numbered one higher than the highest existing D<n>. -->
 

@@ -48,7 +48,7 @@ Minimums (SPEC §2.2): tray cells ≥ 44 CSS px, buttons ≥ 56 CSS px, measured
 | g1-s0-pad | 1194x834 | digit-8 | 104.5 × 104.5 | yes |
 | g1-s0-pad | 1194x834 | digit-9 | 104.5 × 104.5 | yes |
 | g1-s0-pad | 1194x834 | help | 130.6 × 115.7 | yes |
-| g1-s0-pad | 1194x834 | bell | 111.9 × 111.9 | yes |
+| g1-s0-pad | 1194x834 | bell | 134.3 × 134.3 | yes |
 | g2-s0-cloche | 1194x834 | door | 104.5 × 104.5 | yes |
 | g2-s0-cloche | 1194x834 | tray cell | 82.1 × 82.1 | yes |
 | g2-s0-cloche | 1194x834 | cloche-lid | 176.3 × 176.3 | yes |
@@ -100,7 +100,7 @@ Minimums (SPEC §2.2): tray cells ≥ 44 CSS px, buttons ≥ 56 CSS px, measured
 | g1-s0-pad | 844x390 | digit-8 | 60.7 × 60.7 | yes |
 | g1-s0-pad | 844x390 | digit-9 | 60.7 × 60.7 | yes |
 | g1-s0-pad | 844x390 | help | 75.8 × 67.2 | yes |
-| g1-s0-pad | 844x390 | bell | 65.0 × 65.0 | yes |
+| g1-s0-pad | 844x390 | bell | 78.0 × 78.0 | yes |
 | g2-s0-cloche | 844x390 | door | 60.7 × 60.7 | yes |
 | g2-s0-cloche | 844x390 | tray cell | 47.7 × 47.7 | yes |
 | g2-s0-cloche | 844x390 | cloche-lid | 102.4 × 102.4 | yes |

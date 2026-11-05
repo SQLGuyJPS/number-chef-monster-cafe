@@ -48,36 +48,36 @@ export const TAKEN_FRAME = frameSize(TAKEN_CELL, TAKEN_GAP, TAKEN_PAD); // 324 �
 const TRAY_TOP = 311;
 const centeredX = (w: number) => Math.round((STAGE_W - w) / 2);
 
-/** Bell beside a tray, vertically centred on the tray band (D63). */
-const BELL = 144;
-const bellRightOf = (trayRight: number): Rect => ({
-  x: trayRight + 32,
-  y: TRAY_TOP + Math.round((FRAME.h - BELL) / 2),
-  w: BELL,
-  h: BELL,
-});
-const FRAMES2_W = 2 * FRAME.w + FRAMES_GAP;
-const FRAMES2_X = 40;
+const BIN: Rect = { x: centeredX(300), y: 570, w: 300, h: 130 };
+const TAKE_BACK: Rect = { x: BIN.x + BIN.w + 20, y: 582, w: 124, h: 112 };
+/** The bell sits right of the bin, or right of "take one back" when that button shows (D64). */
+const bellAfter = (r: Rect): Rect => ({ x: r.x + r.w + 20, y: 562, w: 144, h: 144 });
 const BUBBLE_W = 2 * MINI_FRAME.w + 12 + 16; // two mini frames + gap + padding; used for one frame too
+const MONSTER: Rect = { x: 360, y: 52, w: 240, h: 240 };
+// Top at y 8 so the bubble clears the waiting line's heads (y ≈ 218) on its left.
+const BUBBLE: Rect = { x: MONSTER.x + MONSTER.w - BUBBLE_W + 28, y: 8, w: BUBBLE_W, h: 210 };
 
 /**
- * Service screen layout (SPEC §5.4 as amended by D63; S0 band per D48/D62). Fixed by the M1 layout
- * mock. Bands: ticket (centre) and monster (right) y 40–300 · tray y 311–519 · bottom y 570–700.
- * The ticket sits straight above the tray so the problem and the plate read as one column; the bell
- * sits beside the tray so serving reads as "send this plate" (D63).
+ * Service screen layout (SPEC §5.4 as amended by D63/D64; S0 band per D48/D62). Fixed by the M1
+ * layout mock. Bands: monster (just left of centre) with the ticket at its right, y 40–300 · tray
+ * y 311–519 · bottom y 570–700 (Pip's hat, bin, take one back, bell). The monster stays near the
+ * middle so the child feels they are serving it; the ticket sits beside it so order and customer
+ * read as one (D64).
  */
 export const SERVICE = {
   door: { x: 16, y: 16, w: 112, h: 112 },
-  /** Waiting monsters line up by the door (left); the served monster walks to the counter (right). */
-  queue: { x: 0, y: 150, w: 400, h: 150 },
-  ticket: { x: centeredX(380), y: 50, w: 380, h: 220 },
-  monsterZone: { x: 880, y: 40, w: 360, h: 260 },
+  /** Waiting monsters line up by the door, left of the monster at the counter. */
+  queue: { x: 0, y: 150, w: 340, h: 150 },
+  monsterZone: MONSTER,
+  ticket: { x: MONSTER.x + MONSTER.w + 24, y: 50, w: 380, h: 220 },
   trayFrames1: { x: centeredX(FRAME.w), y: TRAY_TOP, w: FRAME.w, h: FRAME.h },
-  /** M5: the two-frame tray shifts left so the bell still fits beside it. */
-  trayFrames2: { x: FRAMES2_X, y: TRAY_TOP, w: FRAMES2_W, h: FRAME.h },
-  bell: bellRightOf(centeredX(FRAME.w) + FRAME.w),
-  bellFrames2: bellRightOf(FRAMES2_X + FRAMES2_W),
-  /** Left of a centred frames1 tray (the bell has the right side); missing-subtrahend forms only. */
+  trayFrames2: {
+    x: centeredX(2 * FRAME.w + FRAMES_GAP),
+    y: TRAY_TOP,
+    w: 2 * FRAME.w + FRAMES_GAP,
+    h: FRAME.h,
+  },
+  /** Left of a centred frames1 tray; missing-subtrahend forms only (D63). */
   takenAway: {
     x: centeredX(FRAME.w) - 28 - TAKEN_FRAME.w,
     y: TRAY_TOP + Math.round((FRAME.h - TAKEN_FRAME.h) / 2),
@@ -86,18 +86,21 @@ export const SERVICE = {
   },
   help: { x: 40, y: 576, w: 140, h: 124 },
   /** Bin centred under the tray; "take one back" right of it (add mode only). */
-  bin: { x: centeredX(300), y: 570, w: 300, h: 130 },
-  takeBack: { x: centeredX(300) + 320, y: 582, w: 124, h: 112 },
-  /** S0 (D48, D62, D63): Peek · display · backspace · bell in one row above the digit row. */
-  s0Peek: { x: 376, y: 292, w: 128, h: 112 },
+  bin: BIN,
+  takeBack: TAKE_BACK,
+  /** Bell when "take one back" shows (add mode) … */
+  bell: bellAfter(TAKE_BACK),
+  /** … and when it does not (remove mode, and S0, where the bell keeps the same spot, D64). */
+  bellNoTakeBack: bellAfter(BIN),
+  /** S0 (D48, D62): Peek · display · backspace in one row above the digit row. */
+  s0Peek: { x: 360, y: 292, w: 128, h: 112 },
   s0Display: { x: 520, y: 292, w: 240, h: 112 },
   s0Backspace: { x: 776, y: 292, w: 128, h: 112 },
-  s0Bell: { x: 928, y: 288, w: 120, h: 120 },
   s0Digits: { x: centeredX(10 * BUTTON_MIN + 9 * 8), y: 414, w: 10 * BUTTON_MIN + 9 * 8, h: BUTTON_MIN },
   s0DigitGap: 8,
   /** Lifted cloche lid left of the S3 tray; tapping it closes the cloche and brings the digits back (D62). */
   clocheLid: { x: 200, y: 330, w: 150, h: 150 },
-  /** CountTogether bubble in the monster zone, one width for one or two frames; the monster shrinks below its tail (D63). */
-  bubble: { x: STAGE_W - 6 - BUBBLE_W, y: 40, w: BUBBLE_W, h: 196 },
-  monsterAside: { x: 1172, y: 240, w: 64, h: 64 },
+  /** CountTogether bubble over the monster's spot, one width for one or two frames; the monster shrinks below its tail. */
+  bubble: BUBBLE,
+  monsterAside: { x: BUBBLE.x + BUBBLE.w - 92, y: BUBBLE.y + BUBBLE.h + 22, w: 64, h: 64 },
 } as const satisfies Record<string, Rect | number>;

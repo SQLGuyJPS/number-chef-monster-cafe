@@ -50,7 +50,7 @@ const tok = (text: string, role?: TicketToken['role'], blank?: boolean): TicketT
 const op = (text: string): TicketToken => ({ text });
 
 function Monster({ aside }: { aside?: boolean }) {
-  const r: Rect = aside ? L.monsterAside : { x: 940, y: 52, w: 240, h: 240 };
+  const r: Rect = aside ? L.monsterAside : L.monsterZone;
   return (
     <div className="monster-slot" style={at(r)}>
       <PlaceholderMonster size={r.w} />
@@ -106,18 +106,16 @@ function Frames2({ cells }: { cells: CellView[] }) {
 function BottomBand({
   food,
   takeBack = true,
-  bell = L.bell,
 }: {
   food: FoodId;
   takeBack?: boolean;
-  bell?: Rect | null;
 }) {
   return (
     <>
       <PipHat rect={L.help} />
       <Bin rect={L.bin} food={food} />
       {takeBack && <TakeBack rect={L.takeBack} food={food} />}
-      {bell && <Bell rect={bell} />}
+      <Bell rect={takeBack ? L.bell : L.bellNoTakeBack} />
     </>
   );
 }
@@ -156,7 +154,7 @@ function Bubble({
           gap={MINI_GAP}
           pad={MINI_PAD}
           x={left + i * (MINI_FRAME.w + 12)}
-          y={50}
+          y={58}
           className="mini"
         />
       ))}
@@ -202,7 +200,7 @@ export function LayoutMock({ frame }: { frame: string }) {
           <Monster />
           <Ticket rect={L.ticket} food="strawberry" tokens={[tok('8', 'prefill'), op('+'), tok('5', 'child'), op('='), tok('?', 'result', true)]} />
           <Frames2 cells={cellsOf('strawberry', 8, 4, { pops: true, popFrom: 8 })} />
-          <BottomBand food="strawberry" bell={L.bellFrames2} />
+          <BottomBand food="strawberry" />
         </Chrome>
       );
     case 'c1-count-together-1':
@@ -224,7 +222,7 @@ export function LayoutMock({ frame }: { frame: string }) {
           <Bubble rect={L.bubble} frames={[cells.slice(0, 10), cells.slice(10)]} caption="… eleven, twelve, thirteen!" />
           <Ticket rect={L.ticket} food="strawberry" tokens={[tok('8', 'prefill'), op('+'), tok('5', 'child'), op('='), tok('?', 'result', true)]} />
           <Frames2 cells={cellsOf('strawberry', 8, 3)} />
-          <BottomBand food="strawberry" bell={L.bellFrames2} />
+          <BottomBand food="strawberry" />
         </Chrome>
       );
     }
@@ -251,7 +249,7 @@ export function LayoutMock({ frame }: { frame: string }) {
         </Chrome>
       );
     case 'g1-s0-pad':
-      // S0 (D48, D63): display row (with the bell) + digit row in the tray band; Pip's hat bottom-left.
+      // S0 (D48, D64): display row + digit row in the tray band; hat and bell in the bottom band.
       return (
         <Chrome>
           <Monster />
@@ -261,7 +259,7 @@ export function LayoutMock({ frame }: { frame: string }) {
           <Backspace rect={L.s0Backspace} />
           <Digits />
           <PipHat rect={L.help} />
-          <Bell rect={L.s0Bell} />
+          <Bell rect={L.bellNoTakeBack} />
         </Chrome>
       );
     case 'g2-s0-cloche':
