@@ -25,8 +25,8 @@ Tier 2 (rough, re-estimated when you pick one): M4 2.0 · M5 3.5 · M7 3.0 · M8
 
 None of these re-open a decided item. On approval I record each accepted one as a DECISIONS entry (D48+). Items marked **decision** need your answer; the rest I will just do as proposed unless you object.
 
-1. **S0 number pad does not fit the bottom band (decision-light).** §5.4 puts ten digit buttons ≥ 112 logical px (≈ 1192 px with 8 px gaps) in the bin area, but Pip's hat sits bottom-left and the bell bottom-right, leaving ≈ 1000 px. *Proposal:* at S0 the digit row sits in the tray band (y ≈ 400–512) with the answer display, backspace and Peek above it (y ≈ 310–390); the bottom band keeps Pip's hat and the bell. When Peek, Worked or FollowMe lifts the cloche, the full-size S3 tray temporarily takes the tray band (FollowMe needs ≥ 44 CSS px cells) and the digit row returns for the final typing (D41). I add an S0 frame to the M1 layout mock so you can see it before anything is built.
-2. **WebKit is not available in this cloud container (decision).** Only Playwright's Chromium is pre-installed here; the WebKit iPad / iPhone projects (M1 needs one, M2 needs the matrix) cannot run unless WebKit can be installed for the project's Playwright version. *Proposal:* I try installing WebKit for the pinned Playwright in M0. If that fails, WebKit projects run on your Windows machine (`npm run test:e2e -- --project=webkit-ipad`) and I report the Chromium results plus "WebKit not run here". Please say which you prefer if the install fails.
+1. **S0 number pad does not fit the bottom band — APPROVED by the owner 2026-11-05.** §5.4 puts ten digit buttons ≥ 112 logical px (≈ 1192 px with 8 px gaps) in the bin area, but Pip's hat sits bottom-left and the bell bottom-right, leaving ≈ 1000 px. *Proposal:* at S0 the digit row sits in the tray band (y ≈ 400–512) with the answer display, backspace and Peek above it (y ≈ 310–390); the bottom band keeps Pip's hat and the bell. When Peek, Worked or FollowMe lifts the cloche, the full-size S3 tray temporarily takes the tray band (FollowMe needs ≥ 44 CSS px cells) and the digit row returns for the final typing (D41). I add an S0 frame to the M1 layout mock so you can see it before anything is built.
+2. **WebKit is not available in this cloud container — DECIDED 2026-11-05: WebKit projects run on the owner's Windows machine; agent reports run Chromium only and say "WebKit not run here".** Only Playwright's Chromium is pre-installed here; the WebKit iPad / iPhone projects (M1 needs one, M2 needs the matrix) cannot run unless WebKit can be installed for the project's Playwright version. *Proposal:* I try installing WebKit for the pinned Playwright in M0. If that fails, WebKit projects run on your Windows machine (`npm run test:e2e -- --project=webkit-ipad`) and I report the Chromium results plus "WebKit not run here". Please say which you prefer if the install fails.
 3. **`factKey` scheme for missing-amount forms.** §3.1 gives examples but no rule. *Proposal:* `skill:form:operands`; addition keys sort operands (`A2:+:3,5`); `a+?=c` and `?+a=c` share one key `A4:?add:a,c` (they are commuted partners, so they share a box per §4.1 step 4); `10−a=?` (`A3:-:10,a`) and `10−?=a` (`A3:?sub:10,a`) are separate keys. Consequence: A3's canonical add/sub share is 9 : 18, so with `ops = both` the ±1 balance target for A3 is about one third addition (D43b).
 4. **Coins before M3a.** M2 shows coins in the jar but persistence is M3a. *Proposal:* M2 keeps the jar in memory (a reload resets it); M3a starts writing the frozen `coin` events. PLAYTEST.md for M2 says so. The M2 warm-up "shown once" flag already uses the `meta` store (D47i), so the warm-up does not repeat after a reload.
 5. **Where the `?debug` stage/operations picker stores its values (M1–M2).** *Proposal:* in the per-device `settings` store skeleton under a `debugSkillConfig` key, so they survive reloads during playtests; M3a ignores and deletes the key once `skillConfig` events exist.
@@ -94,7 +94,7 @@ Order inside each milestone is the order I will work in. Every milestone ends wi
 8. PWA: manifest (landscape, standalone, `./` scope), `vite-plugin-pwa` with `registerType: 'prompt'`, `cacheId: 'ncmc'`, `injectRegister: null`; icons rasterized by `scripts/make-icons.ts` via Playwright Chromium from a placeholder monster SVG.
 9. CSP meta injected in production builds only (small Vite plugin) + build test.
 10. `?debug` screen (version, build date, storage state); `VITE_E2E` hook skeleton; production-bundle-has-no-`__ncmc` test.
-11. Playwright config with M0/M1 projects; try installing WebKit (risk 2). E2E: portrait tap hits rotated control, rotate back keeps state, back shows dialog, offline reload (Chromium), zero external requests, no zoom/scroll/long-press menu.
+11. Playwright config with M0/M1 projects (WebKit projects defined but run on the owner's machine, §2 item 2). E2E: portrait tap hits rotated control, rotate back keeps state, back shows dialog, offline reload (Chromium), zero external requests, no zoom/scroll/long-press menu.
 12. `.github/workflows/deploy.yml` (checkout → setup-node → `npm ci` → `npm run check` → build → upload-pages-artifact → deploy-pages).
 13. PLAYTEST.md created (M0 owner checks: Pages URL installs and launches standalone on iPad, iPhone, Android); screenshots; commit.
 
@@ -125,7 +125,7 @@ Order inside each milestone is the order I will work in. Every milestone ends wi
 9. Audio: `speech.ts` (`speak` resolves on end or timeout, voice pick, `cancel()` quirk, latest-wins counting), minimal SFX (place, remove, bell, hm).
 10. `?debug` stage/operations picker.
 11. `lint:content` v1 (A1/A2 pool sizes, independent evaluator, spoken-text rules, emoji allowlist with `scripts/emoji-versions.json`).
-12. E2E (Chromium landscape + one WebKit iPad if available): stages, fill order, remove-from-end, locks, wrong→wrong→demo→FollowMe, Help-then-wrong → Worked, speech stubbed to never end, 844×390 tap targets; M0 portrait test still green.
+12. E2E (Chromium landscape here; one WebKit iPad project run by the owner): stages, fill order, remove-from-end, locks, wrong→wrong→demo→FollowMe, Help-then-wrong → Worked, speech stubbed to never end, 844×390 tap targets; M0 portrait test still green.
 13. Screenshots, PLAYTEST, DECISIONS, commit, stop.
 
 **Accept (SPEC §14 M1)**
@@ -210,6 +210,6 @@ Order inside each milestone is the order I will work in. Every milestone ends wi
 ## 6. What I need from you
 
 1. Approve this plan (or adjust the estimate or order).
-2. Answer §2 item 2 (WebKit fallback) — only matters if the in-container install fails.
+2. ~~WebKit fallback~~ — answered: WebKit runs on your Windows machine.
 3. Any objection to the proposed resolutions in §2 (otherwise they become D48+ when M0 starts).
 4. M0 owner action: set Pages source to "GitHub Actions" once you push.
