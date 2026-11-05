@@ -24,12 +24,12 @@ Owner action first: in the GitHub repo, Settings → Pages → Source = **GitHub
 
 - [x] The Pages URL loads (Splash: monster, "Tap to start").
 - [x] **iPad:** Share → Add to Home Screen; the icon is the green monster; it launches standalone (no Safari bars).
-- [ ] **iPhone:** same; launches standalone; landscape fills the screen (notch side has no clipped buttons).
-- [ ] **Android:** Chrome menu → Install app; launches standalone and stays landscape.
+- [x] **iPhone:** same; launches standalone; landscape fills the screen (notch side has no clipped buttons).
+- [x] **Android:** Chrome menu → Install app; launches standalone and stays landscape.
 - [x] Portrait (rotation lock on): the café shows sideways with a curved-arrow cue for ~6 s; turning the device makes it upright; buttons work both ways. (iPad, 2026-11-05)
-- [ ] Pinch, double-tap and long-press do nothing (no zoom, no text selection, no callout menu).
-- [ ] Android back gesture / iOS edge swipe shows "Take a break?" instead of leaving; *Keep cooking* closes it.
-- [ ] Airplane mode after one visit: the installed app still opens.
+- [x] Pinch, double-tap and long-press do nothing (no zoom, no text selection, no callout menu).
+- [x] Android back gesture / iOS edge swipe shows "Take a break?" instead of leaving; *Keep cooking* closes it.
+- [x] Airplane mode after one visit: the installed app still opens.
 - [ ] `…/number-chef-monster-cafe/?debug` shows the version and "Storage idb" (Persisted / Usage may say "not available on this device" on older iOS; that's expected).
 
 Notes:
