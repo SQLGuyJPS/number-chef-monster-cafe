@@ -1,0 +1,29 @@
+{
+  "$comment": "SPEC §7.1, D35: Unicode version of each emoji the app may use (allow) and known rejects (deny, with why). lint:content fails on any pictographic codepoint in src/ that is not allowed here at Unicode <= 9.0.",
+  "maxUnicode": 9.0,
+  "allow": {
+    "1F36A": { "name": "cookie", "unicode": 6.0 },
+    "1F369": { "name": "doughnut", "unicode": 6.0 },
+    "1F355": { "name": "pizza", "unicode": 6.0 },
+    "1F354": { "name": "hamburger", "unicode": 6.0 },
+    "1F32D": { "name": "hot dog", "unicode": 8.0 },
+    "1F950": { "name": "croissant", "unicode": 9.0 },
+    "1F35E": { "name": "bread", "unicode": 6.0 },
+    "1F370": { "name": "shortcake", "unicode": 6.0 },
+    "1F353": { "name": "strawberry", "unicode": 6.0 },
+    "1F34E": { "name": "red apple", "unicode": 6.0 },
+    "1F34C": { "name": "banana", "unicode": 6.0 },
+    "1F34A": { "name": "tangerine", "unicode": 6.0 },
+    "1F359": { "name": "rice ball", "unicode": 6.0 },
+    "1F366": { "name": "soft ice cream", "unicode": 6.0 },
+    "1F955": { "name": "carrot", "unicode": 9.0 },
+    "1F32E": { "name": "taco", "unicode": 8.0 }
+  },
+  "deny": {
+    "1F352": { "name": "cherries", "unicode": 6.0, "why": "shows two cherries (D35)" },
+    "1F95E": { "name": "pancakes", "unicode": 9.0, "why": "shows a stack (D35)" },
+    "1F9C1": { "name": "cupcake", "unicode": 11.0, "why": "Unicode 11" },
+    "1F96A": { "name": "sandwich", "unicode": 10.0, "why": "Unicode 10" },
+    "1F967": { "name": "pie", "unicode": 10.0, "why": "Unicode 10" }
+  }
+}
