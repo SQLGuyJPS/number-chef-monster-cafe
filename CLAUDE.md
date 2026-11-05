@@ -1,14 +1,14 @@
-# Number Chef Monsters — Claude Code conventions
+# Number Chef: Monster Café — Claude Code conventions
 
 A math game for a young child. The full design is in `docs/SPEC.md` and is the source of truth. Read it before changing anything. Reasoning behind departures from the original idea is in `docs/DECISIONS.md`. Do not re-litigate decided items; if you find a real problem, add a DECISIONS.md entry and ask.
 
 ## Working agreement
-- Build in the milestones listed in SPEC §14. **Tier 1 (M0, M1, M2, M3a, M3b; target ≈ 10 h) is the target for a playable game**; Tier 2 (M4+) is bonus work in any order the owner picks, with no hour cap. **Stop after each milestone** (M3a and M3b each count) and wait for the owner's playtest feedback. Do not start the next milestone unprompted. M1 starts with a static layout mock; stop for the owner's OK before building interaction (D36).
+- Build in the milestones listed in SPEC §14. **Tier 1 (M0, M1, M2, M3a, M3b; ≈ 10 h as a guide, not a cap, D44) is the target for a playable game**; Tier 2 (M4+) is bonus work in any order the owner picks, with no hour cap. **Stop after each milestone** (M3a and M3b each count) and wait for the owner's playtest feedback. Do not start the next milestone unprompted. M1 starts with a static layout mock; stop for the owner's OK before building interaction (D36).
 - First task of the project: write `docs/PLAN.md` (steps, order, risks, a redone hour estimate per milestone, D36) and wait for approval. The risks section carries the platform risks listed in D37.
 - Record every assumption you make that the spec doesn't cover in `docs/DECISIONS.md` (numbered one higher than the highest `D<n>` already in the file, with Why and How-to-revisit).
 - The owner is technical but is the playtester, not the reviewer of every line. Keep explanations short; flag only what needs a decision.
 - Windows 11 host. Scripts must be cross-platform Node (no `rm -rf`, no bash-only syntax in package.json). Use `cross-env` if env vars are needed.
-- `git init` at M0. Commit at the end of each milestone (and sensible checkpoints). Never push unless asked.
+- The Git repo already exists (no `git init`). Playtest builds reach the devices when the owner pushes to `main` (D44). Commit at the end of each milestone (and sensible checkpoints). Never push unless asked.
 
 ## Commands
 ```
@@ -40,8 +40,8 @@ E2E runs against the production build with `VITE_E2E=1`; hooks at `window.__ncmc
 - No buzzers, fail screens, red X's, lost coins, countdown visible to the child, streaks, daily-login rewards, ads, or external links.
 - The play-time limit (SPEC §6) is optional and **off by default** (D27); nothing may lock, count down or show a cue unless a parent enabled it. When enabled, the lock is persistent: reload, relaunch and starting another service never refill it; only the parent gate (or an explicitly chosen auto-refill mode) does. Allowance time is a monotonic active-time accumulator, never wall-clock subtraction.
 - Serving is always an explicit bell press; never auto-serve (FollowMe pulses the bell and the child presses it).
-- A reloaded or relaunched service is only ever *offered* ("Continue dinner service?"), never resumed silently, and never offered while the café is locked (D33).
-- Coins only ever go down through a confirmed shop purchase.
+- A reloaded or relaunched service is only ever *offered* ("Continue dinner service?"), never resumed silently, and never offered while the café is locked or after an unlock: the lock clears the resume snapshot (D33, D40).
+- Coins only ever go down through a confirmed shop purchase (or an explicit parent Reset / Replace import, D44).
 - Touch hardening (SPEC §2.3): no zoom, scroll, selection, or long-press menus on the play surface; single active pointer; reduced-motion honored.
 - Primary tap targets ≥ 44 CSS px at 844×390 (cells) and ≥ 56 (buttons).
 
