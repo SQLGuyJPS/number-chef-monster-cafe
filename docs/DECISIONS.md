@@ -393,6 +393,11 @@ What: the bin shows two overlapping rows (four behind, five in front) with about
 Why: the outer items were clipped and looked like they were falling out; the heap looked sparse.
 How to revisit: `.bin-heap` in `service.css`, rows in `Bin` (`ServiceParts.tsx`).
 
+**D80. WebKit e2e runs locally too, not only in the cloud (owner).**
+What: amends D49. Every session that has Playwright's WebKit runs the WebKit projects, the owner's Windows machine included (`npx playwright test` runs the whole M1 set there: 62 passed on 2026-11-06). The cloud setup script still installs WebKit so cloud sessions can too. A session without WebKit says so rather than skipping silently.
+Why: the cloud-only note came from an earlier session that had no WebKit; it never meant local runs should skip it.
+How to revisit: `playwright.config.ts` projects; the setup script line in D49.
+
 <!-- New decisions go above this line, numbered one higher than the highest existing D<n>. -->
 
 ---
