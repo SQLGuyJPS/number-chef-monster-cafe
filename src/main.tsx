@@ -31,6 +31,8 @@ if (flags.debug) {
   installAudioResume(window);
 }
 
-createRoot(document.getElementById('root')!).render(
+const root = createRoot(document.getElementById('root')!);
+
+root.render(
   <StrictMode>{flags.debug ? <DebugScreen /> : <App allowRotate={flags.allowRotate} />}</StrictMode>,
 );

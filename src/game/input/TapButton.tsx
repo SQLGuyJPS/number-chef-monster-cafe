@@ -9,6 +9,8 @@ interface Props {
   testId?: string;
   /** Rendered but taps do nothing (aria-disabled keeps events flowing for a later wobble). */
   inert?: boolean;
+  /** Marks a tap target for the size assertions (e2e, CLAUDE.md: ≥ 44 cells, ≥ 56 buttons). */
+  tapKind?: 'button' | 'cell';
 }
 
 /**
@@ -17,7 +19,7 @@ interface Props {
  * the up position is checked against the element's screen rect, which stays an exact rectangle
  * under the 90° stage rotation.
  */
-export function TapButton({ onTap, children, className, style, label, testId, inert }: Props) {
+export function TapButton({ onTap, children, className, style, label, testId, inert, tapKind }: Props) {
   const pointer = useRef<number | null>(null);
 
   return (
@@ -28,6 +30,7 @@ export function TapButton({ onTap, children, className, style, label, testId, in
       aria-label={label}
       aria-disabled={inert || undefined}
       data-testid={testId}
+      data-tap={tapKind}
       onPointerDown={(e) => {
         pointer.current = e.pointerId;
       }}

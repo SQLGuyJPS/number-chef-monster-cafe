@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getStorageBoot } from './runtime';
 import { getSwStatus } from './pwa';
 import { APP_NAME } from './identity';
+import { SkillPicker } from './SkillPicker';
 
 interface Info {
   rows: [string, string][];
@@ -62,6 +63,7 @@ export function DebugScreen() {
         </tbody>
       </table>
       {!info && <p>Loading…</p>}
+      <SkillPicker />
     </div>
   );
 }

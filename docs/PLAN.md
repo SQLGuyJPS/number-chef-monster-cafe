@@ -1,6 +1,6 @@
 # Build plan — Number Chef: Monster Café
 
-Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05**, waiting for the owner's M0 checks. Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
+Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**, waiting for the owner's M1 playtest. Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
 
 ---
 
@@ -129,17 +129,17 @@ Order inside each milestone is the order I will work in. Every milestone ends wi
 13. Screenshots, PLAYTEST, DECISIONS, commit, stop.
 
 **Accept (SPEC §14 M1)**
-- [ ] layout mock approved by the owner before interaction
-- [ ] unit tests for generators / tray / check / demos pass
-- [ ] all four stages playable for A1 and A2 (incl. S0 help path on the cloche tray)
-- [ ] fill order, remove-from-end and lock rules (§3.3) verified by e2e (Chromium landscape + one WebKit iPad project)
-- [ ] `toStageCoords` unit-tested for portrait; M0 portrait tap test still green
-- [ ] no auto-serve (FollowMe pulses the bell, the child presses it)
-- [ ] wrong → wrong → demo → follow-me completes
-- [ ] Help at attempt 1 then a wrong serve goes straight to Worked
-- [ ] speech never blocks the flow (`speechSynthesis` stubbed to never fire `end`)
-- [ ] 844×390 tap-target assertions pass
-- [ ] `attempt` and `coin` event shapes fixed
+- [x] layout mock approved by the owner before interaction (2026-11-05, rev 4; layout in D62–D65, `SERVICE` in `src/app/metrics.ts`, shots in `docs/screens/M1/mock/`)
+- [x] unit tests for generators / tray / check / demos pass (`tests/unit`: generators, tray incl. every pool item × every stage, demos end state, attempt machine, events, number words)
+- [x] all four stages playable for A1 and A2 (incl. S0 help path on the cloche tray); stage/ops via the `?debug` picker
+- [x] fill order, remove-from-end and lock rules (§3.3) verified by e2e (Chromium landscape + one WebKit iPad project)
+- [x] `toStageCoords` unit-tested for portrait; M0 portrait tap test still green
+- [x] no auto-serve (FollowMe pulses the bell, the child presses it)
+- [x] wrong → wrong → demo → follow-me completes
+- [x] Help at attempt 1 then a wrong serve goes straight to Worked
+- [x] speech never blocks the flow (`speechSynthesis` stubbed to never fire `end`, every M1 e2e; one flow at real time)
+- [x] 844×390 tap-target assertions pass (`m1-taps.spec.ts`, WebKit iPhone 13)
+- [x] `attempt` and `coin` event shapes fixed (`src/engine/events.ts`, key-set test)
 
 ### M2 — Café service (5.0 h)
 1. Engine: session builder (§4.1): pool + ops filter, box weights, new-fact cap and difficulty order, no-repeat window (requeues exempt), food/monster rules, add/sub balance, requeue placement and append, pool-size guard; determinism tests.

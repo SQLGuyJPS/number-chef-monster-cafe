@@ -303,6 +303,71 @@ What: (a) The e2e `overscroll-behavior` assertion is skipped where the engine do
 Why: each is a gap between the spec and what the tools can do on the owner's Windows machine, or wording the spec left open.
 How to revisit: (a) drop the guard if the cloud WebKit reports the property; (d) add subsets if localization is ever wanted.
 
+**D62. M1 layout mock geometry (service screen; positions of the bell, bin, taken-away row, cloche lid and bubble amended by D63).**
+What: the service layout is one table, `SERVICE` in `src/app/metrics.ts`. (a) **S0 rows are 112 logical px tall**, not the ≈ 80 px D48 sketched: Peek, the answer display and backspace sit at y 292–404 and the digit row at y 414–526, so every S0 button stays ≥ 56 CSS px at 844×390 (60.7 measured). (b) **Take one back** sits right of the bin (x 650–774, bottom band), add mode only; remove mode has no such button (tapping the bin puts one back, D42). (c) **Taken-away row** is a 2 × 5 grid of 56-px dashed slots right of the centred `frames1` tray (x 916–1240), tapped as one target (175 × 75 CSS px at 844×390); the tray keeps its size and position. (d) **CountTogether** mini frames keep 36-px cells but use a 3 px gap and 4 px padding (200 px per frame), so the two-frame bubble is 432 px wide; it overlaps the monster zone by 32 px and the monster shrinks to its left (x 300–410). (e) Tray group colour is a 5 px ring on the cell, so the five-wall tint stays visible under the emoji. (f) **S0 cloche:** while it is lifted (Peek, Worked, FollowMe) the bin and take-one-back return to the bottom band and the lifted lid sits right of the tray with a "123" badge; tapping the lid lowers the cloche and brings the digits back. After Worked/FollowMe the digits return on their own (D41). (g) The mock is reachable at `?mock=<frame>` only in `VITE_E2E=1` builds (`npx cross-env VITE_E2E=1 vite` for dev); production builds drop it (build test).
+Why: D48's band heights could not hold 112-px buttons; §3.3/§5.4 left the slots and the Peek return path to the mock.
+How to revisit: owner's review of `docs/screens/M1/mock/`; geometry changes are edits to `SERVICE` only.
+
+**D63. Service layout after the owner's mock review: ticket centred, monster right, bell beside the tray (amends SPEC §5.4 and D62; monster, ticket and bell positions superseded by D64).**
+What: (a) The **ticket** moves to the centre, straight above the tray (x 450–830); the **monster** stands at the right (x 880–1240). (b) The **waiting line stays on the left by the door**, so nothing else moves: monsters wait by the door and walk to the counter on the right. (c) The **bell sits beside the tray**, vertically centred on it (frames1: x 920–1064); at S0 it joins the Peek · display · backspace row; for `frames2` (M5) the two-frame tray shifts left (x 40–1056) to make room. (d) With the bell on the right, the **taken-away row** and the **lifted cloche lid** move to the left of the tray; the **bin** is centred under the tray with take one back to its right. (e) The **CountTogether bubble** sits in the monster zone at one width for one or two frames (428 px), so the counting line never wraps; the monster shrinks to 64 px below the bubble's tail. The tail is drawn in the bubble's own colours (the first mock showed a stray grey triangle, a badly drawn tail).
+Why: owner feedback 2026-11-05 on the M1 mock: the problem should be centred above the tray, and the bell next to the tray makes "the bell sends the food" obvious.
+How to revisit: positions are the `SERVICE` table in `src/app/metrics.ts`. If the line by the door reads poorly once monsters walk across (M2), the fallback is a small row of plate icons by the door instead of silhouettes.
+
+**D64. Monster just left of centre with the ticket beside it; bell back in the bottom band next to the bin (amends D63; monster, ticket and bubble positions superseded by D65).**
+What: (a) The **monster** stands just left of centre (x 360–600) and the **ticket** sits right beside it (x 624–1004), so customer and order read as one. The waiting line stays by the door on the left. (b) The **bell** returns to the bottom band, always next to the bin: right of **take one back** when that button shows (add mode, x 954–1098), otherwise straight right of the bin (remove mode and S0, x 810–954). At S0 there is no bin on screen, but the bell keeps that same spot so it never jumps around between stages. (c) The two-frame tray (M5) is centred again. (d) The CountTogether bubble now sits over the monster's spot (x 200–628, y 8–218); the monster shrinks below its tail. Unchanged from D63: bin centred under the tray, taken-away row and lifted cloche lid left of the tray, one bubble width for one or two frames.
+Why: owner feedback 2026-11-05 on mock rev 2: the child should feel they are serving the monster, so it belongs near the middle; the bell should sit by the basket, not by the tray or at the far right.
+How to revisit: the `SERVICE` table in `src/app/metrics.ts`.
+
+**D65. Monster centred, ticket right beside it; ticket slides right during CountTogether (amends D64).**
+What: (a) The **monster** is centred (x 520–760). (b) The **ticket** (360 wide) sits 24 px to its right (x 784–1144), the same gap as mock rev 3. (c) During **CountTogether** the bubble is centred over the monster's spot (x 426–854) and the ticket slides right to x 904–1264, leaving a 50 px gap; it slides back afterwards. Unchanged from D64: bell in the bottom band next to the bin (after take one back when that shows), waiting line by the door, bin centred under the tray, taken-away row and cloche lid left of the tray.
+Why: owner feedback 2026-11-05 on mock rev 3: the off-centre monster did not feel right; the bubble and ticket were too close.
+How to revisit: `SERVICE` in `src/app/metrics.ts` (`ticket`, `ticketCounting`, `bubble`).
+
+**D66. M1 service scope: a stand-in order plan, a short "Yum!", and back to the menu.**
+What: until the §4.1 session builder (M2), `engine/plan.ts` draws 6 orders uniformly from the skill's filtered pool, with the no-repeat window (§4.1 step 5/9) and no food twice in a row; one placeholder monster serves every order. A correct serve plays a ≈ 1.6 s skippable "Yum! Eight!" instead of the M2 eat sequence; no coins are shown (D51). After the last order the service ends back on the menu board (Results is M2). `attempt` and `coin` events are built with the frozen shapes and kept in memory (visible only through the e2e probe) until M3a writes them. The A3 tile is shown but inert until M2; the A1 tile glows (first-run rule; last-played glow is M2). Close the café writes nothing yet (M3a: partial `serviceEnd`).
+Why: M1 is the core loop; the session builder, eating, Results and persistence are M2/M3a work.
+How to revisit: replaced piece by piece in M2 and M3a.
+
+**D67. S0 Peek marks Help but plays no CountTogether and does not advance the attempt.**
+What: Peek before the first serve makes a correct first serve `afterHint` (D41). It only lifts the cloche on the S3 model, so the attempt stays 1: a wrong serve after Peek still gets PlateCount → CountTogether, and a correct second serve is `fixed`. Help (Pip's hat) keeps §3.4's rule (attempt 1 → CountTogether → attempt 2). While the cloche is up for Peek the bell is disabled; tapping the lid (or Help) lowers it.
+Why: D41 says Peek counts as Help for the outcome, but Peek shows a model, not the CountTogether script, so advancing to attempt 2 would skip CountTogether without having played it.
+How to revisit: `peek` in `engine/attempt.ts`.
+
+**D68. CountTogether details.**
+What: the bell is disabled while Pip is counting; the tray stays editable throughout (SPEC §5.5). When the count ends the bubble stays up as a model until the next serve, which is evaluated as usual. Subtraction result forms count back from the minuend as the orange items fade ("Eight. Seven, six, five. Five left!"); missing-subtrahend forms (M2) end on "Three taken away!" (`ct.away`), missing-addend forms on "Three more!".
+Why: §5.5 does not say whether the bubble stays, whether the child may serve mid-count, or how subtraction is counted.
+How to revisit: `engine/countTogether.ts`, `runCountTogether` in `src/game/service/controller.ts`.
+
+**D69. `TrayTask` refinement for S0.**
+What: at S0 `toTrayTask` returns the S3 tray fields (the cloche model, D41) plus `entry: 'numpad1'` and `expected.typed = answer`; `check` compares the typed number when `entry` is set, otherwise the tray. (SPEC §3.1 allows names and shapes to be refined, not semantics.)
+Why: the S0 task needs both the typed answer and the tray Worked/FollowMe play on.
+How to revisit: `engine/tray.ts`.
+
+**D70. Caption bubble slot.**
+What: captions (SPEC §8.1: always on) sit in one bubble between the door and the monster, `SERVICE.caption` (x 144–414, y 16–140), clear of the CountTogether bubble and the waiting line. Every child-facing caption is ≤ 8 words (lint); ticket lines ≤ 12.
+Why: the approved mock had no caption slot; this is the free space in the top band.
+How to revisit: one rect in `src/app/metrics.ts`.
+
+**D71. Worked and FollowMe always use the S3 tray; FollowMe can only end right.**
+What: (a) at every stage (S1 and S0 included) Worked clears to the S3 start (prefill, or the full minuend) so the strategy is visible, and FollowMe repeats it there; at S0 that is the cloche tray (D41). (b) FollowMe pulses the next target (empty cell + bin, last item, take one back, or the bin for put-back); tapping the pulsing empty cell also places. The bell lights and pulses only when the tray (at S0: the typed number) is right, so a FollowMe serve is always correct; it is never pressed for the child. (c) At S0, once the cloche tray is complete the cloche lowers on its own, the digits return and the correct digit pulses.
+Why: a count-on demo on an empty S1 tray shows no strategy; §5.5 does not say what happens on a wrong FollowMe serve.
+How to revisit: `runWorked` and `canServe` in `src/game/service/controller.ts`.
+
+**D72. A1/A2 strategy tags, difficulty and demo wording.**
+What: addition `a = b` → `doubles`; `|a − b| = 1` → `nearDouble` (1+2 included); otherwise `countOn`; subtraction → `countBack`. Difficulty 1–5: near-doubles 1, then by larger addend (A1: larger − 1, A2: larger − 4); subtraction by minuend (A1: m − 1, A2: m − 5). The doubles line is split in two ("Three orange. The same!" then "Three and three is six.") to keep every caption ≤ 8 words.
+Why: SPEC §4 names the orderings but not the 1–5 mapping; §13.2's 8-word caption limit.
+How to revisit: `engine/generators.ts`, `engine/demos.ts`.
+
+**D73. Layout mock removed; service controller is a plain class.**
+What: (a) the `?mock` screen, its frames and `layout-mock.spec.ts` are deleted now that the real service screen exists; the approved shots stay in `docs/screens/M1/mock/` and all geometry stays in `SERVICE`. The 844×390 tap-size check moved to `tests/e2e/m1-taps.spec.ts` on the live screen. (b) The service is driven by `ServiceController` (`src/game/service/controller.ts`), a plain class with injected speech, SFX, clocks and timers, read by React through `useSyncExternalStore`: the React-hooks lint (v7) forbids reading refs during render, and the class can be unit-tested without a DOM. (c) The e2e hook gains `setTimeScale` (scales speech timeouts and scripted holds), `setSeed`, `setSkillConfig` and a `service()` state dump; all VITE_E2E-only (build test).
+Why: a second copy of the layout would drift; the lint rule is part of `npm run check`.
+How to revisit: n/a.
+
+**D74. CI actions on current majors.**
+What: `actions/checkout@v7`, `actions/setup-node@v7`, `actions/upload-pages-artifact@v5`, `actions/deploy-pages@v5` (all on the Node 24 runtime), clearing the Node 20 deprecation warnings.
+Why: housekeeping before M1; confirmed by the owner's next push to `main`.
+How to revisit: bump majors when GitHub deprecates a runtime again.
+
 <!-- New decisions go above this line, numbered one higher than the highest existing D<n>. -->
 
 ---
