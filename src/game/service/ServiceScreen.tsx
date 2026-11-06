@@ -177,7 +177,8 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
       <div className="counter" aria-hidden="true" />
       <DoorSign rect={L.door} onTap={onDoor} />
       <Queue rect={L.queue} count={Math.max(0, orders.length - v.index - 1)} />
-      <Caption rect={L.caption} text={v.caption} />
+      {/* The CountTogether bubble is the monster's speech while it shows (D76). */}
+      <Caption rect={L.caption} text={bubbleUp ? '' : v.caption} />
 
       <div
         className={`monster-slot mood-${v.mood}`}

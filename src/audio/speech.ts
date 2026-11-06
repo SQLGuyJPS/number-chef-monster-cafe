@@ -7,8 +7,9 @@ export const DEFAULT_RATE = 0.85;
 const PREFERRED = [/Samantha/i, /Ava/i, /Allison/i, /Google US English/i, /Samsung/i];
 
 let voice: SpeechSynthesisVoice | null = null;
-let busyUntil = 0;
 let token = 0;
+/** Tokens of non-count lines still playing. Counts never cut these off (D75). */
+const activeLines = new Set<number>();
 
 const synth = (): SpeechSynthesis | null => ('speechSynthesis' in window ? window.speechSynthesis : null);
 
@@ -50,24 +51,34 @@ export function initSpeech(): void {
 export const speechTimeoutMs = (text: string, rate = DEFAULT_RATE): number =>
   Math.min(8000, Math.max(1200, 400 + (90 * text.length) / rate));
 
+/**
+ * Text as sent to the speech engine. Engines pause as long on a comma as between sentences, which
+ * makes "Five plus two cookies, please!" sound broken; captions keep the comma (D77).
+ */
+export const spokenForm = (text: string): string => text.replace(/,/g, '');
+
 export interface SpeakOptions {
   /** false queues behind the current line; true (default) cancels it first. */
   interrupt?: boolean;
   pitch?: number;
   rate?: number;
+  /** A tray count: does not mark speech busy, so the next tap's count may replace it (D75). */
+  count?: boolean;
 }
 
 export function speakText(text: string, opts: SpeakOptions = {}): Promise<void> {
   const rate = opts.rate ?? DEFAULT_RATE;
   const ms = speechTimeoutMs(text, rate) * getTimeScale();
   const my = ++token;
-  busyUntil = performance.now() + ms;
+  if (!opts.count) activeLines.add(my);
   return new Promise<void>((resolve) => {
     let settled = false;
+    // Busy ends when the line really ends (`end`/`error`, including being cancelled); the timeout
+    // is only the fallback for engines that never fire `end` (SPEC §8.1).
     const finish = () => {
       if (settled) return;
       settled = true;
-      if (my === token) busyUntil = 0;
+      activeLines.delete(my);
       resolve();
     };
     window.setTimeout(finish, ms);
@@ -75,7 +86,7 @@ export function speakText(text: string, opts: SpeakOptions = {}): Promise<void> 
     if (!s) return; // no speech engine: captions carry the line
     try {
       if (opts.interrupt !== false) s.cancel(); // iOS quirk: cancel before each non-queued line
-      const u = new SpeechSynthesisUtterance(text);
+      const u = new SpeechSynthesisUtterance(spokenForm(text));
       if (voice) u.voice = voice;
       u.lang = voice?.lang ?? 'en-US';
       u.rate = rate;
@@ -92,16 +103,23 @@ export function speakText(text: string, opts: SpeakOptions = {}): Promise<void> 
 export const speak = (key: PhraseKey, params: PhraseParams = {}, opts: SpeakOptions = {}): Promise<void> =>
   speakText(phrase(key, params), opts);
 
-/** Counting while building is "latest wins": if speech is busy, skip it (SPEC §3.3, §8.2). */
+/**
+ * Counting while building (SPEC §3.3, §8.2 as amended by D75): a new count cuts off the previous
+ * count so every tap is heard, but never cuts off another line (order, coaching, PlateCount);
+ * while one of those plays the count is skipped and the tone carries the feedback.
+ */
 export function countAloud(words: string): void {
-  if (performance.now() < busyUntil) return;
-  void speakText(words, { interrupt: true });
+  if (speechBusy()) return;
+  void speakText(words, { interrupt: true, count: true });
 }
+
+/** True while a non-count line is playing. */
+export const speechBusy = (): boolean => activeLines.size > 0;
 
 /** Stops any line (leaving the service). */
 export function hush(): void {
   token++;
-  busyUntil = 0;
+  activeLines.clear();
   try {
     synth()?.cancel();
   } catch {

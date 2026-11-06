@@ -207,7 +207,8 @@ button {
 }
 .tile {
   height: 260px;
-  border: 4px dashed rgba(244, 241, 232, 0.6);
+  /* Solid = playable; dashed is kept for tiles that cannot be tapped yet (D78). */
+  border: 4px solid rgba(244, 241, 232, 0.6);
   border-radius: 20px;
   display: flex;
   flex-direction: column;
@@ -320,10 +321,10 @@ html.debug-mode #root {
   color: var(--c-chalk-ink);
 }
 .tile.tile-glow {
-  border-style: solid;
   box-shadow: 0 0 0 6px rgba(246, 196, 69, 0.45);
 }
 .tile.tile-soon {
+  border-style: dashed;
   opacity: 0.45;
 }
 .debug-skills select {
