@@ -174,21 +174,28 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: 6px;
   display: flex;
   justify-content: center;
   font-family: var(--font-emoji);
   font-size: 58px;
   line-height: 1;
 }
+/* Neighbours overlap by about a third so the crate looks full (D79). */
 .bin-heap span {
-  margin: 0 -6px;
+  margin: 0 -12px;
+}
+.bin-heap.back {
+  top: 0;
+  filter: brightness(0.92);
+}
+.bin-heap.front {
+  top: 18px;
 }
 .bin-heap span:nth-child(odd) {
-  transform: translateY(14px) rotate(-12deg);
+  transform: translateY(6px) rotate(-10deg);
 }
 .bin-heap span:nth-child(even) {
-  transform: rotate(10deg);
+  transform: rotate(9deg);
 }
 .take-back {
   background: var(--c-paper);
@@ -358,6 +365,28 @@
   font-weight: 700;
   line-height: 1.15;
   text-align: center;
+}
+/* Speech-bubble tail toward the monster on the right (D76): border-coloured triangle under a
+   paper one; both start inside the bubble so they hide its right border where they join. */
+.caption::before,
+.caption::after {
+  content: '';
+  position: absolute;
+  clip-path: polygon(0 0, 100% 70%, 0 100%);
+}
+.caption::before {
+  right: -36px;
+  top: 52px;
+  width: 44px;
+  height: 46px;
+  background: #e2d8c3;
+}
+.caption::after {
+  right: -29px;
+  top: 57px;
+  width: 37px;
+  height: 36px;
+  background: var(--c-paper);
 }
 .svc-btn.dim {
   opacity: 0.55;

@@ -65,7 +65,7 @@ export const PHRASES = {
   },
 
   // CountTogether (SPEC §5.5).
-  'ct.start': { params: {}, text: () => "Hmm! Let's count together." },
+  'ct.start': { params: {}, text: () => "Let's count together." },
   'ct.more': { params: { n: 'n' }, text: (p) => `${N(p, 'n')} more!` },
   'ct.left': { params: { n: 'n' }, text: (p) => `${N(p, 'n')} left!` },
   'ct.away': { params: { n: 'n' }, text: (p) => `${N(p, 'n')} taken away!` },

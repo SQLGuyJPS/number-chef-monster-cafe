@@ -56,4 +56,11 @@ How to set it up: open `…/number-chef-monster-cafe/?debug`, pick the stage and
 - [ ] On the iPhone (landscape): are the digits and tray cells comfortable to hit?
 - [ ] On the iPhone/iPad: does the dashed blank on the ticket look whole? (Playwright's WebKit draws it with sparse dashes at phone size; probably an engine quirk.)
 
+### M1 feedback round (D75–D79)
+- [ ] Quick taps: does every tap now say its count, with the previous count cut off cleanly? Any stutter or dropped words on the iPad (iOS can be unreliable when speech is cancelled rapidly)?
+- [ ] "…cookies please!" and "Thank you chef!" (no comma pause): natural now?
+- [ ] Caption bubble next to the monster with its tail: does it read as the monster speaking? Does it hide cleanly during CountTogether and come back for FollowMe?
+- [ ] Menu: do Little Bites and Big Bites both look playable? Does Perfect Ten (dashed, faded) look "not yet"?
+- [ ] Bin: does it look full, with nothing falling off the edges? (Screenshots in `docs/screens/M1/` were re-taken on Windows, so their emoji are Segoe, not the iPad's Apple emoji.)
+
 Notes:

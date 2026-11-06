@@ -368,6 +368,31 @@ What: `actions/checkout@v7`, `actions/setup-node@v7`, `actions/upload-pages-arti
 Why: housekeeping before M1; confirmed by the owner's next push to `main`.
 How to revisit: bump majors when GitHub deprecates a runtime again.
 
+**D75. A tap's count cuts off the previous count (owner, M1 playtest).**
+What: while building at S3, a new count stops the count still playing and speaks its own, so every tap is heard. Counts never cut off any other line (order, coaching, PlateCount); during those the count is skipped and the tone carries the feedback. "Busy" now ends when a line really ends (`end`/`error`); the timeout (SPEC §8.1) is only the fallback. Replaces "if speech is busy, skip" in SPEC §3.3/§8.2.
+Why: the owner found counts went silent on quick taps: the old busy window was the timeout estimate (at least 1.2 s), so even "six" blocked the next count.
+How to revisit: `countAloud` in `src/audio/speech.ts`. The owner may extend the cut-off to every line after playtesting; that is a one-line change (drop the `speechBusy()` check).
+
+**D76. Caption bubble beside the monster, with a tail; hidden during CountTogether (owner, M1 playtest).**
+What: amends D70. `SERVICE.caption` moves to x 250–520 (y 16–140), ending just short of the monster, with a speech tail on its right edge pointing at it. In M1 the tail points at the monster for every line; when Pip arrives (M2) narrator-style lines ("Now ring the bell!") may move to Pip's bubble. While the CountTogether bubble is up the caption hides, because that bubble already carries "Let's count together!" and the monster has shrunk aside.
+Why: the owner found the caption too far from the monster to read as its speech.
+How to revisit: one rect in `src/app/metrics.ts`; tail in `.caption::before/::after` (`service.css`).
+
+**D77. Commas are dropped from spoken text only (owner, M1 playtest).**
+What: `speakText` sends the speech engine the text without commas (`spokenForm`); captions keep them. Ellipses stay, as they are a wanted pause ("I see three… I wanted five."). Also "Hmm!" is dropped from `ct.start` ("Let's count together.").
+Why: engines pause as long on a comma as between sentences, so "…cookies, please!" and "Thank you, chef!" sounded broken.
+How to revisit: `spokenForm` in `src/audio/speech.ts`. Recorded audio (M10) would bypass it.
+
+**D78. Playable menu tiles have solid borders (owner, M1 playtest).**
+What: every playable tile is drawn with a solid border; the last-played tile keeps its glow (SPEC §5.3). Dashed borders are kept for tiles that cannot be tapped yet (faded, unbuilt). The taken-away row stays dashed: it is not a button, and the dashes mean "these are gone".
+Why: dashed versus solid read as "not playable" versus "playable"; Big Bites looked disabled.
+How to revisit: `.tile` / `.tile-soon` in `src/app/global.css`.
+
+**D79. A fuller bin heap (owner, M1 playtest).**
+What: the bin shows two overlapping rows (four behind, five in front) with about a third of each item overlapping its neighbour, all inside the crate's width, so nothing is clipped at the edges.
+Why: the outer items were clipped and looked like they were falling out; the heap looked sparse.
+How to revisit: `.bin-heap` in `service.css`, rows in `Bin` (`ServiceParts.tsx`).
+
 <!-- New decisions go above this line, numbered one higher than the highest existing D<n>. -->
 
 ---

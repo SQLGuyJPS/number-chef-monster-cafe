@@ -85,6 +85,9 @@ export function Bell(props: PartProps) {
   );
 }
 
+const BACK_ROW = [0, 1, 2, 3];
+const FRONT_ROW = [0, 1, 2, 3, 4];
+
 /** The bin never empties (SPEC §3.3): a crate with a heap of the ordered food. */
 export function Bin({ rect, food, handlers, pulsing, wobble }: { rect: Rect; food: FoodId; handlers: Record<string, unknown>; pulsing?: boolean; wobble?: number }) {
   const g = FOODS[food].glyph;
@@ -92,12 +95,16 @@ export function Bin({ rect, food, handlers, pulsing, wobble }: { rect: Rect; foo
   const cls = ['svc-btn', 'bin', pulsing ? 'pulse' : '', wobble ? `wobble-${wobble % 2}` : ''].join(' ');
   return (
     <div className={cls} style={at(rect)} data-tap="button" data-testid="bin" aria-label="Food bin" {...handlers}>
-      <div className="bin-heap">
-        <span>{g}</span>
-        <span>{g}</span>
-        <span>{g}</span>
-        <span>{g}</span>
-        <span>{g}</span>
+      {/* Two overlapping rows read as a full heap; both sit inside the crate's width (D79). */}
+      <div className="bin-heap back">
+        {BACK_ROW.map((i) => (
+          <span key={i}>{g}</span>
+        ))}
+      </div>
+      <div className="bin-heap front">
+        {FRONT_ROW.map((i) => (
+          <span key={i}>{g}</span>
+        ))}
       </div>
       <div className="bin-crate" />
     </div>
