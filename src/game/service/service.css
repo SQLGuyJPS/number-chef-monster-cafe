@@ -153,6 +153,26 @@
 .pip-hat {
   background: rgba(255, 253, 246, 0.7);
 }
+/* Help offer (D89): two picture buttons on a paper card, over the (locked) tray band. */
+.choice {
+  background: var(--c-paper);
+  border-radius: 28px;
+  border: 5px solid #e2d8c3;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
+  padding: 18px;
+  box-sizing: border-box;
+}
+.choice.pulse {
+  animation: pulse 1.2s ease-in-out infinite;
+}
+/* The tray hides behind the question so the two pictures are the only things to look at. */
+.phase-offerHelp .tray,
+.phase-offerHelp .taken-away {
+  visibility: hidden;
+}
+.phase-offerHelp .bin {
+  opacity: 0.35;
+}
 .door-sign {
   background: rgba(255, 253, 246, 0.6);
   border-radius: 18px;
@@ -377,6 +397,47 @@
   height: 36px;
   background: var(--c-paper);
 }
+/* Pip's lines (D90): the right-hand tail hides and a tail points down at Pip below the bubble. */
+.caption.from-pip::before,
+.caption.from-pip::after {
+  clip-path: polygon(0 0, 100% 0, 25% 100%);
+}
+.caption.from-pip::before {
+  right: auto;
+  left: 50px;
+  top: auto;
+  bottom: -30px;
+  width: 50px;
+  height: 34px;
+}
+.caption.from-pip::after {
+  right: auto;
+  left: 55px;
+  top: auto;
+  bottom: -23px;
+  width: 40px;
+  height: 27px;
+}
+
+/* ---- Pip (SPEC §7.3, D90) ---- */
+.pip-slot {
+  position: absolute;
+  z-index: 2;
+  transform-origin: 50% 100%;
+  animation: pip-in 0.35s ease-out;
+}
+.pip-slot.talking > svg {
+  transform-origin: 50% 100%;
+  animation: pip-talk 0.9s ease-in-out infinite;
+}
+@keyframes pip-in {
+  from { transform: translateY(40px) scale(0.6); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes pip-talk {
+  50% { transform: translateY(-4px) rotate(-2deg); }
+}
+
 .svc-btn.dim {
   opacity: 0.55;
   filter: saturate(0.6);

@@ -59,6 +59,13 @@ const TICKET_COUNTING_X = STAGE_W - 16 - TICKET_W;
  * its right side to the ticket, from the top of the screen down to the counter.
  */
 const ASIDE: Rect = { x: 262, y: 172, w: 120, h: 120 };
+/**
+ * Pip (D90) stands on the counter left of the monster while help is offered or given, under the
+ * caption bubble. During CountTogether Pip takes the spot the shrunken monster used, so the model
+ * bubble's tail points at Pip, and the monster steps further left (the queue hides while Pip is out).
+ */
+const PIP: Rect = { x: 262, y: 150, w: 124, h: 155 };
+const ASIDE_FOR_PIP: Rect = { x: 120, y: 172, w: 120, h: 120 };
 const BUBBLE_X = ASIDE.x + ASIDE.w + 22;
 const BUBBLE: Rect = { x: BUBBLE_X, y: 8, w: TICKET_COUNTING_X - 16 - BUBBLE_X, h: 282 };
 
@@ -109,7 +116,12 @@ export const SERVICE = {
   s0DigitGap: 8,
   /** Lifted cloche lid left of the S3 tray; tapping it closes the cloche and brings the digits back (D62). */
   clocheLid: { x: 200, y: 330, w: 150, h: 150 },
+  /** Help offer after the second miss (D89): two big picture buttons over the tray band. */
+  offerYes: { x: centeredX(2 * 220 + 80), y: 300, w: 220, h: 220 },
+  offerNo: { x: centeredX(2 * 220 + 80) + 220 + 80, y: 300, w: 220, h: 220 },
   /** CountTogether bubble right of the shrunken monster, its tail pointing left at it (D84). */
   bubble: BUBBLE,
   monsterAside: ASIDE,
+  pip: PIP,
+  monsterAsideForPip: ASIDE_FOR_PIP,
 } as const satisfies Record<string, Rect | number>;

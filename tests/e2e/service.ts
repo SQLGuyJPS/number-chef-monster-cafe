@@ -36,6 +36,8 @@ declare global {
     __ncmc: Hooks;
     __phases: string[];
     __spoken: string[];
+    /** Lines spoken above the normal pitch: Pip's (D90). */
+    __pipSpoken: string[];
     __cancels: number;
   }
 }
@@ -47,11 +49,15 @@ declare global {
 export async function stubSpeechNeverEnds(page: Page): Promise<void> {
   await page.addInitScript(() => {
     const spoken: string[] = [];
+    const pip: string[] = [];
     const stub = {
       speaking: false,
       pending: false,
       paused: false,
-      speak: (u: { text: string }) => void spoken.push(u.text),
+      speak: (u: { text: string; pitch: number }) => {
+        spoken.push(u.text);
+        if (u.pitch > 1) pip.push(u.text);
+      },
       cancel: () => void window.__cancels++,
       pause: () => undefined,
       resume: () => undefined,
@@ -61,6 +67,7 @@ export async function stubSpeechNeverEnds(page: Page): Promise<void> {
     };
     Object.defineProperty(window, 'speechSynthesis', { value: stub, configurable: true });
     (window as unknown as { __spoken: string[] }).__spoken = spoken;
+    (window as unknown as { __pipSpoken: string[] }).__pipSpoken = pip;
     window.__cancels = 0;
   });
 }

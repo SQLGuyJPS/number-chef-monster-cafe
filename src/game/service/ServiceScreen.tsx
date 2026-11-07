@@ -18,6 +18,7 @@ import type { ModelCell } from '../../engine/countTogether';
 import type { Order } from '../../engine/plan';
 import { ticketRoles } from '../../engine/tray';
 import { PlaceholderMonster } from '../../art/PlaceholderMonster';
+import { PlaceholderPip } from '../../art/PlaceholderPip';
 import { dragTapHandlers, inRect, type StagePoint } from '../input/dragTap';
 import { TapButton } from '../input/TapButton';
 import { TenFrame, type CellView } from '../tray/TenFrame';
@@ -30,6 +31,7 @@ import {
   ClocheLid,
   DigitButton,
   DoorSign,
+  HelpChoice,
   ModelBubble,
   PeekButton,
   PipHat,
@@ -172,18 +174,28 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
     >
       <div className="counter" aria-hidden="true" />
       <DoorSign rect={L.door} onTap={onDoor} />
-      <Queue rect={L.queue} count={Math.max(0, orders.length - v.index - 1)} />
-      {/* The CountTogether bubble is the monster's speech while it shows (D76). */}
-      <Caption rect={L.caption} text={bubbleUp ? '' : v.caption} />
+      {/* The waiting line steps away while Pip is out, so Pip stands on a clear counter (D90). */}
+      {!v.pipOut && <Queue rect={L.queue} count={Math.max(0, orders.length - v.index - 1)} />}
+      {/* The CountTogether bubble is Pip's speech while it shows (D76, D90). */}
+      <Caption rect={L.caption} text={bubbleUp ? '' : v.caption} speaker={v.speaker} />
 
       <div
         className={`monster-slot mood-${v.mood}`}
-        style={at(bubbleUp ? L.monsterAside : L.monsterZone)}
+        style={at(bubbleUp ? (v.pipOut ? L.monsterAsideForPip : L.monsterAside) : L.monsterZone)}
         data-testid="monster"
         data-mood={v.mood}
       >
         <PlaceholderMonster size={bubbleUp ? L.monsterAside.w : L.monsterZone.w} />
       </div>
+      {v.pipOut && (
+        <div
+          className={`pip-slot ${v.speaker === 'pip' ? 'talking' : ''}`}
+          style={at(L.pip)}
+          data-testid="pip"
+        >
+          <PlaceholderPip />
+        </div>
+      )}
       {bubbleUp && (
         <ModelBubble rect={L.bubble} frames={bubbleFrames(v.bubble!, food)} caption={v.bubbleCount} />
       )}
@@ -282,7 +294,10 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
         </>
       )}
 
-      <PipHat rect={L.help} onTap={ctrl.help} pulsing={v.hatPulse} dim={lockedPhase} />
+      {phase === 'offerHelp' && (
+        <HelpChoice yes={L.offerYes} no={L.offerNo} onYes={ctrl.help} onNo={ctrl.declineHelp} />
+      )}
+      <PipHat rect={L.help} onTap={ctrl.help} pulsing={v.hatPulse || v.helpOffer || phase === 'offerHelp'} dim={lockedPhase} />
       <Bell
         rect={L.bell}
         onTap={ctrl.serve}

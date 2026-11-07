@@ -4,6 +4,8 @@ import { phrase, type PhraseKey, type PhraseParams } from '../engine/phrases';
 import { getTimeScale } from '../app/runtime';
 
 export const DEFAULT_RATE = 0.85;
+/** Pip's voice: the same voice, higher, so the child can tell the helper from the monster (D90). */
+export const PIP_PITCH = 1.5;
 /** A line that has not fired `start` by then is retried once (D88). */
 const START_WATCHDOG_MS = 1500;
 const PREFERRED = [/Samantha/i, /Ava/i, /Allison/i, /Google US English/i, /Samsung/i];

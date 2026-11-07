@@ -110,3 +110,15 @@ Notes:
 - [ ] Over a whole service: any order that stays silent? If one does, note roughly when it happened, and whether it spoke again after about 1–2 seconds (a stuck line is retried once).
 - [ ] Do the tones and the bell still work as in round 3?
 
+### M1 feedback round 5: fixing a mistake (D89)
+- [ ] One wrong serve: the monster says what it wanted, then the child can fix the tray and ring at once. Is that enough for a single slip?
+- [ ] Is the pulsing Pip hat after a miss noticed? Is it tempting enough, or too distracting?
+- [ ] Second wrong serve: "Want Pip to help? Or try again?" Does the child understand the two pictures (Pip = help, the circling tray = try again) without explanation?
+- [ ] Does the child pick "try again" every time? If so, the third miss plays the help anyway; is that third try one too many?
+- [ ] Help before serving still plays the count-together bubble. Is it still useful there?
+
+### M1 feedback round 6: Pip helps (D90)
+- [ ] When the monster asks "Want Pip to help?", Pip pops up on the counter. Does the child connect Pip on the counter, the Pip button in the offer and the hat button?
+- [ ] Pip's voice (same voice, higher): clearly a different character on the iPad and iPhone? Not squeaky or hard to understand? (iOS voices react to pitch differently.)
+- [ ] Count-together with Pip: is it clear Pip is counting (bubble pointing at Pip, monster shrunk to the far left)?
+- [ ] Does Pip stepping back when the child serves feel natural?

@@ -91,20 +91,40 @@ test('S3 remove: tapping any item removes the last one; the bin puts one back (D
   await expect.poll(async () => (await probe(page)).events[0]?.outcome).toBe('first');
 });
 
-test('wrong → wrong → demo → follow-me: the bell pulses and only the child serves (no auto-serve)', async ({ page }) => {
+test('wrong → wrong → help offer → yes → demo → follow-me: the bell pulses and only the child serves (no auto-serve)', async ({ page }) => {
   test.setTimeout(90_000);
   // Real time scale: speech is stubbed to never end, so every line waits for its timeout.
   await openService(page, { skill: 'A1', stage: 3, ops: 'add', seed: 7, timeScale: 1 });
 
+  // First miss: only the plate count, then straight back to building with the hat pulsing (D89).
   await serveWrong(page);
-  await waitPhase(page, 'countTogether', 10_000);
-  await expect(page.getByTestId('model-bubble')).toBeVisible();
-  await waitPhase(page, 'building', 30_000);
+  await waitPhase(page, 'plateCount', 10_000);
+  await waitPhase(page, 'building', 10_000);
+  await expect(page.getByTestId('model-bubble')).toHaveCount(0);
+  await expect(page.getByTestId('pip')).toHaveCount(0);
+  await expect(page.getByTestId('help')).toHaveClass(/pulse/);
+  expect((await probe(page)).canServe).toBe(true);
 
+  // Second miss: the monster offers help; the bell stays off until the child chooses.
   await serveWrong(page);
+  await waitPhase(page, 'offerHelp', 10_000);
+  // Pip steps out as the monster asks, so "Want Pip to help?" points at someone (D90).
+  await expect(page.getByTestId('pip')).toBeVisible();
+  await expect(page.getByTestId('caption')).toHaveAttribute('data-speaker', 'monster');
+  await expect(page.getByTestId('offer-yes')).toBeVisible();
+  await expect(page.getByTestId('offer-no')).toBeVisible();
+  expect((await probe(page)).canServe).toBe(false);
+  await tapId(page, 'offer-yes');
   await waitPhase(page, 'worked', 10_000);
+  // Pip gives the demo, in Pip's own bubble and voice (D90).
+  await expect(page.getByTestId('pip')).toBeVisible();
+  await expect(page.getByTestId('caption')).toHaveAttribute('data-speaker', 'pip');
   await waitPhase(page, 'followMe', 40_000);
-  expect(await phases(page)).toEqual(['building', 'plateCount', 'countTogether', 'building', 'plateCount', 'worked', 'followMe']);
+  const voices = await page.evaluate(() => ({ all: window.__spoken.slice(), pip: window.__pipSpoken.slice() }));
+  expect(voices.pip).toContain('Your turn! Follow me.');
+  expect(voices.pip.some((l) => l.includes('Want Pip'))).toBe(false); // the monster asks
+  expect(voices.all.some((l) => l.includes('Want Pip'))).toBe(true);
+  await expect.poll(() => phases(page)).toEqual(['building', 'plateCount', 'building', 'plateCount', 'offerHelp', 'worked', 'followMe']);
 
   await followMe(page);
   await expect(page.getByTestId('bell')).toHaveClass(/pulse/);
@@ -113,6 +133,39 @@ test('wrong → wrong → demo → follow-me: the bell pulses and only the child
   expect((await probe(page)).phase).toBe('followMe');
   await ringBell(page);
   await expect.poll(async () => (await probe(page)).events[0]?.outcome).toBe('assisted');
+  await expect(page.getByTestId('pip')).toHaveCount(0); // Pip steps back once the child serves
+});
+
+test('help offer → no repeats the order; right then is "fixed", a third miss plays the demo unasked (D89)', async ({ page }) => {
+  await openService(page, { skill: 'A1', stage: 3, ops: 'add', seed: 7 });
+  await serveWrong(page);
+  await waitPhase(page, 'building');
+  await serveWrong(page);
+  await waitPhase(page, 'offerHelp');
+  await tapId(page, 'offer-no');
+  await waitPhase(page, 'building');
+  const s = await probe(page);
+  expect(s.caption).not.toContain('help');
+  await expect(page.getByTestId('offer-yes')).toHaveCount(0);
+  await serveCorrect(page);
+  await expect.poll(async () => (await probe(page)).events[0]?.outcome).toBe('fixed');
+
+  await expect.poll(async () => (await probe(page)).index).toBe(1);
+  await page.evaluate(() => (window.__phases = []));
+  await serveWrong(page);
+  await waitPhase(page, 'building');
+  await serveWrong(page);
+  await waitPhase(page, 'offerHelp');
+  await tapId(page, 'offer-no');
+  await waitPhase(page, 'building');
+  await serveWrong(page);
+  await waitPhase(page, 'followMe');
+  await expect.poll(() => phases(page)).toEqual([
+    'building', 'plateCount', 'building', 'plateCount', 'offerHelp', 'building', 'plateCount', 'worked', 'followMe',
+  ]);
+  await followMe(page);
+  await ringBell(page);
+  await expect.poll(async () => (await probe(page)).events.filter((e) => e.k === 'attempt')[1]?.outcome).toBe('assisted');
 });
 
 test('Help at attempt 1 then a wrong serve goes straight to Worked (D29)', async ({ page }) => {
@@ -121,7 +174,7 @@ test('Help at attempt 1 then a wrong serve goes straight to Worked (D29)', async
   await waitPhase(page, 'building');
   await serveWrong(page);
   await waitPhase(page, 'followMe');
-  expect(await phases(page)).toEqual(['building', 'countTogether', 'building', 'plateCount', 'worked', 'followMe']);
+  await expect.poll(() => phases(page)).toEqual(['building', 'countTogether', 'building', 'plateCount', 'worked', 'followMe']);
   await followMe(page);
   await ringBell(page);
   await expect.poll(async () => (await probe(page)).events[0]?.outcome).toBe('assisted');
@@ -177,11 +230,13 @@ test('S0: one digit row, a two-digit display, bell disabled while empty, Peek co
   await expect.poll(async () => (await probe(page)).events[0]).toMatchObject({ outcome: 'afterHint', stage: 0 });
 });
 
-test('S0 help path: wrong, wrong → Worked and FollowMe on the cloche tray → type → bell (D41)', async ({ page }) => {
+test('S0 help path: wrong, wrong, yes → Worked and FollowMe on the cloche tray → type → bell (D41, D89)', async ({ page }) => {
   await openService(page, { skill: 'A1', stage: 0, seed: 6 });
   await serveWrong(page);
   await waitPhase(page, 'building');
   await serveWrong(page);
+  await waitPhase(page, 'offerHelp');
+  await tapId(page, 'offer-yes');
   await waitPhase(page, 'worked');
   await expect(page.getByTestId('tray')).toBeVisible(); // the cloche lifted
   await waitPhase(page, 'followMe');

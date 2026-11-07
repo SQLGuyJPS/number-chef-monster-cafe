@@ -59,10 +59,18 @@ test('service screenshots', async ({ page }, info) => {
   await shot('service-s3-remove');
 
   await openService(page, { skill: 'A2', stage: 3, ops: 'add', seed: 3, timeScale: 1 });
-  await serveWrong(page);
+  await tapId(page, 'help');
   await waitPhase(page, 'countTogether');
   await page.waitForTimeout(5000);
   await shot('service-count-together');
+
+  await openService(page, { skill: 'A2', stage: 3, ops: 'add', seed: 3 });
+  await serveWrong(page);
+  await waitPhase(page, 'building');
+  await serveWrong(page);
+  await waitPhase(page, 'offerHelp');
+  await page.waitForTimeout(300);
+  await shot('service-offer-help');
 
   await openService(page, { skill: 'A2', stage: 3, ops: 'add', seed: 12, timeScale: 1 });
   await tapId(page, 'help');

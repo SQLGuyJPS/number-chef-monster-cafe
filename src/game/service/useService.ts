@@ -1,12 +1,12 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { getTimeScale, setServiceProbe } from '../../app/runtime';
-import { countAloud, hush, speakText } from '../../audio/speech';
+import { PIP_PITCH, countAloud, hush, speakText } from '../../audio/speech';
 import { sfx } from '../../audio/sfx';
 import { newId } from '../../storage/ids';
 import { ServiceController, type ServiceDeps, type ServiceOptions } from './controller';
 
 const browserDeps: ServiceDeps = {
-  speak: (text) => speakText(text),
+  speak: (text, who) => speakText(text, who === 'pip' ? { pitch: PIP_PITCH } : {}),
   countAloud,
   hush,
   sfx,
