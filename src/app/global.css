@@ -324,6 +324,18 @@ html.debug-mode #root {
   border-style: dashed;
   opacity: 0.45;
 }
+.audio-test button,
+.audio-test select {
+  font-size: 16px;
+  padding: 10px 14px;
+  margin: 4px 4px 4px 0;
+  border: 2px solid currentColor;
+  border-radius: 10px;
+  background: var(--c-bg);
+}
+.audio-test button:active {
+  opacity: 0.6;
+}
 .debug-skills select {
   font-size: 16px;
   padding: 4px;
