@@ -88,6 +88,9 @@ function primeSilent(c: AudioContext): void {
 function build(): void {
   const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!AC) return;
+  // Builds only happen inside a gesture; set the session type here too, so pages that skip the
+  // Splash tap (the ?debug sound test) test the same session type as the game.
+  applyAudioSession();
   if (ctx) {
     audioStats.rebuilds++;
     void ctx.close().catch(() => undefined);
