@@ -174,15 +174,19 @@
   position: absolute;
   left: 0;
   right: 0;
-  display: flex;
-  justify-content: center;
+  height: 58px;
   font-family: var(--font-emoji);
   font-size: 58px;
   line-height: 1;
 }
-/* Neighbours overlap by about a third so the crate looks full (D79). */
+/* Each item is placed by its centre (left set inline, D85), so the heap spans the crate whatever
+   the emoji font's glyph width; neighbours overlap a little so the crate looks full (D79). */
 .bin-heap span {
-  margin: 0 -12px;
+  position: absolute;
+  top: 0;
+  width: 70px;
+  margin-left: -35px;
+  text-align: center;
 }
 .bin-heap.back {
   top: 0;
@@ -197,27 +201,12 @@
 .bin-heap span:nth-child(even) {
   transform: rotate(9deg);
 }
-.take-back {
-  background: var(--c-paper);
-  color: var(--c-role-child);
-  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
-  border: 5px solid var(--c-role-child);
-}
-.take-back .tb-food {
-  position: absolute;
-  top: 8px;
-  font-family: var(--font-emoji);
-  font-size: 44px;
-  line-height: 1;
-}
-.take-back .tb-arrow {
-  position: absolute;
-  bottom: 8px;
-  width: 60px;
-  height: 40px;
-}
-
 /* ---- Queue silhouettes ---- */
+/* Own stacking context, so the silhouettes' z-index never lifts them over the monster, which
+   stands in front of the line during CountTogether (D84). */
+.queue {
+  z-index: 0;
+}
 .queue-mon {
   position: absolute;
   bottom: 0;
@@ -252,15 +241,15 @@
   border: 4px solid #e2d8c3;
 }
 .model-bubble::after {
-  /* Tail down toward the shrunken monster below the bubble's right end. */
+  /* Tail left toward the shrunken monster on the counter (D84). */
   content: '';
   position: absolute;
-  right: 44px;
-  bottom: -18px;
+  left: -19px;
+  top: 196px;
   width: 30px;
   height: 30px;
   background: var(--c-paper);
-  border-right: 4px solid #e2d8c3;
+  border-left: 4px solid #e2d8c3;
   border-bottom: 4px solid #e2d8c3;
   transform: rotate(45deg);
 }
@@ -268,19 +257,19 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: 8px;
+  top: 10px;
   text-align: center;
-  font-size: 30px;
+  font-size: 38px;
   font-weight: 700;
 }
 .bubble-count {
   position: absolute;
   left: 0;
   right: 0;
-  top: 148px;
+  top: 222px;
   text-align: center;
   white-space: nowrap;
-  font-size: 30px;
+  font-size: 40px;
   font-weight: 700;
   color: var(--c-role-result);
 }
@@ -408,7 +397,6 @@
 }
 .svc-btn.digit.pulse,
 .svc-btn.backspace.pulse,
-.svc-btn.take-back.pulse,
 .svc-btn.bin.pulse,
 .taken-away.pulse {
   animation: pulse 1.2s ease-in-out infinite;
@@ -426,18 +414,12 @@
 .tf-cell.fx-in .food {
   animation: pop-in 0.22s ease-out;
 }
-.tf-cell.fx-hop .food {
-  animation: hop 0.4s ease-out;
-}
 .tf-cell.fx-shake {
   animation: shake 0.35s ease;
 }
 @keyframes pop-in {
   from { transform: scale(0.3); }
   to { transform: scale(1); }
-}
-@keyframes hop {
-  40% { transform: translateY(-22px); }
 }
 @keyframes shake {
   25% { transform: translateX(-6px); }

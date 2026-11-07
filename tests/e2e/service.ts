@@ -115,8 +115,7 @@ export async function trayTo(page: Page, target: number): Promise<void> {
     const s = await probe(page);
     if (s.filled === target) return;
     if (s.filled < target) await tapId(page, 'bin');
-    else if (s.mode === 'remove') await tapId(page, 'tray-cell-0');
-    else await tapId(page, 'take-back');
+    else await tapId(page, `tray-cell-${s.filled - 1}`);
   }
   throw new Error(`tray did not reach ${target}`);
 }
@@ -164,7 +163,6 @@ export async function followMe(page: Page): Promise<void> {
     if (s.cue === 'bell') return;
     if (s.cue === 'place' || s.cue === 'putBack') await tapId(page, 'bin');
     else if (s.cue === 'remove') await tapId(page, `tray-cell-${s.filled - 1}`);
-    else if (s.cue === 'takeBack') await tapId(page, 'take-back');
     else await page.waitForTimeout(50);
   }
 }

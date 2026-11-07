@@ -320,9 +320,6 @@ html.debug-mode #root {
 .tile {
   color: var(--c-chalk-ink);
 }
-.tile.tile-glow {
-  box-shadow: 0 0 0 6px rgba(246, 196, 69, 0.45);
-}
 .tile.tile-soon {
   border-style: dashed;
   opacity: 0.45;

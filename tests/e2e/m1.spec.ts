@@ -23,7 +23,7 @@ test.beforeEach(({ browserName: _browser }, info) => {
 
 const filledCells = (page: import('@playwright/test').Page) => page.locator('[data-testid^="tray-cell-"][data-filled="true"]').count();
 
-test('S3 add: fill order, tap-to-count, locked prefill, take one back, then a first-try serve', async ({ page }) => {
+test('S3 add: fill order, tap an item to send it back, locked prefill shakes, then a first-try serve', async ({ page }) => {
   await openService(page, { skill: 'A2', stage: 3, ops: 'add', seed: 3 });
   const s = await probe(page);
   expect(s.mode).toBe('add');
@@ -39,14 +39,15 @@ test('S3 add: fill order, tap-to-count, locked prefill, take one back, then a fi
   await expect(page.getByTestId(`tray-cell-${s.prefill}`)).toHaveAttribute('data-filled', 'true');
   await expect(page.getByTestId(`tray-cell-${s.prefill + 1}`)).not.toHaveAttribute('data-filled', 'true');
 
-  // Tapping placed items counts them and removes nothing (locked ones too).
-  await tapId(page, `tray-cell-${s.prefill}`);
+  // There is no "take one back" button in any mode (D82).
+  await expect(page.getByTestId('take-back')).toHaveCount(0);
+
+  // A locked (blue) item shakes and stays; tapping the child's item sends it back to the bin.
   await tapId(page, 'tray-cell-0');
   expect((await probe(page)).filled).toBe(s.prefill + 1);
-
-  // Take one back removes the last cell; the locked prefill then stays put.
-  await tapId(page, 'take-back');
-  await tapId(page, 'take-back');
+  await tapId(page, `tray-cell-${s.prefill}`);
+  expect((await probe(page)).filled).toBe(s.prefill);
+  await tapId(page, `tray-cell-${s.prefill - 1}`);
   expect((await probe(page)).filled).toBe(s.prefill);
   await expect(page.getByTestId(`tray-cell-${s.prefill - 1}`)).toHaveAttribute('data-filled', 'true');
 

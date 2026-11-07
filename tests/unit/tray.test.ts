@@ -177,14 +177,15 @@ describe('tray rules (SPEC §3.3)', () => {
     }
   });
 
-  it('add mode: tapping a placed item counts and removes nothing; locked items count too', () => {
-    const s = apply(add, 2, tapBin);
-    expect(tapItem(s, 6)).toEqual({ state: s, effect: { kind: 'count', index: 6, count: 7 } });
-    expect(tapItem(s, 1)).toEqual({ state: s, effect: { kind: 'count', index: 1, count: 2 } });
+  it('add mode: tapping a placed item sends the last one back to the bin; a locked item shakes (D82)', () => {
+    const s = apply(add, 2, tapBin); // 5 locked + 2 placed
+    expect(tapItem(s, 5)).toEqual({ state: { ...s, filled: 6 }, effect: { kind: 'removed', index: 6, count: 6 } });
+    expect(tapItem(s, 6).effect).toEqual({ kind: 'removed', index: 6, count: 6 });
+    expect(tapItem(s, 1)).toEqual({ state: s, effect: { kind: 'shakeLocked', index: 1 } });
     expect(tapItem(s, 9).effect.kind).toBe('none');
   });
 
-  it('add mode: take one back removes the last unlocked cell; locked prefill shakes and stays', () => {
+  it('add mode: removeLast (drag to the bin) takes the last unlocked cell; locked prefill shakes and stays', () => {
     const s = apply(add, 2, tapBin);
     const r1 = removeLast(s);
     expect(r1.effect).toEqual({ kind: 'removed', index: 6, count: 6 });

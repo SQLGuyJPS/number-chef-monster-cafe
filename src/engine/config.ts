@@ -9,9 +9,8 @@ export const REPEAT_WINDOW = 4;
 /** Bell double-press guard (PLAN M1 step 6). */
 export const BELL_GUARD_MS = 400;
 
-/** Idle cues while building (SPEC §3.2, §5.4). */
+/** Idle cue while building (SPEC §3.2). The spoken ticket no longer repeats on idle (D81). */
 export const HAT_PULSE_IDLE_MS = 10_000;
-export const TICKET_REPEAT_IDLE_MS = 20_000;
 
 /** FollowMe step cap (SPEC §5.5). */
 export const FOLLOW_ME_MAX_STEPS = 10;

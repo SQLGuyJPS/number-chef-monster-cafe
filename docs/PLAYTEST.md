@@ -6,7 +6,6 @@ What the agent cannot verify here (CLAUDE.md, SPEC §13.6). Tick, and add notes.
 
 ## Always (every milestone)
 - [ ] Did the child understand the ticket unaided?
-- [ ] Does the child count by touching the placed items?
 - [ ] Tap vs. drag preference?
 - [ ] Is the bell press discoverable?
 - [ ] Any voice line scary or annoying?
@@ -41,26 +40,53 @@ Notes:
 ## M1 — Core loop (5 minutes with the child on the real iPad)
 How to set it up: open `…/number-chef-monster-cafe/?debug`, pick the stage and operations for A1/A2 under **Skills** (applies from the next service), then open the app normally. Menu → **Little Bites** (A1) or **Big Bites** (A2). One placeholder monster, 6 orders, then back to the menu. No coins, eating animation or Results yet (M2).
 
-- [ ] Does the child understand the ticket unaided (S3)? Do they tap the ticket to hear it again?
-- [ ] Is the bell press discoverable? (It looks faded until something is built.)
-- [ ] Tap vs. drag from the bin: which does the child use?
-- [ ] Does the child count by touching the placed items (they hop and say their number)?
-- [ ] Take-away orders (S3, remove mode): does the child tap items to take them away, and find the bin to put one back? Are number sentences the barrier for subtraction?
-- [ ] Wrong serve: is the monster's "I see seven… I wanted eight. One more!" clear and friendly?
-- [ ] CountTogether bubble (after a wrong serve or Pip's hat): readable on the iPad? Does the child watch it?
+- [x] Does the child understand the ticket unaided (S3)? Do they tap the ticket to hear it again?
+  Understands fine; doesn't tap to hear it again. The automatic repeat after 20 s was annoying → removed (D81).
+- [x] Is the bell press discoverable? (It looks faded until something is built.)
+  Yes. Owner heard no sound on the press; a chime already exists (SPEC §8.3), so this is being checked as an audio problem (see the M1 round 2 list below).
+- [x] Tap vs. drag from the bin: which does the child use?
+  Always taps. Drag stays.
+- [x] Does the child count by touching the placed items (they hop and say their number)?
+  No; she counts by eye. Tapping an item now sends it back to the bin in every mode, and "take one back" is gone (D82).
+- [x] Take-away orders (S3, remove mode): does the child tap items to take them away, and find the bin to put one back? Are number sentences the barrier for subtraction?
+  Taps to take away and put back. Number sentences are not the barrier.
+- [x] Wrong serve: is the monster's "I see seven… I wanted eight. One more!" clear and friendly?
+  Yes.
+- [x] CountTogether bubble (after a wrong serve or Pip's hat): readable on the iPad? Does the child watch it?
+  Too small on the iPhone → the monster stands left of a bigger bubble, contents about twice as big (D84).
 - [ ] Worked demo + FollowMe after two misses: too long? Does the child follow the pulsing cell/bin and then press the pulsing bell?
+  Not reached yet (CountTogether was enough help). No change for now.
 - [ ] S0 (number pad): speed versus flash-card pace? Does the child find Peek (the cloche) and the lid to go back?
-- [ ] Voices: which voice did the iPad pick, is the rate (0.85) right, are lines clipped by the next line (speech timeout tuning, D37)?
+  Not tried yet.
+- [x] Voices: which voice did the iPad pick, is the rate (0.85) right, are lines clipped by the next line (speech timeout tuning, D37)?
+  Rate and timeout fine; keep watching.
 - [ ] Is anything silent with the silent switch on (SFX need iOS 17+)?
-- [ ] Captions bubble (top left): readable? In the way?
-- [ ] On the iPhone (landscape): are the digits and tray cells comfortable to hit?
-- [ ] On the iPhone/iPad: does the dashed blank on the ticket look whole? (Playwright's WebKit draws it with sparse dashes at phone size; probably an engine quirk.)
+  Not tested yet.
+- [x] Captions bubble (top left): readable? In the way?
+  Readable, not in the way.
+- [x] On the iPhone (landscape): are the digits and tray cells comfortable to hit?
+  Yes.
+- [x] On the iPhone/iPad: does the dashed blank on the ticket look whole? (Playwright's WebKit draws it with sparse dashes at phone size; probably an engine quirk.)
+  Doesn't look whole, but that's fine.
 
 ### M1 feedback round (D75–D79)
-- [ ] Quick taps: does every tap now say its count, with the previous count cut off cleanly? Any stutter or dropped words on the iPad (iOS can be unreliable when speech is cancelled rapidly)?
-- [ ] "…cookies please!" and "Thank you chef!" (no comma pause): natural now?
-- [ ] Caption bubble next to the monster with its tail: does it read as the monster speaking? Does it hide cleanly during CountTogether and come back for FollowMe?
-- [ ] Menu: do Little Bites and Big Bites both look playable? Does Perfect Ten (dashed, faded) look "not yet"?
-- [ ] Bin: does it look full, with nothing falling off the edges? (Screenshots in `docs/screens/M1/` were re-taken on Windows, so their emoji are Segoe, not the iPad's Apple emoji.)
+- [x] Quick taps: does every tap now say its count, with the previous count cut off cleanly? Any stutter or dropped words on the iPad (iOS can be unreliable when speech is cancelled rapidly)?
+  Consistent; cuts off cleanly.
+- [x] "…cookies please!" and "Thank you chef!" (no comma pause): natural now?
+  Yes.
+- [x] Caption bubble next to the monster with its tail: does it read as the monster speaking? Does it hide cleanly during CountTogether and come back for FollowMe?
+  Yes.
+- [x] Menu: do Little Bites and Big Bites both look playable? Does Perfect Ten (dashed, faded) look "not yet"?
+  Perfect Ten reads "not yet". Little/Big Bites borders differed and the last-played highlight was confusing → removed (D83).
+- [x] Bin: does it look full, with nothing falling off the edges?
+  Laptop (Windows Chrome) good; on iOS the emoji bunched in the middle → items placed by centre so both fill the crate (D85).
+
+### M1 feedback round 2 (D81–D85)
+- [ ] Sounds: on the iPhone and iPad, do you hear the short rising tones when tapping the bin, and the bell's "ding" when pressing it? Try once with the silent switch off. If tones play with the switch off but not on, that's the iOS < 17 silent-switch limit (D37); if nothing plays either way, tell me.
+- [ ] Order spoken once on arrival, no repeat when the child waits: better?
+- [ ] Tapping an orange item in addition sends it back to the bin; tapping a blue one only wiggles it. Clear to the child?
+- [ ] Menu: Little Bites and Big Bites now look identical (no glow).
+- [ ] CountTogether on the iPhone: monster on the left, larger bubble. Readable now? Anything overlapping (the monster stands in front of the waiting line)?
+- [ ] Bin on the iPhone/iPad: does the heap now reach the crate edges? And on the laptop, does it still look as before?
 
 Notes:

@@ -34,7 +34,6 @@ import {
   PeekButton,
   PipHat,
   Queue,
-  TakeBack,
   Ticket,
   at,
   type TicketToken,
@@ -159,9 +158,6 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
   });
 
   const showTray = !v.padMode;
-  const addMode = v.tray.mode === 'add';
-  const showTakeBack = showTray && addMode;
-  const bellRect = showTakeBack ? L.bell : L.bellNoTakeBack;
   const bubbleUp = v.bubble !== null;
   const removed = v.removed;
   const phase = v.attempt.phase;
@@ -261,7 +257,6 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
             pulsing={cue === 'place' || (cue === 'putBack' && !v.tray.takenAwayRow)}
             wobble={v.binWobble}
           />
-          {showTakeBack && <TakeBack rect={L.takeBack} food={food} onTap={ctrl.takeBack} pulsing={cue === 'takeBack'} />}
           {order.stage === 0 && <ClocheLid rect={L.clocheLid} onTap={ctrl.lowerCloche} dim={v.cloche !== 'peek'} />}
         </>
       )}
@@ -289,7 +284,7 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
 
       <PipHat rect={L.help} onTap={ctrl.help} pulsing={v.hatPulse} dim={lockedPhase} />
       <Bell
-        rect={bellRect}
+        rect={L.bell}
         onTap={ctrl.serve}
         dim={!v.canServe}
         pulsing={v.attempt.phase === 'followMe' && v.canServe}

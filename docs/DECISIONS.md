@@ -398,6 +398,31 @@ What: amends D49. Every session that has Playwright's WebKit runs the WebKit pro
 Why: the cloud-only note came from an earlier session that had no WebKit; it never meant local runs should skip it.
 How to revisit: `playwright.config.ts` projects; the setup script line in D49.
 
+**D81. The ticket is not re-spoken on idle (owner, M1 playtest 2).**
+What: amends SPEC §5.4. The 20 s idle repeat of the spoken order is removed at every stage. The order is spoken once when the monster arrives; tapping the ticket still replays it. Pip's hat still pulses after 10 s idle at S3.
+Why: the child understands the ticket and never needed the repeat; hearing it again unprompted was annoying.
+How to revisit: `scheduleIdle` in `src/game/service/controller.ts`; `HAT_PULSE_IDLE_MS` in `src/engine/config.ts`.
+
+**D82. Tapping a placed item always sends one back to the bin; no "take one back" button (owner, M1 playtest 2).**
+What: amends SPEC §3.3 and D64. In add mode a tap on a placed item now removes one (the last unlocked cell, D30), as remove mode always did. The tap-to-count hop is gone, and so is the *take one back* button in every mode. A tap on a locked blue prefill item shakes that item and removes nothing, so touching a blue item never takes away one of the child's orange items. Dragging an item to the bin still works. The bell sits right of the bin at every stage. FollowMe's "too many" cue now pulses the last item in both modes (the old `takeBack` cue is gone).
+Why: the child counts the items by eye without touching. A tap that removed items in subtraction but only counted them in addition was confusing. One meaning everywhere is simpler, and the child already taps items to take them away.
+How to revisit: `tapItem` in `src/engine/tray.ts`, `followMeCue` in `src/engine/demos.ts`, `SERVICE.bell` in `src/app/metrics.ts`.
+
+**D83. No last-played glow on the menu (owner, M1 playtest 2).**
+What: amends SPEC §1.2 and §5.3, and D78. Every playable tile looks the same (solid border, no glow). Tiles that can't be played yet stay dashed and faded.
+Why: the glow made Little Bites look different from Big Bites, and the child found the highlight confusing.
+How to revisit: `.tile` in `src/app/global.css`, `Menu.tsx`.
+
+**D84. CountTogether: the monster stands left of a larger bubble (owner, M1 playtest 2).**
+What: amends SPEC §5.5 and D65's bubble placement. While the model bubble shows, the monster shrinks to 120 px and stands on the counter at x 262, in front of the waiting line. The bubble runs from its right side to the ticket (x 404–888) and from y 8 down to the counter (h 282), with its tail pointing left at the monster. One frame is drawn with 64-px cells (was 36); two frames sit side by side with 42-px cells. The title is 38 px and the running count 40 px (both were 30). On an iPhone (scale ≈ 0.54) a single-frame cell is ≈ 35 CSS px, up from ≈ 19.
+Why: on the iPhone the pictures and text in the bubble were too small to read.
+How to revisit: `SERVICE.bubble`, `SERVICE.monsterAside`, `MODEL_ONE` / `MODEL_TWO` in `src/app/metrics.ts`; `ModelBubble` in `ServiceParts.tsx`.
+
+**D85. Bin items are placed by their centres (owner, M1 playtest 2).**
+What: amends D79. Each item in the bin heap is absolutely positioned at a fixed share of the bin's width (front row 13 %–87 %, back row in the gaps) instead of flowing in a row with negative margins. The two-row heap and the overlap are kept.
+Why: the flowing row's width depended on the emoji font's glyph width. Segoe (Windows) is wide enough to fill the crate, but Apple's emoji are narrower, so on iOS the heap bunched up in the middle. Centre positions give the same spread with any font, so the laptop view stays as it was and iOS now fills to the edges.
+How to revisit: `FRONT_ROW` / `BACK_ROW` in `Bin` (`ServiceParts.tsx`), `.bin-heap` in `service.css`.
+
 <!-- New decisions go above this line, numbered one higher than the highest existing D<n>. -->
 
 ---
