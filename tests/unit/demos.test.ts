@@ -73,7 +73,7 @@ describe('followMeCue', () => {
     const add = startState(toTrayTask(pool('A1')[0]!, 3)); // 1 + 1
     expect(followMeCue(add, 2)).toBe('place');
     expect(followMeCue(tapBin(add).state, 2)).toBe('bell');
-    expect(followMeCue(tapBin(tapBin(add).state).state, 2)).toBe('takeBack');
+    expect(followMeCue(tapBin(tapBin(add).state).state, 2)).toBe('remove');
     const sub = startState(
       toTrayTask(
         pool('A1').find((p) => p.form === 'sub')!,

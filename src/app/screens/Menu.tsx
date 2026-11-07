@@ -38,7 +38,8 @@ export function Menu({
             return (
               <TapButton
                 key={t.id}
-                className={`tile ${built ? '' : 'tile-soon'} ${t.id === 'A1' ? 'tile-glow' : ''}`}
+                // Every playable tile looks the same; no last-played glow (D83).
+                className={`tile ${built ? '' : 'tile-soon'}`}
                 testId={`tile-${t.id}`}
                 tapKind="button"
                 inert={!built}

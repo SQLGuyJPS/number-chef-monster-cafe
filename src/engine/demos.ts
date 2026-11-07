@@ -106,9 +106,10 @@ export function runDemo(p: Problem): TrayState {
  * FollowMe (SPEC §5.5): what the child should do next to reach the expected tray. The UI pulses
  * the matching target; when nothing is left, the bell pulses (the child presses it, D4).
  */
-export type FollowMeCue = 'place' | 'putBack' | 'remove' | 'takeBack' | 'bell';
+export type FollowMeCue = 'place' | 'putBack' | 'remove' | 'bell';
 export function followMeCue(s: TrayState, expectedCells: number): FollowMeCue {
   if (s.filled < expectedCells) return s.mode === 'remove' ? 'putBack' : 'place';
-  if (s.filled > expectedCells) return s.mode === 'remove' ? 'remove' : 'takeBack';
+  // Too many: the last item pulses; tapping it sends it back in every mode (D82).
+  if (s.filled > expectedCells) return 'remove';
   return 'bell';
 }

@@ -15,7 +15,7 @@ export interface CellView {
   /** Demo highlight (SPEC §5.5). */
   glow?: boolean;
   /** One-shot animation; `nonce` changes to replay it. */
-  fx?: 'hop' | 'shake' | 'in';
+  fx?: 'shake' | 'in';
   nonce?: number;
 }
 

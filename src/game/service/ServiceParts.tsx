@@ -3,7 +3,7 @@ import { TapButton } from '../input/TapButton';
 import { FOODS, type FoodId } from '../../engine/foods';
 import type { Rect } from '../../app/metrics';
 import { TenFrame, type CellView, type ItemRole } from '../tray/TenFrame';
-import { MINI_CELL, MINI_FRAME, MINI_GAP, MINI_PAD } from '../../app/metrics';
+import { MODEL_FRAMES_GAP, MODEL_ONE, MODEL_TWO, frameSize } from '../../app/metrics';
 
 export const at = (r: Rect): CSSProperties => ({ left: r.x, top: r.y, width: r.w, height: r.h });
 
@@ -85,8 +85,14 @@ export function Bell(props: PartProps) {
   );
 }
 
-const BACK_ROW = [0, 1, 2, 3];
-const FRONT_ROW = [0, 1, 2, 3, 4];
+/**
+ * Item centres as a share of the bin's width (D85). Placing each item by its centre, not by inline
+ * flow, keeps the heap the same width whatever the emoji font: Apple's glyphs are narrower than
+ * Segoe's, so a flowing row bunched up in the middle on iOS. Front row spans the crate (inset 10 of
+ * 300 plus half an item); the back row sits in the gaps.
+ */
+const FRONT_ROW = [13, 31.5, 50, 68.5, 87];
+const BACK_ROW = [22.25, 40.75, 59.25, 77.75];
 
 /** The bin never empties (SPEC §3.3): a crate with a heap of the ordered food. */
 export function Bin({ rect, food, handlers, pulsing, wobble }: { rect: Rect; food: FoodId; handlers: Record<string, unknown>; pulsing?: boolean; wobble?: number }) {
@@ -95,38 +101,23 @@ export function Bin({ rect, food, handlers, pulsing, wobble }: { rect: Rect; foo
   const cls = ['svc-btn', 'bin', pulsing ? 'pulse' : '', wobble ? `wobble-${wobble % 2}` : ''].join(' ');
   return (
     <div className={cls} style={at(rect)} data-tap="button" data-testid="bin" aria-label="Food bin" {...handlers}>
-      {/* Two overlapping rows read as a full heap; both sit inside the crate's width (D79). */}
+      {/* Two overlapping rows read as a full heap; both sit inside the crate's width (D79, D85). */}
       <div className="bin-heap back">
-        {BACK_ROW.map((i) => (
-          <span key={i}>{g}</span>
+        {BACK_ROW.map((x) => (
+          <span key={x} style={{ left: `${x}%` }}>
+            {g}
+          </span>
         ))}
       </div>
       <div className="bin-heap front">
-        {FRONT_ROW.map((i) => (
-          <span key={i}>{g}</span>
+        {FRONT_ROW.map((x) => (
+          <span key={x} style={{ left: `${x}%` }}>
+            {g}
+          </span>
         ))}
       </div>
       <div className="bin-crate" />
     </div>
-  );
-}
-
-/** "Take one back" (SPEC §3.3, add mode): removes the last filled unlocked cell. */
-export function TakeBack({ food, ...props }: PartProps & { food: FoodId }) {
-  return (
-    <Btn {...props} className="take-back" testId="take-back" label="Take one back">
-      <span className="tb-food">{FOODS[food].glyph}</span>
-      <svg className="tb-arrow" viewBox="0 0 60 40" aria-hidden="true">
-        <path
-          d="M52 8 Q52 30 26 30 L12 30"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="7"
-          strokeLinecap="round"
-        />
-        <path d="M18 18 L6 30 L18 40" fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </Btn>
   );
 }
 
@@ -255,13 +246,23 @@ export function Caption({ rect, text }: { rect: Rect; text: string }) {
   );
 }
 
+/** Bubble border width (service.css .model-bubble); children are placed inside it. */
+const BUBBLE_BORDER = 4;
+/** Frames band inside the bubble, below the title line and above the running count (D84). */
+const FRAMES_TOP = 68;
+const FRAMES_H = frameSize(MODEL_ONE.cell, MODEL_ONE.gap, MODEL_ONE.pad).h;
+
 /**
- * CountTogether model bubble (SPEC §5.5): non-interactive mini frames, blue then orange, with a
- * running count. One width for one or two frames so the line never wraps (D63e).
+ * CountTogether model bubble (SPEC §5.5): non-interactive frames, blue then orange, with a running
+ * count. One frame is drawn large; two shrink to fit side by side (D84). One bubble size for both,
+ * so the line never wraps (D63e).
  */
 export function ModelBubble({ rect, frames, caption }: { rect: Rect; frames: CellView[][]; caption: string }) {
-  const innerW = frames.length * MINI_FRAME.w + (frames.length - 1) * 12;
-  const left = Math.round((rect.w - innerW) / 2);
+  const m = frames.length > 1 ? MODEL_TWO : MODEL_ONE;
+  const size = frameSize(m.cell, m.gap, m.pad);
+  const innerW = frames.length * size.w + (frames.length - 1) * MODEL_FRAMES_GAP;
+  const left = Math.round((rect.w - 2 * BUBBLE_BORDER - innerW) / 2);
+  const top = FRAMES_TOP + Math.round((FRAMES_H - size.h) / 2);
   return (
     <div className="model-bubble" style={at(rect)} data-testid="model-bubble">
       <div className="bubble-line">Let&apos;s count together!</div>
@@ -269,11 +270,11 @@ export function ModelBubble({ rect, frames, caption }: { rect: Rect; frames: Cel
         <TenFrame
           key={i}
           cells={cells}
-          cell={MINI_CELL}
-          gap={MINI_GAP}
-          pad={MINI_PAD}
-          x={left + i * (MINI_FRAME.w + 12)}
-          y={58}
+          cell={m.cell}
+          gap={m.gap}
+          pad={m.pad}
+          x={left + i * (size.w + MODEL_FRAMES_GAP)}
+          y={top}
           className="mini"
         />
       ))}

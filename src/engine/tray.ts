@@ -1,5 +1,5 @@
 // Tray model (SPEC §3.3, D30, D42): canonical fill order, removal from the end, locked prefill,
-// tap-to-count, remove-mode put-back, capacity, taken-away row. Pure; the UI renders it.
+// tap-to-return (D82), remove-mode put-back, capacity, taken-away row. Pure; the UI renders it.
 import type { Layout, Problem, Stage, TrayTask } from './types';
 
 const capacityOf = (layout: Layout): number => (layout === 'frames2' ? 20 : 10);
@@ -100,7 +100,6 @@ export type TrayEffect =
   | { kind: 'placed'; index: number; count: number } // count = running total said at S3
   | { kind: 'putBack'; index: number; count: number }
   | { kind: 'removed'; index: number; count: number } // count = remaining (counting back)
-  | { kind: 'count'; index: number; count: number } // tap-to-count hop (add mode)
   | { kind: 'wobbleBin' } // over capacity, or nothing to put back
   | { kind: 'shakeLocked'; index: number }
   | { kind: 'none' };
@@ -130,8 +129,8 @@ export const tapTakenAway = (s: TrayState): TrayResult =>
   s.takenAwayRow ? tapBin(s) : { state: s, effect: { kind: 'none' } };
 
 /**
- * Removal always takes the last filled cell, whichever item was touched (D30). Add mode: "take one
- * back" or dragging an item to the bin; locked prefill shakes and stays.
+ * Removal always takes the last filled cell, whichever item was touched (D30). Add mode: tapping an
+ * item or dragging it to the bin (D82); locked prefill shakes and stays.
  */
 export function removeLast(s: TrayState): TrayResult {
   if (s.filled === 0) return { state: s, effect: { kind: 'none' } };
@@ -142,13 +141,14 @@ export function removeLast(s: TrayState): TrayResult {
 }
 
 /**
- * Tapping a placed item. Add mode: it hops and says its position; nothing is removed (counting by
- * touch, SPEC §3.3). Remove mode: removes the last filled cell (the action being taught).
+ * Tapping a placed item sends one back to the bin in every mode, so a tap on an item always means
+ * the same thing (D82). The last filled cell goes (D30). Add mode: a tap on a locked prefill item
+ * shakes that item, so the child's own items are never taken by touching a blue one.
  */
 export function tapItem(s: TrayState, index: number): TrayResult {
   if (index < 0 || index >= s.filled) return { state: s, effect: { kind: 'none' } };
-  if (s.mode === 'remove') return removeLast(s);
-  return { state: s, effect: { kind: 'count', index, count: index + 1 } };
+  if (index < s.locked) return { state: s, effect: { kind: 'shakeLocked', index } };
+  return removeLast(s);
 }
 
 /** Dragging a placed item off the tray (remove mode) or onto the bin (add mode). */

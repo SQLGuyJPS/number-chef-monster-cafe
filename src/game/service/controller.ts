@@ -3,7 +3,7 @@
 // deps. Scripted parts (PlateCount, CountTogether, Worked, eating) await speech that always
 // resolves (SPEC §8.1), so nothing here can hang on a missing `end` event.
 import { initialAttempt, plateCountLine, stepAttempt, trayEditable, type AttemptState, type Outcome } from '../../engine/attempt';
-import { BELL_GUARD_MS, COINS_PER_PROBLEM, HAT_PULSE_IDLE_MS, TICKET_REPEAT_IDLE_MS } from '../../engine/config';
+import { BELL_GUARD_MS, BELL_LEAD_MS, COINS_PER_PROBLEM, HAT_PULSE_IDLE_MS } from '../../engine/config';
 import { countTogetherTicks, type ModelCell } from '../../engine/countTogether';
 import { buildDemo, followMeCue, type FollowMeCue } from '../../engine/demos';
 import { attemptEvent, coinEvent, type FrozenEvt } from '../../engine/events';
@@ -52,7 +52,7 @@ interface State {
   bubbleCount: string;
   counting: boolean;
   mood: Mood;
-  fx: { index: number; kind: 'hop' | 'shake' | 'in'; nonce: number } | null;
+  fx: { index: number; kind: 'shake' | 'in'; nonce: number } | null;
   binWobble: number;
   bellWobble: number;
   flights: Flight[];
@@ -116,7 +116,6 @@ export class ServiceController {
   private script = 0; // bumped to cancel the running script
   private lastBell = -Infinity;
   private lastInput: number;
-  private ticketRepeated = false;
   private orderStarted: number;
   private skipEat: (() => void) | null = null;
   private nonce = 0;
@@ -282,14 +281,13 @@ export class ServiceController {
     const my = ++this.script;
     this.orderStarted = this.d.now();
     this.lastInput = this.d.now();
-    this.ticketRepeated = false;
     this.s = this.fresh(index);
     this.set({});
     void this.d.speak(ticketLine(this.order));
     void this.wait(600).then(() => my === this.script && this.set({ mood: 'idle' }));
   }
 
-  /** Idle cues (SPEC §3.2, §5.4): Pip's hat pulses after 10 s at S3; the ticket repeats once after 20 s. */
+  /** Idle cue (SPEC §3.2): Pip's hat pulses after 10 s at S3. The ticket is never re-spoken on idle (D81). */
   private scheduleIdle(): void {
     if (this.disposed) return;
     this.idleTimer = this.d.setTimeout(() => {
@@ -297,10 +295,6 @@ export class ServiceController {
       if (s.attempt.phase === 'building' && !s.finished) {
         const idle = this.d.now() - this.lastInput;
         if (this.stage === 3 && idle > HAT_PULSE_IDLE_MS && !s.hatPulse) this.set({ hatPulse: true });
-        if (idle > TICKET_REPEAT_IDLE_MS && !this.ticketRepeated) {
-          this.ticketRepeated = true;
-          void this.d.speak(ticketLine(this.order));
-        }
       }
       this.scheduleIdle();
     }, 1000);
@@ -337,6 +331,9 @@ export class ServiceController {
     const n = this.order.problem.answer;
     this.d.sfx.correct();
     this.set({ mood: 'delight', caption: say('serve.yum', { n }), bubble: null, counting: false, glow: [] });
+    // Let the bell ring out before "Yum!" (D86).
+    await this.wait(BELL_LEAD_MS);
+    if (my !== this.script) return;
     void this.d.speak(say('serve.yum', { n }));
     // Eat + react; any tap skips ahead (SPEC §5.6, D56). The full eat sequence is M2 (D66).
     await Promise.race([this.wait(1600), new Promise<void>((r) => (this.skipEat = r))]);
@@ -415,6 +412,8 @@ export class ServiceController {
     const line = plateCountLine(served, expected, this.stage);
     const text = say(line.key, line.params);
     this.set({ mood: 'puzzled', caption: text, bubble: null, counting: false });
+    await this.wait(BELL_LEAD_MS); // the bell first, then the monster (D86)
+    if (my !== this.script) return;
     await Promise.all([this.d.speak(text), this.wait(900)]);
     if (my !== this.script) return;
     const next = stepAttempt(this.s.attempt, { type: 'phaseDone' });
@@ -436,7 +435,7 @@ export class ServiceController {
     const e = r.effect;
     // S3 counts aloud (counting on / counting back); S2 and below: tones only (SPEC §3.2).
     const voice = this.stage === 3;
-    const fx = (kind: 'hop' | 'shake' | 'in', index: number) => ({ index, kind, nonce: ++this.nonce });
+    const fx = (kind: 'shake' | 'in', index: number) => ({ index, kind, nonce: ++this.nonce });
     switch (e.kind) {
       case 'placed':
       case 'putBack':
@@ -449,10 +448,6 @@ export class ServiceController {
         if (voice) this.d.countAloud(numberToWords(e.count));
         this.set({ tray: r.state });
         this.flyAway(e);
-        break;
-      case 'count': // counting by touch works at every stage (SPEC §3.3)
-        this.d.countAloud(numberToWords(e.count));
-        this.set({ fx: fx('hop', e.index) });
         break;
       case 'shakeLocked':
         this.d.sfx.wobble();
@@ -480,7 +475,6 @@ export class ServiceController {
   };
 
   tapBin = (): void => this.act(tapBin);
-  takeBack = (): void => this.act(removeLast);
   tapItem = (i: number): void => this.act((s) => tapItem(s, i));
   /** FollowMe: tapping the pulsing empty cell places too. */
   tapEmpty = (i: number): void =>

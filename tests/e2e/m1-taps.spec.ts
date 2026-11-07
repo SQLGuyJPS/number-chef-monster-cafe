@@ -29,9 +29,8 @@ async function expectAllBigEnough(page: Page, scene: string) {
   expect(small, `${scene}: targets below the minimum`).toEqual([]);
 }
 
-test('S3 add (tray cells, bin, take one back, bell, help, door)', async ({ page }) => {
+test('S3 add (tray cells, bin, bell, help, door)', async ({ page }) => {
   await openService(page, { skill: 'A2', stage: 3, ops: 'add' });
-  await expect(page.getByTestId('take-back')).toBeVisible();
   await expectAllBigEnough(page, 'S3 add');
 });
 
