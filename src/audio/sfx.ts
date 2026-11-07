@@ -1,12 +1,17 @@
 // WebAudio-synthesised SFX (SPEC §8.3): no audio files. Every call is best-effort; with no
 // AudioContext (not unlocked yet, or unsupported) nothing plays and nothing breaks.
-import { getAudioContext } from './unlock';
+import { audioStats, getAudioContext } from './unlock';
 
 const SFX_VOLUME = 0.7 * 0.8; // SFX × master defaults (SPEC §8.3)
 const PENTATONIC = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5, 1174.66, 1318.51, 1567.98, 1760.0];
 
 /** A tone that waits longer than this for the context to resume is dropped: late is worse than silent. */
 const RESUME_GRACE_MS = 250;
+/**
+ * Tones start this far ahead of the audio clock (D87). Scheduled at `currentTime` exactly, a
+ * context that has just resumed or been rebuilt cuts off the attack, which sounded clipped.
+ */
+const START_LEAD_S = 0.03;
 
 /**
  * Runs `play` now if the context is running, else right after it resumes (D86). iOS pauses
@@ -15,19 +20,21 @@ const RESUME_GRACE_MS = 250;
  */
 function whenRunning(play: (ctx: AudioContext) => void): void {
   const ctx = getAudioContext();
-  if (!ctx) return;
-  if (ctx.state === 'running') {
-    play(ctx);
-    return;
-  }
-  if (ctx.state === 'closed') return;
+  const skip = () => void audioStats.tonesSkipped++;
+  const run = (c: AudioContext) => {
+    audioStats.tonesPlayed++;
+    play(c);
+  };
+  if (!ctx || ctx.state === 'closed') return skip();
+  if (ctx.state === 'running') return run(ctx);
   const asked = performance.now();
   void ctx
     .resume()
     .then(() => {
-      if (ctx.state === 'running' && performance.now() - asked <= RESUME_GRACE_MS) play(ctx);
+      if (ctx.state === 'running' && performance.now() - asked <= RESUME_GRACE_MS) run(ctx);
+      else skip();
     })
-    .catch(() => undefined);
+    .catch(skip);
 }
 
 function tone(freq: number, start: number, dur: number, type: OscillatorType, gain: number, endFreq?: number): void {
@@ -43,7 +50,7 @@ function playTone(
   gain: number,
   endFreq?: number,
 ): void {
-  const t0 = ctx.currentTime + start;
+  const t0 = ctx.currentTime + START_LEAD_S + start;
   const osc = ctx.createOscillator();
   const g = ctx.createGain();
   osc.type = type;
@@ -60,10 +67,10 @@ function playTone(
 export const sfx = {
   /** Pitch walks a pentatonic ladder by running count, resetting every 10. */
   place(n: number): void {
-    tone(PENTATONIC[(Math.max(1, n) - 1) % 10]!, 0, 0.12, 'sine', 0.5);
+    tone(PENTATONIC[(Math.max(1, n) - 1) % 10]!, 0, 0.16, 'sine', 0.5);
   },
   remove(): void {
-    tone(520, 0, 0.12, 'sine', 0.35, 300);
+    tone(520, 0, 0.16, 'sine', 0.35, 300);
   },
   bell(): void {
     tone(1318, 0, 1.2, 'triangle', 0.45);

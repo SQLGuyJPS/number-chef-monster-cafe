@@ -83,9 +83,17 @@ How to set it up: open `…/number-chef-monster-cafe/?debug`, pick the stage and
 
 ### M1 feedback round 2 (D81–D85)
 - [x] Sounds: silent switch off. The bell was never heard; basket tones played only sometimes, and never when a count was spoken.
-- [ ] Bell (D86): does the "ding" now ring on every press, with "Yum!" (or "I see…") right after? Is the half-second pause before the monster speaks OK?
-- [ ] Tray tones (D86): with counting aloud (S3), do you now hear a short tone with each tap as well as the number? If the number still drowns the tone, say so (next step is in D86).
-- [ ] At S1/S2 (no counting voice): does every basket tap make a tone?
+- [x] After D86: bell still silent; tones played for a short while, sounded clipped, then stopped for good; voices fine (A1/A2, add and sub).
+
+### M1 feedback round 3: sound (D87)
+Play first, then use the sound test if anything is silent.
+- [ ] In a service: does the bell ding on every press now? Do basket/tray tones keep playing for a whole service, and are they still clipped?
+- [ ] If sound still stops: open `…/number-chef-monster-cafe/?debug` (in Safari is fine), scroll to **Sound test**, and tell me:
+  1. Tap **Bell** a few times. Heard? What do *Context*, *Clock* and *Tones* say?
+  2. Tap **Speak, then bell**. Does the bell ring after "one, two, three"? Then tap **Bell** again: heard? Did *Contexts built* go up?
+  3. Tap **Bell, then speak**. Both heard?
+  4. If nothing works: switch *audioSession type* to `ambient`, then `auto`, and repeat 1–3 each time (`ambient` follows the silent switch, so keep it off).
+  5. The *audioSession* row: what does it say (it shows whether the device is on iOS 17+)?
 - [ ] Order spoken once on arrival, no repeat when the child waits: better?
 - [ ] Tapping an orange item in addition sends it back to the bin; tapping a blue one only wiggles it. Clear to the child?
 - [ ] Menu: Little Bites and Big Bites now look identical (no glow).
