@@ -82,7 +82,10 @@ How to set it up: open `…/number-chef-monster-cafe/?debug`, pick the stage and
   Laptop (Windows Chrome) good; on iOS the emoji bunched in the middle → items placed by centre so both fill the crate (D85).
 
 ### M1 feedback round 2 (D81–D85)
-- [ ] Sounds: on the iPhone and iPad, do you hear the short rising tones when tapping the bin, and the bell's "ding" when pressing it? Try once with the silent switch off. If tones play with the switch off but not on, that's the iOS < 17 silent-switch limit (D37); if nothing plays either way, tell me.
+- [x] Sounds: silent switch off. The bell was never heard; basket tones played only sometimes, and never when a count was spoken.
+- [ ] Bell (D86): does the "ding" now ring on every press, with "Yum!" (or "I see…") right after? Is the half-second pause before the monster speaks OK?
+- [ ] Tray tones (D86): with counting aloud (S3), do you now hear a short tone with each tap as well as the number? If the number still drowns the tone, say so (next step is in D86).
+- [ ] At S1/S2 (no counting voice): does every basket tap make a tone?
 - [ ] Order spoken once on arrival, no repeat when the child waits: better?
 - [ ] Tapping an orange item in addition sends it back to the bin; tapping a blue one only wiggles it. Clear to the child?
 - [ ] Menu: Little Bites and Big Bites now look identical (no glow).

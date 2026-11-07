@@ -423,6 +423,11 @@ What: amends D79. Each item in the bin heap is absolutely positioned at a fixed 
 Why: the flowing row's width depended on the emoji font's glyph width. Segoe (Windows) is wide enough to fill the crate, but Apple's emoji are narrower, so on iOS the heap bunched up in the middle. Centre positions give the same spread with any font, so the laptop view stays as it was and iOS now fills to the edges.
 How to revisit: `FRONT_ROW` / `BACK_ROW` in `Bin` (`ServiceParts.tsx`), `.bin-heap` in `service.css`.
 
+**D86. The bell rings before the monster speaks; sound effects wait for audio to resume (owner, M1 playtest 2).**
+What: amends SPEC §5.6 and §8.3. After a serve, the monster's line ("Yum!" or the plate count) starts 500 ms after the bell press (`BELL_LEAD_MS`), so the ding is heard first. And when the AudioContext is not running (iOS marks it "interrupted" while speech plays), a sound effect now resumes it and plays as soon as it is running, if that happens within 250 ms; before, it was skipped.
+Why: the owner never heard the bell (silent switch off), and tray tones were missing whenever a count was spoken. iOS pauses WebAudio while speech plays, and the tap's resume is asynchronous, so a tone started in the same tap found the context not running and was dropped. A line spoken at the moment of the press also swallowed the ding.
+How to revisit: `BELL_LEAD_MS` in `src/engine/config.ts`; `whenRunning` in `src/audio/sfx.ts`. If tray tones are still lost under the counting voice on the real iPad, the next step is to start each count a tone-length (≈ 120 ms) after its tone; this was not done here because it adds lag to counting, which the owner said already feels right.
+
 <!-- New decisions go above this line, numbered one higher than the highest existing D<n>. -->
 
 ---

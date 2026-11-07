@@ -345,7 +345,7 @@ Chalkboard with two pages (swipe not required; two big tabs "Little Menu"/"Big M
 | tens and ones (B2/B3) | Tens packs counted by tens, then singles by ones: "twenty… twenty-one… twenty-seven" |
 
 ### 5.6 Eating and reaction
-Correct serve: bell "ding"; tray slides to the monster; food flies into the mouth in groups (≤ 5 individually counted, > 5 by row/pack with running total spoken at the end, e.g. "Eight!"); 3 chew cycles; reaction chosen from the monster's list (§7.2) with a bigger variant on first-try (a deliberate, visual-only exception to §1.1 point 7, D45). Total eat+react ≤ 4 s; any tap skips ahead. Then 3 coins fly into the jar one by one (§9); the matching `coin` event is written in the same transaction as the problem's other events (§11.3, D31), so the coins shown are exactly the coins kept.
+Correct serve: bell "ding", and the monster's line starts 500 ms later so the ding is heard first (also after a wrong serve, D86); tray slides to the monster; food flies into the mouth in groups (≤ 5 individually counted, > 5 by row/pack with running total spoken at the end, e.g. "Eight!"); 3 chew cycles; reaction chosen from the monster's list (§7.2) with a bigger variant on first-try (a deliberate, visual-only exception to §1.1 point 7, D45). Total eat+react ≤ 4 s; any tap skips ahead. Then 3 coins fly into the jar one by one (§9); the matching `coin` event is written in the same transaction as the problem's other events (§11.3, D31), so the coins shown are exactly the coins kept.
 
 ### 5.7 Results (closing time)
 The sign flips to CLOSED. Coin tally counts up with spoken numbers (counting by ones, then by fives for > 10). Shows the monsters served as a row of happy faces (everyone is happy; no scores). Buttons (≥ 160 px): **Another service** (the default, highlighted: same skill again; absent when the café is locked, §6; when a play-time limit is on and less than about half a service of allowance remains it offers a shorter service instead, §6.2), **Change dish** (back to the menu board), **Decorate** (from M4), **Home**. When the allowance ran out during this service, Results is followed by the locked Home. No streaks, no daily login, no "come back" nags.
@@ -435,7 +435,7 @@ Layered SVG scene: wall, floor, window, lights, counter, counter-top slot, wall 
 ## 8. Audio
 
 ### 8.1 Rules
-- Unlock on every `pointerdown` if the `AudioContext` is not `running` (iOS suspends after backgrounding).
+- Unlock on every `pointerdown` if the `AudioContext` is not `running` (iOS suspends after backgrounding). A sound effect asked for while the context is not running resumes it and plays once it is (within 250 ms), instead of being skipped; iOS also pauses WebAudio while speech plays (D86).
 - Set `navigator.audioSession.type='playback'` when available so the iPhone silent switch does not mute WebAudio; document the silent switch in the Parent area's help.
 - **Never block game flow on speech.** `speak()` returns a promise that resolves on `end` **or** after a timeout of about `clamp(1200, 400 + 90 ms × chars / rate, 8000)` (`rate` = the speech rate, default 0.85; iOS adds start-up latency, so a shorter timeout clips lines when the next `cancel()` fires; tune on the iPad, D37); iOS sometimes never fires `onend`. All game logic proceeds on this promise.
 - Always show captions on the ticket and in Pip's bubble; if there are no voices the game is fully playable.

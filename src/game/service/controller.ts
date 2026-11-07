@@ -3,7 +3,7 @@
 // deps. Scripted parts (PlateCount, CountTogether, Worked, eating) await speech that always
 // resolves (SPEC §8.1), so nothing here can hang on a missing `end` event.
 import { initialAttempt, plateCountLine, stepAttempt, trayEditable, type AttemptState, type Outcome } from '../../engine/attempt';
-import { BELL_GUARD_MS, COINS_PER_PROBLEM, HAT_PULSE_IDLE_MS } from '../../engine/config';
+import { BELL_GUARD_MS, BELL_LEAD_MS, COINS_PER_PROBLEM, HAT_PULSE_IDLE_MS } from '../../engine/config';
 import { countTogetherTicks, type ModelCell } from '../../engine/countTogether';
 import { buildDemo, followMeCue, type FollowMeCue } from '../../engine/demos';
 import { attemptEvent, coinEvent, type FrozenEvt } from '../../engine/events';
@@ -331,6 +331,9 @@ export class ServiceController {
     const n = this.order.problem.answer;
     this.d.sfx.correct();
     this.set({ mood: 'delight', caption: say('serve.yum', { n }), bubble: null, counting: false, glow: [] });
+    // Let the bell ring out before "Yum!" (D86).
+    await this.wait(BELL_LEAD_MS);
+    if (my !== this.script) return;
     void this.d.speak(say('serve.yum', { n }));
     // Eat + react; any tap skips ahead (SPEC §5.6, D56). The full eat sequence is M2 (D66).
     await Promise.race([this.wait(1600), new Promise<void>((r) => (this.skipEat = r))]);
@@ -409,6 +412,8 @@ export class ServiceController {
     const line = plateCountLine(served, expected, this.stage);
     const text = say(line.key, line.params);
     this.set({ mood: 'puzzled', caption: text, bubble: null, counting: false });
+    await this.wait(BELL_LEAD_MS); // the bell first, then the monster (D86)
+    if (my !== this.script) return;
     await Promise.all([this.d.speak(text), this.wait(900)]);
     if (my !== this.script) return;
     const next = stepAttempt(this.s.attempt, { type: 'phaseDone' });
