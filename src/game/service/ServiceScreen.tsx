@@ -30,6 +30,7 @@ import {
   ClocheLid,
   DigitButton,
   DoorSign,
+  HelpChoice,
   ModelBubble,
   PeekButton,
   PipHat,
@@ -282,7 +283,10 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
         </>
       )}
 
-      <PipHat rect={L.help} onTap={ctrl.help} pulsing={v.hatPulse} dim={lockedPhase} />
+      {phase === 'offerHelp' && (
+        <HelpChoice yes={L.offerYes} no={L.offerNo} onYes={ctrl.help} onNo={ctrl.declineHelp} />
+      )}
+      <PipHat rect={L.help} onTap={ctrl.help} pulsing={v.hatPulse || v.helpOffer || phase === 'offerHelp'} dim={lockedPhase} />
       <Bell
         rect={L.bell}
         onTap={ctrl.serve}

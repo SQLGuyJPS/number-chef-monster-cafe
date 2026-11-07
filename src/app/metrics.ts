@@ -109,6 +109,9 @@ export const SERVICE = {
   s0DigitGap: 8,
   /** Lifted cloche lid left of the S3 tray; tapping it closes the cloche and brings the digits back (D62). */
   clocheLid: { x: 200, y: 330, w: 150, h: 150 },
+  /** Help offer after the second miss (D89): two big picture buttons over the tray band. */
+  offerYes: { x: centeredX(2 * 220 + 80), y: 300, w: 220, h: 220 },
+  offerNo: { x: centeredX(2 * 220 + 80) + 220 + 80, y: 300, w: 220, h: 220 },
   /** CountTogether bubble right of the shrunken monster, its tail pointing left at it (D84). */
   bubble: BUBBLE,
   monsterAside: ASIDE,

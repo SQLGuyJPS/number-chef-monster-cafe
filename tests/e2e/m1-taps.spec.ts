@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { MIN_BUTTON_CSS_PX, MIN_CELL_CSS_PX } from '../../src/app/metrics';
-import { openService, tapId, waitPhase } from './service';
+import { openService, serveWrong, tapId, waitPhase } from './service';
 
 // CLAUDE.md: primary tap targets ≥ 44 CSS px (cells) and ≥ 56 (buttons) at 844×390, measured on
 // the live service screen in every layout the child can reach in M1.
@@ -45,6 +45,15 @@ test('CountTogether bubble up', async ({ page }) => {
   await waitPhase(page, 'countTogether');
   await expect(page.getByTestId('model-bubble')).toBeVisible();
   await expectAllBigEnough(page, 'CountTogether');
+});
+
+test('help offer after the second miss (D89)', async ({ page }) => {
+  await openService(page, { skill: 'A1', stage: 3 });
+  await serveWrong(page);
+  await waitPhase(page, 'building');
+  await serveWrong(page);
+  await waitPhase(page, 'offerHelp');
+  await expectAllBigEnough(page, 'Help offer');
 });
 
 test('S0 number pad and the lifted cloche', async ({ page }) => {

@@ -121,26 +121,59 @@ export function Bin({ rect, food, handlers, pulsing, wobble }: { rect: Rect; foo
   );
 }
 
+function HatArt() {
+  return (
+    <svg viewBox="0 0 120 110" width="100%" height="100%" aria-hidden="true">
+      <path
+        d="M30 52 Q10 50 14 32 Q18 14 38 20 Q44 4 60 6 Q78 4 82 20 Q102 14 106 32 Q110 50 90 52 L88 64 L32 64 Z"
+        fill="#fff"
+        stroke="#c9c2b4"
+        strokeWidth="3"
+      />
+      <rect x="32" y="60" width="56" height="10" rx="3" fill="#e9e3d6" />
+      <circle cx="34" cy="80" r="12" fill="#b9a7a0" />
+      <circle cx="86" cy="80" r="12" fill="#b9a7a0" />
+      <ellipse cx="60" cy="88" rx="24" ry="20" fill="#cdbdb6" />
+      <circle cx="51" cy="84" r="3.5" fill="#2b2b3a" />
+      <circle cx="69" cy="84" r="3.5" fill="#2b2b3a" />
+      <circle cx="60" cy="94" r="4" fill="#ff8fa3" />
+    </svg>
+  );
+}
+
 /** Pip's hat = Help (SPEC §7.3). */
 export function PipHat(props: PartProps) {
   return (
     <Btn {...props} className="pip-hat" testId="help" label="Help">
-      <svg viewBox="0 0 120 110" width="100%" height="100%" aria-hidden="true">
-        <path
-          d="M30 52 Q10 50 14 32 Q18 14 38 20 Q44 4 60 6 Q78 4 82 20 Q102 14 106 32 Q110 50 90 52 L88 64 L32 64 Z"
-          fill="#fff"
-          stroke="#c9c2b4"
-          strokeWidth="3"
-        />
-        <rect x="32" y="60" width="56" height="10" rx="3" fill="#e9e3d6" />
-        <circle cx="34" cy="80" r="12" fill="#b9a7a0" />
-        <circle cx="86" cy="80" r="12" fill="#b9a7a0" />
-        <ellipse cx="60" cy="88" rx="24" ry="20" fill="#cdbdb6" />
-        <circle cx="51" cy="84" r="3.5" fill="#2b2b3a" />
-        <circle cx="69" cy="84" r="3.5" fill="#2b2b3a" />
-        <circle cx="60" cy="94" r="4" fill="#ff8fa3" />
-      </svg>
+      <HatArt />
     </Btn>
+  );
+}
+
+/**
+ * Help offer after the second miss (D89). Pictures, not words: Pip (the same art as the Help
+ * button) means "help me"; the circling arrow round the child's own tray means "let me try again".
+ * The monster says the question aloud, so neither button needs reading.
+ */
+export function HelpChoice({ yes, no, onYes, onNo }: { yes: Rect; no: Rect; onYes: () => void; onNo: () => void }) {
+  return (
+    <>
+      <Btn rect={yes} className="choice choice-yes pulse" testId="offer-yes" label="Yes, help me" onTap={onYes}>
+        <HatArt />
+      </Btn>
+      <Btn rect={no} className="choice choice-no" testId="offer-no" label="No, I will try again" onTap={onNo}>
+        <svg viewBox="0 0 120 110" width="100%" height="100%" aria-hidden="true">
+          {/* A small ten-frame (the child's tray) inside a circling arrow. */}
+          <rect x="30" y="40" width="60" height="30" rx="4" fill="#fffdf6" stroke="#8a5a35" strokeWidth="3.5" />
+          <line x1="30" y1="55" x2="90" y2="55" stroke="#8a5a35" strokeWidth="2.5" />
+          {[42, 54, 66, 78].map((x) => (
+            <line key={x} x1={x} y1="40" x2={x} y2="70" stroke="#8a5a35" strokeWidth="2.5" />
+          ))}
+          <path d="M20 55 A40 40 0 1 1 34 86" fill="none" stroke="#4a8fd8" strokeWidth="8" strokeLinecap="round" />
+          <path d="M18 74 L34 90 L40 70 Z" fill="#4a8fd8" />
+        </svg>
+      </Btn>
+    </>
   );
 }
 

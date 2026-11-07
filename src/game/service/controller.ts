@@ -57,6 +57,8 @@ interface State {
   bellWobble: number;
   flights: Flight[];
   hatPulse: boolean;
+  /** After the first miss Pip's hat pulses as a quiet offer until the next serve or Help (D89). */
+  helpOffer: boolean;
   drag: { x: number; y: number } | null;
   finished: boolean;
 }
@@ -233,6 +235,7 @@ export class ServiceController {
       s0Typing: v.s0Typing,
       counting: v.counting,
       demoTray: v.demoTray,
+      helpOffer: v.helpOffer,
       canServe: v.canServe,
       cue: v.cue,
       caption: v.caption,
@@ -262,6 +265,7 @@ export class ServiceController {
       bellWobble: 0,
       flights: [],
       hatPulse: false,
+      helpOffer: false,
       drag: null,
       finished: false,
     };
@@ -441,9 +445,14 @@ export class ServiceController {
     await Promise.all([this.d.speak(text), this.wait(900)]);
     if (my !== this.script) return;
     const next = stepAttempt(this.s.attempt, { type: 'phaseDone' });
-    this.set({ attempt: next, mood: 'idle', typed: '' });
-    if (next.phase === 'countTogether') void this.runCountTogether(my);
-    else if (next.phase === 'worked') void this.runWorked(my);
+    this.lastInput = this.d.now();
+    // First miss: back to building at once with the hat pulsing as an offer (D89).
+    this.set({ attempt: next, mood: 'idle', typed: '', helpOffer: next.phase === 'building' });
+    if (next.phase === 'offerHelp') {
+      const ask = say('offer.help');
+      this.set({ caption: ask, mood: 'puzzled' });
+      void this.d.speak(ask);
+    } else if (next.phase === 'worked') void this.runWorked(my);
   }
 
   // ---------- tray feedback ----------
@@ -524,7 +533,7 @@ export class ServiceController {
     const correct = this.correctNow(s);
     const next = stepAttempt(s.attempt, { type: 'serve', correct });
     const my = ++this.script;
-    this.set({ attempt: next, bubble: null, counting: false, glow: [], hatPulse: false });
+    this.set({ attempt: next, bubble: null, counting: false, glow: [], hatPulse: false, helpOffer: false });
     if (next.phase === 'eating') {
       this.record(next.outcome!);
       void this.runEat(my);
@@ -543,10 +552,29 @@ export class ServiceController {
     if (next === s.attempt) return;
     const my = ++this.script;
     this.ticketTalking = false; // Pip's lines follow; taps must not cut them
-    this.set({ attempt: next, hatPulse: false, cloche: s.cloche === 'peek' ? 'down' : s.cloche });
+    this.hushIfOffer(s);
+    this.set({ attempt: next, hatPulse: false, helpOffer: false, cloche: s.cloche === 'peek' ? 'down' : s.cloche });
     if (next.phase === 'countTogether') void this.runCountTogether(my);
     else if (next.phase === 'worked') void this.runWorked(my);
   };
+
+  /** "No" to the help offer: the monster repeats the order and the child tries again (D89). */
+  declineHelp = (): void => {
+    this.touch();
+    const s = this.s;
+    const next = stepAttempt(s.attempt, { type: 'declineHelp' });
+    if (next === s.attempt) return;
+    ++this.script;
+    this.hushIfOffer(s);
+    this.lastInput = this.d.now();
+    this.set({ attempt: next, caption: ticketLine(this.order), mood: 'idle' });
+    this.speakTicket();
+  };
+
+  /** A choice made while the question is still being asked cuts it off, so the answer is heard at once. */
+  private hushIfOffer(s: State): void {
+    if (s.attempt.phase === 'offerHelp') this.d.hush();
+  }
 
   /** S0 Peek lifts the cloche on the S3 model; counts as Help (D41). */
   peek = (): void => {

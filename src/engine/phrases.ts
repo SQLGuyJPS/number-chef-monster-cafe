@@ -64,6 +64,9 @@ export const PHRASES = {
     text: (p) => `${N(p, 'seen')}? I wanted ${n(p, 'wanted')}.`,
   },
 
+  // Help offer after the second miss (D89).
+  'offer.help': { params: {}, text: () => 'Want Pip to help? Or try again?' },
+
   // CountTogether (SPEC §5.5).
   'ct.start': { params: {}, text: () => "Let's count together." },
   'ct.more': { params: { n: 'n' }, text: (p) => `${N(p, 'n')} more!` },
