@@ -3,7 +3,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 // D86: iOS leaves the AudioContext "interrupted" after speech; a tone asked for in the same tap
 // as the resume must still play once the context is running, not be skipped.
 let fake: FakeCtx | null = null;
-vi.mock('../../src/audio/unlock', () => ({ getAudioContext: () => fake }));
+vi.mock('../../src/audio/unlock', () => ({
+  getAudioContext: () => fake,
+  audioStats: { contextsCreated: 0, rebuilds: 0, tonesPlayed: 0, tonesSkipped: 0 },
+}));
 const { sfx } = await import('../../src/audio/sfx');
 
 class FakeCtx {

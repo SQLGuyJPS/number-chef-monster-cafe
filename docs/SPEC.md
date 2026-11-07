@@ -435,7 +435,7 @@ Layered SVG scene: wall, floor, window, lights, counter, counter-top slot, wall 
 ## 8. Audio
 
 ### 8.1 Rules
-- Unlock on every `pointerdown` if the `AudioContext` is not `running` (iOS suspends after backgrounding). A sound effect asked for while the context is not running resumes it and plays once it is (within 250 ms), instead of being skipped; iOS also pauses WebAudio while speech plays (D86).
+- Unlock on every `pointerdown` if the `AudioContext` is not `running` (iOS suspends after backgrounding). A sound effect asked for while the context is not running resumes it and plays once it is (within 250 ms), instead of being skipped; iOS also pauses WebAudio while speech plays (D86). If the context is interrupted, closed, or running with a frozen clock, the tap closes it and builds a fresh one (D87).
 - Set `navigator.audioSession.type='playback'` when available so the iPhone silent switch does not mute WebAudio; document the silent switch in the Parent area's help.
 - **Never block game flow on speech.** `speak()` returns a promise that resolves on `end` **or** after a timeout of about `clamp(1200, 400 + 90 ms × chars / rate, 8000)` (`rate` = the speech rate, default 0.85; iOS adds start-up latency, so a shorter timeout clips lines when the next `cancel()` fires; tune on the iPad, D37); iOS sometimes never fires `onend`. All game logic proceeds on this promise.
 - Always show captions on the ticket and in Pip's bubble; if there are no voices the game is fully playable.

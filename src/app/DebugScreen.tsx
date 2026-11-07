@@ -3,6 +3,7 @@ import { getStorageBoot } from './runtime';
 import { getSwStatus } from './pwa';
 import { APP_NAME } from './identity';
 import { SkillPicker } from './SkillPicker';
+import { AudioTest } from './AudioTest';
 
 interface Info {
   rows: [string, string][];
@@ -64,6 +65,7 @@ export function DebugScreen() {
       </table>
       {!info && <p>Loading…</p>}
       <SkillPicker />
+      <AudioTest />
     </div>
   );
 }
