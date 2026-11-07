@@ -121,6 +121,9 @@ export class ServiceController {
   private nonce = 0;
   private flightId = 0;
   private idleTimer: number | null = null;
+  /** Bumped per spoken ticket; the ticket is still talking while `ticketTalking` is set (D88). */
+  private ticketTok = 0;
+  private ticketTalking = false;
   private disposed = false;
   readonly events: FrozenEvt[] = [];
 
@@ -283,8 +286,29 @@ export class ServiceController {
     this.lastInput = this.d.now();
     this.s = this.fresh(index);
     this.set({});
-    void this.d.speak(ticketLine(this.order));
+    this.speakTicket();
     void this.wait(600).then(() => my === this.script && this.set({ mood: 'idle' }));
+  }
+
+  private speakTicket(): void {
+    const t = ++this.ticketTok;
+    this.ticketTalking = true;
+    void this.d.speak(ticketLine(this.order)).then(() => {
+      if (t === this.ticketTok) this.ticketTalking = false;
+    });
+  }
+
+  /**
+   * The child started building while the order was still being read: stop the order at once so the
+   * tap's tone and count are heard and nothing waits for the line (D88). No AudioContext rebuild
+   * here: the engine is still tearing the line down, which is when a new context took the audio
+   * session from speech (D87). The tone resumes the context; a later tap rebuilds it if needed.
+   */
+  private cutTicket(): void {
+    if (!this.ticketTalking) return;
+    this.ticketTalking = false;
+    this.ticketTok++;
+    this.d.hush();
   }
 
   /** Idle cue (SPEC §3.2): Pip's hat pulses after 10 s at S3. The ticket is never re-spoken on idle (D81). */
@@ -465,6 +489,7 @@ export class ServiceController {
   private act(f: (s: TrayState) => TrayResult): void {
     this.touch();
     if (!this.editable(this.s)) return;
+    this.cutTicket();
     this.applyTray(f(this.s.tray));
   }
 
@@ -495,6 +520,7 @@ export class ServiceController {
       return;
     }
     this.d.sfx.bell();
+    this.ticketTalking = false; // the monster's next line replaces the order; taps must not cut it
     const correct = this.correctNow(s);
     const next = stepAttempt(s.attempt, { type: 'serve', correct });
     const my = ++this.script;
@@ -516,6 +542,7 @@ export class ServiceController {
     const next = stepAttempt(s.attempt, { type: 'help' });
     if (next === s.attempt) return;
     const my = ++this.script;
+    this.ticketTalking = false; // Pip's lines follow; taps must not cut them
     this.set({ attempt: next, hatPulse: false, cloche: s.cloche === 'peek' ? 'down' : s.cloche });
     if (next.phase === 'countTogether') void this.runCountTogether(my);
     else if (next.phase === 'worked') void this.runWorked(my);
@@ -543,6 +570,7 @@ export class ServiceController {
     const s = this.s;
     const padOpen = s.cloche === 'down' || s.s0Typing;
     if (this.stage !== 0 || !padOpen || !trayEditable(s.attempt.phase) || s.typed.length >= 2) return;
+    this.cutTicket();
     this.d.sfx.place(d === 0 ? 10 : d);
     // One display that always takes up to two digits (D32); a lone leading zero is replaced.
     this.set({ typed: s.typed === '0' ? String(d) : s.typed + String(d) });
@@ -552,13 +580,14 @@ export class ServiceController {
     this.touch();
     const s = this.s;
     if (this.stage !== 0 || s.typed === '' || !trayEditable(s.attempt.phase)) return;
+    this.cutTicket();
     this.d.sfx.remove();
     this.set({ typed: s.typed.slice(0, -1) });
   };
 
   replayTicket = (): void => {
     this.touch();
-    void this.d.speak(ticketLine(this.order));
+    this.speakTicket();
   };
 
   skip = (): void => this.skipEat?.();

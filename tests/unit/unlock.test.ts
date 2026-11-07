@@ -59,6 +59,31 @@ describe('ensureAudio (D87)', () => {
     expect(m.audioStats.rebuilds).toBe(1);
   });
 
+  it('never replaces the context while speech is talking (D88)', async () => {
+    const m = await fresh();
+    const w = window as unknown as { speechSynthesis?: { speaking: boolean } };
+    w.speechSynthesis = { speaking: true };
+    FakeCtx.made[0]!.state = 'interrupted';
+    m.ensureAudio();
+    expect(FakeCtx.made).toHaveLength(1);
+    w.speechSynthesis.speaking = false;
+    m.ensureAudio();
+    expect(FakeCtx.made).toHaveLength(2);
+  });
+
+  it('ignores a `speaking` flag stuck longer than any line can last (D88)', async () => {
+    const m = await fresh();
+    (window as unknown as { speechSynthesis: { speaking: boolean } }).speechSynthesis = { speaking: true };
+    FakeCtx.made[0]!.state = 'interrupted';
+    m.ensureAudio();
+    now += 5000;
+    m.ensureAudio();
+    expect(FakeCtx.made).toHaveLength(1);
+    now += 5000;
+    m.ensureAudio();
+    expect(FakeCtx.made).toHaveLength(2);
+  });
+
   it('replaces an interrupted context and only resumes a suspended one', async () => {
     const m = await fresh();
     FakeCtx.made[0]!.state = 'suspended';

@@ -106,18 +106,47 @@ function build(): void {
   if (sampler === null) sampler = window.setInterval(sample, SAMPLE_MS);
 }
 
+/** Longer than any line may last (8 s cap, SPEC §8.1): `speaking` true beyond this is stuck. */
+const STUCK_SPEAKING_MS = 9000;
+let talkingSince: number | null = null;
+
+/**
+ * True while the speech engine is talking (read directly, so this module stays free of speech.ts).
+ * WebKit can leave `speaking` stuck at true after an interruption; trusting it forever would block
+ * every rebuild, so a flag that has stayed true longer than any line can last is ignored.
+ */
+function speechTalking(): boolean {
+  try {
+    if (!('speechSynthesis' in window) || !window.speechSynthesis.speaking) {
+      talkingSince = null;
+      return false;
+    }
+    const t = performance.now();
+    talkingSince ??= t;
+    return t - talkingSince < STUCK_SPEAKING_MS;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Call inside a gesture (every pointerdown, D87). A suspended context (backgrounding) is resumed;
- * an interrupted, closed or frozen one is replaced.
+ * an interrupted, closed or frozen one is replaced, but never while speech is playing (D88): iOS
+ * pauses WebAudio during speech, and building a new context then takes the audio session from the
+ * speech engine, which cut the line off, left later lines silent and held up the tap.
  */
 export function ensureAudio(): void {
   try {
-    if (!ctx) return build();
+    if (!ctx) {
+      if (!speechTalking()) build();
+      return;
+    }
     if (ctx.state === 'suspended') {
       void ctx.resume().catch(() => undefined);
       lastAdvance = { wall: performance.now(), audio: -1 };
       return;
     }
+    if (speechTalking()) return;
     if (!healthy(ctx)) build();
   } catch {
     ctx = null;
