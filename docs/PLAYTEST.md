@@ -101,3 +101,12 @@ Play first, then use the sound test if anything is silent.
 - [ ] Bin on the iPhone/iPad: does the heap now reach the crate edges? And on the laptop, does it still look as before?
 
 Notes:
+
+- [x] After D87: tray/basket tones work; the bell rings, then the monster says "Yum!" after a pause. But a tap while the monster was talking cut the line off, the next order was silent, and speech came back only after a long while. Tapping food while the order was read did nothing, then "caught up" when the line ended.
+
+### M1 feedback round 4: talking and tapping (D88)
+- [ ] Start tapping food while the monster is still reading the order: does it stop talking at once, with the tones, counting and food moving immediately?
+- [ ] Tap around (tray, basket, anywhere) while the monster says "Yum!" or "I see…": does speech carry on, and is the next order spoken?
+- [ ] Over a whole service: any order that stays silent? If one does, note roughly when it happened, and whether it spoke again after about 1–2 seconds (a stuck line is retried once).
+- [ ] Do the tones and the bell still work as in round 3?
+

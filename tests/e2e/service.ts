@@ -35,6 +35,8 @@ declare global {
   interface Window {
     __ncmc: Hooks;
     __phases: string[];
+    __spoken: string[];
+    __cancels: number;
   }
 }
 
@@ -50,7 +52,7 @@ export async function stubSpeechNeverEnds(page: Page): Promise<void> {
       pending: false,
       paused: false,
       speak: (u: { text: string }) => void spoken.push(u.text),
-      cancel: () => undefined,
+      cancel: () => void window.__cancels++,
       pause: () => undefined,
       resume: () => undefined,
       getVoices: () => [],
@@ -59,6 +61,7 @@ export async function stubSpeechNeverEnds(page: Page): Promise<void> {
     };
     Object.defineProperty(window, 'speechSynthesis', { value: stub, configurable: true });
     (window as unknown as { __spoken: string[] }).__spoken = spoken;
+    window.__cancels = 0;
   });
 }
 

@@ -57,6 +57,19 @@ test('S3 add: fill order, tap an item to send it back, locked prefill shakes, th
   await expect.poll(async () => (await probe(page)).index).toBe(1);
 });
 
+test('tapping food while the order is read stops the order at once and counts the tap (D88)', async ({ page }) => {
+  // Real time: the stubbed order line never ends, so it is still "talking" when the child taps.
+  await openService(page, { skill: 'A2', stage: 3, ops: 'add', seed: 3, timeScale: 1 });
+  const s = await probe(page);
+  const before = await page.evaluate(() => ({ cancels: window.__cancels, spoken: window.__spoken.length }));
+  await tapId(page, 'bin');
+  expect((await probe(page)).filled).toBe(s.prefill + 1);
+  const after = await page.evaluate(() => ({ cancels: window.__cancels, spoken: window.__spoken.slice() }));
+  expect(after.cancels).toBeGreaterThan(before.cancels);
+  // The count is spoken right away instead of being skipped behind the order.
+  expect(after.spoken.length).toBeGreaterThan(before.spoken);
+});
+
 test('S3 remove: tapping any item removes the last one; the bin puts one back (D30, D42)', async ({ page }) => {
   await openService(page, { skill: 'A2', stage: 3, ops: 'sub', seed: 5 });
   const s = await probe(page);

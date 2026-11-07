@@ -95,6 +95,30 @@ describe('countAloud (D75)', () => {
   });
 });
 
+describe('start watchdog (D88)', () => {
+  it('a line that never starts is retried once', async () => {
+    const sp = await load();
+    void sp.speakText('Five plus two cookies, please!');
+    vi.advanceTimersByTime(1600);
+    expect(spoken.map((u) => u.text)).toEqual(['Five plus two cookies please!', 'Five plus two cookies please!']);
+    vi.advanceTimersByTime(3000);
+    expect(spoken).toHaveLength(2);
+  });
+
+  it('no retry once the line has started, or when a newer line replaced it', async () => {
+    const sp = await load();
+    void sp.speakText('Yum! Seven!');
+    (spoken[0] as unknown as { onstart: () => void }).onstart();
+    vi.advanceTimersByTime(1600);
+    expect(spoken).toHaveLength(1);
+    void sp.speakText('Thank you chef!');
+    void sp.speakText('Bye!'); // replaces the line before its watchdog fires
+    (spoken[2] as unknown as { onstart: () => void }).onstart();
+    vi.advanceTimersByTime(1600);
+    expect(spoken.map((u) => u.text)).toEqual(['Yum! Seven!', 'Thank you chef!', 'Bye!']);
+  });
+});
+
 describe('spokenForm (D77)', () => {
   it('drops commas but keeps other punctuation', async () => {
     const sp = await load();
