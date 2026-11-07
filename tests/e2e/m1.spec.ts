@@ -101,18 +101,29 @@ test('wrong → wrong → help offer → yes → demo → follow-me: the bell pu
   await waitPhase(page, 'plateCount', 10_000);
   await waitPhase(page, 'building', 10_000);
   await expect(page.getByTestId('model-bubble')).toHaveCount(0);
+  await expect(page.getByTestId('pip')).toHaveCount(0);
   await expect(page.getByTestId('help')).toHaveClass(/pulse/);
   expect((await probe(page)).canServe).toBe(true);
 
   // Second miss: the monster offers help; the bell stays off until the child chooses.
   await serveWrong(page);
   await waitPhase(page, 'offerHelp', 10_000);
+  // Pip steps out as the monster asks, so "Want Pip to help?" points at someone (D90).
+  await expect(page.getByTestId('pip')).toBeVisible();
+  await expect(page.getByTestId('caption')).toHaveAttribute('data-speaker', 'monster');
   await expect(page.getByTestId('offer-yes')).toBeVisible();
   await expect(page.getByTestId('offer-no')).toBeVisible();
   expect((await probe(page)).canServe).toBe(false);
   await tapId(page, 'offer-yes');
   await waitPhase(page, 'worked', 10_000);
+  // Pip gives the demo, in Pip's own bubble and voice (D90).
+  await expect(page.getByTestId('pip')).toBeVisible();
+  await expect(page.getByTestId('caption')).toHaveAttribute('data-speaker', 'pip');
   await waitPhase(page, 'followMe', 40_000);
+  const voices = await page.evaluate(() => ({ all: window.__spoken.slice(), pip: window.__pipSpoken.slice() }));
+  expect(voices.pip).toContain('Your turn! Follow me.');
+  expect(voices.pip.some((l) => l.includes('Want Pip'))).toBe(false); // the monster asks
+  expect(voices.all.some((l) => l.includes('Want Pip'))).toBe(true);
   await expect.poll(() => phases(page)).toEqual(['building', 'plateCount', 'building', 'plateCount', 'offerHelp', 'worked', 'followMe']);
 
   await followMe(page);
@@ -122,6 +133,7 @@ test('wrong → wrong → help offer → yes → demo → follow-me: the bell pu
   expect((await probe(page)).phase).toBe('followMe');
   await ringBell(page);
   await expect.poll(async () => (await probe(page)).events[0]?.outcome).toBe('assisted');
+  await expect(page.getByTestId('pip')).toHaveCount(0); // Pip steps back once the child serves
 });
 
 test('help offer → no repeats the order; right then is "fixed", a third miss plays the demo unasked (D89)', async ({ page }) => {

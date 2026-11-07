@@ -397,6 +397,47 @@
   height: 36px;
   background: var(--c-paper);
 }
+/* Pip's lines (D90): the right-hand tail hides and a tail points down at Pip below the bubble. */
+.caption.from-pip::before,
+.caption.from-pip::after {
+  clip-path: polygon(0 0, 100% 0, 25% 100%);
+}
+.caption.from-pip::before {
+  right: auto;
+  left: 50px;
+  top: auto;
+  bottom: -30px;
+  width: 50px;
+  height: 34px;
+}
+.caption.from-pip::after {
+  right: auto;
+  left: 55px;
+  top: auto;
+  bottom: -23px;
+  width: 40px;
+  height: 27px;
+}
+
+/* ---- Pip (SPEC §7.3, D90) ---- */
+.pip-slot {
+  position: absolute;
+  z-index: 2;
+  transform-origin: 50% 100%;
+  animation: pip-in 0.35s ease-out;
+}
+.pip-slot.talking > svg {
+  transform-origin: 50% 100%;
+  animation: pip-talk 0.9s ease-in-out infinite;
+}
+@keyframes pip-in {
+  from { transform: translateY(40px) scale(0.6); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes pip-talk {
+  50% { transform: translateY(-4px) rotate(-2deg); }
+}
+
 .svc-btn.dim {
   opacity: 0.55;
   filter: saturate(0.6);

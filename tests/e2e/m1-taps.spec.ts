@@ -44,6 +44,7 @@ test('CountTogether bubble up', async ({ page }) => {
   await tapId(page, 'help');
   await waitPhase(page, 'countTogether');
   await expect(page.getByTestId('model-bubble')).toBeVisible();
+  await expect(page.getByTestId('pip')).toBeVisible(); // Pip counts (D90)
   await expectAllBigEnough(page, 'CountTogether');
 });
 

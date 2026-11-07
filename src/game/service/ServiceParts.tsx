@@ -3,6 +3,7 @@ import { TapButton } from '../input/TapButton';
 import { FOODS, type FoodId } from '../../engine/foods';
 import type { Rect } from '../../app/metrics';
 import { TenFrame, type CellView, type ItemRole } from '../tray/TenFrame';
+import { PlaceholderPip } from '../../art/PlaceholderPip';
 import { MODEL_FRAMES_GAP, MODEL_ONE, MODEL_TWO, frameSize } from '../../app/metrics';
 
 export const at = (r: Rect): CSSProperties => ({ left: r.x, top: r.y, width: r.w, height: r.h });
@@ -151,15 +152,15 @@ export function PipHat(props: PartProps) {
 }
 
 /**
- * Help offer after the second miss (D89). Pictures, not words: Pip (the same art as the Help
- * button) means "help me"; the circling arrow round the child's own tray means "let me try again".
- * The monster says the question aloud, so neither button needs reading.
+ * Help offer after the second miss (D89). Pictures, not words: Pip (the helper standing on the
+ * counter, D90) means "help me"; the circling arrow round the child's own tray means "let me try
+ * again". The monster says the question aloud, so neither button needs reading.
  */
 export function HelpChoice({ yes, no, onYes, onNo }: { yes: Rect; no: Rect; onYes: () => void; onNo: () => void }) {
   return (
     <>
       <Btn rect={yes} className="choice choice-yes pulse" testId="offer-yes" label="Yes, help me" onTap={onYes}>
-        <HatArt />
+        <PlaceholderPip />
       </Btn>
       <Btn rect={no} className="choice choice-no" testId="offer-no" label="No, I will try again" onTap={onNo}>
         <svg viewBox="0 0 120 110" width="100%" height="100%" aria-hidden="true">
@@ -169,8 +170,9 @@ export function HelpChoice({ yes, no, onYes, onNo }: { yes: Rect; no: Rect; onYe
           {[42, 54, 66, 78].map((x) => (
             <line key={x} x1={x} y1="40" x2={x} y2="70" stroke="#8a5a35" strokeWidth="2.5" />
           ))}
-          <path d="M20 55 A40 40 0 1 1 34 86" fill="none" stroke="#4a8fd8" strokeWidth="8" strokeLinecap="round" />
-          <path d="M18 74 L34 90 L40 70 Z" fill="#4a8fd8" />
+          {/* Clockwise arc round the tray; the arrowhead sits at the end, pointing along the turn. */}
+          <path d="M24.3 42 A38 38 0 1 1 30.9 79.4" fill="none" stroke="#4a8fd8" strokeWidth="8" strokeLinecap="round" />
+          <path d="M21.9 68.7 L25.1 89.6 L41.9 75.4 Z" fill="#4a8fd8" />
         </svg>
       </Btn>
     </>
@@ -270,10 +272,11 @@ export function ClocheLid(props: PartProps) {
 }
 
 /** Caption bubble (SPEC §8.1: captions always on). ≤ 8 words by lint (SPEC §13.2). */
-export function Caption({ rect, text }: { rect: Rect; text: string }) {
+/** The tail points at whoever is talking: right at the monster, down at Pip (D76, D90). */
+export function Caption({ rect, text, speaker }: { rect: Rect; text: string; speaker: 'monster' | 'pip' }) {
   if (!text) return null;
   return (
-    <div className="caption" style={at(rect)} data-testid="caption" aria-live="polite">
+    <div className={`caption from-${speaker}`} style={at(rect)} data-testid="caption" data-speaker={speaker} aria-live="polite">
       {text}
     </div>
   );

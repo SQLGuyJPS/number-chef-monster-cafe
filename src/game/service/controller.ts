@@ -29,6 +29,8 @@ import type { TrayTask } from '../../engine/types';
 /** S0 cloche (D41, D62): down = number pad; peek = the child lifted it; model = Worked/FollowMe. */
 export type Cloche = 'down' | 'peek' | 'model';
 export type Mood = 'arrive' | 'idle' | 'puzzled' | 'delight' | 'leave';
+/** Who says the caption line: the monster orders and reacts; Pip gives the help (SPEC §7.3, D90). */
+export type Speaker = 'monster' | 'pip';
 
 export interface Flight {
   id: number;
@@ -48,6 +50,7 @@ interface State {
   s0Typing: boolean;
   glow: number[];
   caption: string;
+  speaker: Speaker;
   bubble: ModelCell[] | null;
   bubbleCount: string;
   counting: boolean;
@@ -65,6 +68,8 @@ interface State {
 
 /** What the screen renders: the state plus everything derived from the engine. */
 export interface ServiceView extends State {
+  /** Pip is out beside the monster: offering help or giving it (D90). */
+  pipOut: boolean;
   order: Order;
   task: TrayTask;
   padMode: boolean;
@@ -77,7 +82,8 @@ export interface ServiceView extends State {
 }
 
 export interface ServiceDeps {
-  speak(text: string): Promise<void>;
+  /** Pip speaks in a higher voice so the child hears who is talking (D90). */
+  speak(text: string, who?: Speaker): Promise<void>;
   /** Latest-wins counting voice (SPEC §3.3). */
   countAloud(text: string): void;
   hush(): void;
@@ -99,6 +105,9 @@ export interface ServiceOptions {
   dev: string;
   onDone: () => void;
 }
+
+/** Pip stands beside the monster while help is offered or given (D90). */
+const PIP_PHASES = new Set(['countTogether', 'offerHelp', 'worked', 'followMe']);
 
 const say = (key: PhraseKey, params: PhraseParams = {}) => phrase(key, params);
 
@@ -201,6 +210,7 @@ export class ServiceController {
     const followTyping = this.stage === 0 && s.attempt.phase === 'followMe' && s.s0Typing;
     return {
       ...s,
+      pipOut: PIP_PHASES.has(s.attempt.phase),
       order: this.order,
       task: this.trayTask(s),
       padMode: this.stage === 0 && s.cloche === 'down',
@@ -219,6 +229,8 @@ export class ServiceController {
       index: v.index,
       orders: this.opts.orders.length,
       phase: v.attempt.phase,
+      speaker: v.speaker,
+      pipOut: v.pipOut,
       attempt: v.attempt.attempt,
       stage: v.order.stage,
       form: v.order.problem.form,
@@ -256,6 +268,7 @@ export class ServiceController {
       s0Typing: false,
       glow: [],
       caption: ticketLine(o),
+      speaker: 'monster',
       bubble: null,
       bubbleCount: '',
       counting: false,
@@ -333,8 +346,8 @@ export class ServiceController {
     const s = this.s;
     if (this.stage !== 0 || s.attempt.phase !== 'followMe' || s.s0Typing) return;
     if (followMeCue(s.tray, this.trayTask(s).expected.cells) !== 'bell') return;
-    this.s = { ...s, s0Typing: true, cloche: 'down', typed: '', caption: say('follow.type') };
-    void this.d.speak(say('follow.type'));
+    this.s = { ...s, s0Typing: true, cloche: 'down', typed: '', caption: say('follow.type'), speaker: 'pip' };
+    void this.d.speak(say('follow.type'), 'pip');
   }
 
   // ---------- scripts ----------
@@ -358,7 +371,7 @@ export class ServiceController {
   private async runEat(my: number): Promise<void> {
     const n = this.order.problem.answer;
     this.d.sfx.correct();
-    this.set({ mood: 'delight', caption: say('serve.yum', { n }), bubble: null, counting: false, glow: [] });
+    this.set({ mood: 'delight', caption: say('serve.yum', { n }), speaker: 'monster', bubble: null, counting: false, glow: [] });
     // Let the bell ring out before "Yum!" (D86).
     await this.wait(BELL_LEAD_MS);
     if (my !== this.script) return;
@@ -375,7 +388,7 @@ export class ServiceController {
       this.startOrder(next);
       return;
     }
-    this.set({ finished: true, caption: say('service.closed'), mood: 'delight' });
+    this.set({ finished: true, caption: say('service.closed'), speaker: 'monster', mood: 'delight' });
     await this.d.speak(say('service.closed'));
     await this.wait(600);
     if (my === this.script) this.opts.onDone();
@@ -383,13 +396,13 @@ export class ServiceController {
 
   private async runCountTogether(my: number): Promise<void> {
     const ticks = countTogetherTicks(this.order.problem);
-    this.set({ counting: true, bubble: ticks[0]!.cells, bubbleCount: '', mood: 'idle', caption: say('ct.start') });
-    await this.d.speak(say('ct.start'));
+    this.set({ counting: true, bubble: ticks[0]!.cells, bubbleCount: '', mood: 'idle', caption: say('ct.start'), speaker: 'pip' });
+    await this.d.speak(say('ct.start'), 'pip');
     for (const t of ticks.slice(1)) {
       if (my !== this.script) return;
       const line = say(t.key, t.params);
       this.set({ bubble: t.cells, bubbleCount: line });
-      await Promise.all([this.d.speak(line), this.wait(450)]);
+      await Promise.all([this.d.speak(line, 'pip'), this.wait(450)]);
     }
     if (my !== this.script) return;
     // The bubble stays up as a model until the next serve (D68); the tray was editable throughout.
@@ -421,8 +434,8 @@ export class ServiceController {
         this.flyAway(r.effect);
       }
       const line = say(step.narrationKey, step.params);
-      this.set({ tray, glow: step.trayOp.op === 'glow' ? step.trayOp.cells : [], caption: line });
-      await Promise.all([this.d.speak(line), this.wait(step.holdMs)]);
+      this.set({ tray, glow: step.trayOp.op === 'glow' ? step.trayOp.cells : [], caption: line, speaker: 'pip' });
+      await Promise.all([this.d.speak(line, 'pip'), this.wait(step.holdMs)]);
     }
     if (my !== this.script) return;
     // FollowMe: the tray resets to the start and the child repeats the steps (SPEC §5.5).
@@ -431,15 +444,16 @@ export class ServiceController {
       tray: startState(t3),
       glow: [],
       caption: say('follow.start'),
+      speaker: 'pip',
     }));
-    void this.d.speak(say('follow.start'));
+    void this.d.speak(say('follow.start'), 'pip');
   }
 
   private async runPlate(my: number, served: number, expected: number): Promise<void> {
     this.d.sfx.hm();
     const line = plateCountLine(served, expected, this.stage);
     const text = say(line.key, line.params);
-    this.set({ mood: 'puzzled', caption: text, bubble: null, counting: false });
+    this.set({ mood: 'puzzled', caption: text, speaker: 'monster', bubble: null, counting: false });
     await this.wait(BELL_LEAD_MS); // the bell first, then the monster (D86)
     if (my !== this.script) return;
     await Promise.all([this.d.speak(text), this.wait(900)]);
@@ -450,7 +464,7 @@ export class ServiceController {
     this.set({ attempt: next, mood: 'idle', typed: '', helpOffer: next.phase === 'building' });
     if (next.phase === 'offerHelp') {
       const ask = say('offer.help');
-      this.set({ caption: ask, mood: 'puzzled' });
+      this.set({ caption: ask, speaker: 'monster', mood: 'puzzled' });
       void this.d.speak(ask);
     } else if (next.phase === 'worked') void this.runWorked(my);
   }
@@ -567,7 +581,7 @@ export class ServiceController {
     ++this.script;
     this.hushIfOffer(s);
     this.lastInput = this.d.now();
-    this.set({ attempt: next, caption: ticketLine(this.order), mood: 'idle' });
+    this.set({ attempt: next, caption: ticketLine(this.order), speaker: 'monster', mood: 'idle' });
     this.speakTicket();
   };
 
