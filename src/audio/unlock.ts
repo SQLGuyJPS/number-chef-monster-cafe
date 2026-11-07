@@ -106,10 +106,24 @@ function build(): void {
   if (sampler === null) sampler = window.setInterval(sample, SAMPLE_MS);
 }
 
-/** True while the speech engine is talking (read directly, so this module stays free of speech.ts). */
+/** Longer than any line may last (8 s cap, SPEC §8.1): `speaking` true beyond this is stuck. */
+const STUCK_SPEAKING_MS = 9000;
+let talkingSince: number | null = null;
+
+/**
+ * True while the speech engine is talking (read directly, so this module stays free of speech.ts).
+ * WebKit can leave `speaking` stuck at true after an interruption; trusting it forever would block
+ * every rebuild, so a flag that has stayed true longer than any line can last is ignored.
+ */
 function speechTalking(): boolean {
   try {
-    return 'speechSynthesis' in window && window.speechSynthesis.speaking;
+    if (!('speechSynthesis' in window) || !window.speechSynthesis.speaking) {
+      talkingSince = null;
+      return false;
+    }
+    const t = performance.now();
+    talkingSince ??= t;
+    return t - talkingSince < STUCK_SPEAKING_MS;
   } catch {
     return false;
   }

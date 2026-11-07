@@ -71,6 +71,19 @@ describe('ensureAudio (D87)', () => {
     expect(FakeCtx.made).toHaveLength(2);
   });
 
+  it('ignores a `speaking` flag stuck longer than any line can last (D88)', async () => {
+    const m = await fresh();
+    (window as unknown as { speechSynthesis: { speaking: boolean } }).speechSynthesis = { speaking: true };
+    FakeCtx.made[0]!.state = 'interrupted';
+    m.ensureAudio();
+    now += 5000;
+    m.ensureAudio();
+    expect(FakeCtx.made).toHaveLength(1);
+    now += 5000;
+    m.ensureAudio();
+    expect(FakeCtx.made).toHaveLength(2);
+  });
+
   it('replaces an interrupted context and only resumes a suspended one', async () => {
     const m = await fresh();
     FakeCtx.made[0]!.state = 'suspended';

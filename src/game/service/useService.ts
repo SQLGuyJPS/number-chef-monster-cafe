@@ -2,7 +2,6 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import { getTimeScale, setServiceProbe } from '../../app/runtime';
 import { countAloud, hush, speakText } from '../../audio/speech';
 import { sfx } from '../../audio/sfx';
-import { ensureAudio } from '../../audio/unlock';
 import { newId } from '../../storage/ids';
 import { ServiceController, type ServiceDeps, type ServiceOptions } from './controller';
 
@@ -10,7 +9,6 @@ const browserDeps: ServiceDeps = {
   speak: (text) => speakText(text),
   countAloud,
   hush,
-  wakeAudio: ensureAudio,
   sfx,
   now: () => performance.now(),
   wall: () => Date.now(),

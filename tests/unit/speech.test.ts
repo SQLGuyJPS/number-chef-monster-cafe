@@ -33,7 +33,11 @@ beforeEach(() => {
   spoken = [];
   playing = null;
   vi.useFakeTimers();
-  vi.stubGlobal('window', { speechSynthesis: fakeSynth, setTimeout: globalThis.setTimeout });
+  vi.stubGlobal('window', {
+    speechSynthesis: fakeSynth,
+    setTimeout: globalThis.setTimeout,
+    clearTimeout: globalThis.clearTimeout,
+  });
   vi.stubGlobal(
     'SpeechSynthesisUtterance',
     class {
@@ -103,6 +107,18 @@ describe('start watchdog (D88)', () => {
     expect(spoken.map((u) => u.text)).toEqual(['Five plus two cookies please!', 'Five plus two cookies please!']);
     vi.advanceTimersByTime(3000);
     expect(spoken).toHaveLength(2);
+  });
+
+  it('the retried line keeps speech busy for its own full length', async () => {
+    const sp = await load();
+    const text = 'Five plus two cookies please!';
+    void sp.speakText(text);
+    const ms = sp.speechTimeoutMs(text);
+    vi.advanceTimersByTime(1600); // retried here
+    vi.advanceTimersByTime(ms - 1600 + 100); // past the first fallback
+    expect(sp.speechBusy()).toBe(true);
+    vi.advanceTimersByTime(1600);
+    expect(sp.speechBusy()).toBe(false);
   });
 
   it('no retry once the line has started, or when a newer line replaced it', async () => {

@@ -79,8 +79,6 @@ export interface ServiceDeps {
   /** Latest-wins counting voice (SPEC §3.3). */
   countAloud(text: string): void;
   hush(): void;
-  /** Re-checks the sound player after speech was cut, inside the same tap (D87, D88). */
-  wakeAudio(): void;
   sfx: { place(n: number): void; remove(): void; bell(): void; correct(): void; hm(): void; wobble(): void };
   /** Monotonic ms. */
   now(): number;
@@ -302,14 +300,15 @@ export class ServiceController {
 
   /**
    * The child started building while the order was still being read: stop the order at once so the
-   * tap's tone and count are heard and nothing waits for the line (D88).
+   * tap's tone and count are heard and nothing waits for the line (D88). No AudioContext rebuild
+   * here: the engine is still tearing the line down, which is when a new context took the audio
+   * session from speech (D87). The tone resumes the context; a later tap rebuilds it if needed.
    */
   private cutTicket(): void {
     if (!this.ticketTalking) return;
     this.ticketTalking = false;
     this.ticketTok++;
     this.d.hush();
-    this.d.wakeAudio();
   }
 
   /** Idle cue (SPEC §3.2): Pip's hat pulses after 10 s at S3. The ticket is never re-spoken on idle (D81). */

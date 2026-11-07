@@ -83,7 +83,7 @@ export function speakText(text: string, opts: SpeakOptions = {}): Promise<void> 
       activeLines.delete(my);
       resolve();
     };
-    window.setTimeout(finish, ms);
+    let fallback = window.setTimeout(finish, ms);
     const s = synth();
     if (!s) return; // no speech engine: captions carry the line
     let started = false;
@@ -105,7 +105,8 @@ export function speakText(text: string, opts: SpeakOptions = {}): Promise<void> 
       const u = utter();
       s.speak(u);
       // D88: if the line has not started by now (and nothing newer replaced it), the engine is
-      // wedged: cancel, un-pause and say it once more. Counts are short-lived; they skip this.
+      // wedged: cancel, un-pause and say it once more. Counts skip this, and so do lines whose
+      // fallback (≥ 1.2 s) has already settled them, such as a short "Yum!".
       if (!opts.count) {
         window.setTimeout(() => {
           if (started || settled || my !== token) return;
@@ -114,6 +115,9 @@ export function speakText(text: string, opts: SpeakOptions = {}): Promise<void> 
             s.cancel();
             if (s.paused) s.resume();
             s.speak(utter());
+            // The retry starts late: give it its own full fallback so busy lasts as long as it does.
+            window.clearTimeout(fallback);
+            fallback = window.setTimeout(finish, ms);
           } catch {
             /* the timeout resolves it */
           }
