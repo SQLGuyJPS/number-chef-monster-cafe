@@ -1,5 +1,5 @@
 // Content lint v1 (SPEC §13.2). Fails `npm run check` on any problem. Covers the A1–A3 pools,
-// spoken text, phrases, toTrayTask/check agreement and the emoji allowlist; monster specs arrive in M2.
+// spoken text, phrases, toTrayTask/check agreement, monster specs (SPEC §7.2) and the emoji allowlist.
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,6 +15,19 @@ import {
 import { buildDemo } from '../src/engine/demos';
 import { check, removeLast, startState, tapBin, toTrayTask } from '../src/engine/tray';
 import { STAGES, type Problem, type SkillId, type Token } from '../src/engine/types';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { REGULARS } from '../src/engine/monsters';
+import {
+  BODIES,
+  EXPRESSIONS,
+  EXTRAS,
+  INK,
+  MONSTER_SPECS,
+  MONSTER_SPEC_VERSION,
+  REACTIONS,
+} from '../src/art/monsters/specs';
+import { DRAWINGS } from '../src/art/monsters/roster';
 
 const repo = fileURLToPath(new URL('../', import.meta.url));
 const errors: string[] = [];
@@ -179,6 +192,59 @@ for (const key of Object.keys(PHRASES) as PhraseKey[]) {
   }
 }
 
+// ---------- monster specs (SPEC §7.2) ----------
+/** WCAG relative luminance and contrast ratio. */
+const lum = (hex: string) => {
+  const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const l = c.map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * l[0]! + 0.7152 * l[1]! + 0.0722 * l[2]!;
+};
+const contrast = (a: string, b: string) => {
+  const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
+  return (x! + 0.05) / (y! + 0.05);
+};
+/** Pip speaks at 1.5 (D90); every monster stays below so Pip is always recognisable (D101). */
+const PIP_PITCH = 1.5;
+if (MONSTER_SPEC_VERSION !== 1) fail(`MonsterSpec version ${MONSTER_SPEC_VERSION}: add a migration note`);
+if (EXPRESSIONS.length !== 5) fail(`monsters: ${EXPRESSIONS.length} expressions, SPEC §7.2 says five`);
+const monsterIds = new Set<string>();
+for (const m of MONSTER_SPECS) {
+  const at = `monster ${m.id}`;
+  if (monsterIds.has(m.id)) fail(`${at}: duplicate id`);
+  monsterIds.add(m.id);
+  if (!BODIES.includes(m.body)) fail(`${at}: unknown body ${m.body}`);
+  for (const x of m.extras) if (!EXTRAS.includes(x)) fail(`${at}: extra ${x} not allowed`);
+  for (const f of m.favorites) if (!FOOD_IDS.includes(f)) fail(`${at}: favourite ${f} not in the food allowlist`);
+  if (m.favorites[0] === m.favorites[1]) fail(`${at}: two favourites must differ`);
+  for (const r of m.reactions) if (!REACTIONS.includes(r)) fail(`${at}: reaction ${r} does not exist`);
+  if (!m.reactions.length) fail(`${at}: no reaction`);
+  for (const part of ['body', 'belly'] as const) {
+    const ratio = contrast(m.palette[part], INK);
+    if (ratio < 3) fail(`${at}: ${part} ${m.palette[part]} vs eyes/mouth ${ratio.toFixed(2)}:1 (min 3:1)`);
+  }
+  if (m.voice.pitch >= PIP_PITCH || m.voice.pitch <= 0) fail(`${at}: voice pitch ${m.voice.pitch} must be in (0, ${PIP_PITCH})`);
+  if (m.voice.rate < 0.5 || m.voice.rate > 1.2) fail(`${at}: voice rate ${m.voice.rate} out of range`);
+  for (const line of [...m.lines.arrive, ...m.lines.thanks]) checkSpoken(`${at} line`, line, 8);
+  if (!m.lines.arrive.length || !m.lines.thanks.length) fail(`${at}: needs arrive and thanks lines`);
+  const engine = REGULARS.find((r) => r.id === m.id);
+  if (!engine) fail(`${at}: not in the engine roster`);
+  else if (engine.favorites.join() !== m.favorites.join()) fail(`${at}: favourites differ from the engine roster`);
+  // All five expressions are drawn, and each one looks different.
+  const draw = DRAWINGS[m.id];
+  if (!draw) {
+    fail(`${at}: no hand-authored drawing`);
+    continue;
+  }
+  const looks = new Set<string>();
+  for (const e of EXPRESSIONS) {
+    const svg = renderToStaticMarkup(createElement(draw, { e, s: m, react: false }));
+    if (svg.length < 200) fail(`${at} ${e}: drawing is nearly empty`);
+    looks.add(svg);
+  }
+  if (looks.size !== EXPRESSIONS.length) fail(`${at}: some expressions draw the same picture`);
+}
+for (const r of REGULARS) if (!monsterIds.has(r.id)) fail(`engine roster ${r.id}: no MonsterSpec`);
+
 // ---------- emoji allowlist scan (SPEC §7.1) ----------
 interface EmojiTable {
   maxUnicode: number;
@@ -235,5 +301,5 @@ if (errors.length) {
 }
 const sizes = BUILT_SKILLS.map((s) => `${s} ${pool(s).length}`).join(', ');
 console.log(
-  `lint:content: OK (pools ${sizes}; ${Object.keys(PHRASES).length} phrases; emoji allowlist clean)`,
+  `lint:content: OK (pools ${sizes}; ${Object.keys(PHRASES).length} phrases; ${MONSTER_SPECS.length} monsters × ${EXPRESSIONS.length} expressions; emoji allowlist clean)`,
 );

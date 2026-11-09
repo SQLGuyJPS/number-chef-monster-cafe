@@ -183,4 +183,5 @@ The D94 list above is covered by this round (the hold now goes through the popup
 - [ ] Each monster says hello the first time it comes in a service ("Hee hee. Hello!"). Charming, or does it slow the orders down?
 - [ ] Sounds: a "boing" when a monster arrives, crunching while it chews, a "ting" for each coin, Chompers' burp. Any too loud or annoying?
 - [ ] A finished service now ends with a 5-coin tip: a 6-monster service shows 23 coins on the closing sign.
+- [ ] Skim `docs/CONTENT_REVIEW.md` (sample orders, spoken lines and Pip's demos for A1–A3, and the monsters' lines). Anything that reads oddly aloud?
 
