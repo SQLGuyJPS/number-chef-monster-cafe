@@ -38,7 +38,7 @@ Notes:
 
 
 ## M1 — Core loop (5 minutes with the child on the real iPad)
-How to set it up: open `…/number-chef-monster-cafe/?debug`, pick the stage and operations for A1/A2 under **Skills** (applies from the next service), then open the app normally. Menu → **Little Bites** (A1) or **Big Bites** (A2). One placeholder monster, 6 orders, then back to the menu. No coins, eating animation or Results yet (M2).
+How to set it up: in the installed app, hold the gear (top right of Home) for 2 seconds to open the playtest tools; pick the stage and operations for A1/A2 under **Skills** (applies from the next service), or use the **Sound test**; **Back to the café** returns to Home. (`?debug` in a browser still works, but on iOS it has separate storage from the Home Screen app.) Menu → **Little Bites** (A1) or **Big Bites** (A2). One placeholder monster, 6 orders, then back to the menu. No coins, eating animation or Results yet (M2).
 
 - [x] Does the child understand the ticket unaided (S3)? Do they tap the ticket to hear it again?
   Understands fine; doesn't tap to hear it again. The automatic repeat after 20 s was annoying → removed (D81).
@@ -137,3 +137,11 @@ Notes:
 - [ ] Counting-on / counting-back orders (S3): each tap says its number with no tone under it. Does the child still get enough feedback from a tap? Other orders (no counting) keep their tones.
 - [ ] Pip sinking back behind the counter and the monster walking back: the right pace now, or still too quick / now too slow?
 - [ ] After count-together on the first order: does the waiting line stay away until the monster is back in its spot, then fade in without overlapping it?
+
+## M1 — Playtest tools from the gear (D94)
+- [ ] In the installed app on the iPad, iPhone and Android: holding the gear 2 s opens the playtest tools.
+- [ ] A short tap on the gear does nothing.
+- [ ] A stage/operations change there reaches the next service.
+- [ ] The sound test there behaves as it did in a Safari tab (note any differences).
+- [ ] **Back to the café** and the back gesture (Android back, iOS edge swipe) both return to Home.
+- [ ] The child doesn't stumble into it.

@@ -266,7 +266,7 @@ What: survives reloads during M1–M2 playtests; M3a ignores and deletes the key
 Why: the picker needs somewhere per device to live before the event log exists.
 How to revisit: n/a after M3a.
 
-**D53. The Home gear is inert before M3a.**
+**D53. The Home gear is inert before M3a (superseded by D94).**
 What: in M2 the gear renders but its long-press has no target; stage changes go through `?debug`.
 Why: §5.2 gives the gear a target only from M3a.
 
@@ -462,6 +462,11 @@ How to revisit: restore the old layout from this archive or from git history (th
 What: amends D91(b). The monster's moves between its own spot, the CountTogether aside and the Pip aside take 550 ms (`MONSTER_MOVE_MS`), not the 0.5 s D91 states; Pip's exit stays 500 ms (`PIP_EXIT_MS`). The code already used 550 ms; the owner confirmed it is intended.
 Why: found while folding D91 into SPEC (D92): the text and `src/app/metrics.ts` disagreed.
 How to revisit: `MONSTER_MOVE_MS` in `src/app/metrics.ts`, kept in step with `.monster-slot` in `service.css`.
+
+**D94. Before M3a, a long-press on the Home gear opens the playtest tools, with no gate (owner, 2026-11-09).**
+What: supersedes D53. (a) Before M3a, a 2 s long-press on the Home gear (top right, 44 px, 30% opacity; `GEAR_LONG_PRESS_MS = 2000` in `src/app/metrics.ts`) opens a "Grown-ups" playtest-tools screen with the same content as the `?debug` screen: build/storage info, the per-skill stage/operations picker (D44, D52) and the sound test (D87). A short tap does nothing. The gear exists only on Home, so the screen is never reachable during a service. (b) The screen is full-screen, not rotated, and scrollable, like the parent area (SPEC §2.2). A big "Back to the café" button returns to Home, and so does the back gesture (Android back, iOS edge swipe), so nobody is trapped (SPEC §2.3). (c) Picker changes apply from the next service. It is parent area, so it will not count as play time (§6) once that exists. (d) `?debug` keeps working unchanged for desktop/browser use. (e) M3a turns this screen into the minimal Skills list (still opened by the gear without a gate); M3b puts the multiplication gate in front (D44 otherwise unchanged).
+Why: the owner playtests from the installed Home Screen app, whose start URL can't carry `?debug`, so changing stages or running the sound test meant switching to a browser tab. On iOS a Home Screen app and a Safari tab keep separate storage (SPEC §11.4), so the picker in a Safari tab could not even configure the installed app, and the sound test there tested a different audio setup from the installed app's.
+How to revisit: if the child finds and opens it, lengthen the press (`GEAR_LONG_PRESS_MS`) or bring the M3b multiplication gate forward.
 
 <!-- New decisions go above this line, numbered one higher than the highest existing D<n>. -->
 

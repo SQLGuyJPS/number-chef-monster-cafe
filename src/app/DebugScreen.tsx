@@ -40,8 +40,11 @@ async function collect(): Promise<Info> {
   return { rows };
 }
 
-/** Hidden debug screen (`?debug`, SPEC §2.2): not rotated, scrollable, unreachable from child UI. */
-export function DebugScreen() {
+/**
+ * Build/storage info, the stage/operations picker and the sound test. Shown by the `?debug` screen
+ * and, before M3a, by the grown-ups' screen behind the Home gear (D94).
+ */
+export function PlaytestTools() {
   const [info, setInfo] = useState<Info | null>(null);
   useEffect(() => {
     let live = true;
@@ -51,8 +54,7 @@ export function DebugScreen() {
     };
   }, []);
   return (
-    <div className="debug" data-scroll-ok data-testid="debug-screen">
-      <h1>Debug</h1>
+    <>
       <table>
         <tbody>
           {info?.rows.map(([k, v]) => (
@@ -66,6 +68,16 @@ export function DebugScreen() {
       {!info && <p>Loading…</p>}
       <SkillPicker />
       <AudioTest />
+    </>
+  );
+}
+
+/** Hidden debug screen (`?debug`, SPEC §2.2): not rotated, scrollable, unreachable from child UI. */
+export function DebugScreen() {
+  return (
+    <div className="debug" data-scroll-ok data-testid="debug-screen">
+      <h1>Debug</h1>
+      <PlaytestTools />
     </div>
   );
 }
