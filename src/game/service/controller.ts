@@ -424,13 +424,12 @@ export class ServiceController {
     for (const step of buildDemo(this.order.problem)) {
       if (my !== this.script) return;
       let tray = this.s.tray;
+      // No place/remove tones in the demo: Pip's counting is the sound, and tones stepped on it (D91).
       if (step.trayOp.op === 'add') {
         tray = tapBin(tray).state;
-        this.d.sfx.place(tray.filled);
       } else if (step.trayOp.op === 'remove') {
         const r = removeLast(tray);
         tray = r.state;
-        this.d.sfx.remove();
         this.flyAway(r.effect);
       }
       const line = say(step.narrationKey, step.params);
@@ -480,19 +479,19 @@ export class ServiceController {
 
   private applyTray(r: TrayResult): void {
     const e = r.effect;
-    // S3 counts aloud (counting on / counting back); S2 and below: tones only (SPEC §3.2).
+    // S3 counts aloud (counting on / counting back); S2 and below: tones only (SPEC §3.2). A tap
+    // gets a count or a tone, never both: the tone stepped on the spoken number (D91).
     const voice = this.stage === 3;
+    const cue = (count: number, tone: () => void) => (voice ? this.d.countAloud(numberToWords(count)) : tone());
     const fx = (kind: 'shake' | 'in', index: number) => ({ index, kind, nonce: ++this.nonce });
     switch (e.kind) {
       case 'placed':
       case 'putBack':
-        this.d.sfx.place(e.count);
-        if (voice) this.d.countAloud(numberToWords(e.count));
+        cue(e.count, () => this.d.sfx.place(e.count));
         this.set({ tray: r.state, fx: fx('in', e.index) });
         break;
       case 'removed':
-        this.d.sfx.remove();
-        if (voice) this.d.countAloud(numberToWords(e.count));
+        cue(e.count, () => this.d.sfx.remove());
         this.set({ tray: r.state });
         this.flyAway(e);
         break;
