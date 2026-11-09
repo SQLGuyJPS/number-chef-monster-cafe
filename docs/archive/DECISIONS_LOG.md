@@ -458,6 +458,11 @@ What: every live decision D1–D91 is folded into the section of `docs/SPEC.md` 
 Why: SPEC had stopped tracking decisions around D47, so the current design had to be pieced together from about 42 "amended by"/"superseded by" chains, SPEC and DECISIONS contradicted each other (e.g. the A1 first-run highlight vs. D83), and `docs/` cost about 80k tokens per fresh session.
 How to revisit: restore the old layout from this archive or from git history (the commit before this one); the content is unchanged.
 
+**D93. The monster's move between spots takes 550 ms (owner, 2026-11-09).**
+What: amends D91(b). The monster's moves between its own spot, the CountTogether aside and the Pip aside take 550 ms (`MONSTER_MOVE_MS`), not the 0.5 s D91 states; Pip's exit stays 500 ms (`PIP_EXIT_MS`). The code already used 550 ms; the owner confirmed it is intended.
+Why: found while folding D91 into SPEC (D92): the text and `src/app/metrics.ts` disagreed.
+How to revisit: `MONSTER_MOVE_MS` in `src/app/metrics.ts`, kept in step with `.monster-slot` in `service.css`.
+
 <!-- New decisions go above this line, numbered one higher than the highest existing D<n>. -->
 
 ---

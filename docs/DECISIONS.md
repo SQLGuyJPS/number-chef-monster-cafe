@@ -80,7 +80,7 @@
 | D70 | Caption slot; captions ≤ 8 words, ticket lines ≤ 12 | SPEC §13.2; slot superseded by D76 | Mock had no caption slot |
 | D71 | Worked/FollowMe always on the S3 tray; FollowMe ends right | SPEC §5.5; take-back cue superseded by D82 | No strategy visible on an empty tray |
 | D72 | A1/A2 strategy tags, difficulty and doubles wording | SPEC §4, §5.5 | Mapping was unspecified; caption limit |
-| D73 | Layout mock removed; service controller is a plain class | Implementation only | Avoid a drifting second layout; hooks lint |
+| D73 | Layout mock removed; service controller is a plain class | Implementation only; controller noted in SPEC §2 | Avoid a drifting second layout; hooks lint |
 | D74 | CI actions on current majors | Implementation only | Node 20 deprecation |
 | D75 | A tap's count cuts off the previous count | SPEC §3.3, §8.1, §8.2 | Counts went silent on quick taps |
 | D76 | Caption bubble beside the monster with a tail | SPEC §5.4; Pip's lines by D90 | Caption read as nobody's speech |
@@ -98,5 +98,6 @@
 | D88 | Building cuts the order; no audio rebuild during speech; line retry | SPEC §5.4, §8.1 | Rebuilds stole the audio session; eager child |
 | D89 | First miss names the number; second offers help; third demos | SPEC §1.1, §3.4, §5.5 | One slip needs no long interruption |
 | D90 | Pip is the visible helper (placeholder Pip, own voice and caption) | SPEC §5.4, §5.5, §7.3 | "Want Pip to help?" named someone who never helped |
-| D91 | A tap gets a count or a tone; Pip steps back slowly; line waits | SPEC §3.2, §3.3, §5.4, §7.3, §8.3 | Tones stepped on counts; hand-off felt abrupt |
+| D91 | A tap gets a count or a tone; Pip steps back slowly; line waits | SPEC §1.4, §3.2, §3.3, §5.4, §7.3, §8.3; move time amended by D93 | Tones stepped on counts; hand-off felt abrupt |
 | D92 | Decisions folded into SPEC; DECISIONS becomes an index; finished docs archived | This file; SPEC header; CLAUDE.md | Context cost and SPEC/DECISIONS contradictions |
+| D93 | Monster's move between spots is 550 ms | SPEC §7.3 | Code and D91 text disagreed; owner confirmed 550 ms |

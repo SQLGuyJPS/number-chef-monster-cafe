@@ -1,6 +1,6 @@
 # Number Chef: Monster Café — Build Spec
 
-Status: the single, current statement of the design (decisions D1–D92 folded in, D92). `(Dn)` cites the decision that set a rule; `docs/DECISIONS.md` indexes them and `docs/archive/DECISIONS_LOG.md` holds the full reasoning. Companion files: `CLAUDE.md` (conventions), `docs/OPEN_ITEMS.md` (what the owner must supply or decide), `docs/PLAN.md` (build plan and hour estimates), `docs/PLAYTEST.md`.
+Status: the single, current statement of the design, with every live decision through D93 folded in (D92). `(Dn)` cites the decision that set a rule; `docs/DECISIONS.md` indexes them and `docs/archive/DECISIONS_LOG.md` holds the full reasoning. Companion files: `CLAUDE.md` (conventions), `docs/OPEN_ITEMS.md` (what the owner must supply or decide), `docs/PLAN.md` (build plan and hour estimates), `docs/PLAYTEST.md`.
 
 Normative words: **MUST** = acceptance criteria test it; **SHOULD** = default, may deviate with a decision entry.
 
@@ -76,7 +76,7 @@ Yes, with these constraints (all encoded below):
 "Tap the food with the right number on it" is guessable multiple choice and trains numeral matching, not quantity. Instead:
 - **Primary response = build the answer** on the tray (S3–S1).
 - **Abstract response = numeral entry** on a number pad (S0).
-- Numbers appear only as counting cues: at S3 each placed or removed item's running count is spoken (D91).
+- Numbers appear only as counting cues: at S3 each tap speaks the running count (adding) or the remaining count (removing), §3.3 (D91).
 
 ---
 
@@ -85,7 +85,7 @@ Yes, with these constraints (all encoded below):
 | Concern | Decision |
 |---|---|
 | Language/build | TypeScript (strict), Vite, ES2020 target; baseline iOS 15.4+ / recent Chrome on Android (`100dvh` and `crypto.randomUUID` need iOS 15.4+, D37). |
-| UI | React 18, function components. State via a small reducer + context or a plain controller class read through `useSyncExternalStore`; no state library. |
+| UI | React 18, function components. The service is a plain controller class read through `useSyncExternalStore` (D73); elsewhere a small reducer + context; no state library. |
 | Styling | Plain CSS (or CSS modules) with custom properties. No CSS-in-JS. |
 | Animation | CSS transforms/opacity and Web Animations API. No animation library. Animate only transform/opacity. |
 | Drag | Custom Pointer Events (no dnd library). |
@@ -204,7 +204,7 @@ Worked mapping — add result `5 + 3`: S3/S2 prefill 5 (blue, locked), the child
 - **Capacity:** `frames1` holds 10, `frames2` 20 (A-track max). Over-capacity attempts wobble the bin and say nothing; no second frame appears on its own. Tier 1 renders only `frames1`; the model, `toTrayTask` and `check` support `frames2` from M1 (D57).
 - **Tens-and-ones layout (B-track, M8):** left = **tens shelf** (up to 10 ten-packs, two rows of 5 slots), right = **ones frame** (single ten-frame; the 10th single triggers auto-bundle: ten singles pop into a pack and fly to the shelf). Two bins: *Box of 10* and *Single*. Capacity: 10 packs + 9 ones. Removing a pack takes the last pack on the shelf, which flies to the *Box of 10* bin. Settled by a static layout mock at the start of M8 (D47).
 - **Ten-pack art:** rounded SVG box containing a 2×5 grid of ten small food glyphs (HTML-positioned, same renderer as frame cells), so a pack visibly equals one full frame.
-- **Serve:** the bell (≥ 112 logical px). Disabled while animations run or when the tray equals its start state (a disabled tap wobbles the bell; this is also why no answer is ever 0, §4). **Never auto-serves.**
+- **Serve:** the bell (≥ 112 logical px). Disabled while animations run or when the tray equals its start state (a disabled tap wobbles the bell; this is also why no answer is ever 0, §4). **Never auto-serves** (D4).
 - **Counting voice (S3, D75, D91):** adding says the running total from the prefilled count ("six", "seven", …, counting on); removing says the remaining count (counting back); B-track packs say the running tens ("ten", "twenty"…), then singles continue ("twenty-one"…). A new count cuts off the count still playing, but never another line; while another line plays, the count is skipped. At S3 a tap gets the count and no tone; at S2, S1 and on the S0 digit pad a tap gets its tone (§8.3). The sound follows the service's stage, also during FollowMe.
 
 ### 3.4 Problem state machine (`engine/attempt.ts`, pure + tested; D29, D89)
@@ -219,7 +219,7 @@ OfferHelp: no (try again) → order repeated → Building
 Evaluate: 3rd or later wrong → PlateCount → Worked → FollowMe → Assisted → requeue
 Help before any serve (attempt=1) → CountTogether → Building(attempt=2)
 Evaluate: wrong after Help-before-serving → PlateCount → Worked → FollowMe → Assisted
-Help after a miss (attempt=2) → Worked → FollowMe → Assisted
+Help at attempt=2 (after a miss, or again after CountTogether) → Worked → FollowMe → Assisted
 ```
 - Help at attempt 1 *advances* to attempt 2, so CountTogether never plays twice and Help followed by a wrong serve goes straight to Worked (D29). The first miss also advances to attempt 2, so Help after a miss plays Worked (D89).
 - OfferHelp locks the tray and bell until the child picks one of two picture buttons; the tray hides behind them. Nothing is chosen for the child, and the offer never repeats within one problem: a miss after "no" plays the demo (D89).
@@ -251,7 +251,7 @@ Pool counts below were computed by script. They count **ordered presentations** 
 | A1 | `a+b=?`, `m−b=?` | a,b ≥ 1, a+b ≤ 5; m 2–5, b 1–(m−1) | 10 add + 10 sub = **20** |
 | A2 | `a+b=?`, `m−b=?` | sums 6–10; m 6–10, b 1–(m−1) | 35 + 35 = **70** |
 | A3 | `a+?=10`, `?+a=10`, `10−a=?`, `10−?=a` | a 1–9 | 9×4 = **36** |
-| A4 | `a+?=c`, `?+a=c`, `m−?=c` | c ≤ 10, a<c; m 2–10, 1 ≤ c < m | **135** |
+| A4 | `a+?=c`, `?+a=c`, `m−?=c` | c ≤ 10, a<c; m 2–10, 1 ≤ c < m; `?+a=c` included (D34) | **135** |
 | A5 | `10+n=?`, `n+10=?`, `1n=10+?`, `1n=?+n`, `1n−10=?`, `1n−n=?` | n 1–9 | 9×6 = **54** |
 | A6 | `1n+k=?`, `k+1n=?`, `1n−k=?` | n+k ≤ 9 (no crossing); k<n for sub (result > 10) | 72 + 36 = **108** |
 | A7 | `a+b=?` | a,b 2–9, a+b 11–18 | **36** (20 unordered) |
@@ -274,7 +274,7 @@ Spoken forms (all via `numberToWords`, never raw digits):
 - **Result forms** (`a + b = ?`, `m − b = ?`) are wrapped in the café frame with the order's food and "please": "Three plus two cookies, please!", "Eight minus three cookies, please!" Spoken only; the written ticket stays numerals and symbols.
 - **All other forms keep the plain question** (the food is shown, not spoken): `a + ? = c` → "Seven plus what equals ten?"; `m − ? = c` → "Seven minus what equals five?"; A5 `14 = 10 + ?` → "Fourteen equals ten plus what?". The unwrapped result form (the `spoken` field) is "Eight plus five equals what?".
 - A0 → "Can I have seven cookies, please?"
-- The base wording is "minus" and "equals what?".
+- The base wording is "minus" and "equals what?"; "take away" / "makes" was considered and rejected.
 - The food noun uses the `{singular, plural}` pair of the order's `FoodId` (§7.1). Phrases live in the phrase table (`phrases.ts`).
 
 ### 4.1 Session builder (deterministic given seed)
@@ -386,7 +386,7 @@ Only while a limit is enabled. Closing time is not the child's choice, so a time
 2. **No full new service on a short allowance.** Below about half a service (`minServiceMs`), starting a service (Another service or a menu tile) offers a **shorter service** with as many orders as fit (at least 1, D39). With less than one order's length left, that single order is the last customer.
 3. At `remainingMs ≤ 0` with a monster still being served: no new orders; the monster finishes (including FollowMe) with a **hard cap of 90 s grace**. At the cap the monster eats happily and leaves; that problem writes no `attempt` and no `coin` event (a cutoff pays nothing), its box is unchanged, and any pending requeue is dropped. The cap is 90 s of **wall time**, so it runs even while the idle pause has stopped the allowance clock (D40).
 4. **Tip:** the +5 tip is paid when the allowance closes the café mid-service (steps 1–3). A voluntary exit (Close the café, Take a break) pays no tip. A service that finishes all its orders pays it as usual.
-5. Results plays as usual (tally), then the café **locks**: `state='locked'` is persisted immediately and the `resume` snapshot is cleared. This also applies after a wind-down that ends with a little allowance left (less than one order is not enough to play; Start new session or Add time reopens).
+5. Results ("Closing time!") plays as usual (tally), then the café **locks**: `state='locked'` is persisted immediately and the `resume` snapshot is cleared. This also applies after a wind-down that ends with a little allowance left (less than one order is not enough to play; Start new session or Add time reopens).
 6. **Locked screen:** the closed café ("Closed — ask a grown-up to open it!") with sleepy monsters. No Open, Menu or Shop. The gear still works. Relaunching or reloading lands on the same locked screen. No "Continue dinner service?" offer while locked or after an unlock (D40).
 7. A parent unlocks through the gate: **Start new session** (full allowance) or **Add time** (5 / 10 / 15 / 20 minutes on top of what remains; also works before it runs out). Either sets `state='open'`. These buttons exist only while a limit is enabled.
 8. While `open` with time left, everything works normally; the allowance and the service are independent unless step 1 or 2 shortens a service.
@@ -440,7 +440,7 @@ interface MonsterSpec { id; name; body:'blob'|'tall'|'round'|'square'|'jelly'|'f
 - `lint:content` validates every spec: palette contrast, allowed extras, favorites in the allowlist, unique ids, reaction ids exist, all five expressions present.
 
 ### 7.3 Pip and staff
-Pip, a mouse in a chef hat, is the guide and **the one who helps (D90)**: the Help button (Pip's hat), the help-offer button, the helper on the counter and the tutorial pointer are one character. While help is offered or given (OfferHelp, CountTogether, Worked, FollowMe) Pip pops up on the counter left of the monster and bobs while talking; every help line (CountTogether, demo and FollowMe lines) comes from Pip, in Pip's own caption bubble with its tail pointing down at Pip and the same voice at pitch 1.5. The monster keeps the order, PlateCount, the help question, "Yum!", its reactions and the closing line. When help ends Pip sinks back behind the counter over 0.5 s, and the monster's moves between its spot and the aside spots take about 0.5 s (`PIP_EXIT_MS`, `MONSTER_MOVE_MS`; D91). Pip is a placeholder drawing until the hand-authored art in M2. Other animal staff are shop items (§10) that idle in the café and react to events (clap, bounce); staff do not speak.
+Pip, a mouse in a chef hat, is the guide and **the one who helps (D90)**: the Help button (Pip's hat), the help-offer button, the helper on the counter and the tutorial pointer are one character. While help is offered or given (OfferHelp, CountTogether, Worked, FollowMe) Pip pops up on the counter left of the monster and bobs while talking; every help line (CountTogether, demo and FollowMe lines) comes from Pip, in Pip's own caption bubble with its tail pointing down at Pip and the same voice at pitch 1.5. The monster keeps the order, PlateCount, the help question, "Yum!", its reactions and the closing line. When help ends Pip sinks back behind the counter over 0.5 s (`PIP_EXIT_MS`), and the monster's moves between its spot and the aside spots take 0.55 s (`MONSTER_MOVE_MS`; D91, D93). Pip is a placeholder drawing until the hand-authored art in M2. Other animal staff are shop items (§10) that idle in the café and react to events (clap, bounce); staff do not speak.
 
 ### 7.4 Café background
 Layered SVG scene: wall, floor, window, lights, counter, counter-top slot, wall art slot, staff spots. Shop item = `{slot, svg component, price}`. The **Service screen uses the same decorated café**, so purchases show while the child plays (D37). Missing art falls back to a labeled placeholder shape.
@@ -452,7 +452,7 @@ Layered SVG scene: wall, floor, window, lights, counter, counter-top slot, wall 
 ### 8.1 Rules
 - **Unlock and recovery (D86, D87, D88):** every `pointerdown` checks the `AudioContext`. A suspended one is resumed. One that is interrupted, closed, or "running" with a clock frozen for 600 ms is closed and replaced inside that tap (plus one silent sample, which older iOS needs to unlock output) — but never while `speechSynthesis.speaking` is true, since a new context takes the audio session from the speech engine; a `speaking` flag stuck true for more than 9 s is ignored. A sound effect asked for while the context is not running resumes it and plays once it is running, within 250 ms, instead of being skipped (iOS pauses WebAudio while speech plays).
 - Set `navigator.audioSession.type='playback'` when available so the iPhone silent switch does not mute WebAudio; document the silent switch in the parent Help.
-- **Never block game flow on speech.** `speak()` resolves on `end` **or** after a fallback timeout of `clamp(1200, 400 + 90 ms × chars / rate, 8000)` (`rate` default 0.85; tune on the iPad, D37); "busy" ends when a line really ends (`end`/`error`), the timeout is only the fallback (D75). A line (not a count) that has not fired `start` 1.5 s after `speak()` is cancelled and spoken once more with a fresh timeout, and a paused engine is resumed before each line (D88).
+- **Never block game flow on speech.** `speak()` resolves on `end` **or** after a fallback timeout of `clamp(1200, 400 + 90 ms × chars / rate, 8000)` (`rate` default 0.85; iOS sometimes never fires `onend`, and its start-up latency means a shorter timeout clips lines; tune on the iPad, D37); "busy" ends when a line really ends (`end`/`error`), the timeout is only the fallback (D75). A line (not a count) that has not fired `start` 1.5 s after `speak()` is cancelled and spoken once more with a fresh timeout (lines whose fallback is under 1.5 s, like "Yum!", are already settled and not retried), and a paused engine is resumed before each line (D88).
 - Captions always show (the monster's caption bubble or Pip's, §5.4, §7.3); with no voices the game is fully playable.
 
 ### 8.2 Speech
@@ -475,7 +475,7 @@ Tones start 30 ms ahead of the audio clock (D87). Place/remove tones play only w
 | munch | band-passed noise bursts ×3 |
 | burp | low saw glide down, short |
 | hm | two-note descending soft sine (never a buzzer) |
-| wobble | short wobble for a disabled bell, full bin or locked item |
+| wobble | short wobble for a disabled bell, full bin or locked item (unchanged by D91) |
 | coin | two-tone sine "ting" |
 | buy | coin ×3 + rising chime |
 | arrive | rubber "boing" (sine with pitch envelope) |
@@ -551,7 +551,7 @@ Safari tabs can have script-writable storage evicted after 7 days of non-use; **
 - The service worker scope is the project path, so it cannot control sibling apps.
 
 ### 11.6 Export, import, merge, reset, resume
-- **Export JSON:** `{ app:'number-chef-monster-cafe', schemaVersion, deviceId, deviceLabel, exportedAt, events, settings, checksum }`; `checksum` = hex SHA-256 (SubtleCrypto) of the serialized `events` and `settings` (D37, D39). Shared through the Web Share API with a file when `navigator.canShare({ files })` allows it; otherwise a `text/plain` share with a `.json` name, or a download link. Runs inside a button tap. Import file inputs use a permissive `accept` (a narrow one greys out the file in the iOS Files picker).
+- **Export JSON:** `{ app:'number-chef-monster-cafe', schemaVersion, deviceId, deviceLabel, exportedAt, events, settings, checksum }`; `checksum` = hex SHA-256 (SubtleCrypto) of the serialized `events` and `settings` (D37, D39). Shared through the Web Share API with a file when `navigator.canShare({ files })` allows it; otherwise a `text/plain` share with a `.json` name, or a download link (Android Chrome shares only an allowlisted set of file types). Runs inside a button tap. Import file inputs use a permissive `accept` (a narrow one greys out the file in the iOS Files picker).
 - **Import — Merge (default, M7):** union by event id; dry-run summary ("adds 42 events from 'iPad', Nov 3–Nov 9; coins 118 → 161"); idempotent; checkbox "also copy settings from this file". **Replace (M3b, D44):** wipes local events and settings, needs a second multiplication prompt, always snapshots first. Validate with zod; reject a checksum mismatch unless confirmed twice.
 - **Reset (D44):** writes a snapshot, then deletes everything except the `snapshots` store (only `ncmc*` names). Because merging is union by id, a later merge from an older export or another device can bring reset progress back; the parent Help says so.
 - Keeping two devices aligned: export from A, merge into B, export from B, merge into A. The Data tab explains this in three lines.
@@ -617,7 +617,7 @@ Every engine rule in §3, §4, §6, §9 and §11 has a unit test; these MUST exi
 ## 14. Milestones
 Each milestone starts by fixing what the previous playtest found and ends: `npm run check` green, e2e green, screenshots saved, `PLAYTEST.md` updated, **STOP and wait for the owner's playtest feedback**. Hours are indicative; `PLAN.md` holds the authoritative estimate (D36).
 
-### Tier 1 — Playable (guide ≈ 10 h, not a cap, D44): M0, M1, M2, M3a, M3b
+### Tier 1 — Playable (guide ≈ 10 h, not a cap, D20, D44): M0, M1, M2, M3a, M3b
 Playtest builds reach the devices when the owner pushes to `main` (the real app, §15). Before the child's real use begins, the parent resets playtest progress once (D44). At the end of M3b the child plays A1–A3 with monsters and sound, progress is saved, and if a parent turns on the optional limit the café locks when time is up until a parent unlocks it.
 
 #### M0 — Foundations (≈ 2 h)
@@ -682,10 +682,10 @@ Later ideas, unscheduled: B4 compare (needs a response mechanic), rush-hour mode
 
 ## 15. Deployment (GitHub Pages, D14)
 - Project site `https://<user>.github.io/number-chef-monster-cafe/`. On a free plan Pages needs a **public** repo: the code and docs are public, the repo holds no personal data (the child's name lives only in on-device settings), and the docs describe the child generically: no age, sex, school grade or device ownership (D38).
-- GitHub Actions deploys on push to `main`: checkout → setup-node → `npm ci` → `npm run check` → `npm run build` → upload-pages-artifact → deploy-pages. Pages source = "GitHub Actions" (owner). Claude Code never pushes unless asked.
+- GitHub Actions (`.github/workflows/deploy.yml`) deploys on push to `main`: checkout → setup-node → `npm ci` → `npm run check` → `npm run build` → upload-pages-artifact → deploy-pages. Pages source = "GitHub Actions" (owner). Claude Code never pushes unless asked.
 - Vite `base: './'`; manifest `start_url: './'`, `scope: './'`, `display: standalone`, `orientation: landscape` (iOS ignores it, hence §2.2). **No path-based routing**: screens are in-memory state.
 - Pages sends `Cache-Control: max-age=600`, so `index.html` and the service worker can be 10 minutes stale after a deploy. Asset filenames are hashed.
-- Updates: `registerType: 'prompt'` with silent activation on cold launch or after 30 s of Home idle (§2, D54); never during a service (e2e: a waiting worker mid-service causes no reload).
+- Updates: `registerType: 'prompt'` (`autoUpdate` would reload under a playing child, D12) with silent activation on cold launch or after 30 s of Home idle (§2, D54); never during a service (e2e: a waiting worker mid-service causes no reload).
 - Icons (192, 512, maskable-512, Apple-touch 180) are generated by `scripts/make-icons.ts` from a monster SVG.
 
 ---
