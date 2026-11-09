@@ -17,6 +17,14 @@ export const MIN_BUTTON_CSS_PX = 56;
 /** Rotated-stage turn cue duration (SPEC §2.2). */
 export const TURN_CUE_MS = 6000;
 
+/**
+ * Pip's hand-off back to the monster (D91). Pip's exit and the monster's walk back match the
+ * `.pip-slot.leaving` and `.monster-slot` durations in service.css; the waiting line returns only
+ * once the monster is back in its spot, so it never appears under the moving monster.
+ */
+export const PIP_EXIT_MS = 500;
+export const MONSTER_MOVE_MS = 550;
+
 /** A rectangle in logical stage px. */
 export interface Rect {
   x: number;

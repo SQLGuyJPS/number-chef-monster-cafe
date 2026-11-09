@@ -6,6 +6,8 @@ import {
   FRAME,
   FRAME_PADDING,
   FRAMES_GAP,
+  MONSTER_MOVE_MS,
+  PIP_EXIT_MS,
   SERVICE as L,
   TAKEN_CELL,
   TAKEN_GAP,
@@ -22,6 +24,7 @@ import { PlaceholderPip } from '../../art/PlaceholderPip';
 import { dragTapHandlers, inRect, type StagePoint } from '../input/dragTap';
 import { TapButton } from '../input/TapButton';
 import { TenFrame, type CellView } from '../tray/TenFrame';
+import { useHold } from './useHold';
 import {
   AnswerDisplay,
   Backspace,
@@ -161,6 +164,9 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
 
   const showTray = !v.padMode;
   const bubbleUp = v.bubble !== null;
+  // Pip steps back instead of vanishing; the line stays away until the monster is home (D91).
+  const pipShown = useHold(v.pipOut, PIP_EXIT_MS);
+  const lineAway = useHold(v.pipOut || bubbleUp, MONSTER_MOVE_MS);
   const removed = v.removed;
   const phase = v.attempt.phase;
   const lockedPhase = phase === "plateCount" || phase === "worked" || phase === "eating";
@@ -174,8 +180,9 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
     >
       <div className="counter" aria-hidden="true" />
       <DoorSign rect={L.door} onTap={onDoor} />
-      {/* The waiting line steps away while Pip is out, so Pip stands on a clear counter (D90). */}
-      {!v.pipOut && <Queue rect={L.queue} count={Math.max(0, orders.length - v.index - 1)} />}
+      {/* The waiting line steps away while Pip is out or the bubble is up, so Pip stands on a clear
+          counter (D90) and the monster never walks back over it (D91). */}
+      {!lineAway && <Queue rect={L.queue} count={Math.max(0, orders.length - v.index - 1)} />}
       {/* The CountTogether bubble is Pip's speech while it shows (D76, D90). */}
       <Caption rect={L.caption} text={bubbleUp ? '' : v.caption} speaker={v.speaker} />
 
@@ -187,11 +194,11 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
       >
         <PlaceholderMonster size={bubbleUp ? L.monsterAside.w : L.monsterZone.w} />
       </div>
-      {v.pipOut && (
+      {pipShown && (
         <div
-          className={`pip-slot ${v.speaker === 'pip' ? 'talking' : ''}`}
+          className={`pip-slot ${!v.pipOut ? 'leaving' : v.speaker === 'pip' ? 'talking' : ''}`}
           style={at(L.pip)}
-          data-testid="pip"
+          data-testid={v.pipOut ? 'pip' : 'pip-leaving'}
         >
           <PlaceholderPip />
         </div>

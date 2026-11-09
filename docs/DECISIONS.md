@@ -448,6 +448,11 @@ What: pulls part of M2's "Pip" item (SPEC §7.3, D76) forward. (a) A placeholder
 Why: the owner pointed out that the D89 offer's Pip picture meant nothing: the monster said every help line and Pip was only a mouse face on the Help button, so "Want Pip to help?" named someone the child had never seen help. With Pip visibly giving the help, the hat button, the offer and the helper are one character.
 How to revisit: `PIP_PITCH` in `src/audio/speech.ts` (real voices differ in how pitch sounds; it may need tuning or a second voice); `SERVICE.pip` and `monsterAsideForPip` in `src/app/metrics.ts`; `PIP_PHASES` in `src/game/service/controller.ts`. The hand-authored Pip art is still M2.
 
+**D91. A tap gets a count or a tone, never both; Pip steps back slowly; the waiting line stays away until the monster is home (owner, M1 playtest 6).**
+What: amends SPEC §3.2, §5.5 and §8.3, and D90. (a) Place/remove tones play only where nothing is counted aloud: S3 taps (which count on or back) and Pip's worked demo get the spoken number alone; S1/S2 taps, FollowMe below S3 and the S0 digit pad keep their tones. The bell, "Yum" chime, "hm", and wobble/shake tones are unchanged. (b) Pip no longer vanishes when help ends: it sinks back behind the counter over 0.5 s (`PIP_EXIT_MS`), and the monster's moves between its spot, the CountTogether aside and the Pip aside take 0.5 s (was 0.3). (c) The waiting-line silhouettes stay hidden while Pip is out *or* the CountTogether bubble is up, and come back (fading in) only `MONSTER_MOVE_MS` after the monster has started back to its own spot.
+Why: the owner heard Pip's counting and the food tones step on each other and asked that tones be limited to modes without spoken counting. The hand-off from Pip to the monster felt a hair too quick. And when CountTogether ended, Pip left and the line reappeared while the monster was still standing left of the bubble, so the monster looked as if it stood on top of the last waiting monster.
+How to revisit: `applyTray` and `runWorked` in `src/game/service/controller.ts`; `PIP_EXIT_MS` / `MONSTER_MOVE_MS` in `src/app/metrics.ts` (kept in step with `.pip-slot.leaving` and `.monster-slot` in `service.css`); `useHold` in `src/game/service/useHold.ts`.
+
 <!-- New decisions go above this line, numbered one higher than the highest existing D<n>. -->
 
 ---

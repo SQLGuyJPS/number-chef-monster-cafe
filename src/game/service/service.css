@@ -226,6 +226,10 @@
    stands in front of the line during CountTogether (D84). */
 .queue {
   z-index: 0;
+  animation: queue-in 0.3s ease-out;
+}
+@keyframes queue-in {
+  from { opacity: 0; }
 }
 .queue-mon {
   position: absolute;
@@ -430,6 +434,14 @@
   transform-origin: 50% 100%;
   animation: pip-talk 0.9s ease-in-out infinite;
 }
+.pip-slot.leaving {
+  /* Steps back down behind the counter instead of vanishing (D91); PIP_EXIT_MS in metrics.ts. */
+  animation: pip-out 0.5s ease-in forwards;
+  pointer-events: none;
+}
+@keyframes pip-out {
+  to { transform: translateY(40px) scale(0.6); opacity: 0; }
+}
 @keyframes pip-in {
   from { transform: translateY(40px) scale(0.6); opacity: 0; }
   to { transform: none; opacity: 1; }
@@ -521,7 +533,8 @@
   pointer-events: none;
 }
 .monster-slot {
-  transition: left 0.3s ease, top 0.3s ease, width 0.3s ease, height 0.3s ease;
+  /* 0.5 s (was 0.3): the hand-off from Pip felt rushed (D91); MONSTER_MOVE_MS in metrics.ts. */
+  transition: left 0.5s ease, top 0.5s ease, width 0.5s ease, height 0.5s ease;
 }
 .monster-slot.mood-arrive {
   animation: arrive 0.5s ease-out;
