@@ -1,11 +1,14 @@
 # Number Chef: Monster Café — Claude Code conventions
 
-A math game for a young child. The full design is in `docs/SPEC.md` and is the source of truth. Read it before changing anything. Reasoning behind departures from the original idea is in `docs/DECISIONS.md`. Do not re-litigate decided items; if you find a real problem, add a DECISIONS.md entry and ask.
+A math game for a young child. `docs/SPEC.md` is the single, current statement of the design and the source of truth; read it before changing anything. Each rule cites the decision behind it as `(Dn)`.
+- `docs/DECISIONS.md` is an index (one line per decision, with status and SPEC section). Read it only when you are changing an area, to see which decisions govern it.
+- `docs/archive/DECISIONS_LOG.md` holds the full text of every decision. Read an entry there by its D-number only when you need the full reasoning. Don't read anything else in `docs/archive/` (finished reviews, the kickoff prompt) unless asked.
+- Do not re-litigate decided items; if you find a real problem, add a decision and ask.
 
 ## Working agreement
 - Build in the milestones listed in SPEC §14. **Tier 1 (M0, M1, M2, M3a, M3b; ≈ 10 h as a guide, not a cap, D44) is the target for a playable game**; Tier 2 (M4+) is bonus work in any order the owner picks, with no hour cap. **Stop after each milestone** (M3a and M3b each count) and wait for the owner's playtest feedback. Do not start the next milestone unprompted. M1 starts with a static layout mock; stop for the owner's OK before building interaction (D36).
 - First task of the project: write `docs/PLAN.md` (steps, order, risks, a redone hour estimate per milestone, D36) and wait for approval. The risks section carries the platform risks listed in D37.
-- Record every assumption you make that the spec doesn't cover in `docs/DECISIONS.md` (numbered one higher than the highest `D<n>` already in the file, with Why and How-to-revisit).
+- Record every assumption you make that the spec doesn't cover as a decision, numbered one higher than the highest `D<n>` in the index: append the full entry (What, Why, How to revisit) to `docs/archive/DECISIONS_LOG.md`, add its line to `docs/DECISIONS.md`, **and update SPEC.md in the same commit** (citing `(Dn)`; implementation-only decisions skip SPEC). If it replaces an earlier decision, update that one's index status too.
 - The owner is technical but is the playtester, not the reviewer of every line. Keep explanations short; flag only what needs a decision.
 - Windows 11 host. Scripts must be cross-platform Node (no `rm -rf`, no bash-only syntax in package.json). Use `cross-env` if env vars are needed.
 - The Git repo already exists (no `git init`). Playtest builds reach the devices when the owner pushes to `main` (D44). Commit at the end of each milestone (and sensible checkpoints). Never push unless asked.
