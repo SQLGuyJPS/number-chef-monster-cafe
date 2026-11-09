@@ -30,11 +30,14 @@ test('milestone screenshots', async ({ page }, info) => {
     await page.getByTestId('debug-version').waitFor();
     await shot('debug');
   }
-  // D94: the gear's playtest tools, at every captured size (it is not rotated).
+  // D94, D95: the gear popup part-way through a hold, then the playtest tools (not rotated).
   await startApp(page);
-  const g = (await page.getByTestId('gear').boundingBox())!;
+  await tap(page, page.getByTestId('gear'));
+  const g = (await page.getByTestId('gear-hold').boundingBox())!;
   await page.mouse.move(g.x + g.width / 2, g.y + g.height / 2);
   await page.mouse.down();
+  await page.waitForTimeout(1200);
+  await shot('gear-hold');
   await page.getByTestId('parent-screen').waitFor({ timeout: 5000 });
   await page.mouse.up();
   await page.getByTestId('debug-version').waitFor();

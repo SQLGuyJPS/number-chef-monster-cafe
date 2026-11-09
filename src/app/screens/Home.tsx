@@ -1,17 +1,17 @@
 import { TapButton } from '../../game/input/TapButton';
-import { HoldButton } from '../../game/input/HoldButton';
 import { PlaceholderMonster } from '../../art/PlaceholderMonster';
-import { GEAR_LONG_PRESS_MS } from '../metrics';
+import { GEAR_PATH } from '../../art/gearIcon';
+import { GEAR_SIZE } from '../metrics';
 
-/** SPEC §5.2. M0 placeholder: coin jar, Open the Café, and the grown-ups' gear (hold 2 s, D94). */
+/** SPEC §5.2. M0 placeholder: coin jar, Open the Café, and the grown-ups' gear (tap → popup, D95). */
 export function Home({
   coins,
   onOpen,
-  onParent,
+  onGear,
 }: {
   coins: number;
   onOpen: () => void;
-  onParent: () => void;
+  onGear: () => void;
 }) {
   return (
     <div className="screen home" data-testid="screen-home">
@@ -24,14 +24,22 @@ export function Home({
       <TapButton className="btn btn-primary open-cafe" testId="open-cafe" onTap={onOpen}>
         Open the Café
       </TapButton>
-      <HoldButton className="gear" testId="gear" label="Grown-ups" holdMs={GEAR_LONG_PRESS_MS} onHold={onParent}>
-        <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
-          <path
-            fill="currentColor"
-            d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm8.9 4.6-.1-2.2 2-1.6-2-3.4-2.4.9-1.8-1.1L16.2 3h-4l-.4 2.6-1.9 1.1-2.4-.9-2 3.4 2 1.6v2.2l-2 1.6 2 3.4 2.4-.9 1.9 1.1.4 2.6h4l.4-2.6 1.8-1.1 2.4.9 2-3.4z"
-          />
+      <TapButton
+        className="gear"
+        style={{ width: GEAR_SIZE, height: GEAR_SIZE }}
+        testId="gear"
+        label="Grown-ups"
+        onTap={onGear}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width={GEAR_SIZE * 0.66}
+          height={GEAR_SIZE * 0.66}
+          aria-hidden="true"
+        >
+          <path fill="currentColor" fillRule="evenodd" d={GEAR_PATH} />
         </svg>
-      </HoldButton>
+      </TapButton>
     </div>
   );
 }

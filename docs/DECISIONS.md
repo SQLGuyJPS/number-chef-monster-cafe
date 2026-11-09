@@ -101,4 +101,5 @@
 | D91 | A tap gets a count or a tone; Pip steps back slowly; line waits | SPEC §1.4, §3.2, §3.3, §5.4, §7.3, §8.3; move time amended by D93 | Tones stepped on counts; hand-off felt abrupt |
 | D92 | Decisions folded into SPEC; DECISIONS becomes an index; finished docs archived | This file; SPEC header; CLAUDE.md | Context cost and SPEC/DECISIONS contradictions |
 | D93 | Monster's move between spots is 550 ms | SPEC §7.3 | Code and D91 text disagreed; owner confirmed 550 ms |
-| D94 | Home gear opens playtest tools before M3a (long-press 2 s, no gate) | SPEC §2.2, §5.2, §12, §14 | Installed app can't open `?debug`; iOS storage is per app |
+| D94 | Home gear opens playtest tools before M3a (long-press 2 s, no gate) | SPEC §2.2, §5.2, §12, §14; amended by D95 | Installed app can't open `?debug`; iOS storage is per app |
+| D95 | Gear tap opens a hold-to-open popup with a filling ring; gear 88 px with real gear art | SPEC §2.2, §5.2, §12, §14 | Hold on the small gear gave no feedback and failed on devices |
