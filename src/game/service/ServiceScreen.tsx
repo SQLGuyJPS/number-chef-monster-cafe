@@ -48,6 +48,8 @@ import './service.css';
 
 interface Props {
   orders: Order[];
+  /** Service seed: requeues are placed from it too (SPEC §4.1). */
+  seed: number;
   svc: string;
   dev: string;
   onDone: () => void;
@@ -85,8 +87,8 @@ function bubbleFrames(cells: ModelCell[], food: CellView['food']): CellView[][] 
   return shown.length > 10 ? [shown.slice(0, 10), shown.slice(10)] : [shown];
 }
 
-export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
-  const { view: v, ctrl } = useService({ orders, svc, dev, onDone });
+export function ServiceScreen({ orders, seed, svc, dev, onDone, onDoor }: Props) {
+  const { view: v, ctrl } = useService({ orders, seed, svc, dev, onDone });
   const { order, task } = v;
   const food = order.food;
   const glyph = FOODS[food].glyph;
@@ -183,7 +185,7 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
       <DoorSign rect={L.door} onTap={onDoor} />
       {/* The waiting line steps away while Pip is out or the bubble is up, so Pip stands on a clear
           counter (D90) and the monster never walks back over it (D91). */}
-      {!lineAway && <Queue rect={L.queue} count={Math.max(0, orders.length - v.index - 1)} />}
+      {!lineAway && <Queue rect={L.queue} count={Math.max(0, v.remaining)} />}
       {/* The CountTogether bubble is Pip's speech while it shows (D76, D90). */}
       <Caption rect={L.caption} text={bubbleUp ? '' : v.caption} speaker={v.speaker} />
 

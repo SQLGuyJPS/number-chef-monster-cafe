@@ -63,3 +63,42 @@ test('A3 make-ten help: wrong, wrong, yes → Pip flashes the gap to ten, then F
   await ringBell(page);
   await expect.poll(async () => (await probe(page)).events[0]?.outcome).toBe('assisted');
 });
+
+test('an assisted order brings the same monster back later with more support; coins add up (SPEC §4.1 step 7)', async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  await openService(page, { skill: 'A2', stage: 2, ops: 'add', seed: 21 });
+  const first = await probe(page);
+  expect(first.orders).toBe(6);
+  expect(first.remaining).toBe(5);
+  await serveWrong(page);
+  await waitPhase(page, 'building');
+  await serveWrong(page);
+  await waitPhase(page, 'offerHelp');
+  await tapId(page, 'offer-yes');
+  await waitPhase(page, 'followMe', 40_000);
+  await followMe(page);
+  await ringBell(page);
+  await expect.poll(async () => (await probe(page)).orders).toBe(7);
+  expect((await probe(page)).coins).toBe(3);
+
+  // Play on until the monster comes back.
+  for (let i = 1; i < 7; i++) {
+    await expect.poll(async () => (await probe(page)).index).toBe(i);
+    await waitPhase(page, 'building');
+    const s = await probe(page);
+    if (s.requeue) {
+      expect(s.monster).toBe(first.monster);
+      expect(s.factKey).toBe(first.factKey);
+      expect(s.stage).toBe(3); // S2 → S3
+      expect(i).toBeGreaterThanOrEqual(3); // 3–5 orders after the original at index 0
+      await expect.poll(() => page.evaluate(() => window.__spoken.includes("I'm back! Still hungry!"))).toBe(true);
+      await serveCorrect(page);
+      await expect.poll(async () => (await probe(page)).coins).toBe(3 * (i + 1));
+      return;
+    }
+    await serveCorrect(page);
+  }
+  throw new Error('the requeued monster never came back');
+});

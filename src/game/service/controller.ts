@@ -9,7 +9,9 @@ import { buildDemo, followMeCue, type FollowMeCue } from '../../engine/demos';
 import { attemptEvent, coinEvent, type FrozenEvt } from '../../engine/events';
 import { numberToWords } from '../../engine/numberWords';
 import { phrase, type PhraseKey, type PhraseParams } from '../../engine/phrases';
-import type { Order } from '../../engine/session';
+import { REGULARS, type MonsterRef } from '../../engine/monsters';
+import { hashSeed, mulberry32, type Rng } from '../../engine/rng';
+import { withRequeue, type Order } from '../../engine/session';
 import {
   check,
   isStartState,
@@ -79,6 +81,10 @@ export interface ServiceView extends State {
   /** S0 FollowMe typing: the number to enter, for the digit pulse. */
   correctTyped: string | null;
   removed: number;
+  /** Silhouettes in the waiting line: orders still to come, requeues included (SPEC §5.4). */
+  remaining: number;
+  /** Coins earned this service, from its `coin` events (in memory until M3a, D51). */
+  coins: number;
 }
 
 export interface ServiceDeps {
@@ -104,6 +110,9 @@ export interface ServiceOptions {
   svc: string;
   dev: string;
   onDone: () => void;
+  /** The service seed; requeue placement draws from it too, so a seeded service stays deterministic. */
+  seed?: number;
+  monsters?: readonly MonsterRef[];
 }
 
 /** Pip stands beside the monster while help is offered or given (D90). */
@@ -137,11 +146,16 @@ export class ServiceController {
   private ticketTalking = false;
   private disposed = false;
   readonly events: FrozenEvt[] = [];
+  /** The planned orders; an `assisted` order brings its monster back later (SPEC §4.1 step 7). */
+  private orders: Order[];
+  private readonly requeueRng: Rng;
 
   constructor(
     private readonly opts: ServiceOptions,
     private readonly d: ServiceDeps,
   ) {
+    this.orders = opts.orders.slice();
+    this.requeueRng = mulberry32(hashSeed(opts.seed ?? 0, 'requeue'));
     this.lastInput = d.now();
     this.orderStarted = d.now();
     this.s = this.fresh(0);
@@ -169,14 +183,14 @@ export class ServiceController {
 
   // ---------- derived ----------
   private get order(): Order {
-    return this.opts.orders[this.s.index]!;
+    return this.orders[this.s.index]!;
   }
   private get stage() {
     return this.order.stage;
   }
   /** The tray shown: S1 builds the unknown; otherwise (and for every demo) the S3 tray (D71). */
   private trayTask(s: State = this.s): TrayTask {
-    const o = this.opts.orders[s.index]!;
+    const o = this.orders[s.index]!;
     return toTrayTask(o.problem, o.stage === 1 && !s.demoTray ? 1 : o.stage === 0 ? 3 : o.stage);
   }
   private entryTask(): TrayTask {
@@ -219,6 +233,8 @@ export class ServiceController {
       editable: this.editable(s),
       correctTyped: followTyping ? String(this.order.problem.answer) : null,
       removed: removedCount(s.tray),
+      remaining: this.orders.length - s.index - 1,
+      coins: this.events.filter((e) => e.k === 'coin').reduce((n, e) => n + (e as { n: number }).n, 0),
     };
   }
 
@@ -227,7 +243,7 @@ export class ServiceController {
     const v = this.snap;
     return {
       index: v.index,
-      orders: this.opts.orders.length,
+      orders: this.orders.length,
       phase: v.attempt.phase,
       speaker: v.speaker,
       pipOut: v.pipOut,
@@ -236,6 +252,10 @@ export class ServiceController {
       form: v.order.problem.form,
       display: v.order.problem.display.join(' '),
       factKey: v.order.problem.factKey,
+      requeue: !!v.order.requeue,
+      monster: v.order.monster,
+      remaining: v.remaining,
+      coins: v.coins,
       answer: v.order.problem.answer,
       mode: v.tray.mode,
       filled: v.tray.filled,
@@ -257,7 +277,7 @@ export class ServiceController {
 
   // ---------- lifecycle ----------
   private fresh(index: number): State {
-    const o = this.opts.orders[index]!;
+    const o = this.orders[index]!;
     return {
       index,
       tray: startState(toTrayTask(o.problem, o.stage === 0 ? 3 : o.stage)),
@@ -303,16 +323,20 @@ export class ServiceController {
     this.lastInput = this.d.now();
     this.s = this.fresh(index);
     this.set({});
-    this.speakTicket();
+    this.speakTicket(true);
     void this.wait(600).then(() => my === this.script && this.set({ mood: 'idle' }));
   }
 
-  private speakTicket(): void {
+  /** `arrival`: a returning monster first says it is back (SPEC §4.1 step 7); replays skip that. */
+  private speakTicket(arrival = false): void {
     const t = ++this.ticketTok;
     this.ticketTalking = true;
-    void this.d.speak(ticketLine(this.order)).then(() => {
-      if (t === this.ticketTok) this.ticketTalking = false;
-    });
+    const back = arrival && this.order.requeue;
+    void (back ? this.d.speak(say('order.back')) : Promise.resolve())
+      .then(() => (t === this.ticketTok ? this.d.speak(ticketLine(this.order)) : undefined))
+      .then(() => {
+        if (t === this.ticketTok) this.ticketTalking = false;
+      });
   }
 
   /**
@@ -366,6 +390,11 @@ export class ServiceController {
       }),
       coinEvent(ctx, { svc: this.opts.svc, n: COINS_PER_PROBLEM }),
     );
+    // SPEC §4.1 step 7: an assisted fact comes back with the same monster, one step more support.
+    if (outcome === 'assisted') {
+      const next = withRequeue(this.orders, this.s.index, this.requeueRng, this.opts.monsters ?? REGULARS);
+      if (next) this.orders = next;
+    }
   }
 
   private async runEat(my: number): Promise<void> {
@@ -384,7 +413,7 @@ export class ServiceController {
     await this.wait(350);
     if (my !== this.script) return;
     const next = this.s.index + 1;
-    if (next < this.opts.orders.length) {
+    if (next < this.orders.length) {
       this.startOrder(next);
       return;
     }

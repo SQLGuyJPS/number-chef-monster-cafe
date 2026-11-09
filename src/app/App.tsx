@@ -26,6 +26,7 @@ type AppScreen = Extract<ScreenId, 'splash' | 'home' | 'menu' | 'service' | 'par
 interface RunningService {
   svc: string;
   skill: SkillId;
+  seed: number;
   orders: Order[];
 }
 
@@ -114,7 +115,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
     });
     plan.newFacts.forEach((k) => introducedThisSession.add(k));
     const orders = plan.orders;
-    setService({ svc: newId(), skill, orders });
+    setService({ svc: newId(), skill, seed, orders });
     go('service');
   };
 
@@ -150,6 +151,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
         <ServiceScreen
           key={service.svc}
           orders={service.orders}
+          seed={service.seed}
           svc={service.svc}
           dev={deviceId}
           onDoor={() => setBreakOpen(true)}

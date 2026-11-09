@@ -22,6 +22,12 @@ export interface Probe {
   canServe: boolean;
   cue: string | null;
   caption: string;
+  orders: number;
+  factKey: string;
+  requeue: boolean;
+  monster: string;
+  remaining: number;
+  coins: number;
   events: { k: string; outcome?: string; stage?: number; fact?: string }[];
 }
 

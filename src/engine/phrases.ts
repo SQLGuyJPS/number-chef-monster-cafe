@@ -44,6 +44,9 @@ export const PHRASES = {
     text: (p) => `${N(p, 'a')} minus ${n(p, 'b')} ${plural(p)}, please!`,
   },
 
+  // A requeue is the same monster coming back (SPEC §4.1 step 7); names arrive with M7 renaming.
+  'order.back': { params: {}, text: () => "I'm back! Still hungry!" },
+
   'count.n': { params: { n: 'n' }, text: (p) => n(p, 'n') },
 
   // PlateCount (SPEC §5.5, D30): the monster counts what was served, then names what it wanted.
