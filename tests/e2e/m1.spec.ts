@@ -317,7 +317,9 @@ test('S0 help path: wrong, wrong, yes → Worked and FollowMe on the cloche tray
   await expect.poll(async () => (await probe(page)).events[0]?.outcome).toBe('assisted');
 });
 
-test('a whole service of six orders ends back on the menu board', async ({ page }) => {
+test('a whole service of six orders ends on Results; Another service, Change dish and Home (SPEC §5.7)', async ({
+  page,
+}) => {
   test.setTimeout(60_000);
   await openService(page, { skill: 'A1', stage: 3, seed: 8 });
   for (let i = 0; i < 6; i++) {
@@ -325,7 +327,43 @@ test('a whole service of six orders ends back on the menu board', async ({ page 
     await waitPhase(page, 'building');
     await serveCorrect(page);
   }
-  await expect(page.getByTestId('screen-menu')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId('screen-results')).toBeVisible({ timeout: 10_000 });
+  // The tally counts up to the exact total: 6 orders × 3 coins.
+  await expect(page.getByTestId('results-count')).toHaveText('18', { timeout: 15_000 });
+  await expect(page.locator('.results-face')).toHaveCount(6);
+  expect(await page.evaluate(() => window.__spoken.includes('Eighteen!'))).toBe(true);
+
+  // Another service repeats the skill (a new service starts at order 0).
+  await tapId(page, 'results-another');
+  await waitPhase(page, 'building');
+  expect((await probe(page)).index).toBe(0);
+  expect((await probe(page)).factKey.startsWith('A1:')).toBe(true);
+
+  // Close it from the door; Home's jar keeps every coin earned (18 so far).
+  await tapId(page, 'door');
+  await tapId(page, 'close-cafe');
+  await expect(page.getByTestId('coin-jar')).toContainText('18');
+});
+
+test('Results: Change dish goes to the menu board, Home goes home', async ({ page }) => {
+  test.setTimeout(60_000);
+  await openService(page, { skill: 'A2', stage: 3, ops: 'add', seed: 2 });
+  for (let i = 0; i < 6; i++) {
+    await expect.poll(async () => (await probe(page))?.index).toBe(i);
+    await waitPhase(page, 'building');
+    await serveCorrect(page);
+  }
+  await expect(page.getByTestId('screen-results')).toBeVisible({ timeout: 10_000 });
+  await tapId(page, 'results-change');
+  await expect(page.getByTestId('screen-menu')).toBeVisible();
+  await tapId(page, 'tile-A2');
+  for (let i = 0; i < 6; i++) {
+    await expect.poll(async () => (await probe(page))?.index).toBe(i);
+    await waitPhase(page, 'building');
+    await serveCorrect(page);
+  }
+  await tapId(page, 'results-home');
+  await expect(page.getByTestId('coin-jar')).toContainText('36');
 });
 
 test('the door opens "Take a break?" with Close the café, which goes Home', async ({ page }) => {

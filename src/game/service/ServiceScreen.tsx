@@ -45,6 +45,7 @@ import {
   type TicketToken,
 } from './ServiceParts';
 import { useService } from './useService';
+import type { ServiceSummary } from './controller';
 import './service.css';
 
 interface Props {
@@ -53,7 +54,8 @@ interface Props {
   seed: number;
   svc: string;
   dev: string;
-  onDone: () => void;
+  onDone: (summary: ServiceSummary) => void;
+  onCoins?: (n: number) => void;
   onDoor: () => void;
 }
 
@@ -88,8 +90,8 @@ function bubbleFrames(cells: ModelCell[], food: CellView['food']): CellView[][] 
   return shown.length > 10 ? [shown.slice(0, 10), shown.slice(10)] : [shown];
 }
 
-export function ServiceScreen({ orders, seed, svc, dev, onDone, onDoor }: Props) {
-  const { view: v, ctrl } = useService({ orders, seed, svc, dev, onDone });
+export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor }: Props) {
+  const { view: v, ctrl } = useService({ orders, seed, svc, dev, onDone, onCoins });
   const { order, task } = v;
   const food = order.food;
   const glyph = FOODS[food].glyph;

@@ -172,4 +172,6 @@ The D94 list above is covered by this round (the hold now goes through the popup
 - [ ] Services now pick facts by how well they're known and bring in at most 3 new ones (D97). Until M3a this is remembered only while the app stays open. Do the first services with both operations feel too subtraction-heavy?
 - [ ] **Warm-up (first service on a device only):** a `2 + 1` cookie order comes first. If she waits, a pale hand taps the basket, then (once the cookie is on) points at the bell while Pip says "Ring the bell to serve!". To see it again on a device, it needs a fresh install or storage reset (the reset arrives in M3b). Does the hand help or confuse?
 - [ ] **A monster comes back:** after Pip's full help (the follow-me path), that monster returns 3–5 orders later saying "I'm back! Still hungry!", with one step more support, and the waiting line grows by one. Natural, or confusing?
+- [ ] **Results (closing time):** after the last monster the CLOSED sign flips, the coins count up aloud ("one, two, … ten, fifteen, eighteen!"), and the monsters served stand in a row. Pace of the count right? Does she pick **Another service** (ringed in gold), **Change dish** or **Home**?
+- [ ] **Coin jar on Home:** shows every coin earned since the app was opened (also from a café closed early). It resets on reload until M3a saves it.
 

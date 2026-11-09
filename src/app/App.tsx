@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ServiceScreen } from '../game/service/ServiceScreen';
+import type { ServiceSummary } from '../game/service/controller';
 import { REGULARS } from '../engine/monsters';
 import { buildService, knownPreset, withWarmUp, type Order } from '../engine/session';
 import { ORDERS_PER_SERVICE } from '../engine/config';
@@ -11,6 +12,7 @@ import { getStorageBoot, takeSeedOverride } from './runtime';
 import { Stage } from './Stage';
 import { Splash } from './screens/Splash';
 import { Home } from './screens/Home';
+import { Results } from './screens/Results';
 import { Menu } from './screens/Menu';
 import { BreakDialog } from './BreakDialog';
 import { ParentScreen } from './ParentScreen';
@@ -21,7 +23,7 @@ import { setCurrentScreen } from './runtime';
 import { hush } from '../audio/speech';
 import type { ScreenId } from './pwaPolicy';
 
-type AppScreen = Extract<ScreenId, 'splash' | 'home' | 'menu' | 'service' | 'parent'>;
+type AppScreen = Extract<ScreenId, 'splash' | 'home' | 'menu' | 'service' | 'results' | 'parent'>;
 
 interface RunningService {
   svc: string;
@@ -43,6 +45,9 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   const [configs, setConfigs] = useState<SkillConfigs>({});
   const [deviceId, setDeviceId] = useState('memory');
   const [service, setService] = useState<RunningService | null>(null);
+  /** The coin jar. In memory until M3a derives it from `coin` events (D51). */
+  const [coins, setCoins] = useState(0);
+  const [results, setResults] = useState<ServiceSummary | null>(null);
   /** First-ever warm-up order already shown on this device (SPEC §5.4, D26); `meta` store. */
   const [warmupShown, setWarmupShown] = useState(true);
 
@@ -143,7 +148,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
         />
       )}
       {screen === 'home' && (
-        <Home coins={0} onOpen={() => go('menu')} onGear={() => setGearOpen(true)} />
+        <Home coins={coins} onOpen={() => go('menu')} onGear={() => setGearOpen(true)} />
       )}
       {screen === 'home' && gearOpen && (
         <GearDialog
@@ -165,8 +170,21 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
           svc={service.svc}
           dev={deviceId}
           onDoor={() => setBreakOpen(true)}
-          // M1 ends a service back on the menu board; Results arrive in M2 (D66).
-          onDone={() => go('menu')}
+          onCoins={(n) => setCoins((c) => c + n)}
+          onDone={(summary) => {
+            setResults(summary);
+            go('results');
+          }}
+        />
+      )}
+      {screen === 'results' && service && results && (
+        <Results
+          coins={results.coins}
+          monsters={results.monsters}
+          // SPEC §5.7: Another service repeats the skill; Change dish goes back to the menu board.
+          onAnother={() => startService(service.skill)}
+          onChangeDish={() => go('menu')}
+          onHome={() => go('home')}
         />
       )}
       {breakOpen && (

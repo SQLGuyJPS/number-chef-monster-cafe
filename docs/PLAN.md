@@ -147,7 +147,7 @@ Order inside each milestone is the order I will work in. Every milestone ends wi
 3. *(done 2026-11-09, D99)* Service state machine: 6 orders, queue silhouettes, requeue = same monster returns, warm-up order with ghost hand (flag in `meta`), coins in memory (§2 item 4). The jar UI comes with Home in step 6.
 4. Art: `MonsterSpec` data + six hand-authored SVG monsters × idle/delight/eat/puzzled/sleepy, reactions, reduced-motion static poses; Pip (hand-authored art replacing the placeholder Pip from D90); café background with fallback placeholders.
 5. Eat sequence (≤ 4 s, skippable), coin flight, all SFX (§8.3), voice lines. On a correct serve the ticket's blank becomes the answer in green (D96; done first, 2026-11-09).
-6. Screens: Home (coin jar, Open the Café), Menu board (Little Menu only, A1–A3 tiles, last-played glow, A1 on first run), Results (tally, Another service / Change dish / Home).
+6. *(done 2026-11-09 except the art)* Screens: Home (coin jar, in memory until M3a), Open the Café), Menu board (Little Menu only, A1–A3 tiles; no last-played glow, D83), Results (CLOSED sign, spoken tally, monsters served as faces, Another service / Change dish / Home). Faces use the placeholder monster until step 4.
 7. `lint:content` monster validation; `content:table` → `docs/CONTENT_REVIEW.md`.
 8. E2E full matrix (Chromium iPad Pro 11 + Pixel 7, WebKit iPad gen 7 + iPhone 13, portrait variants), CDP drag incl. rotated portrait, ≤ 2 taps to first order, Another service / Change dish, monster screenshot grid, throttle report.
 9. Screenshots, PLAYTEST (service length timing, monster appeal, voices on three devices), commit, stop.
@@ -161,7 +161,7 @@ Order inside each milestone is the order I will work in. Every milestone ends wi
 - [ ] 4× CPU throttle frame report produced (not a gate)
 - [ ] full e2e device matrix incl. CDP drag in rotated portrait
 - [ ] first run reaches the first order in ≤ 2 taps after Splash
-- [ ] Another service repeats the skill; Change dish returns to the menu
+- [x] Another service repeats the skill; Change dish returns to the menu (e2e)
 - [ ] content table generated
 - [ ] correct serve shows the answer in green in place of the dashed blank (D96, e2e)
 

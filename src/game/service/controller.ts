@@ -113,11 +113,19 @@ export interface ServiceDeps {
   clearTimeout(id: number): void;
 }
 
+/** What Results shows (SPEC §5.7): coins earned this service and the monsters served, in order. */
+export interface ServiceSummary {
+  coins: number;
+  monsters: string[];
+}
+
 export interface ServiceOptions {
   orders: Order[];
   svc: string;
   dev: string;
-  onDone: () => void;
+  onDone: (summary: ServiceSummary) => void;
+  /** Coins paid for a completed problem; the jar keeps them even if the café closes early (§5.8). */
+  onCoins?: (n: number) => void;
   /** The service seed; requeue placement draws from it too, so a seeded service stays deterministic. */
   seed?: number;
   monsters?: readonly MonsterRef[];
@@ -408,6 +416,7 @@ export class ServiceController {
     const ctx = { id: () => this.d.newId(), now: () => this.d.wall(), dev: this.opts.dev };
     const o = this.order;
     // The warm-up order pays the usual coins but writes no `attempt` (SPEC §5.4, D26).
+    this.opts.onCoins?.(COINS_PER_PROBLEM);
     if (o.warmUp) {
       this.events.push(coinEvent(ctx, { svc: this.opts.svc, n: COINS_PER_PROBLEM }));
       return;
@@ -454,7 +463,9 @@ export class ServiceController {
     this.set({ finished: true, caption: say('service.closed'), speaker: 'monster', mood: 'delight' });
     await this.d.speak(say('service.closed'));
     await this.wait(600);
-    if (my === this.script) this.opts.onDone();
+    if (my === this.script) {
+      this.opts.onDone({ coins: this.snap.coins, monsters: this.orders.map((o) => o.monster) });
+    }
   }
 
   private async runCountTogether(my: number): Promise<void> {
