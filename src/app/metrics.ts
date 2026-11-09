@@ -17,6 +17,9 @@ export const MIN_BUTTON_CSS_PX = 56;
 /** Rotated-stage turn cue duration (SPEC §2.2). */
 export const TURN_CUE_MS = 6000;
 
+/** Hold time on the Home gear before the grown-ups' screen opens (SPEC §5.2, D94). */
+export const GEAR_LONG_PRESS_MS = 2000;
+
 /**
  * Pip's hand-off back to the monster (D91). Pip's exit and the monster's walk back match the
  * `.pip-slot.leaving` and `.monster-slot` durations in service.css; the waiting line returns only

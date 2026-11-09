@@ -340,3 +340,26 @@ html.debug-mode #root {
   font-size: 16px;
   padding: 4px;
 }
+
+/* ---- Grown-ups' screen behind the gear (D94): not rotated, scrolls inside the fixed root ---- */
+.parent-screen {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  background: var(--c-bg);
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+.parent-screen .parent-back {
+  min-height: 56px;
+  margin-top: 16px;
+  padding: 0 24px;
+  font-size: 20px;
+  border: 2px solid currentColor;
+  border-radius: 14px;
+  background: var(--c-bg);
+}

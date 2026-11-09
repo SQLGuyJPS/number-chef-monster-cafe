@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ServiceScreen } from '../game/service/ServiceScreen';
 import { planOrders, type Order } from '../engine/plan';
 import { ORDERS_PER_SERVICE } from '../engine/config';
@@ -12,13 +12,14 @@ import { Splash } from './screens/Splash';
 import { Home } from './screens/Home';
 import { Menu } from './screens/Menu';
 import { BreakDialog } from './BreakDialog';
+import { ParentScreen } from './ParentScreen';
 import { onBack, pushGuard } from './backGuard';
 import { unlockFromGesture } from '../audio/unlock';
 import { setCurrentScreen } from './runtime';
 import { hush } from '../audio/speech';
 import type { ScreenId } from './pwaPolicy';
 
-type ChildScreen = Extract<ScreenId, 'splash' | 'home' | 'menu' | 'service'>;
+type AppScreen = Extract<ScreenId, 'splash' | 'home' | 'menu' | 'service' | 'parent'>;
 
 interface RunningService {
   svc: string;
@@ -29,7 +30,8 @@ interface RunningService {
 let serviceCounter = 0;
 
 export function App({ allowRotate }: { allowRotate: boolean }) {
-  const [screen, setScreen] = useState<ChildScreen>('splash');
+  const [screen, setScreen] = useState<AppScreen>('splash');
+  const screenRef = useRef(screen);
   const [breakOpen, setBreakOpen] = useState(false);
   const [configs, setConfigs] = useState<SkillConfigs>({});
   const [deviceId, setDeviceId] = useState('memory');
@@ -51,11 +53,20 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
     };
   }, [screen]);
 
-  useEffect(() => setCurrentScreen(screen), [screen]);
+  useEffect(() => {
+    screenRef.current = screen;
+    setCurrentScreen(screen);
+  }, [screen]);
 
   useEffect(
     () =>
       onBack(() => {
+        // Never trap anyone in the grown-ups' screen (SPEC §2.3): back returns to Home. No new
+        // guard entry can be pushed here (no gesture); the next navigation tap pushes one.
+        if (screenRef.current === 'parent') {
+          setScreen('home');
+          return;
+        }
         // Before the Splash tap no guard exists (none can be pushed without a gesture).
         setBreakOpen(true);
       }),
@@ -63,7 +74,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   );
 
   /** Every navigation comes from a tap, so the guard entry is pushed with user activation (D37). */
-  const go = (next: ChildScreen) => {
+  const go = (next: AppScreen) => {
     setScreen(next);
     pushGuard();
   };
@@ -77,6 +88,9 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
     go('service');
   };
 
+  // Parent area: full-screen, not rotated, scrollable (SPEC §2.2); outside the stage on purpose.
+  if (screen === 'parent') return <ParentScreen onBack={() => go('home')} />;
+
   return (
     <Stage allowRotate={allowRotate} background={<div className="cafe-backdrop" />}>
       {screen === 'splash' && (
@@ -87,7 +101,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
           }}
         />
       )}
-      {screen === 'home' && <Home coins={0} onOpen={() => go('menu')} />}
+      {screen === 'home' && <Home coins={0} onOpen={() => go('menu')} onParent={() => go('parent')} />}
       {screen === 'menu' && <Menu onHome={() => go('home')} onPick={startService} configs={configs} />}
       {screen === 'service' && service && (
         <ServiceScreen

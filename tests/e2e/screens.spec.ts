@@ -30,6 +30,15 @@ test('milestone screenshots', async ({ page }, info) => {
     await page.getByTestId('debug-version').waitFor();
     await shot('debug');
   }
+  // D94: the gear's playtest tools, at every captured size (it is not rotated).
+  await startApp(page);
+  const g = (await page.getByTestId('gear').boundingBox())!;
+  await page.mouse.move(g.x + g.width / 2, g.y + g.height / 2);
+  await page.mouse.down();
+  await page.getByTestId('parent-screen').waitFor({ timeout: 5000 });
+  await page.mouse.up();
+  await page.getByTestId('debug-version').waitFor();
+  await shot('parent-tools');
 });
 
 // M1 service screens (SPEC §13.5 "as built so far"): iPad 1194×834 and iPhone 844×390.

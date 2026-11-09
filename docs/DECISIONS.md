@@ -2,7 +2,7 @@
 
 `docs/SPEC.md` is the single statement of the current design; every live decision is folded into it and cited there as `(Dn)`. This file is only an index: one line per decision with where it lives now. The full text of each entry (What / Why / How to revisit, amendments, review logs) is in `docs/archive/DECISIONS_LOG.md`; read an entry there by its number only when you need the full reasoning.
 
-**Status:** *SPEC §x* = live, stated in that section · *Partly superseded* = live in SPEC, but parts were replaced by the decision named · *Implementation only* = toolchain, tests, CI or code structure; not design, so not in SPEC · *Removed* = the feature no longer exists; do not flag its absence.
+**Status:** *SPEC §x* = live, stated in that section · *Partly superseded* = live in SPEC, but parts were replaced by the decision named · *Implementation only* = toolchain, tests, CI or code structure; not design, so not in SPEC · *Superseded* = replaced entirely by the decision named; not in SPEC · *Removed* = the feature no longer exists; do not flag its absence.
 
 **Adding a decision:** number it one higher than the highest D below; append the full entry (What, Why, How to revisit) to `docs/archive/DECISIONS_LOG.md`; add one line here; **and update SPEC.md in the same commit**, citing `(Dn)`. When a decision replaces an earlier one, update that line's status here too.
 
@@ -60,7 +60,7 @@
 | D50 | `factKey` scheme for missing-amount forms | SPEC §3.1, §4 | Persisted identifier needed a rule |
 | D51 | Coins stay in memory until M3a | SPEC §11.2, §14 | Persistence is M3a's job |
 | D52 | `?debug` picker stored under `debugSkillConfig` | Implementation only | Per-device home before the event log |
-| D53 | Home gear inert before M3a | SPEC §5.2 | No target yet |
+| D53 | Home gear inert before M3a | Superseded by D94 | No target yet |
 | D54 | Waiting service worker activates on cold launch or 30 s Home idle | SPEC §2, §15 | "When idle" had no threshold |
 | D55 | Results tally by ones to ten, then fives, to the exact total | SPEC §5.7 | End point was unspecified |
 | D56 | Tap-to-skip exempt from the eat lock | SPEC §2.3, §5.6 | Skip must work during eating |
@@ -101,3 +101,4 @@
 | D91 | A tap gets a count or a tone; Pip steps back slowly; line waits | SPEC §1.4, §3.2, §3.3, §5.4, §7.3, §8.3; move time amended by D93 | Tones stepped on counts; hand-off felt abrupt |
 | D92 | Decisions folded into SPEC; DECISIONS becomes an index; finished docs archived | This file; SPEC header; CLAUDE.md | Context cost and SPEC/DECISIONS contradictions |
 | D93 | Monster's move between spots is 550 ms | SPEC §7.3 | Code and D91 text disagreed; owner confirmed 550 ms |
+| D94 | Home gear opens playtest tools before M3a (long-press 2 s, no gate) | SPEC §2.2, §5.2, §12, §14 | Installed app can't open `?debug`; iOS storage is per app |
