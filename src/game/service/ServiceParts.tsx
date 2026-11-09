@@ -462,3 +462,35 @@ export function ModelBubble({
     </div>
   );
 }
+
+/**
+ * Warm-up ghost hand (SPEC §5.4, D26): a pale pointing hand that taps the thing to press next.
+ * It never presses anything itself; under reduced motion it just points.
+ */
+export function GhostHand({ target, name }: { target: Rect; name: 'bin' | 'bell' }) {
+  const size = 120;
+  // Fingertip lands a little below the target's centre, the hand trailing down-right.
+  const x = target.x + target.w / 2 - 34;
+  const y = target.y + target.h / 2 - 10;
+  return (
+    <div
+      className="ghost-hand"
+      data-testid="ghost-hand"
+      data-target={name}
+      style={{ left: x, top: y, width: size, height: size }}
+      aria-hidden="true"
+    >
+      <span className="ghost-ripple" />
+      <svg viewBox="0 0 120 120" width={size} height={size}>
+        <path
+          d="M34 10c7 0 12 5 12 12v38l6-3V44c0-6 5-10 11-10s10 4 10 10v14l5-2c6-2 12 2 13 8l1 6 6-1c6 0 10 5 10 11v12c0 14-12 26-28 26H62c-10 0-19-5-24-14L18 72c-3-6 0-12 6-14 5-2 9 0 12 4l-14-1V22c0-7 5-12 12-12z"
+          fill="rgba(255,255,255,0.85)"
+          stroke="rgba(43,43,58,0.55)"
+          strokeWidth="4"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </div>
+  );
+}
+

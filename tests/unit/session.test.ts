@@ -9,6 +9,7 @@ import {
   knownPreset,
   moreSupport,
   withRequeue,
+  withWarmUp,
   type PlannedOrder,
   type ServiceInput,
 } from '../../src/engine/session';
@@ -211,5 +212,22 @@ describe('requeue (SPEC §4.1 step 7)', () => {
 
   it('support steps S0 → S1 → S2 → S3, S3 stays', () => {
     expect([0, 1, 2, 3].map((s) => moreSupport(s as 0 | 1 | 2 | 3))).toEqual([1, 2, 3, 3]);
+  });
+});
+
+describe('warm-up order (SPEC §5.4, D26)', () => {
+  it('prepends 2 + 1 cookies at S3 with a different monster; no cookies twice in a row', () => {
+    for (let seed = 0; seed < 200; seed++) {
+      const plan = buildService(input('A2', 'both', seed)).orders;
+      const next = withWarmUp(plan, REGULARS);
+      expect(next).toHaveLength(plan.length + 1);
+      const w = next[0]!;
+      expect(w).toMatchObject({ food: 'cookie', stage: 3, warmUp: true });
+      expect(w.problem.display.join('')).toBe('2+1=?');
+      expect(w.monster).not.toBe(next[1]!.monster);
+      expect(next[1]!.food).not.toBe('cookie');
+      expect(next[1]!.food).not.toBe(next[2]!.food);
+      expect(next.slice(1).map((o) => o.problem)).toEqual(plan.map((o) => o.problem));
+    }
   });
 });

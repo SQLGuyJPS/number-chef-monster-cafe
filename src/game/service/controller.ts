@@ -3,7 +3,13 @@
 // deps. Scripted parts (PlateCount, CountTogether, Worked, eating) await speech that always
 // resolves (SPEC §8.1), so nothing here can hang on a missing `end` event.
 import { initialAttempt, plateCountLine, stepAttempt, trayEditable, type AttemptState, type Outcome } from '../../engine/attempt';
-import { BELL_GUARD_MS, BELL_LEAD_MS, COINS_PER_PROBLEM, HAT_PULSE_IDLE_MS } from '../../engine/config';
+import {
+  BELL_GUARD_MS,
+  BELL_LEAD_MS,
+  COINS_PER_PROBLEM,
+  HAT_PULSE_IDLE_MS,
+  WARMUP_GHOST_IDLE_MS,
+} from '../../engine/config';
 import { countTogetherTicks, type ModelCell } from '../../engine/countTogether';
 import { buildDemo, followMeCue, type FollowMeCue } from '../../engine/demos';
 import { attemptEvent, coinEvent, type FrozenEvt } from '../../engine/events';
@@ -66,6 +72,8 @@ interface State {
   helpOffer: boolean;
   drag: { x: number; y: number } | null;
   finished: boolean;
+  /** Warm-up order only: the ghost hand points at the next thing to press (SPEC §5.4, D26). */
+  ghost: 'bin' | 'bell' | null;
 }
 
 /** What the screen renders: the state plus everything derived from the engine. */
@@ -224,7 +232,8 @@ export class ServiceController {
     const followTyping = this.stage === 0 && s.attempt.phase === 'followMe' && s.s0Typing;
     return {
       ...s,
-      pipOut: PIP_PHASES.has(s.attempt.phase),
+      // Pip also steps out to tell a first-time chef to ring the bell (SPEC §5.4).
+      pipOut: PIP_PHASES.has(s.attempt.phase) || s.ghost === 'bell',
       order: this.order,
       task: this.trayTask(s),
       padMode: this.stage === 0 && s.cloche === 'down',
@@ -253,6 +262,8 @@ export class ServiceController {
       display: v.order.problem.display.join(' '),
       factKey: v.order.problem.factKey,
       requeue: !!v.order.requeue,
+      warmUp: !!v.order.warmUp,
+      ghost: v.ghost,
       monster: v.order.monster,
       remaining: v.remaining,
       coins: v.coins,
@@ -301,6 +312,7 @@ export class ServiceController {
       helpOffer: false,
       drag: null,
       finished: false,
+      ghost: null,
     };
   }
 
@@ -359,10 +371,27 @@ export class ServiceController {
       const s = this.s;
       if (s.attempt.phase === 'building' && !s.finished) {
         const idle = this.d.now() - this.lastInput;
-        if (this.stage === 3 && idle > HAT_PULSE_IDLE_MS && !s.hatPulse) this.set({ hatPulse: true });
+        if (this.order.warmUp) this.warmUpIdle(idle);
+        else if (this.stage === 3 && idle > HAT_PULSE_IDLE_MS && !s.hatPulse) this.set({ hatPulse: true });
       }
       this.scheduleIdle();
     }, 1000);
+  }
+
+  /**
+   * Warm-up (SPEC §5.4, D26, D99): after 4 s without a touch the ghost hand taps the bin; once
+   * the item is on the tray, after 4 more idle seconds it hovers over the bell while Pip says what
+   * to do. The ghost only points: the child places the item and presses the bell herself.
+   */
+  private warmUpIdle(idle: number): void {
+    const s = this.s;
+    if (idle < WARMUP_GHOST_IDLE_MS || s.ghost !== null || this.ticketTalking) return;
+    if (!this.canServe(s)) {
+      this.set({ ghost: 'bin' });
+      return;
+    }
+    this.set({ ghost: 'bell', caption: say('warm.bell'), speaker: 'pip' });
+    void this.d.speak(say('warm.bell'), 'pip');
   }
 
   /** S0 FollowMe: once the cloche tray is complete the digits come back for the final typing (D41). */
@@ -378,6 +407,11 @@ export class ServiceController {
   private record(outcome: Outcome): void {
     const ctx = { id: () => this.d.newId(), now: () => this.d.wall(), dev: this.opts.dev };
     const o = this.order;
+    // The warm-up order pays the usual coins but writes no `attempt` (SPEC §5.4, D26).
+    if (o.warmUp) {
+      this.events.push(coinEvent(ctx, { svc: this.opts.svc, n: COINS_PER_PROBLEM }));
+      return;
+    }
     // In memory until M3a persists them (D51); the shapes are frozen (SPEC §11.2).
     this.events.push(
       attemptEvent(ctx, {
@@ -547,7 +581,7 @@ export class ServiceController {
   // ---------- actions (bound, so the screen can pass them straight to handlers) ----------
   touch = (): void => {
     this.lastInput = this.d.now();
-    if (this.s.hatPulse) this.set({ hatPulse: false });
+    if (this.s.hatPulse || this.s.ghost) this.set({ hatPulse: false, ghost: null });
   };
 
   tapBin = (): void => this.act(tapBin);

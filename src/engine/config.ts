@@ -38,3 +38,6 @@ export const MAX_REQUEUES = 2;
 
 /** The monster asks for a favourite food this often (SPEC §4.1 step 6). */
 export const FAVORITE_FOOD_SHARE = 0.7;
+
+/** Warm-up order: the ghost hand shows the next step after this much idle time (SPEC §5.4, D26). */
+export const WARMUP_GHOST_IDLE_MS = 4000;

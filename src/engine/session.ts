@@ -21,6 +21,8 @@ export interface PlannedOrder {
   monster: string;
   /** A requeued fact: the same monster coming back (step 7). */
   requeue?: boolean;
+  /** The first-ever warm-up order (SPEC §5.4, D26): pays coins, writes no `attempt`. */
+  warmUp?: boolean;
 }
 
 /** One order of a service (the UI's name for a planned order). */
@@ -255,3 +257,21 @@ export function knownPreset(skill: SkillId): Map<string, number> {
   }
   return out;
 }
+
+/**
+ * First-ever service (SPEC §5.4, D26): one `2 + 1` cookie order at S3 before the chosen skill's
+ * orders, whatever skill was picked. Its monster differs from the first planned one.
+ */
+export function withWarmUp(plan: readonly PlannedOrder[], monsters: readonly MonsterRef[]): PlannedOrder[] {
+  const problem = pool('A1').find((p) => p.display.join('') === '2+1=?')!;
+  const monster = monsters.find((m) => m.id !== plan[0]?.monster) ?? monsters[0]!;
+  const warm: PlannedOrder = { problem, food: 'cookie', stage: 3, monster: monster.id, warmUp: true };
+  // The next order must not repeat the cookies (step 5); swap in its monster's other favourite.
+  const next = plan[0];
+  const rest =
+    next && next.food === 'cookie'
+      ? [{ ...next, food: FOOD_IDS.find((f) => f !== 'cookie' && f !== plan[1]?.food)! }, ...plan.slice(1)]
+      : plan.slice();
+  return [warm, ...rest];
+}
+

@@ -488,6 +488,11 @@ What: (a) A3's addition forms (`a + ? = 10`, `? + a = 10`) are tagged `makeTen`;
 Why: SPEC §5.5 gives the make-ten demo in one line and §4 says only "A3 → makeTen"; the subtraction forms and exact lines were open.
 How to revisit: if the child prefers a make-ten picture for `10 − a`, tag those `makeTen` and add a "take away from ten" variant to `buildDemo`.
 
+**D99. Warm-up order details: the ghost keeps pointing until touched, the flag is set at start, its monster and food (agent, 2026-11-09).**
+What: fills gaps in the first-ever warm-up (SPEC §5.4, D26). (a) The ghost hand only points (a pale hand tapping in place with a ripple); it never places an item or presses the bell. Once shown it keeps tapping until the child touches anything, and it comes back after every further 4 s without a touch (`WARMUP_GHOST_IDLE_MS`), at the bin while the tray is unchanged and at the bell once the item is on it. (b) Each time the ghost moves to the bell, Pip pops up and says "Ring the bell to serve!" in Pip's voice and caption. The ghost waits while the order is still being read. (c) The `warmupShown` flag (`meta` store) is set when the warm-up service starts, so leaving early never shows it again. (d) The warm-up monster differs from the first planned monster; if the first planned order was cookies, it gets another food so cookies are not served twice in a row. (e) A wrong serve in the warm-up runs the usual PlateCount/help flow; it still writes no `attempt` and never requeues. Reduced motion: the hand points without moving.
+Why: SPEC §5.4 says "a ghost hand taps the bin once" but not what happens if the child still does nothing, nor when the once-per-device flag is written.
+How to revisit: if the repeating ghost is distracting, show each hint once; `warmUpIdle` in `src/game/service/controller.ts`.
+
 <!-- New decisions go above this line, numbered one higher than the highest existing D<n>. -->
 
 ---

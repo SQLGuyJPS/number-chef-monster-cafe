@@ -144,7 +144,7 @@ Order inside each milestone is the order I will work in. Every milestone ends wi
 ### M2 — Café service (5.0 h)
 1. *(done 2026-11-09, D97)* Engine: session builder (§4.1): pool + ops filter, box weights, new-fact cap and difficulty order, no-repeat window (requeues exempt), food/monster rules, add/sub balance, requeue placement and append, pool-size guard; determinism tests.
 2. *(done 2026-11-09, D98)* Engine: A3 generator + make-ten demo; taken-away row for `10 − ? = a`; `known` preset (in step 1).
-3. Service state machine: 6 orders, queue silhouettes, requeue = same monster returns, warm-up order with ghost hand (flag in `meta`), coins in memory (§2 item 4).
+3. *(done 2026-11-09, D99)* Service state machine: 6 orders, queue silhouettes, requeue = same monster returns, warm-up order with ghost hand (flag in `meta`), coins in memory (§2 item 4). The jar UI comes with Home in step 6.
 4. Art: `MonsterSpec` data + six hand-authored SVG monsters × idle/delight/eat/puzzled/sleepy, reactions, reduced-motion static poses; Pip (hand-authored art replacing the placeholder Pip from D90); café background with fallback placeholders.
 5. Eat sequence (≤ 4 s, skippable), coin flight, all SFX (§8.3), voice lines. On a correct serve the ticket's blank becomes the answer in green (D96; done first, 2026-11-09).
 6. Screens: Home (coin jar, Open the Café), Menu board (Little Menu only, A1–A3 tiles, last-played glow, A1 on first run), Results (tally, Another service / Change dish / Home).

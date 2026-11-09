@@ -21,6 +21,11 @@ export function installE2eHooks(): void {
       const boot = await getStorageBoot();
       if (boot) await saveSkillConfig(boot.storage, skill, { stage, ops });
     },
+    /** Marks the first-ever warm-up order as shown (or not) on this device (SPEC §5.4). */
+    async setWarmupShown(shown: boolean) {
+      const boot = await getStorageBoot();
+      if (boot) await boot.storage.setMeta('warmupShown', shown);
+    },
     async storage() {
       const boot = await getStorageBoot();
       return boot ? { kind: boot.storage.kind, degraded: boot.degraded, deviceId: boot.deviceId } : null;

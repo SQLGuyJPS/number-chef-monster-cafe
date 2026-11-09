@@ -34,6 +34,7 @@ import {
   ClocheLid,
   DigitButton,
   DoorSign,
+  GhostHand,
   HelpChoice,
   ModelBubble,
   PeekButton,
@@ -320,6 +321,7 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onDoor }: Props)
         </>
       )}
 
+      {v.ghost && <GhostHand target={v.ghost === 'bin' ? L.bin : L.bell} name={v.ghost} />}
       {phase === 'offerHelp' && (
         <HelpChoice yes={L.offerYes} no={L.offerNo} onYes={ctrl.help} onNo={ctrl.declineHelp} />
       )}

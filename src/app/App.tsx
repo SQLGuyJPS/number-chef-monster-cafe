@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ServiceScreen } from '../game/service/ServiceScreen';
 import { REGULARS } from '../engine/monsters';
-import { buildService, knownPreset, type Order } from '../engine/session';
+import { buildService, knownPreset, withWarmUp, type Order } from '../engine/session';
 import { ORDERS_PER_SERVICE } from '../engine/config';
 import { hashSeed } from '../engine/rng';
 import type { SkillId } from '../engine/types';
@@ -43,6 +43,8 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   const [configs, setConfigs] = useState<SkillConfigs>({});
   const [deviceId, setDeviceId] = useState('memory');
   const [service, setService] = useState<RunningService | null>(null);
+  /** First-ever warm-up order already shown on this device (SPEC §5.4, D26); `meta` store. */
+  const [warmupShown, setWarmupShown] = useState(true);
 
   // Stage/operations per skill from the ?debug picker (D52); read whenever the menu opens so the
   // tile tap can start the service synchronously, inside the user gesture.
@@ -51,8 +53,10 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
     let live = true;
     void getStorageBoot()?.then(async (boot) => {
       const c = await loadSkillConfigs(boot.storage);
+      const warm = (await boot.storage.getMeta('warmupShown')) === true;
       if (!live) return;
       setConfigs(c);
+      setWarmupShown(warm);
       setDeviceId(boot.deviceId);
     });
     return () => {
@@ -114,7 +118,13 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
       monsters: REGULARS,
     });
     plan.newFacts.forEach((k) => introducedThisSession.add(k));
-    const orders = plan.orders;
+    // The warm-up runs once per device; the flag is set as it starts, so leaving early never
+    // shows it again (SPEC §5.4).
+    const orders = warmupShown ? plan.orders : withWarmUp(plan.orders, REGULARS);
+    if (!warmupShown) {
+      setWarmupShown(true);
+      void getStorageBoot()?.then((boot) => boot.storage.setMeta('warmupShown', true));
+    }
     setService({ svc: newId(), skill, seed, orders });
     go('service');
   };

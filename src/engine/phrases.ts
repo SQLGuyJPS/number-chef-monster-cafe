@@ -101,6 +101,9 @@ export const PHRASES = {
     text: (p) => `${N(p, 'a')} and ${n(p, 'b')} more makes ten!`,
   },
 
+  // Warm-up order (SPEC §5.4, D26): Pip says what to do while the ghost hand points at the bell.
+  'warm.bell': { params: {}, text: () => 'Ring the bell to serve!' },
+
   // FollowMe (SPEC §5.5).
   'follow.start': { params: {}, text: () => 'Your turn! Follow me.' },
   'follow.bell': { params: {}, text: () => 'Now ring the bell!' },

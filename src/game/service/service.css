@@ -568,6 +568,35 @@
   50% { transform: translateY(-26px) scale(1.06); }
 }
 
+/* Warm-up ghost hand (SPEC §5.4, D26): taps in place over the bin or the bell. */
+.ghost-hand {
+  position: absolute;
+  z-index: 30;
+  pointer-events: none;
+  animation: ghost-tap 1.4s ease-in-out infinite;
+  transform-origin: 34px 10px;
+}
+.ghost-ripple {
+  position: absolute;
+  left: 4px;
+  top: -20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 5px solid rgba(255, 255, 255, 0.9);
+  opacity: 0;
+  animation: ghost-ripple 1.4s ease-out infinite;
+}
+@keyframes ghost-tap {
+  0%, 100% { transform: translate(14px, 18px); }
+  45%, 55% { transform: translate(0, 0) scale(0.94); }
+}
+@keyframes ghost-ripple {
+  0%, 45% { transform: scale(0.4); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .service *,
   .service *::before,

@@ -102,3 +102,47 @@ test('an assisted order brings the same monster back later with more support; co
   }
   throw new Error('the requeued monster never came back');
 });
+
+test('first-ever service: the warm-up order, ghost hand on the bin then the bell; shown once (SPEC §5.4, D26)', async ({
+  page,
+}) => {
+  test.setTimeout(90_000);
+  await openService(page, { skill: 'A2', stage: 1, ops: 'both', seed: 3, warmUp: true });
+  let s = await probe(page);
+  expect(s.warmUp).toBe(true);
+  expect(s.display).toBe('2 + 1 = ?');
+  expect(s.stage).toBe(3); // S3 whatever the skill's stage
+  expect(s.orders).toBe(7);
+
+  // No touch for 4 s: the ghost taps the bin. It only points; nothing is placed.
+  await expect(page.getByTestId('ghost-hand')).toHaveAttribute('data-target', 'bin', { timeout: 8000 });
+  expect((await probe(page)).filled).toBe(2);
+  await tapId(page, 'bin');
+  await expect(page.getByTestId('ghost-hand')).toHaveCount(0);
+
+  // Item on the tray and 4 more idle seconds: the ghost hovers over the bell and Pip says what to do.
+  await expect(page.getByTestId('ghost-hand')).toHaveAttribute('data-target', 'bell', { timeout: 8000 });
+  await expect(page.getByTestId('pip')).toBeVisible();
+  expect(await page.evaluate(() => window.__pipSpoken.includes('Ring the bell to serve!'))).toBe(true);
+  // Nothing serves itself.
+  await page.waitForTimeout(1500);
+  expect((await probe(page)).phase).toBe('building');
+  await ringBell(page);
+
+  // Coins, but no attempt event; then the chosen skill begins.
+  await expect.poll(async () => (await probe(page)).index).toBe(1);
+  s = await probe(page);
+  expect(s.events.map((e) => e.k)).toEqual(['coin']);
+  expect(s.coins).toBe(3);
+  expect(s.warmUp).toBe(false);
+  expect(s.stage).toBe(1);
+
+  // Shown once per device: the next service starts straight on the skill.
+  await tapId(page, 'door');
+  await tapId(page, 'close-cafe');
+  await tapId(page, 'open-cafe');
+  await page.waitForTimeout(150);
+  await tapId(page, 'tile-A2');
+  await waitPhase(page, 'building');
+  expect((await probe(page)).warmUp).toBe(false);
+});

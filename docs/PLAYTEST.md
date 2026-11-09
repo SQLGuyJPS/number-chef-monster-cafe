@@ -170,4 +170,6 @@ The D94 list above is covered by this round (the hold now goes through the popup
 - [ ] `10 − ? = 6`: the items taken off stay in the small grid left of the tray. Does the child see that grid as the answer? Does tapping it to put one back occur to her?
 - [ ] Pip's make-ten help ("Seven." … "Three empty spots." … "Seven and three more makes ten!"): clear, too long?
 - [ ] Services now pick facts by how well they're known and bring in at most 3 new ones (D97). Until M3a this is remembered only while the app stays open. Do the first services with both operations feel too subtraction-heavy?
+- [ ] **Warm-up (first service on a device only):** a `2 + 1` cookie order comes first. If she waits, a pale hand taps the basket, then (once the cookie is on) points at the bell while Pip says "Ring the bell to serve!". To see it again on a device, it needs a fresh install or storage reset (the reset arrives in M3b). Does the hand help or confuse?
+- [ ] **A monster comes back:** after Pip's full help (the follow-me path), that monster returns 3–5 orders later saying "I'm back! Still hungry!", with one step more support, and the waiting line grows by one. Natural, or confusing?
 
