@@ -8,7 +8,8 @@ export const CELL_GAP = 8;
 export const FRAME_PADDING = 12;
 export const BUTTON_MIN = 112;
 export const BIG_BUTTON = 160;
-export const GEAR_SIZE = 44;
+/** The grown-ups' gear (SPEC §5.2, D95): ≈ 47 CSS px at 844×390, so a finger can tell it hit it. */
+export const GEAR_SIZE = 88;
 
 /** Asserted by e2e at 844×390 (CLAUDE.md child-safety invariants). */
 export const MIN_CELL_CSS_PX = 44;
@@ -17,8 +18,13 @@ export const MIN_BUTTON_CSS_PX = 56;
 /** Rotated-stage turn cue duration (SPEC §2.2). */
 export const TURN_CUE_MS = 6000;
 
-/** Hold time on the Home gear before the grown-ups' screen opens (SPEC §5.2, D94). */
+/** Hold time on the gear popup's circle before the grown-ups' screen opens (SPEC §5.2, D94, D95). */
 export const GEAR_LONG_PRESS_MS = 2000;
+/**
+ * Gear popup hold target (D95), logical px: the light circle is wider than a fingertip at every
+ * size, and the ring is drawn just outside it so the finger never covers the progress.
+ */
+export const GEAR_HOLD = { svg: 264, circle: 216, ringR: 120, ringW: 18 } as const;
 
 /**
  * Pip's hand-off back to the monster (D91). Pip's exit and the monster's walk back match the

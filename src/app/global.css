@@ -173,11 +173,48 @@ button {
   position: absolute;
   right: 0;
   top: 0;
-  width: 44px;
-  height: 44px;
   opacity: 0.3;
   display: grid;
   place-items: center;
+}
+/* Brightens under the finger so a grown-up can tell the gear was hit (D95). */
+.gear:active {
+  opacity: 0.7;
+}
+
+/* ---- Gear popup: hold the circle to open the grown-ups' screen (D95) ---- */
+.gear-dialog {
+  padding: 32px 48px;
+  max-width: 820px;
+}
+.gear-dialog-title {
+  font-size: 48px;
+  font-weight: 700;
+}
+.gear-dialog-text {
+  font-size: 32px;
+  margin: 8px 0 12px;
+}
+.gear-hold {
+  margin: 0 auto 16px;
+  touch-action: none;
+}
+.gear-hold svg {
+  display: block;
+}
+.gear-hold-fill {
+  fill: var(--c-hold-fill);
+}
+.gear-hold.holding .gear-hold-fill {
+  fill: var(--c-hold-fill-down);
+}
+.gear-hold-ring {
+  fill: none;
+  stroke: var(--c-hold-ring);
+  stroke-linecap: butt;
+}
+.gear-dialog-close {
+  min-width: 280px;
 }
 
 /* ---- Menu (SPEC §5.3) ---- */

@@ -14,6 +14,9 @@
   --c-chalk-ink: #f4f1e8;
   --c-coin: #f6c445;
   --c-scrim: rgba(43, 43, 58, 0.45);
+  --c-hold-fill: #d6ebfa; /* gear popup circle (D95) */
+  --c-hold-fill-down: #bfdcf3; /* the circle while held */
+  --c-hold-ring: #1f5fa8; /* its filling ring, darker so it reads against the circle */
 
   /* Ten-frame "five wall" tints and tray role colours (SPEC §3.3, §5.4). */
   --c-frame-a: #fff0c9;

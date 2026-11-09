@@ -136,6 +136,9 @@ test('tap targets meet the minimum sizes (CLAUDE.md: buttons ≥ 56 CSS px)', as
     const b = (await page.getByTestId(id).boundingBox())!;
     expect(Math.min(b.width, b.height)).toBeGreaterThanOrEqual(56);
   }
+  // D95: the grown-ups' gear is big enough to know it was hit.
+  const g = (await page.getByTestId('gear').boundingBox())!;
+  expect(Math.min(g.width, g.height)).toBeGreaterThanOrEqual(44);
   await page.goBack();
   const k = (await page.getByTestId('keep-cooking').boundingBox())!;
   expect(Math.min(k.width, k.height)).toBeGreaterThanOrEqual(56);

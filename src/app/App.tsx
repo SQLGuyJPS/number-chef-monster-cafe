@@ -13,6 +13,7 @@ import { Home } from './screens/Home';
 import { Menu } from './screens/Menu';
 import { BreakDialog } from './BreakDialog';
 import { ParentScreen } from './ParentScreen';
+import { GearDialog } from './GearDialog';
 import { onBack, pushGuard } from './backGuard';
 import { unlockFromGesture } from '../audio/unlock';
 import { setCurrentScreen } from './runtime';
@@ -33,6 +34,8 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   const [screen, setScreen] = useState<AppScreen>('splash');
   const screenRef = useRef(screen);
   const [breakOpen, setBreakOpen] = useState(false);
+  const [gearOpen, setGearOpen] = useState(false);
+  const gearRef = useRef(gearOpen);
   const [configs, setConfigs] = useState<SkillConfigs>({});
   const [deviceId, setDeviceId] = useState('memory');
   const [service, setService] = useState<RunningService | null>(null);
@@ -54,6 +57,10 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   }, [screen]);
 
   useEffect(() => {
+    gearRef.current = gearOpen;
+  }, [gearOpen]);
+
+  useEffect(() => {
     screenRef.current = screen;
     setCurrentScreen(screen);
   }, [screen]);
@@ -65,6 +72,11 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
         // guard entry can be pushed here (no gesture); the next navigation tap pushes one.
         if (screenRef.current === 'parent') {
           setScreen('home');
+          return;
+        }
+        // The grown-ups' popup just closes; the child never sees "Take a break?" for it (D95).
+        if (gearRef.current) {
+          setGearOpen(false);
           return;
         }
         // Before the Splash tap no guard exists (none can be pushed without a gesture).
@@ -101,8 +113,21 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
           }}
         />
       )}
-      {screen === 'home' && <Home coins={0} onOpen={() => go('menu')} onParent={() => go('parent')} />}
-      {screen === 'menu' && <Menu onHome={() => go('home')} onPick={startService} configs={configs} />}
+      {screen === 'home' && (
+        <Home coins={0} onOpen={() => go('menu')} onGear={() => setGearOpen(true)} />
+      )}
+      {screen === 'home' && gearOpen && (
+        <GearDialog
+          onClose={() => setGearOpen(false)}
+          onOpen={() => {
+            setGearOpen(false);
+            go('parent');
+          }}
+        />
+      )}
+      {screen === 'menu' && (
+        <Menu onHome={() => go('home')} onPick={startService} configs={configs} />
+      )}
       {screen === 'service' && service && (
         <ServiceScreen
           key={service.svc}
