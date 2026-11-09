@@ -473,6 +473,11 @@ What: amends D94. (a) Owner's playtest of D94 on the real devices: the 2 s hold 
 Why: the owner needs clear feedback that the hold is working; a short tap must still never open settings, but a child who taps the gear sees only a popup of grown-up text and a circle.
 How to revisit: if the child learns to hold the circle, bring the M3b multiplication gate forward; if the hold is still unreliable on iOS, report what the ring does.
 
+**D96. A correct serve fills the ticket's blank with the answer in green (owner, 2026-11-09).**
+What: amends the ticket in SPEC §5.4. When a serve is correct (the attempt enters `eating`, at every stage and after any help path), the dashed box of the blank is replaced by the answer as a number in the result green (`--c-role-result`), whatever the blank's role colour was (so in `? + 4 = 14` the filled-in 10 is green, not orange). It pops in (scale) with motion, and appears without animation under reduced motion. The finished sentence stays until the next order's ticket replaces it. Nothing changes on a wrong serve: the blank stays dashed. Added to M2 by the owner.
+Why: the child sees the whole, true number sentence at the moment of success, linking the tray she built to the written fact. Green means "done" here, and the dashed box would otherwise still say "unknown" while the monster eats.
+How to revisit: if the green answer competes with the eating for attention, delay it until the monster's reaction ends; if it should keep the role colour instead, change `.tok-solved` in `service.css`.
+
 <!-- New decisions go above this line, numbered one higher than the highest existing D<n>. -->
 
 ---

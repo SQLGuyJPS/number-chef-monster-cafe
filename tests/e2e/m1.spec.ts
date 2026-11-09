@@ -290,3 +290,34 @@ test('drag from the bin onto the tray places an item (CDP touch, Chromium only)'
   await expect.poll(async () => (await probe(page)).filled).toBe(before + 1);
   await expect(page.getByTestId(`tray-cell-${before}`)).toHaveAttribute('data-filled', 'true');
 });
+
+test('a correct serve replaces the dashed blank with the answer in green; a wrong one does not (D96)', async ({ page }) => {
+  await openService(page, { skill: 'A2', stage: 3, ops: 'add', seed: 5, timeScale: 1 });
+  const ticket = page.getByTestId('ticket');
+  await expect(ticket.locator('.tok-blank')).toHaveCount(1);
+  await expect(page.getByTestId('ticket-answer')).toHaveCount(0);
+
+  await serveWrong(page);
+  await waitPhase(page, 'plateCount');
+  await expect(ticket.locator('.tok-blank')).toHaveCount(1);
+  await expect(page.getByTestId('ticket-answer')).toHaveCount(0);
+
+  await waitPhase(page, 'building');
+  const s = await probe(page);
+  await serveCorrect(page);
+  const answer = page.getByTestId('ticket-answer');
+  await expect(answer).toHaveText(String(s.answer));
+  await expect(ticket.locator('.tok-blank')).toHaveCount(0);
+  const green = await page.evaluate(() =>
+    getComputedStyle(document.documentElement).getPropertyValue('--c-role-result').trim(),
+  );
+  const rgb = await answer.evaluate((el) => getComputedStyle(el).color);
+  const hex = green.replace('#', '');
+  const want = `rgb(${parseInt(hex.slice(0, 2), 16)}, ${parseInt(hex.slice(2, 4), 16)}, ${parseInt(hex.slice(4, 6), 16)})`;
+  expect(rgb).toBe(want);
+
+  // The next order brings a fresh ticket with its own dashed blank.
+  await expect.poll(async () => (await probe(page)).index).toBe(1);
+  await expect(ticket.locator('.tok-blank')).toHaveCount(1);
+  await expect(page.getByTestId('ticket-answer')).toHaveCount(0);
+});

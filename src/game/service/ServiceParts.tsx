@@ -16,23 +16,41 @@ export interface TicketToken {
 }
 
 /** Paper receipt (SPEC §5.4): tokens coloured by their role on the tray, not by position (D30). */
-export function Ticket({ rect, tokens, food, onTap }: { rect: Rect; tokens: TicketToken[]; food: FoodId; onTap?: () => void }) {
+/**
+ * `solved`: after a correct serve the blank shows the answer in result green, so the child sees the
+ * finished, true sentence at the moment of success (D96).
+ */
+export function Ticket({
+  rect,
+  tokens,
+  food,
+  solved,
+  onTap,
+}: {
+  rect: Rect;
+  tokens: TicketToken[];
+  food: FoodId;
+  solved?: number;
+  onTap?: () => void;
+}) {
   return (
     <TapButton className="ticket" style={at(rect)} testId="ticket" label="Hear the order" onTap={onTap ?? (() => undefined)}>
       <div className="ticket-food">{FOODS[food].glyph}</div>
       <div className="ticket-sentence">
-        {tokens.map((t, i) => (
-          <span
-            key={i}
-            className={[
-              'tok',
-              t.role ? `tok-${t.role}` : 'tok-op',
-              t.blank ? 'tok-blank' : '',
-            ].join(' ')}
-          >
-            {t.blank ? '' : t.text}
-          </span>
-        ))}
+        {tokens.map((t, i) =>
+          t.blank && solved !== undefined ? (
+            <span key={i} className="tok tok-solved" data-testid="ticket-answer">
+              {solved}
+            </span>
+          ) : (
+            <span
+              key={i}
+              className={['tok', t.role ? `tok-${t.role}` : 'tok-op', t.blank ? 'tok-blank' : ''].join(' ')}
+            >
+              {t.blank ? '' : t.text}
+            </span>
+          ),
+        )}
       </div>
     </TapButton>
   );

@@ -133,10 +133,14 @@ Notes:
   A hair too quick → slowed (D91). The waiting line reappeared under the monster as it walked back after count-together → line stays hidden until the monster is home (D91).
 
 ### M1 feedback round 7: quieter counting, slower hand-off (D91)
-- [ ] Pip's demo: only Pip's counting is heard as food goes in or out (no tones). Clear?
-- [ ] Counting-on / counting-back orders (S3): each tap says its number with no tone under it. Does the child still get enough feedback from a tap? Other orders (no counting) keep their tones.
-- [ ] Pip sinking back behind the counter and the monster walking back: the right pace now, or still too quick / now too slow?
-- [ ] After count-together on the first order: does the waiting line stay away until the monster is back in its spot, then fade in without overlapping it?
+- [x] Pip's demo: only Pip's counting is heard as food goes in or out (no tones). Clear?
+  Yes, only Pip's voice. Known issue, left as is by the owner: tapping the next food item before the previous count has finished cuts the counting off, and counting stays silent until the bell is pressed. Speech cancelling/sticking is accepted until recorded voice-overs replace TTS (OPEN_ITEMS, Recordings).
+- [x] Counting-on / counting-back orders (S3): each tap says its number with no tone under it. Does the child still get enough feedback from a tap? Other orders (no counting) keep their tones.
+  Yes.
+- [x] Pip sinking back behind the counter and the monster walking back: the right pace now, or still too quick / now too slow?
+  Good pace.
+- [x] After count-together on the first order: does the waiting line stay away until the monster is back in its spot, then fade in without overlapping it?
+  Yes, looks good.
 
 ## M1 — Playtest tools from the gear (D94)
 2026-11-09: the hold on the gear did nothing and gave no feedback; the gear was too small to tell → D95.
@@ -148,9 +152,17 @@ Notes:
 - [ ] The child doesn't stumble into it.
 
 ## M1 — Gear popup and hold ring (D95)
-- [ ] The gear is easy to find and hit, and looks like a gear.
-- [ ] A tap on the gear opens the popup at once.
-- [ ] Holding the circle fills the ring clockwise from the top and opens the tools when it closes (iPad, iPhone, Android).
-- [ ] Lifting early empties the ring and nothing opens.
-- [ ] **Close**, tapping outside and the back gesture all close the popup.
+2026-11-09 playtest:
+- [x] The gear is easy to find and hit, and looks like a gear.
+- [x] A tap on the gear opens the popup at once.
+- [x] Holding the circle fills the ring clockwise from the top and opens the tools when it closes (iPad, iPhone, Android).
+  Confirmed on the iPhone; iPad and Android not reported.
+- [x] Lifting early empties the ring and nothing opens.
+- [x] **Close**, tapping outside and the back gesture all close the popup.
 - [ ] What does the child do when she taps the gear?
+  Not tested yet.
+
+The D94 list above is covered by this round (the hold now goes through the popup).
+
+## M2 — Café service
+- [ ] Correct serve: the dashed blank on the ticket turns into the answer in green (D96). Does the child notice it and read the finished sentence? Does it help, or is it noise during the eating?

@@ -211,6 +211,7 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
         rect={bubbleUp ? L.ticketCounting : L.ticket}
         tokens={tokens}
         food={food}
+        solved={phase === 'eating' || phase === 'done' ? order.problem.answer : undefined}
         onTap={ctrl.replayTicket}
       />
 
