@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { TapButton } from '../../game/input/TapButton';
-import { PlaceholderMonster } from '../../art/PlaceholderMonster';
+import { Monster } from '../../art/monsters/Monster';
 import { countAloud, hush, speakText } from '../../audio/speech';
 import { numberToWords } from '../../engine/numberWords';
 import { phrase } from '../../engine/phrases';
@@ -67,7 +67,7 @@ export function Results({
       <div className="results-faces" data-testid="results-faces">
         {monsters.map((m, i) => (
           <div key={i} className="results-face" data-monster={m}>
-            <PlaceholderMonster size={88} />
+            <Monster id={m} expression="delight" size={88} />
           </div>
         ))}
       </div>

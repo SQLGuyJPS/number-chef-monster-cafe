@@ -10,6 +10,7 @@ import { newId } from '../storage/ids';
 import { configFor, loadSkillConfigs, type SkillConfigs } from './skillConfig';
 import { getStorageBoot, takeSeedOverride } from './runtime';
 import { Stage } from './Stage';
+import { CafeScene } from '../art/CafeScene';
 import { Splash } from './screens/Splash';
 import { Home } from './screens/Home';
 import { Results } from './screens/Results';
@@ -139,6 +140,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
 
   return (
     <Stage allowRotate={allowRotate} background={<div className="cafe-backdrop" />}>
+      <CafeScene />
       {screen === 'splash' && (
         <Splash
           onStart={() => {

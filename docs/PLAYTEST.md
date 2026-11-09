@@ -174,4 +174,8 @@ The D94 list above is covered by this round (the hold now goes through the popup
 - [ ] **A monster comes back:** after Pip's full help (the follow-me path), that monster returns 3–5 orders later saying "I'm back! Still hungry!", with one step more support, and the waiting line grows by one. Natural, or confusing?
 - [ ] **Results (closing time):** after the last monster the CLOSED sign flips, the coins count up aloud ("one, two, … ten, fifteen, eighteen!"), and the monsters served stand in a row. Pace of the count right? Does she pick **Another service** (ringed in gold), **Change dish** or **Home**?
 - [ ] **Coin jar on Home:** shows every coin earned since the app was opened (also from a café closed early). It resets on reload until M3a saves it.
+- [ ] **The six monsters** (Blobbo, Gruffles, Zibbit, Mimsy, Chompers, Wobbleton) and the new Pip. Open `…/?gallery` to see all of them with every face. Which does the child like or avoid? Any that look scary? Do the puzzled faces (head tilt, raised brow) read as "hmm", never cross?
+- [ ] Each monster's happy reaction after a correct serve (melts, stomps, spins, floats with hearts, burp bubble, wobbles into a puddle): fun, too long, distracting?
+- [ ] Café background (wallpaper, string lights, window, floor): cosy, or too busy behind the ticket and tray?
+- [ ] With the device's Reduce Motion on, the monsters stand still in their poses (no bob, no reactions).
 

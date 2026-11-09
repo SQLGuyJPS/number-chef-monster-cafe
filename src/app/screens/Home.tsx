@@ -1,5 +1,5 @@
 import { TapButton } from '../../game/input/TapButton';
-import { PlaceholderMonster } from '../../art/PlaceholderMonster';
+import { Monster } from '../../art/monsters/Monster';
 import { GEAR_PATH } from '../../art/gearIcon';
 import { GEAR_SIZE } from '../metrics';
 
@@ -20,7 +20,7 @@ export function Home({
         <span className="coin-icon" aria-hidden="true" />
         <span className="coin-count">{coins}</span>
       </div>
-      <PlaceholderMonster size={220} className="home-monster" />
+      <Monster id="blobbo" expression="idle" size={220} className="home-monster" />
       <TapButton className="btn btn-primary open-cafe" testId="open-cafe" onTap={onOpen}>
         Open the Café
       </TapButton>

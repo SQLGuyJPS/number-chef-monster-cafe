@@ -427,7 +427,7 @@ interface MonsterSpec { id; name; body:'blob'|'tall'|'round'|'square'|'jelly'|'f
   extras:('horns'|'antennae'|'ears'|'spikes'|'drips'|'tail')[]; voice:{ pitch:number; rate:number };
   personality:string; favorites:[FoodId,FoodId]; reactions:ReactionId[]; lines:{ arrive:string[]; thanks:string[] } }
 ```
-- Expressions: `idle` (bob + blink), `delight`, `eat` (mouth open, 3 chews), `puzzled` (head tilt), `sleepy` (closed-café art). CSS-transform-driven; reduced motion swaps to static poses.
+- Expressions: `idle` (bob + blink), `delight`, `eat` (mouth open, 3 chews), `puzzled` (head tilt, a still pose), `sleepy` (closed-café art). CSS-transform-driven; reduced motion swaps to static poses. Reactions are about 1.4 s each so eat + react fits in 4 s; `?gallery` shows every monster at every expression with its reaction (D100).
 - Roster (6 + 2 surprise guests after the 5th and 15th completed service; names are placeholders through M2, renaming comes with M7):
   1. **Blobbo** — green, one eye, shy giggler, 🍰 / 🍓. Reaction: melts happily.
   2. **Gruffles** — purple, horns, deep "Mmm!", 🍔 / 🌭. Reaction: ground-shaking stomp then purr.
@@ -440,10 +440,10 @@ interface MonsterSpec { id; name; body:'blob'|'tall'|'round'|'square'|'jelly'|'f
 - `lint:content` validates every spec: palette contrast, allowed extras, favorites in the allowlist, unique ids, reaction ids exist, all five expressions present.
 
 ### 7.3 Pip and staff
-Pip, a mouse in a chef hat, is the guide and **the one who helps (D90)**: the Help button (Pip's hat), the help-offer button, the helper on the counter and the tutorial pointer are one character. While help is offered or given (OfferHelp, CountTogether, Worked, FollowMe) Pip pops up on the counter left of the monster and bobs while talking; every help line (CountTogether, demo and FollowMe lines) comes from Pip, in Pip's own caption bubble with its tail pointing down at Pip and the same voice at pitch 1.5. The monster keeps the order, PlateCount, the help question, "Yum!", its reactions and the closing line. When help ends Pip sinks back behind the counter over 0.5 s (`PIP_EXIT_MS`), and the monster's moves between its spot and the aside spots take 0.55 s (`MONSTER_MOVE_MS`; D91, D93). Pip is a placeholder drawing until the hand-authored art in M2. Other animal staff are shop items (§10) that idle in the café and react to events (clap, bounce); staff do not speak.
+Pip, a mouse in a chef hat, is the guide and **the one who helps (D90)**: the Help button (Pip's hat), the help-offer button, the helper on the counter and the tutorial pointer are one character. While help is offered or given (OfferHelp, CountTogether, Worked, FollowMe) Pip pops up on the counter left of the monster and bobs while talking; every help line (CountTogether, demo and FollowMe lines) comes from Pip, in Pip's own caption bubble with its tail pointing down at Pip and the same voice at pitch 1.5. The monster keeps the order, PlateCount, the help question, "Yum!", its reactions and the closing line. When help ends Pip sinks back behind the counter over 0.5 s (`PIP_EXIT_MS`), and the monster's moves between its spot and the aside spots take 0.55 s (`MONSTER_MOVE_MS`; D91, D93). Pip is hand-authored SVG from M2 (`src/art/Pip.tsx`). Other animal staff are shop items (§10) that idle in the café and react to events (clap, bounce); staff do not speak.
 
 ### 7.4 Café background
-Layered SVG scene: wall, floor, window, lights, counter, counter-top slot, wall art slot, staff spots. Shop item = `{slot, svg component, price}`. The **Service screen uses the same decorated café**, so purchases show while the child plays (D37). Missing art falls back to a labeled placeholder shape.
+Layered SVG scene: wall, floor, window, lights, counter, counter-top slot, wall art slot, staff spots. The wallpaper is CSS on the bleed and the room (`CafeScene`) is SVG in stage coordinates behind every screen, muted so the foreground stays brightest (D100). Shop item = `{slot, svg component, price}`. The **Service screen uses the same decorated café**, so purchases show while the child plays (D37). Missing art falls back to a labeled placeholder shape.
 
 ---
 

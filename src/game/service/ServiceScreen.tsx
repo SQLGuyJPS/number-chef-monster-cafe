@@ -19,8 +19,8 @@ import { FOODS } from '../../engine/foods';
 import type { ModelCell } from '../../engine/countTogether';
 import type { Order } from '../../engine/session';
 import { ticketRoles } from '../../engine/tray';
-import { PlaceholderMonster } from '../../art/PlaceholderMonster';
-import { PlaceholderPip } from '../../art/PlaceholderPip';
+import { Monster } from '../../art/monsters/Monster';
+import { Pip } from '../../art/Pip';
 import { dragTapHandlers, inRect, type StagePoint } from '../input/dragTap';
 import { TapButton } from '../input/TapButton';
 import { TenFrame, type CellView } from '../tray/TenFrame';
@@ -198,7 +198,12 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor 
         data-testid="monster"
         data-mood={v.mood}
       >
-        <PlaceholderMonster size={bubbleUp ? L.monsterAside.w : L.monsterZone.w} />
+        <Monster
+          id={order.monster}
+          expression={v.mood === 'delight' ? 'delight' : v.mood === 'puzzled' ? 'puzzled' : 'idle'}
+          react={v.mood === 'delight'}
+          size={bubbleUp ? L.monsterAside.w : L.monsterZone.w}
+        />
       </div>
       {pipShown && (
         <div
@@ -206,7 +211,7 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor 
           style={at(L.pip)}
           data-testid={v.pipOut ? 'pip' : 'pip-leaving'}
         >
-          <PlaceholderPip />
+          <Pip />
         </div>
       )}
       {bubbleUp && (

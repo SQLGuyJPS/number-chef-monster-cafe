@@ -3,7 +3,7 @@ import { TapButton } from '../input/TapButton';
 import { FOODS, type FoodId } from '../../engine/foods';
 import type { Rect } from '../../app/metrics';
 import { TenFrame, type CellView, type ItemRole } from '../tray/TenFrame';
-import { PlaceholderPip } from '../../art/PlaceholderPip';
+import { Pip } from '../../art/Pip';
 import { MODEL_FRAMES_GAP, MODEL_ONE, MODEL_TWO, frameSize } from '../../app/metrics';
 
 export const at = (r: Rect): CSSProperties => ({ left: r.x, top: r.y, width: r.w, height: r.h });
@@ -242,7 +242,7 @@ export function HelpChoice({
         label="Yes, help me"
         onTap={onYes}
       >
-        <PlaceholderPip />
+        <Pip />
       </Btn>
       <Btn
         rect={no}

@@ -549,13 +549,6 @@
 .monster-slot.mood-arrive {
   animation: arrive 0.5s ease-out;
 }
-.monster-slot.mood-puzzled > div {
-  transform: rotate(-12deg);
-  transition: transform 0.25s ease;
-}
-.monster-slot.mood-delight > div {
-  animation: delight 0.5s ease-in-out 2;
-}
 .monster-slot.mood-leave {
   transition: opacity 0.3s ease, transform 0.3s ease;
   opacity: 0;
@@ -563,9 +556,6 @@
 }
 @keyframes arrive {
   from { transform: translateX(-160px); opacity: 0; }
-}
-@keyframes delight {
-  50% { transform: translateY(-26px) scale(1.06); }
 }
 
 /* Warm-up ghost hand (SPEC §5.4, D26): taps in place over the bin or the bell. */

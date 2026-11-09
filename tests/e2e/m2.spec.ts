@@ -146,3 +146,29 @@ test('first-ever service: the warm-up order, ghost hand on the bin then the bell
   await waitPhase(page, 'building');
   expect((await probe(page)).warmUp).toBe(false);
 });
+
+test('every monster draws all five expressions and its reaction; reduced motion keeps still poses (SPEC §7.2, D100)', async ({
+  browser,
+}) => {
+  for (const reducedMotion of ['no-preference', 'reduce'] as const) {
+    const page = await browser.newPage({ reducedMotion });
+    await page.goto('./?gallery');
+    const ids = ['blobbo', 'gruffles', 'zibbit', 'mimsy', 'chompers', 'wobbleton'];
+    for (const id of ids) {
+      const row = page.getByTestId(`gallery-${id}`);
+      const shown = await row
+        .locator('.monster-art')
+        .evaluateAll((els) => els.map((e) => `${e.getAttribute('data-monster')}:${e.getAttribute('data-expression')}`));
+      expect(shown).toEqual(['idle', 'delight', 'eat', 'puzzled', 'sleepy', 'delight'].map((x) => `${id}:${x}`));
+      // Something is actually drawn: the figure has a real size.
+      const box = await row.locator('.monster-art .m-figure').first().boundingBox();
+      expect(box!.width).toBeGreaterThan(60);
+    }
+    const anims = await page
+      .locator('.monster-art .m-figure')
+      .evaluateAll((els) => els.map((e) => getComputedStyle(e).animationName));
+    if (reducedMotion === 'reduce') expect(anims.every((a) => a === 'none')).toBe(true);
+    else expect(anims.some((a) => a !== 'none')).toBe(true);
+    await page.close();
+  }
+});
