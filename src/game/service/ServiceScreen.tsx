@@ -147,7 +147,8 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
   const cue = v.cue;
   const cells: CellView[] = Array.from({ length: v.tray.capacity }, (_, i) => {
     if (i >= v.tray.filled) {
-      return { pulse: cue === 'place' && i === v.tray.filled };
+      // Empty cells glow too: the make-ten demo flashes the gap to ten (SPEC §5.5).
+      return { pulse: cue === 'place' && i === v.tray.filled, glow: v.glow.includes(i) };
     }
     const role = i < v.tray.prefill ? 'prefill' : 'child';
     return {
@@ -169,7 +170,7 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
   const lineAway = useHold(v.pipOut || bubbleUp, MONSTER_MOVE_MS);
   const removed = v.removed;
   const phase = v.attempt.phase;
-  const lockedPhase = phase === "plateCount" || phase === "worked" || phase === "eating";
+  const lockedPhase = phase === 'plateCount' || phase === 'worked' || phase === 'eating';
 
   return (
     <div
@@ -204,7 +205,11 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
         </div>
       )}
       {bubbleUp && (
-        <ModelBubble rect={L.bubble} frames={bubbleFrames(v.bubble!, food)} caption={v.bubbleCount} />
+        <ModelBubble
+          rect={L.bubble}
+          frames={bubbleFrames(v.bubble!, food)}
+          caption={v.bubbleCount}
+        />
       )}
       <Ticket
         key={v.index}
@@ -277,7 +282,9 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
             pulsing={cue === 'place' || (cue === 'putBack' && !v.tray.takenAwayRow)}
             wobble={v.binWobble}
           />
-          {order.stage === 0 && <ClocheLid rect={L.clocheLid} onTap={ctrl.lowerCloche} dim={v.cloche !== 'peek'} />}
+          {order.stage === 0 && (
+            <ClocheLid rect={L.clocheLid} onTap={ctrl.lowerCloche} dim={v.cloche !== 'peek'} />
+          )}
         </>
       )}
 
@@ -285,12 +292,21 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
         <>
           <PeekButton rect={L.s0Peek} onTap={ctrl.peek} dim={v.attempt.phase !== 'building'} />
           <AnswerDisplay rect={L.s0Display} value={v.typed} />
-          <Backspace rect={L.s0Backspace} onTap={ctrl.backspace} pulsing={v.correctTyped !== null && !v.correctTyped.startsWith(v.typed)} />
+          <Backspace
+            rect={L.s0Backspace}
+            onTap={ctrl.backspace}
+            pulsing={v.correctTyped !== null && !v.correctTyped.startsWith(v.typed)}
+          />
           {Array.from({ length: 10 }, (_, d) => (
             <DigitButton
               key={d}
               digit={d}
-              rect={{ x: L.s0Digits.x + d * (BUTTON_MIN + L.s0DigitGap), y: L.s0Digits.y, w: BUTTON_MIN, h: BUTTON_MIN }}
+              rect={{
+                x: L.s0Digits.x + d * (BUTTON_MIN + L.s0DigitGap),
+                y: L.s0Digits.y,
+                w: BUTTON_MIN,
+                h: BUTTON_MIN,
+              }}
               onTap={() => ctrl.digit(d)}
               pulsing={
                 v.correctTyped !== null &&
@@ -305,7 +321,12 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
       {phase === 'offerHelp' && (
         <HelpChoice yes={L.offerYes} no={L.offerNo} onYes={ctrl.help} onNo={ctrl.declineHelp} />
       )}
-      <PipHat rect={L.help} onTap={ctrl.help} pulsing={v.hatPulse || v.helpOffer || phase === 'offerHelp'} dim={lockedPhase} />
+      <PipHat
+        rect={L.help}
+        onTap={ctrl.help}
+        pulsing={v.hatPulse || v.helpOffer || phase === 'offerHelp'}
+        dim={lockedPhase}
+      />
       <Bell
         rect={L.bell}
         onTap={ctrl.serve}
@@ -330,7 +351,11 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
         );
       })}
       {v.drag && (
-        <div className="drag-ghost" style={{ left: v.drag.x - CELL / 2, top: v.drag.y - CELL / 2 }} aria-hidden="true">
+        <div
+          className="drag-ghost"
+          style={{ left: v.drag.x - CELL / 2, top: v.drag.y - CELL / 2 }}
+          aria-hidden="true"
+        >
           {glyph}
         </div>
       )}

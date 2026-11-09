@@ -41,6 +41,9 @@ const CASES: [SkillId, Ops][] = [
   ['A2', 'both'],
   ['A2', 'add'],
   ['A2', 'sub'],
+  ['A3', 'both'],
+  ['A3', 'add'],
+  ['A3', 'sub'],
 ];
 
 describe('session builder (SPEC §4.1)', () => {
@@ -88,15 +91,26 @@ describe('session builder (SPEC §4.1)', () => {
     }
   });
 
-  it('new facts come in difficulty order', () => {
-    const facts = new Map(pool('A2').map((p) => [p.factKey, p.difficulty]));
-    for (let seed = 0; seed < 50; seed++) {
-      const inp = input('A2', 'both', seed);
-      const { newFacts } = buildService(inp);
-      const d = newFacts.map((k) => facts.get(k)!);
-      expect(d).toEqual([...d].sort((a, b) => a - b));
-      const unseenMin = Math.min(...[...facts].filter(([k]) => !inp.seen.has(k)).map(([, v]) => v));
-      expect(d[0]).toBe(unseenMin);
+  it('new facts come in difficulty order within each operation, alternating add and sub', () => {
+    for (const skill of ['A2', 'A3'] as const) {
+      const items = pool(skill);
+      const facts = new Map(items.map((p) => [p.factKey, p.difficulty]));
+      const add = new Map(items.map((p) => [p.factKey, isAddition(p)]));
+      for (let seed = 0; seed < 50; seed++) {
+        const inp = input(skill, 'both', seed);
+        const { newFacts } = buildService(inp);
+        for (const op of [true, false]) {
+          const d = newFacts.filter((k) => add.get(k) === op).map((k) => facts.get(k)!);
+          expect(d).toEqual([...d].sort((a, b) => a - b));
+          const unseen = [...facts]
+            .filter(([k]) => !inp.seen.has(k) && add.get(k) === op)
+            .map(([, v]) => v);
+          if (d.length) expect(d[0]).toBe(Math.min(...unseen));
+        }
+        // A3 starts with nothing seen, so both operations get new facts. (A2's preset is all
+        // addition, so its balance reserve makes the first new facts all subtraction, D97.)
+        if (skill === 'A3') expect(new Set(newFacts.map((k) => add.get(k))).size).toBe(2);
+      }
     }
   });
 

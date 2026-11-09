@@ -1,5 +1,5 @@
 // Generators and pools (SPEC §4). Pools enumerate ordered presentations (3+5 and 5+3 are two);
-// mastery uses the canonical factKey (D50). Tier 1 ships A1–A3; M1 builds A1 and A2.
+// mastery uses the canonical factKey (D50). Tier 1 ships A1–A3.
 import { sentenceOf } from './phrases';
 import type { Form, Ops, Problem, SkillId, StrategyTag, Token } from './types';
 
@@ -28,9 +28,13 @@ export function factKeyOf(
   }
 }
 
-/** A1/A2 strategy tags (D42, D17): doubles and near-doubles build on the child's known doubles. */
-export function strategyFor(form: Form, a: number, b: number): StrategyTag {
-  if (form === 'sub') return 'countBack';
+/**
+ * A1/A2 strategy tags (D42, D17): doubles and near-doubles build on the child's known doubles.
+ * A3: the addition forms make ten; its subtraction forms count back from ten (D98).
+ */
+export function strategyFor(form: Form, a: number, b: number, skill: SkillId = 'A2'): StrategyTag {
+  if (skill === 'A3') return form === 'missingAddend' ? 'makeTen' : 'countBack';
+  if (form === 'sub' || form === 'missingSub') return 'countBack';
   if (form === 'add') {
     if (a === b) return 'doubles';
     if (Math.abs(a - b) === 1) return 'nearDouble';
@@ -44,6 +48,8 @@ export function strategyFor(form: Form, a: number, b: number): StrategyTag {
  */
 function difficultyFor(skill: SkillId, form: Form, a: number, b: number): Difficulty {
   const clamp = (d: number): Difficulty => Math.max(1, Math.min(5, d)) as Difficulty;
+  // A3 (SPEC §4): 5+5 and 9+1 easiest, then by distance from 5. `a` is the part of ten shown.
+  if (skill === 'A3') return a === 5 || a === 1 || a === 9 ? 1 : clamp(Math.abs(a - 5) + 1);
   if (form === 'add') {
     if (Math.abs(a - b) === 1) return 1;
     const big = Math.max(a, b);
@@ -63,9 +69,35 @@ function problem(skill: SkillId, form: 'add' | 'sub', a: number, b: number): Pro
     display,
     answer,
     spoken: sentenceOf(display),
-    strategy: strategyFor(form, a, b),
+    strategy: strategyFor(form, a, b, skill),
     difficulty: difficultyFor(skill, form, a, b),
   };
+}
+
+/** A3 (SPEC §4): `a+?=10`, `?+a=10`, `10−a=?`, `10−?=a`, a 1–9. */
+function perfectTen(a: number): Problem[] {
+  const make = (
+    form: Form,
+    operands: (number | null)[],
+    display: Token[],
+    answer: number,
+  ): Problem => ({
+    factKey: factKeyOf('A3', form, operands, answer),
+    skill: 'A3',
+    form,
+    operands,
+    display,
+    answer,
+    spoken: sentenceOf(display),
+    strategy: strategyFor(form, a, 10 - a, 'A3'),
+    difficulty: difficultyFor('A3', form, a, 10 - a),
+  });
+  return [
+    make('missingAddend', [a, null, 10], [a, '+', '?', '=', 10], 10 - a),
+    make('missingAddend', [null, a, 10], ['?', '+', a, '=', 10], 10 - a),
+    make('sub', [10, a, null], [10, '−', a, '=', '?'], 10 - a),
+    make('missingSub', [10, null, a], [10, '−', '?', '=', a], 10 - a),
+  ];
 }
 
 /** A1: within 5, no zero results (SPEC §1.2, D11). A2: sums 6–10. */
@@ -74,13 +106,14 @@ const RANGES: Partial<Record<SkillId, { sumMin: number; sumMax: number }>> = {
   A2: { sumMin: 6, sumMax: 10 },
 };
 
-export const BUILT_SKILLS = ['A1', 'A2'] as const satisfies readonly SkillId[];
+export const BUILT_SKILLS = ['A1', 'A2', 'A3'] as const satisfies readonly SkillId[];
 export type BuiltSkill = (typeof BUILT_SKILLS)[number];
 export const isBuilt = (s: string): s is BuiltSkill =>
   (BUILT_SKILLS as readonly string[]).includes(s);
 
 /** Every fact of a skill, ordered presentations (SPEC §4 table). */
 export function pool(skill: SkillId): Problem[] {
+  if (skill === 'A3') return Array.from({ length: 9 }, (_, i) => perfectTen(i + 1)).flat();
   const r = RANGES[skill];
   if (!r) throw new Error(`pool(${skill}): not built yet`);
   const out: Problem[] = [];

@@ -1,16 +1,57 @@
 import { describe, expect, it } from 'vitest';
-import { BUILT_SKILLS, factKeyOf, filterOps, isAddition, pool } from '../../src/engine/generators';
+import { factKeyOf, filterOps, isAddition, pool } from '../../src/engine/generators';
 import type { Problem } from '../../src/engine/types';
 
 // SPEC §4 table (ordered presentations).
-const SIZES = { A1: { add: 10, sub: 10 }, A2: { add: 35, sub: 35 } };
+const SIZES = { A1: { add: 10, sub: 10 }, A2: { add: 35, sub: 35 }, A3: { add: 18, sub: 18 } };
 
+/** Solves the ticket for its blank, wherever the blank is. */
 const evaluate = (p: Problem): number => {
-  const [a, op, b] = p.display;
-  return op === '+' ? Number(a) + Number(b) : Number(a) - Number(b);
+  const [x, op, y, , z] = p.display;
+  if (z === '?') return op === '+' ? Number(x) + Number(y) : Number(x) - Number(y);
+  if (x === '?') return op === '+' ? Number(z) - Number(y) : Number(z) + Number(y);
+  return op === '+' ? Number(z) - Number(x) : Number(x) - Number(z);
 };
 
-describe.each(BUILT_SKILLS)('%s pool', (skill) => {
+describe('A3 Perfect Ten pool (SPEC §4)', () => {
+  const items = pool('A3');
+  it('has the four forms for every a 1–9, answers are the other part of ten', () => {
+    expect(items).toHaveLength(36);
+    for (const p of items) {
+      expect(p.answer).toBe(evaluate(p));
+      expect(p.display).toContain(10);
+      expect(p.answer).toBeGreaterThanOrEqual(1);
+      expect(p.answer).toBeLessThanOrEqual(9);
+    }
+  });
+  it('keys: a+?=10 and ?+a=10 share; 10−a=? and 10−?=a do not (D50)', () => {
+    const key = (s: string) => items.find((p) => p.display.join('') === s)!.factKey;
+    expect(key('7+?=10')).toBe('A3:?add:7,10');
+    expect(key('?+7=10')).toBe('A3:?add:7,10');
+    expect(key('10−4=?')).toBe('A3:-:10,4');
+    expect(key('10−?=6')).toBe('A3:?sub:10,6');
+    expect(new Set(items.map((p) => p.factKey)).size).toBe(27);
+  });
+  it('5+5 and 9+1 easiest, then by distance from 5; addition makes ten', () => {
+    const d = (s: string) => items.find((p) => p.display.join('') === s)!;
+    expect(d('5+?=10').difficulty).toBe(1);
+    expect(d('9+?=10').difficulty).toBe(1);
+    expect(d('1+?=10').difficulty).toBe(1);
+    expect(d('4+?=10').difficulty).toBe(2);
+    expect(d('3+?=10').difficulty).toBe(3);
+    expect(d('8+?=10').difficulty).toBe(4);
+    expect(d('7+?=10').strategy).toBe('makeTen');
+    expect(d('10−?=6').strategy).toBe('countBack');
+  });
+  it('spoken text is words only', () => {
+    for (const p of items) expect(p.spoken).not.toMatch(/[0-9+−=]/);
+    expect(items.find((p) => p.display.join('') === '7+?=10')!.spoken).toBe(
+      'Seven plus what equals ten?',
+    );
+  });
+});
+
+describe.each(['A1', 'A2'] as const)('%s pool', (skill) => {
   const items = pool(skill);
 
   it('has the SPEC §4 size', () => {

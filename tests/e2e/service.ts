@@ -73,7 +73,7 @@ export async function stubSpeechNeverEnds(page: Page): Promise<void> {
 }
 
 export interface OpenOptions {
-  skill?: 'A1' | 'A2';
+  skill?: 'A1' | 'A2' | 'A3';
   stage?: 0 | 1 | 2 | 3;
   ops?: 'both' | 'add' | 'sub';
   seed?: number;

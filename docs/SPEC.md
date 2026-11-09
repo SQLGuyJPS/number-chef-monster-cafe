@@ -265,10 +265,10 @@ A3's canonical add/sub share is 9 : 18 (its `?sub` and `-` keys are separate), s
 
 **Difficulty (1–5) is the new-fact introduction order** (§4.1 step 4, D29, D43). When `ops` is both, new addition and subtraction facts alternate. Orderings for A4–A6 are written in M5 and for B1–B2 in M8.
 - A1/A2 (D72): addition near-doubles (`|a − b| = 1`, 1+2 included) are difficulty 1, then by larger addend (A1: larger − 1, A2: larger − 4); subtraction by minuend (A1: m − 1, A2: m − 5). Known facts (+1, doubles) are never "new" (§4.2).
-- A3: 5+5 and 9+1 easiest; then by distance from 5.
+- A3: 5+5 and 9+1 (either part) easiest; then by distance from 5 (D98).
 - A7: near-doubles (5+6, 6+7, 7+8, 8+9) first (doubles are known), then 9+x, then 8+x, then by `10 − max(a,b)`; A8: by `b − (m−10)`, small first (D17).
 
-Strategy tags are attached per fact and pick the demo (§5.5). A1/A2 (D72): addition `a = b` → `doubles`; `|a − b| = 1` → `nearDouble`; otherwise `countOn`; subtraction → `countBack`. Other skills: e.g. 8+5 → `bridge`, A3 → `makeTen`.
+Strategy tags are attached per fact and pick the demo (§5.5). A1/A2 (D72): addition `a = b` → `doubles`; `|a − b| = 1` → `nearDouble`; otherwise `countOn`; subtraction → `countBack`. Other skills: e.g. 8+5 → `bridge`; A3 addition forms → `makeTen`, A3 subtraction forms → `countBack` (D98).
 
 Spoken forms (all via `numberToWords`, never raw digits):
 - **Result forms** (`a + b = ?`, `m − b = ?`) are wrapped in the café frame with the order's food and "please": "Three plus two cookies, please!", "Eight minus three cookies, please!" Spoken only; the written ticket stays numerals and symbols.
@@ -351,7 +351,7 @@ Bands: monster and ticket y ≈ 50–300 · tray y 311–519 · bottom y 562–7
 | count on / count back | Blue group glows "five", orange items appear one by one "six, seven, eight"; back: items fly off "seven, six, five" |
 | doubles | The blue and orange groups glow in turn (groups on the canonical tray, not rows, D42): "Three blue." "Three orange. The same!" "Three and three is six." (split so each caption is ≤ 8 words, D72) |
 | near double | The blue group and an equal part of the orange group glow ("you know six and six is twelve"), then the one extra orange item: "One more makes thirteen!" |
-| make ten (A3) | Empty cells flash; "seven… and three more makes ten" |
+| make ten (A3) | The blue part glows ("Seven."), the empty cells to ten glow ("Three empty spots."), fill with counts "eight, nine, ten", then "Seven and three more makes ten!" (D98). A missing subtrahend (`10 − ? = 6`) counts back and ends on what went away: "Four taken away!" |
 | teens (A5/A6) | Full frame glows "ten"; remainder "and four — fourteen" |
 | bridge (A7) | "Eight. Fill the ten first": the first 2 orange items fill frame 1 → "ten, and three left: thirteen" |
 | back through ten (A8) | "Fifteen. Take the five to get to ten" (5 fly off) "then two more from the ten" → "eight" |

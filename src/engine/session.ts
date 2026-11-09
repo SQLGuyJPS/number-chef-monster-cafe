@@ -98,7 +98,7 @@ export function buildService(input: ServiceInput): ServicePlan {
   const rng = mulberry32(input.seed);
   const facts = factsOf(input.skill, input.ops);
 
-  // Step 4: new facts in difficulty order, ties broken by the seeded rng, at most 3.
+  // Step 4: new facts in difficulty order (per operation), ties broken by the seeded rng, at most 3.
   const ordered = rng
     .shuffle(facts.filter((f) => !input.seen.has(f.key)))
     .sort((x, y) => x.difficulty - y.difficulty);
@@ -120,7 +120,15 @@ export function buildService(input: ServiceInput): ServicePlan {
       fresh.push(...ordered.filter((f) => f.add === add).slice(0, short));
     }
   }
-  for (const f of ordered) if (fresh.length < MAX_NEW_FACTS && !fresh.includes(f)) fresh.push(f);
+  // The rest: with both operations, new addition and subtraction facts alternate (SPEC §4),
+  // starting with whichever operation has fewer new facts so far; otherwise difficulty order.
+  const rest = ordered.filter((f) => !fresh.includes(f));
+  while (fresh.length < MAX_NEW_FACTS && rest.length > 0) {
+    const adds = fresh.filter((f) => f.add).length;
+    const wantAdd = input.ops === 'both' ? adds <= fresh.length - adds : rest[0]!.add;
+    const i = rest.findIndex((f) => f.add === wantAdd);
+    fresh.push(...rest.splice(i < 0 ? 0 : i, 1));
+  }
   fresh.sort((x, y) => x.difficulty - y.difficulty);
   const newKeys = new Set(fresh.map((f) => f.key));
   const available = facts.filter((f) => input.seen.has(f.key) || newKeys.has(f.key));

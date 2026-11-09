@@ -166,3 +166,8 @@ The D94 list above is covered by this round (the hold now goes through the popup
 
 ## M2 — Café service
 - [ ] Correct serve: the dashed blank on the ticket turns into the answer in green (D96). Does the child notice it and read the finished sentence? Does it help, or is it noise during the eating?
+- [ ] **Perfect Ten (A3)** is now playable from the menu. Do the `7 + ? = 10` orders make sense to the child (blue part on the tray, fill to ten)? Is the ticket read aloud ("Seven plus what equals ten?") understood?
+- [ ] `10 − ? = 6`: the items taken off stay in the small grid left of the tray. Does the child see that grid as the answer? Does tapping it to put one back occur to her?
+- [ ] Pip's make-ten help ("Seven." … "Three empty spots." … "Seven and three more makes ten!"): clear, too long?
+- [ ] Services now pick facts by how well they're known and bring in at most 3 new ones (D97). Until M3a this is remembered only while the app stays open. Do the first services with both operations feel too subtraction-heavy?
+

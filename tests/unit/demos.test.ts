@@ -15,8 +15,12 @@ describe('buildDemo (SPEC §5.5)', () => {
     for (const p of all) {
       let s = startState(toTrayTask(p, 3));
       for (const step of buildDemo(p)) {
+        // Only the make-ten gap step lights empty cells (SPEC §5.5); every glow stays on the tray.
+        const limit = step.narrationKey.startsWith('demo.ten.gap')
+          ? s.capacity
+          : Math.max(s.filled, 1);
         if (step.trayOp.op === 'glow')
-          for (const c of step.trayOp.cells) expect(c).toBeLessThan(Math.max(s.filled, 1));
+          for (const c of step.trayOp.cells) expect(c).toBeLessThan(limit);
         s = applyDemoStep(s, step);
         expect(s.filled).toBeGreaterThanOrEqual(s.locked);
       }
@@ -65,6 +69,32 @@ describe('buildDemo (SPEC §5.5)', () => {
       'five',
       'Five left!',
     ]);
+  });
+
+  it('A3: make ten flashes the gap and fills it; 10 − ? names what went away (D98)', () => {
+    const find = (s: string) => all.find((p) => p.display.join('') === s)!;
+    const ten = buildDemo(find('7+?=10'));
+    expect(ten.map((s) => phrase(s.narrationKey, s.params))).toEqual([
+      'Seven.',
+      'Three empty spots.',
+      'eight',
+      'nine',
+      'ten',
+      'Seven and three more makes ten!',
+    ]);
+    expect(ten[1]!.trayOp).toEqual({ op: 'glow', cells: [7, 8, 9] });
+    expect(phrase(buildDemo(find('9+?=10'))[1]!.narrationKey)).toBe('One empty spot.');
+    expect(buildDemo(find('?+3=10'))[0]!.params).toEqual({ n: 3 });
+    expect(
+      buildDemo(find('10−?=6'))
+        .map((s) => phrase(s.narrationKey, s.params))
+        .at(-1),
+    ).toBe('Four taken away!');
+    expect(
+      buildDemo(find('10−4=?'))
+        .map((s) => phrase(s.narrationKey, s.params))
+        .at(-1),
+    ).toBe('Six left!');
   });
 });
 

@@ -89,6 +89,14 @@ export const PHRASES = {
     text: (p) => `You know ${n(p, 'a')} and ${n(p, 'a')} is ${n(p, 'sum')}.`,
   },
   'demo.near.more': { params: { n: 'n' }, text: (p) => `One more makes ${n(p, 'n')}!` },
+  'demo.away': { params: { n: 'n' }, text: (p) => `${N(p, 'n')} taken away!` },
+  // Make ten (A3, SPEC §5.5, D98).
+  'demo.ten.gap': { params: { n: 'n' }, text: (p) => `${N(p, 'n')} empty spots.` },
+  'demo.ten.gap1': { params: {}, text: () => 'One empty spot.' },
+  'demo.ten.make': {
+    params: { a: 'n', b: 'n' },
+    text: (p) => `${N(p, 'a')} and ${n(p, 'b')} more makes ten!`,
+  },
 
   // FollowMe (SPEC §5.5).
   'follow.start': { params: {}, text: () => 'Your turn! Follow me.' },

@@ -44,11 +44,30 @@ function countOn(start: number, add: number): DemoStep[] {
   return steps;
 }
 
-/** Count back: items fly off "seven, six, five" from the last filled cell. */
-function countBack(start: number, remove: number): DemoStep[] {
+/**
+ * Count back: items fly off "seven, six, five" from the last filled cell. For `m − ? = c` the
+ * unknown is what went away, so the demo ends by naming the taken-away row (SPEC §5.5).
+ */
+function countBack(start: number, remove: number, missing = false): DemoStep[] {
   const steps = [say('demo.start', { n: start }, glow(0, start), HOLD.intro)];
   for (let i = 1; i <= remove; i++) steps.push(say('count.n', { n: start - i }, { op: 'remove' }));
-  steps.push(say('demo.left', { n: start - remove }, { op: 'none' }, HOLD.outro));
+  if (missing) steps.push(say('demo.away', { n: remove }, { op: 'none' }, HOLD.outro));
+  else steps.push(say('demo.left', { n: start - remove }, { op: 'none' }, HOLD.outro));
+  return steps;
+}
+
+/**
+ * Make ten (A3, SPEC §5.5): the blue part glows, the empty cells flash ("three empty spots"),
+ * they fill with counts, then "seven and three more makes ten".
+ */
+function makeTen(start: number): DemoStep[] {
+  const gap = 10 - start;
+  const steps = [
+    say('demo.start', { n: start }, glow(0, start), HOLD.intro),
+    say(gap === 1 ? 'demo.ten.gap1' : 'demo.ten.gap', { n: gap }, glow(start, 10), HOLD.intro),
+  ];
+  for (let i = 1; i <= gap; i++) steps.push(say('count.n', { n: start + i }, { op: 'add' }));
+  steps.push(say('demo.ten.make', { a: start, b: gap }, glow(0, 10), HOLD.outro));
   return steps;
 }
 
@@ -79,13 +98,14 @@ function nearDouble(a: number, b: number): DemoStep[] {
   return steps;
 }
 
-/** SPEC §5.5 table; A1/A2 strategies in M1 (D42). */
+/** SPEC §5.5 table; A1/A2 strategies in M1 (D42), make ten for A3 (D98). */
 export function buildDemo(p: Problem): DemoStep[] {
   const task = toTrayTask(p, 3);
   const start = task.prefill.frameCells;
   const target = task.expected.cells;
   const [a, b] = p.operands.filter((o): o is number => o !== null);
-  if (task.mode === 'remove') return countBack(start, start - target);
+  if (task.mode === 'remove') return countBack(start, start - target, p.form === 'missingSub');
+  if (p.strategy === 'makeTen') return makeTen(start);
   if (p.form === 'add' && p.strategy === 'doubles') return doubles(a!);
   if (p.form === 'add' && p.strategy === 'nearDouble') return nearDouble(a!, b!);
   return countOn(start, target - start);
