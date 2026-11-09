@@ -178,4 +178,9 @@ The D94 list above is covered by this round (the hold now goes through the popup
 - [ ] Each monster's happy reaction after a correct serve (melts, stomps, spins, floats with hearts, burp bubble, wobbles into a puddle): fun, too long, distracting?
 - [ ] Café background (wallpaper, string lights, window, floor): cosy, or too busy behind the ticket and tray?
 - [ ] With the device's Reduce Motion on, the monsters stand still in their poses (no bob, no reactions).
+- [ ] **Eating:** the food flies into the monster's mouth (small plates counted "one, two, three…", bigger ones by rows and then "Eight!"), it chews, reacts and thanks her, then 3 coins fly to the jar at the bottom right. Too long, or just right? Does she tap to skip it? On `7 + ? = 10` orders the monster eats all ten: does that read right?
+- [ ] **Monster voices:** each monster has its own pitch (Gruffles deep, Mimsy and Zibbit high). Do they sound different enough on the iPad, iPhone and Android? Any voice that sounds odd or hard to understand?
+- [ ] Each monster says hello the first time it comes in a service ("Hee hee. Hello!"). Charming, or does it slow the orders down?
+- [ ] Sounds: a "boing" when a monster arrives, crunching while it chews, a "ting" for each coin, Chompers' burp. Any too loud or annoying?
+- [ ] A finished service now ends with a 5-coin tip: a 6-monster service shows 23 coins on the closing sign.
 

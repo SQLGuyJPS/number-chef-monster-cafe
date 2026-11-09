@@ -359,7 +359,7 @@ Bands: monster and ticket y ≈ 50–300 · tray y 311–519 · bottom y 562–7
 | tens and ones (B2/B3) | Packs counted by tens, then singles by ones: "twenty… twenty-one… twenty-seven" |
 
 ### 5.6 Eating and reaction
-Correct serve: bell "ding"; the monster's line starts 500 ms after the press (`BELL_LEAD_MS`) so the ding is heard first, also after a wrong serve (D86). The tray slides to the monster; food flies into the mouth in groups (≤ 5 individually counted, > 5 by row/pack with the total spoken at the end, e.g. "Eight!"); 3 chew cycles; a reaction from the monster's list (§7.2), with a bigger variant after a first-try serve (visual only, D45). Total eat+react ≤ 4 s; any tap skips ahead (D56). Then 3 coins fly into the jar one by one (§9); the matching `coin` event is written in the same transaction as the problem's other events (§11.3, D31), so the coins shown are exactly the coins kept.
+Correct serve: bell "ding"; the monster's line starts 500 ms after the press (`BELL_LEAD_MS`) so the ding is heard first, also after a wrong serve (D86). The tray slides to the monster; food flies into the mouth in groups (≤ 5 individually counted, > 5 by row/pack with the total spoken at the end, e.g. "Eight!"); 3 chew cycles; a reaction from the monster's list (§7.2), with a bigger variant after a first-try serve (visual only, D45). Total eat+react ≤ 4 s; any tap skips ahead (D56). The monster eats the plate as served (the tray total), the monster thanks the chef in its own voice during the reaction, and the coins fly to a jar at the bottom right of the service screen (D101). Then 3 coins fly into the jar one by one (§9); the matching `coin` event is written in the same transaction as the problem's other events (§11.3, D31), so the coins shown are exactly the coins kept.
 
 ### 5.7 Results (closing time)
 The sign flips to CLOSED. The coin tally counts up aloud by ones to ten, then by fives, ending on the exact total ("…fifteen, twenty, twenty-three!", D55). The monsters served show as a row of happy faces (no scores). Buttons (≥ 160 px): **Another service** (default, highlighted: same skill again; absent when the café is locked; with a play-time limit on and less than about half a service left it offers a shorter service, §6.2), **Change dish** (menu board), **Decorate** (from M4), **Home**. When the allowance ran out during this service, Results is followed by the locked Home. No streaks, daily login, or "come back" nags.
@@ -437,6 +437,7 @@ interface MonsterSpec { id; name; body:'blob'|'tall'|'round'|'square'|'jelly'|'f
   6. **Wobbleton** — yellow jelly, 🍦 / 🍌. Reaction: wobbles into a puddle and reforms.
   7. *(guest)* **Spindle** — teal, spiky, dramatic, 🥐 / 🍎. Reaction: fake-faints.
   8. *(guest)* **Drizzle** — lavender, dripping, 🌮 / 🥕. Reaction: rains tiny sparkles.
+- Each monster says its `arrive` line on its first visit in a service (a returning one says it is back instead) and its `thanks` line during the reaction, in its own voice, always below Pip's pitch (D101).
 - `lint:content` validates every spec: palette contrast, allowed extras, favorites in the allowlist, unique ids, reaction ids exist, all five expressions present.
 
 ### 7.3 Pip and staff

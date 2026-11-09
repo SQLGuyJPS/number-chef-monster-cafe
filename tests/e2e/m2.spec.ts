@@ -172,3 +172,39 @@ test('every monster draws all five expressions and its reaction; reduced motion 
     await page.close();
   }
 });
+
+test('eat sequence: fly, chew, react within 4 s, then 3 coins land in the jar; a tap skips (SPEC §5.6, D101)', async ({
+  page,
+}) => {
+  test.setTimeout(60_000);
+  await openService(page, { skill: 'A2', stage: 3, ops: 'add', seed: 5, timeScale: 1 });
+  await waitPhase(page, 'building');
+  // Record each eat step with its time, from the moment the bell is pressed.
+  await page.evaluate(() => {
+    const w = window as unknown as { __eat: [string, number][] };
+    w.__eat = [];
+    setInterval(() => {
+      const e = window.__ncmc.service()?.eat;
+      const last = w.__eat.at(-1)?.[0];
+      if (e && e.step !== last) w.__eat.push([e.step, performance.now()]);
+    }, 20);
+  });
+  const t0 = await page.evaluate(() => performance.now());
+  await serveCorrect(page);
+  await expect(page.getByTestId('service-jar')).toHaveAttribute('data-count', '3', { timeout: 10_000 });
+  const steps = await page.evaluate(() => (window as unknown as { __eat: [string, number][] }).__eat);
+  expect(steps.map((s) => s[0])).toEqual(['fly', 'chew', 'react', 'coins']);
+  const coinsAt = steps.find((s) => s[0] === 'coins')![1];
+  // Bell lead (0.5 s) + eat and react ≤ 4 s; a little slack for the 20 ms sampling and the tap.
+  expect(coinsAt - t0).toBeLessThan(500 + 4000 + 300);
+  expect((await probe(page)).landed).toBe(3);
+
+  // Second order: tap during the flight and it goes straight to the coins.
+  await expect.poll(async () => (await probe(page)).index, { timeout: 10_000 }).toBe(1);
+  await waitPhase(page, 'building');
+  await serveCorrect(page);
+  await expect.poll(async () => (await probe(page)).eat?.step).toBe('fly');
+  await tapId(page, 'skip');
+  await expect.poll(async () => (await probe(page)).eat?.step ?? 'gone', { timeout: 1500 }).toMatch(/coins|gone/);
+  await expect(page.getByTestId('service-jar')).toHaveAttribute('data-count', '6', { timeout: 3000 });
+});

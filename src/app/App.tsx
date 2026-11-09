@@ -171,6 +171,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
           seed={service.seed}
           svc={service.svc}
           dev={deviceId}
+          jar={coins}
           onDoor={() => setBreakOpen(true)}
           onCoins={(n) => setCoins((c) => c + n)}
           onDone={(summary) => {

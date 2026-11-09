@@ -41,3 +41,6 @@ export const FAVORITE_FOOD_SHARE = 0.7;
 
 /** Warm-up order: the ghost hand shows the next step after this much idle time (SPEC §5.4, D26). */
 export const WARMUP_GHOST_IDLE_MS = 4000;
+
+/** Service tip on completion (SPEC §9): a 6-monster service pays 6 × 3 + 5 = 23. */
+export const SERVICE_TIP = 5;

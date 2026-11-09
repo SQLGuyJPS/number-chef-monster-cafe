@@ -1,4 +1,4 @@
-import { useMemo, type CSSProperties } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import {
   BUTTON_MIN,
   CELL,
@@ -57,6 +57,8 @@ interface Props {
   onDone: (summary: ServiceSummary) => void;
   onCoins?: (n: number) => void;
   onDoor: () => void;
+  /** Coins in the jar when the service started; landed coins add to it (SPEC §9). */
+  jar?: number;
 }
 
 /** Tray rect for the layout (SPEC §3.3, §5.4). */
@@ -90,7 +92,14 @@ function bubbleFrames(cells: ModelCell[], food: CellView['food']): CellView[][] 
   return shown.length > 10 ? [shown.slice(0, 10), shown.slice(10)] : [shown];
 }
 
-export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor }: Props) {
+/** Where food and coins leave from / fly to (stage px). */
+const MOUTH = { x: L.monsterZone.x + L.monsterZone.w / 2, y: L.monsterZone.y + L.monsterZone.h * 0.6 };
+const JAR = { x: 1096, y: 590, w: 160, h: 96 };
+/** The tray slides up toward the monster while it eats (SPEC §5.6). */
+const EAT_SLIDE = 30;
+
+export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor, jar = 0 }: Props) {
+  const [jarStart] = useState(jar);
   const { view: v, ctrl } = useService({ orders, seed, svc, dev, onDone, onCoins });
   const { order, task } = v;
   const food = order.food;
@@ -150,7 +159,10 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor 
 
   const s3 = order.stage === 3;
   const cue = v.cue;
+  // Eating: the groups already flown leave empty cells behind (SPEC §5.6).
+  const eaten = v.eat ? v.eat.groups.slice(0, v.eat.flown).reduce((a, b) => a + b, 0) : 0;
   const cells: CellView[] = Array.from({ length: v.tray.capacity }, (_, i) => {
+    if (i < eaten) return {};
     if (i >= v.tray.filled) {
       // Empty cells glow too: the make-ten demo flashes the gap to ten (SPEC §5.5).
       return { pulse: cue === 'place' && i === v.tray.filled, glow: v.glow.includes(i) };
@@ -200,8 +212,10 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor 
       >
         <Monster
           id={order.monster}
-          expression={v.mood === 'delight' ? 'delight' : v.mood === 'puzzled' ? 'puzzled' : 'idle'}
-          react={v.mood === 'delight'}
+          expression={v.mood === 'delight' || v.mood === 'eat' || v.mood === 'puzzled' ? v.mood : 'idle'}
+          react={v.eat?.step === 'react'}
+          // A first-try serve gets a bigger reaction (visual only, D45).
+          className={v.eat?.firstTry && v.eat.step === 'react' ? 'big' : undefined}
           size={bubbleUp ? L.monsterAside.w : L.monsterZone.w}
         />
       </div>
@@ -238,7 +252,10 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor 
               style={at({ x: tray.x - 20, y: tray.y + tray.h - 14, w: tray.w + 40, h: 28 })}
             />
           )}
-          <div className={`tray ${v.editable ? '' : 'locked'}`}>
+          <div
+            className={`tray ${v.editable ? '' : 'locked'}`}
+            style={v.eat ? { transform: `translateY(-${EAT_SLIDE}px)`, transition: 'transform 0.3s ease' } : undefined}
+          >
             <TenFrame
               cells={cells.slice(0, 10)}
               cell={CELL}
@@ -370,6 +387,45 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor 
           {glyph}
         </div>
       )}
+      {v.eat &&
+        v.eat.groups.slice(0, v.eat.flown).map((size, g) => {
+          const first = v.eat!.groups.slice(0, g).reduce((a, b) => a + b, 0);
+          return Array.from({ length: size }, (_, j) => {
+            const r = v.padMode ? L.s0Display : cellRect(first + j, frames2);
+            const from = { x: r.x + r.w / 2, y: r.y + r.h / 2 - (v.padMode ? 0 : EAT_SLIDE) };
+            const style = {
+              left: from.x - CELL / 2,
+              top: from.y - CELL / 2,
+              '--dx': `${MOUTH.x - from.x}px`,
+              '--dy': `${MOUTH.y - from.y}px`,
+            } as CSSProperties;
+            return (
+              <div key={`e${first + j}`} className="eat-flight" style={style} aria-hidden="true">
+                {glyph}
+              </div>
+            );
+          });
+        })}
+      {v.eat &&
+        Array.from({ length: v.eat.coinsOut }, (_, k) => (
+          <div
+            key={`c${k}`}
+            className="coin-flight"
+            style={
+              {
+                left: MOUTH.x - 22,
+                top: MOUTH.y - 60,
+                '--dx': `${JAR.x + 40 - MOUTH.x}px`,
+                '--dy': `${JAR.y + JAR.h / 2 - MOUTH.y + 60}px`,
+              } as CSSProperties
+            }
+            aria-hidden="true"
+          />
+        ))}
+      <div className="service-jar" style={at(JAR)} data-testid="service-jar" data-count={jarStart + v.landed}>
+        <span className="coin-icon" aria-hidden="true" />
+        <span className="coin-count">{jarStart + v.landed}</span>
+      </div>
       {v.attempt.phase === 'eating' && (
         // Any tap skips the eat/react time (SPEC §5.6, D56).
         <TapButton className="skip-layer" testId="skip" label="Skip" onTap={ctrl.skip}>

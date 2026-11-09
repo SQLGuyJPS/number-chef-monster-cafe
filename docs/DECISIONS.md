@@ -108,3 +108,4 @@
 | D98 | A3: make-ten demo lines, subtraction counts back, missing-subtrahend demo ends on what went away | SPEC §4, §5.5 | Make-ten demo and A3 subtraction strategy were open |
 | D99 | Warm-up: ghost keeps pointing until touched, flag set at start, its monster and food | SPEC §5.4 | "Taps the bin once" left the idle child and the flag timing open |
 | D100 | Monster art: shared face parts, still puzzled tilt, named ~1.4 s reactions, reduced motion = still poses, `?gallery`, café scene | SPEC §7.2, §7.4 | Look and motion of the five expressions were open |
+| D101 | Eat sequence: eats the tray total, timings, skip to coins, service jar, greetings on first visit, monster voices, +5 tip paid | SPEC §5.6, §7.2, §9 | Timings, what is eaten on missing-amount forms, and when monster lines play were open |

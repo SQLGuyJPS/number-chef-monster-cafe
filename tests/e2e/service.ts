@@ -4,6 +4,9 @@ import { tap } from './helpers';
 /** What `window.__ncmc.service()` returns (src/game/service/controller.ts probe). */
 export interface Probe {
   index: number;
+  eat: { step: string; flown: number; groups: number[]; firstTry: boolean; coinsOut: number } | null;
+  landed: number;
+  mood: string;
   phase: string;
   attempt: number;
   stage: number;
@@ -65,7 +68,7 @@ export async function stubSpeechNeverEnds(page: Page): Promise<void> {
       paused: false,
       speak: (u: { text: string; pitch: number }) => {
         spoken.push(u.text);
-        if (u.pitch > 1) pip.push(u.text);
+        if (u.pitch >= 1.5) pip.push(u.text); // PIP_PITCH; monster voices stay below it
       },
       cancel: () => void window.__cancels++,
       pause: () => undefined,

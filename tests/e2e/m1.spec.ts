@@ -328,10 +328,10 @@ test('a whole service of six orders ends on Results; Another service, Change dis
     await serveCorrect(page);
   }
   await expect(page.getByTestId('screen-results')).toBeVisible({ timeout: 10_000 });
-  // The tally counts up to the exact total: 6 orders × 3 coins.
-  await expect(page.getByTestId('results-count')).toHaveText('18', { timeout: 15_000 });
+  // The tally counts up to the exact total: 6 orders × 3 coins + the 5-coin tip (SPEC §9).
+  await expect(page.getByTestId('results-count')).toHaveText('23', { timeout: 15_000 });
   await expect(page.locator('.results-face')).toHaveCount(6);
-  expect(await page.evaluate(() => window.__spoken.includes('Eighteen!'))).toBe(true);
+  expect(await page.evaluate(() => window.__spoken.includes('Twenty-three!'))).toBe(true);
 
   // Another service repeats the skill (a new service starts at order 0).
   await tapId(page, 'results-another');
@@ -339,10 +339,10 @@ test('a whole service of six orders ends on Results; Another service, Change dis
   expect((await probe(page)).index).toBe(0);
   expect((await probe(page)).factKey.startsWith('A1:')).toBe(true);
 
-  // Close it from the door; Home's jar keeps every coin earned (18 so far).
+  // Close it from the door: no tip for leaving early; Home's jar keeps every coin earned (23).
   await tapId(page, 'door');
   await tapId(page, 'close-cafe');
-  await expect(page.getByTestId('coin-jar')).toContainText('18');
+  await expect(page.getByTestId('coin-jar')).toContainText('23');
 });
 
 test('Results: Change dish goes to the menu board, Home goes home', async ({ page }) => {
@@ -363,7 +363,7 @@ test('Results: Change dish goes to the menu board, Home goes home', async ({ pag
     await serveCorrect(page);
   }
   await tapId(page, 'results-home');
-  await expect(page.getByTestId('coin-jar')).toContainText('36');
+  await expect(page.getByTestId('coin-jar')).toContainText('46');
 });
 
 test('the door opens "Take a break?" with Close the café, which goes Home', async ({ page }) => {
@@ -438,8 +438,8 @@ test('a correct serve replaces the dashed blank with the answer in green; a wron
   const want = `rgb(${parseInt(hex.slice(0, 2), 16)}, ${parseInt(hex.slice(2, 4), 16)}, ${parseInt(hex.slice(4, 6), 16)})`;
   expect(rgb).toBe(want);
 
-  // The next order brings a fresh ticket with its own dashed blank.
-  await expect.poll(async () => (await probe(page)).index).toBe(1);
+  // The next order brings a fresh ticket with its own dashed blank (real time: eat, react, coins ≈ 5 s).
+  await expect.poll(async () => (await probe(page)).index, { timeout: 10_000 }).toBe(1);
   await expect(ticket.locator('.tok-blank')).toHaveCount(1);
   await expect(page.getByTestId('ticket-answer')).toHaveCount(0);
 });

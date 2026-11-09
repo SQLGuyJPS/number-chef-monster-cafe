@@ -64,6 +64,35 @@ function playTone(
   osc.stop(t0 + dur + 0.02);
 }
 
+/** Band-passed noise burst (munch). */
+function noise(start: number, dur: number, freq: number, gain: number): void {
+  whenRunning((ctx) => {
+    const t0 = ctx.currentTime + START_LEAD_S + start;
+    const len = Math.ceil(ctx.sampleRate * dur);
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    // A fixed pseudo-random fill: deterministic, and no Math.random needed for a crunch.
+    let x = 12345;
+    for (let i = 0; i < len; i++) {
+      x = (x * 1103515245 + 12345) & 0x7fffffff;
+      data[i] = (x / 0x7fffffff) * 2 - 1;
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = freq;
+    bp.Q.value = 1.2;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(gain * SFX_VOLUME, t0 + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    src.connect(bp).connect(g).connect(ctx.destination);
+    src.start(t0);
+    src.stop(t0 + dur + 0.02);
+  });
+}
+
 export const sfx = {
   /** Pitch walks a pentatonic ladder by running count, resetting every 10. */
   place(n: number): void {
@@ -86,5 +115,30 @@ export const sfx = {
   },
   wobble(): void {
     tone(330, 0, 0.08, 'sine', 0.15);
+  },
+  /** Three crunchy bites, in time with the three chews (SPEC §5.6). */
+  munch(): void {
+    [0, 0.35, 0.7].forEach((t) => noise(t, 0.12, 900, 0.5));
+  },
+  /** Chompers' reaction: a short low glide down. */
+  burp(): void {
+    tone(160, 0.05, 0.35, 'sawtooth', 0.18, 70);
+  },
+  /** Two-tone "ting" as a coin lands in the jar (SPEC §9). */
+  coin(): void {
+    tone(1568, 0, 0.09, 'sine', 0.3);
+    tone(2093, 0.07, 0.22, 'sine', 0.3);
+  },
+  /** Rubber "boing" as a monster arrives. */
+  arrive(): void {
+    tone(180, 0, 0.32, 'sine', 0.35, 420);
+  },
+  /** Shop purchase (M4): three coins and a rising chime. */
+  buy(): void {
+    [0, 0.12, 0.24].forEach((t) => {
+      tone(1568, t, 0.09, 'sine', 0.25);
+      tone(2093, t + 0.05, 0.15, 'sine', 0.25);
+    });
+    [784, 988, 1175, 1568].forEach((f, i) => tone(f, 0.4 + i * 0.08, 0.25, 'triangle', 0.25));
   },
 };

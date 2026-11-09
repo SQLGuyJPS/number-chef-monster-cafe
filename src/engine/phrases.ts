@@ -111,6 +111,8 @@ export const PHRASES = {
 
   // Correct serve (the full eat sequence is M2).
   'serve.yum': { params: { n: 'n' }, text: (p) => `Yum! ${N(p, 'n')}!` },
+  /** The total named after the last row flies into the mouth (SPEC §5.6, "Eight!"). */
+  'eat.total': { params: { n: 'n' }, text: (p) => `${N(p, 'n')}!` },
   'service.closed': { params: {}, text: () => 'All done! Thank you, chef!' },
   // Results tally (SPEC §5.7, D55): the last number of the count-up.
   'results.total': { params: { n: 'n' }, text: (p) => `${N(p, 'n')}!` },

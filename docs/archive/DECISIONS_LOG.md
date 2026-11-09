@@ -498,6 +498,11 @@ How to revisit: if the repeating ghost is distracting, show each hint once; `war
 **Why:** SPEC §7.2 fixes the roster and the five expressions but not how they look or move, and the screenshot grid needs one page that shows them all.
 **How to revisit:** Owner playtest (monster appeal). Art can be redrawn per monster in `roster.tsx` without touching game code.
 
+## D101 — Eat sequence, coin flight, monster voices and greetings, service tip (2026-11-09)
+**What:** On a correct serve the monster eats **the plate as served** (the tray total: all ten for `7 + ? = 10`; the answer at S1/S0). After the bell lead, food flies from the tray (which slides up 30 px) into the mouth: up to 5 items one by one, 0.26 s each, each counted aloud in the counting voice; more than 5 by rows of five, 0.38 s per row, then the monster names the total ("Eight!"). Then 3 chews with a munch sound (1.05 s), then the reaction with the monster's thanks line in its own voice (1.3 s; Chompers also burps). Eat + react ≤ 4 s for every answer 1–20 (unit test; e2e measures it in real time). Then the 3 coins fly one by one to a coin jar at the bottom right of the service screen with a "ting" each; the jar shows the coins kept so far. Any tap skips straight to the coins, and a tap during the coins lands them at once. A first-try serve shows the same reaction scaled up 12% (D45). Each monster greets the chef the first time it arrives in a service ("Hee hee. Hello!") before its order; a returning (requeued) monster says "I'm back!" instead; the caption shows the order throughout. Monster lines use the monster's `voice` (pitch 0.6–1.3, all below Pip's 1.5 so Pip stays recognisable). Arrival plays the "boing". SPEC §9's +5 tip on completing a service is now paid (a 6-monster service pays 23); none on a voluntary exit.
+**Why:** SPEC §5.6 fixes the shape (groups, ≤ 5 counted, total spoken, 3 chews, reaction, ≤ 4 s, skippable) but not the timings, what the monster eats on missing-amount forms, or when the monster's own lines are spoken.
+**How to revisit:** Owner playtest (service length, whether the greeting slows orders, whether eating the whole ten on make-ten orders reads right). Timings live in `src/engine/eat.ts`.
+
 <!-- New decisions go above this line, numbered one higher than the highest existing D<n>. -->
 
 ---
