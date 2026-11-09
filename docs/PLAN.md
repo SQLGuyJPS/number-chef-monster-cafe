@@ -142,7 +142,7 @@ Order inside each milestone is the order I will work in. Every milestone ends wi
 - [x] `attempt` and `coin` event shapes fixed (`src/engine/events.ts`, key-set test)
 
 ### M2 — Café service (5.0 h)
-1. Engine: session builder (§4.1): pool + ops filter, box weights, new-fact cap and difficulty order, no-repeat window (requeues exempt), food/monster rules, add/sub balance, requeue placement and append, pool-size guard; determinism tests.
+1. *(done 2026-11-09, D97)* Engine: session builder (§4.1): pool + ops filter, box weights, new-fact cap and difficulty order, no-repeat window (requeues exempt), food/monster rules, add/sub balance, requeue placement and append, pool-size guard; determinism tests.
 2. Engine: A3 generator + make-ten demo; taken-away row for `10 − ? = a`; `known` preset.
 3. Service state machine: 6 orders, queue silhouettes, requeue = same monster returns, warm-up order with ghost hand (flag in `meta`), coins in memory (§2 item 4).
 4. Art: `MonsterSpec` data + six hand-authored SVG monsters × idle/delight/eat/puzzled/sleepy, reactions, reduced-motion static poses; Pip (hand-authored art replacing the placeholder Pip from D90); café background with fallback placeholders.
@@ -153,8 +153,8 @@ Order inside each milestone is the order I will work in. Every milestone ends wi
 9. Screenshots, PLAYTEST (service length timing, monster appeal, voices on three devices), commit, stop.
 
 **Accept (SPEC §14 M2)**
-- [ ] deterministic service from seed
-- [ ] no adjacent repeats; at most 3 new facts per service
+- [x] deterministic service from seed (`tests/unit/session.test.ts`)
+- [x] no adjacent repeats; at most 3 new facts per service (500 seeds × A1/A2 × ops)
 - [ ] each monster renders at all five expressions (screenshot grid)
 - [ ] eat + react ≤ 4 s and skippable
 - [ ] reduced-motion variant verified

@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { ServiceScreen } from '../game/service/ServiceScreen';
-import { planOrders, type Order } from '../engine/plan';
+import { REGULARS } from '../engine/monsters';
+import { buildService, knownPreset, type Order } from '../engine/session';
 import { ORDERS_PER_SERVICE } from '../engine/config';
-import { hashSeed, mulberry32 } from '../engine/rng';
+import { hashSeed } from '../engine/rng';
 import type { SkillId } from '../engine/types';
 import { newId } from '../storage/ids';
 import { configFor, loadSkillConfigs, type SkillConfigs } from './skillConfig';
@@ -29,6 +30,8 @@ interface RunningService {
 }
 
 let serviceCounter = 0;
+/** Facts introduced earlier in this app session (stand-in for the M3a event log, D97). */
+const introducedThisSession = new Set<string>();
 
 export function App({ allowRotate }: { allowRotate: boolean }) {
   const [screen, setScreen] = useState<AppScreen>('splash');
@@ -95,7 +98,22 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
     const cfg = configFor(configs, skill);
     // SPEC §4.1 step 1: seed from device, start time and a per-device counter (the e2e hook may pin it).
     const seed = takeSeedOverride() ?? hashSeed(deviceId, Date.now(), ++serviceCounter);
-    const orders = planOrders(mulberry32(seed), skill, cfg.ops, cfg.stage, ORDERS_PER_SERVICE);
+    // Until M3a there is no event log: boxes come from the known preset, and facts introduced
+    // earlier in this app session count as seen so later services move on (D97).
+    const boxes = knownPreset(skill);
+    const seen = new Set([...boxes.keys(), ...introducedThisSession]);
+    const plan = buildService({
+      seed,
+      skill,
+      ops: cfg.ops,
+      stage: cfg.stage,
+      orders: ORDERS_PER_SERVICE,
+      boxes,
+      seen,
+      monsters: REGULARS,
+    });
+    plan.newFacts.forEach((k) => introducedThisSession.add(k));
+    const orders = plan.orders;
     setService({ svc: newId(), skill, orders });
     go('service');
   };

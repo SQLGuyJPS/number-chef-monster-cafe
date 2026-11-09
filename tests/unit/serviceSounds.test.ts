@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { mulberry32 } from '../../src/engine/rng';
-import { planOrders } from '../../src/engine/plan';
+import { REGULARS } from '../../src/engine/monsters';
+import { buildService } from '../../src/engine/session';
 import type { Stage } from '../../src/engine/types';
 import { ServiceController, type ServiceDeps } from '../../src/game/service/controller';
 
@@ -27,7 +27,16 @@ function rig(stage: Stage) {
     setTimeout: (f) => timers.push(f),
     clearTimeout: () => {},
   };
-  const orders = planOrders(mulberry32(7), 'A1', 'add', stage, 3);
+  const orders = buildService({
+    seed: 7,
+    skill: 'A1',
+    ops: 'add',
+    stage,
+    orders: 3,
+    boxes: new Map(),
+    seen: new Set(),
+    monsters: REGULARS,
+  }).orders;
   const c = new ServiceController({ orders, svc: 's', dev: 'd', onDone: () => {} }, deps);
   return { c, log, flush: () => timers.splice(0).forEach((f) => f()) };
 }

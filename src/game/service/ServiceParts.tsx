@@ -34,7 +34,13 @@ export function Ticket({
   onTap?: () => void;
 }) {
   return (
-    <TapButton className="ticket" style={at(rect)} testId="ticket" label="Hear the order" onTap={onTap ?? (() => undefined)}>
+    <TapButton
+      className="ticket"
+      style={at(rect)}
+      testId="ticket"
+      label="Hear the order"
+      onTap={onTap ?? (() => undefined)}
+    >
       <div className="ticket-food">{FOODS[food].glyph}</div>
       <div className="ticket-sentence">
         {tokens.map((t, i) =>
@@ -45,7 +51,11 @@ export function Ticket({
           ) : (
             <span
               key={i}
-              className={['tok', t.role ? `tok-${t.role}` : 'tok-op', t.blank ? 'tok-blank' : ''].join(' ')}
+              className={[
+                'tok',
+                t.role ? `tok-${t.role}` : 'tok-op',
+                t.blank ? 'tok-blank' : '',
+              ].join(' ')}
             >
               {t.blank ? '' : t.text}
             </span>
@@ -71,7 +81,13 @@ interface BtnProps {
 }
 
 function Btn({ rect, className, children, testId, onTap, label, dim, pulsing, wobble }: BtnProps) {
-  const cls = ['svc-btn', className, dim ? 'dim' : '', pulsing ? 'pulse' : '', wobble ? `wobble-${wobble % 2}` : '']
+  const cls = [
+    'svc-btn',
+    className,
+    dim ? 'dim' : '',
+    pulsing ? 'pulse' : '',
+    wobble ? `wobble-${wobble % 2}` : '',
+  ]
     .filter(Boolean)
     .join(' ');
   return (
@@ -95,8 +111,19 @@ export function Bell(props: PartProps) {
     <Btn {...props} className="bell" testId="bell" label="Serve">
       <svg viewBox="0 0 100 100" width="100%" height="100%" aria-hidden="true">
         <ellipse cx="50" cy="86" rx="44" ry="9" fill="#8a5a35" />
-        <path d="M14 80 Q14 34 50 30 Q86 34 86 80 Z" fill="#f6c445" stroke="#b88a16" strokeWidth="3" />
-        <path d="M26 70 Q28 46 46 40" fill="none" stroke="#fff6c8" strokeWidth="6" strokeLinecap="round" />
+        <path
+          d="M14 80 Q14 34 50 30 Q86 34 86 80 Z"
+          fill="#f6c445"
+          stroke="#b88a16"
+          strokeWidth="3"
+        />
+        <path
+          d="M26 70 Q28 46 46 40"
+          fill="none"
+          stroke="#fff6c8"
+          strokeWidth="6"
+          strokeLinecap="round"
+        />
         <rect x="44" y="18" width="12" height="14" rx="4" fill="#b88a16" />
         <circle cx="50" cy="16" r="7" fill="#f6c445" stroke="#b88a16" strokeWidth="3" />
       </svg>
@@ -114,12 +141,33 @@ const FRONT_ROW = [13, 31.5, 50, 68.5, 87];
 const BACK_ROW = [22.25, 40.75, 59.25, 77.75];
 
 /** The bin never empties (SPEC §3.3): a crate with a heap of the ordered food. */
-export function Bin({ rect, food, handlers, pulsing, wobble }: { rect: Rect; food: FoodId; handlers: Record<string, unknown>; pulsing?: boolean; wobble?: number }) {
+export function Bin({
+  rect,
+  food,
+  handlers,
+  pulsing,
+  wobble,
+}: {
+  rect: Rect;
+  food: FoodId;
+  handlers: Record<string, unknown>;
+  pulsing?: boolean;
+  wobble?: number;
+}) {
   const g = FOODS[food].glyph;
   // Tap or drag (SPEC §3.3), so not a TapButton: handlers come from dragTapHandlers.
-  const cls = ['svc-btn', 'bin', pulsing ? 'pulse' : '', wobble ? `wobble-${wobble % 2}` : ''].join(' ');
+  const cls = ['svc-btn', 'bin', pulsing ? 'pulse' : '', wobble ? `wobble-${wobble % 2}` : ''].join(
+    ' ',
+  );
   return (
-    <div className={cls} style={at(rect)} data-tap="button" data-testid="bin" aria-label="Food bin" {...handlers}>
+    <div
+      className={cls}
+      style={at(rect)}
+      data-tap="button"
+      data-testid="bin"
+      aria-label="Food bin"
+      {...handlers}
+    >
       {/* Two overlapping rows read as a full heap; both sit inside the crate's width (D79, D85). */}
       <div className="bin-heap back">
         {BACK_ROW.map((x) => (
@@ -174,22 +222,59 @@ export function PipHat(props: PartProps) {
  * counter, D90) means "help me"; the circling arrow round the child's own tray means "let me try
  * again". The monster says the question aloud, so neither button needs reading.
  */
-export function HelpChoice({ yes, no, onYes, onNo }: { yes: Rect; no: Rect; onYes: () => void; onNo: () => void }) {
+export function HelpChoice({
+  yes,
+  no,
+  onYes,
+  onNo,
+}: {
+  yes: Rect;
+  no: Rect;
+  onYes: () => void;
+  onNo: () => void;
+}) {
   return (
     <>
-      <Btn rect={yes} className="choice choice-yes pulse" testId="offer-yes" label="Yes, help me" onTap={onYes}>
+      <Btn
+        rect={yes}
+        className="choice choice-yes pulse"
+        testId="offer-yes"
+        label="Yes, help me"
+        onTap={onYes}
+      >
         <PlaceholderPip />
       </Btn>
-      <Btn rect={no} className="choice choice-no" testId="offer-no" label="No, I will try again" onTap={onNo}>
+      <Btn
+        rect={no}
+        className="choice choice-no"
+        testId="offer-no"
+        label="No, I will try again"
+        onTap={onNo}
+      >
         <svg viewBox="0 0 120 110" width="100%" height="100%" aria-hidden="true">
           {/* A small ten-frame (the child's tray) inside a circling arrow. */}
-          <rect x="30" y="40" width="60" height="30" rx="4" fill="#fffdf6" stroke="#8a5a35" strokeWidth="3.5" />
+          <rect
+            x="30"
+            y="40"
+            width="60"
+            height="30"
+            rx="4"
+            fill="#fffdf6"
+            stroke="#8a5a35"
+            strokeWidth="3.5"
+          />
           <line x1="30" y1="55" x2="90" y2="55" stroke="#8a5a35" strokeWidth="2.5" />
           {[42, 54, 66, 78].map((x) => (
             <line key={x} x1={x} y1="40" x2={x} y2="70" stroke="#8a5a35" strokeWidth="2.5" />
           ))}
           {/* Clockwise arc round the tray; the arrowhead sits at the end, pointing along the turn. */}
-          <path d="M24.3 42 A38 38 0 1 1 30.9 79.4" fill="none" stroke="#4a8fd8" strokeWidth="8" strokeLinecap="round" />
+          <path
+            d="M24.3 42 A38 38 0 1 1 30.9 79.4"
+            fill="none"
+            stroke="#4a8fd8"
+            strokeWidth="8"
+            strokeLinecap="round"
+          />
           <path d="M21.9 68.7 L25.1 89.6 L41.9 75.4 Z" fill="#4a8fd8" />
         </svg>
       </Btn>
@@ -252,8 +337,19 @@ export function Backspace(props: PartProps) {
   return (
     <Btn {...props} className="backspace" testId="backspace" label="Rub out">
       <svg viewBox="0 0 100 70" width="70%" aria-hidden="true">
-        <path d="M30 6 L92 6 L92 64 L30 64 L6 35 Z" fill="none" stroke="currentColor" strokeWidth="7" strokeLinejoin="round" />
-        <path d="M46 22 L72 48 M72 22 L46 48" stroke="currentColor" strokeWidth="7" strokeLinecap="round" />
+        <path
+          d="M30 6 L92 6 L92 64 L30 64 L6 35 Z"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="7"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M46 22 L72 48 M72 22 L46 48"
+          stroke="currentColor"
+          strokeWidth="7"
+          strokeLinecap="round"
+        />
       </svg>
     </Btn>
   );
@@ -263,7 +359,13 @@ function ClocheSvg() {
   return (
     <svg viewBox="0 0 100 80" width="100%" height="100%" aria-hidden="true">
       <path d="M8 66 Q8 18 50 16 Q92 18 92 66 Z" fill="#d7dde6" stroke="#8b95a5" strokeWidth="3" />
-      <path d="M22 56 Q24 32 44 26" fill="none" stroke="#fff" strokeWidth="6" strokeLinecap="round" />
+      <path
+        d="M22 56 Q24 32 44 26"
+        fill="none"
+        stroke="#fff"
+        strokeWidth="6"
+        strokeLinecap="round"
+      />
       <circle cx="50" cy="12" r="7" fill="#8b95a5" />
       <rect x="2" y="64" width="96" height="8" rx="4" fill="#8b95a5" />
     </svg>
@@ -291,10 +393,24 @@ export function ClocheLid(props: PartProps) {
 
 /** Caption bubble (SPEC §8.1: captions always on). ≤ 8 words by lint (SPEC §13.2). */
 /** The tail points at whoever is talking: right at the monster, down at Pip (D76, D90). */
-export function Caption({ rect, text, speaker }: { rect: Rect; text: string; speaker: 'monster' | 'pip' }) {
+export function Caption({
+  rect,
+  text,
+  speaker,
+}: {
+  rect: Rect;
+  text: string;
+  speaker: 'monster' | 'pip';
+}) {
   if (!text) return null;
   return (
-    <div className={`caption from-${speaker}`} style={at(rect)} data-testid="caption" data-speaker={speaker} aria-live="polite">
+    <div
+      className={`caption from-${speaker}`}
+      style={at(rect)}
+      data-testid="caption"
+      data-speaker={speaker}
+      aria-live="polite"
+    >
       {text}
     </div>
   );
@@ -311,7 +427,15 @@ const FRAMES_H = frameSize(MODEL_ONE.cell, MODEL_ONE.gap, MODEL_ONE.pad).h;
  * count. One frame is drawn large; two shrink to fit side by side (D84). One bubble size for both,
  * so the line never wraps (D63e).
  */
-export function ModelBubble({ rect, frames, caption }: { rect: Rect; frames: CellView[][]; caption: string }) {
+export function ModelBubble({
+  rect,
+  frames,
+  caption,
+}: {
+  rect: Rect;
+  frames: CellView[][];
+  caption: string;
+}) {
   const m = frames.length > 1 ? MODEL_TWO : MODEL_ONE;
   const size = frameSize(m.cell, m.gap, m.pad);
   const innerW = frames.length * size.w + (frames.length - 1) * MODEL_FRAMES_GAP;

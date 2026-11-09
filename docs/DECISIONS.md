@@ -104,3 +104,4 @@
 | D94 | Home gear opens playtest tools before M3a (long-press 2 s, no gate) | SPEC §2.2, §5.2, §12, §14; amended by D95 | Installed app can't open `?debug`; iOS storage is per app |
 | D95 | Gear tap opens a hold-to-open popup with a filling ring; gear 88 px with real gear art | SPEC §2.2, §5.2, §12, §14 | Hold on the small gear gave no feedback and failed on devices |
 | D96 | Correct serve fills the ticket blank with the answer in green | SPEC §5.4, §14 (M2) | Show the finished true sentence at the moment of success |
+| D97 | Session builder gaps: balance-aware new facts, requeue fallback, in-memory seen until M3a | SPEC §4.1 | New-fact cap and add/sub balance conflict on the first service |

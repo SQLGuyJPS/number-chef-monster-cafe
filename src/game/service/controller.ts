@@ -9,7 +9,7 @@ import { buildDemo, followMeCue, type FollowMeCue } from '../../engine/demos';
 import { attemptEvent, coinEvent, type FrozenEvt } from '../../engine/events';
 import { numberToWords } from '../../engine/numberWords';
 import { phrase, type PhraseKey, type PhraseParams } from '../../engine/phrases';
-import type { Order } from '../../engine/plan';
+import type { Order } from '../../engine/session';
 import {
   check,
   isStartState,

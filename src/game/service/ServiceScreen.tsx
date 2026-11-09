@@ -17,7 +17,7 @@ import {
 import { getStageLayout } from '../../app/Stage';
 import { FOODS } from '../../engine/foods';
 import type { ModelCell } from '../../engine/countTogether';
-import type { Order } from '../../engine/plan';
+import type { Order } from '../../engine/session';
 import { ticketRoles } from '../../engine/tray';
 import { PlaceholderMonster } from '../../art/PlaceholderMonster';
 import { PlaceholderPip } from '../../art/PlaceholderPip';
