@@ -178,7 +178,7 @@ The D94 list above is covered by this round (the hold now goes through the popup
 - [ ] Each monster's happy reaction after a correct serve (melts, stomps, spins, floats with hearts, burp bubble, wobbles into a puddle): fun, too long, distracting?
 - [ ] Café background (wallpaper, string lights, window, floor): cosy, or too busy behind the ticket and tray?
 - [ ] With the device's Reduce Motion on, the monsters stand still in their poses (no bob, no reactions).
-- [ ] **Eating:** the food flies into the monster's mouth (small plates counted "one, two, three…", bigger ones by rows and then "Eight!"), it chews, reacts and thanks her, then 3 coins fly to the jar at the bottom right. Too long, or just right? Does she tap to skip it? On `7 + ? = 10` orders the monster eats all ten: does that read right?
+- [ ] **Eating:** the food flies into the monster's mouth (changed in round 1 below, D103), it chews, reacts and thanks her, then 3 coins fly to the jar at the bottom right. Too long, or just right? Does she tap to skip it? On `7 + ? = 10` orders the monster eats all ten: does that read right?
 - [ ] **Monster voices:** each monster has its own pitch (Gruffles deep, Mimsy and Zibbit high). Do they sound different enough on the iPad, iPhone and Android? Any voice that sounds odd or hard to understand?
 - [ ] Each monster says hello the first time it comes in a service ("Hee hee. Hello!"). Charming, or does it slow the orders down?
 - [ ] Sounds: a "boing" when a monster arrives, crunching while it chews, a "ting" for each coin, Chompers' burp. Any too loud or annoying?
@@ -186,5 +186,9 @@ The D94 list above is covered by this round (the hold now goes through the popup
 - [ ] **Service length:** time a few whole services (6 monsters) from the first order to the CLOSED sign. This sets the play-time limit's "last customer" timing in M3b.
 - [ ] Smoothness on the real iPad: food and coin flights, monster reactions, the café background. (A 4× slowed desktop CPU showed no dropped frames, `docs/perf/M2-throttle.md`, but only the device can tell.)
 - [ ] Not yet in M2, so not a bug: progress and coins reset on reload (M3a saves them); no shop yet (M4).
+### M2 feedback round 1 (D102, D103)
+- [ ] On the grown-ups' screen, change a stage (e.g. Perfect Ten S3 → S1) and an operations picker, then tap *Back to the café*: does it respond? Do *Open the Café* and the gear work afterwards, also after leaving with the back gesture?
+- [ ] **Eating:** all the food now flies into the mouth together and the monster says just the answer ("Eight!"). Clear, and no more voices tripping over each other? On `7 + ? = 10` it says "Three!" while eating all ten: right, or should it say "Ten!"?
+
 - [ ] Skim `docs/CONTENT_REVIEW.md` (sample orders, spoken lines and Pip's demos for A1–A3, and the monsters' lines). Anything that reads oddly aloud?
 

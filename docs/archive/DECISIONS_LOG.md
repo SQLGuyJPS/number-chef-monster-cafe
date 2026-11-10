@@ -503,6 +503,16 @@ How to revisit: if the repeating ghost is distracting, show each hint once; `war
 **Why:** SPEC §5.6 fixes the shape (groups, ≤ 5 counted, total spoken, 3 chews, reaction, ≤ 4 s, skippable) but not the timings, what the monster eats on missing-amount forms, or when the monster's own lines are spoken.
 **How to revisit:** Owner playtest (service length, whether the greeting slows orders, whether eating the whole ten on make-ten orders reads right). Timings live in `src/engine/eat.ts`.
 
+## D102 — Pointer guard leaves native form controls alone (2026-11-10)
+**What:** The single-pointer guard (SPEC §2.3) no longer claims a pointer that goes down on a `select`, `option`, `input` or `textarea`. It also releases the held pointer on any `change` event and on a `touchend`/`touchcancel` that leaves no finger on the glass.
+**Why:** Playtest: after changing a stage picker (S3 → S1 on Perfect Ten) on the grown-ups' screen, no tap anywhere worked — not *Back to the café*, not *Open the Café*, not the gear. The native picker swallowed the finger's `pointerup`, so the guard kept that pointer as active forever and blocked every later `pointerdown`. These controls live only in the parent area, never on the play surface.
+**How to revisit:** If a form control is ever added to the play surface, decide there whether it needs the single-pointer rule.
+
+## D103 — Eating: the plate flies in together, the monster says only the answer (2026-11-10)
+**What:** Replaces D101's flight. On a correct serve the whole plate flies into the mouth at once (each item 20 ms after the one before, 0.34 s flight) and the monster says the order's answer once in its own voice ("Eight!"), the same number that shows in green on the ticket (D96). Nothing is counted item by item, at any size. Chews, reaction, thanks, coins and skip are unchanged. For `7 + ? = 10` the monster still eats all ten on the tray but says "Three!".
+**Why:** Owner playtest: the per-item counts (0.26 s apart) tripped over each other in the monster's voice.
+**How to revisit:** Owner playtest. If saying the answer (not the tray total) reads oddly on missing-amount orders, say the total instead (`runEat` in `src/game/service/controller.ts`).
+
 <!-- New decisions go above this line, numbered one higher than the highest existing D<n>. -->
 
 ---

@@ -96,3 +96,18 @@ test('a stage picked there persists; Back to the café and the back gesture retu
   await page.goBack();
   await expect(page.getByTestId('break-dialog')).toBeVisible();
 });
+
+// D102: on iOS the native picker of a <select> swallows the finger's lift, so the single-pointer
+// guard used to hold that pointer forever and every later tap in the app did nothing. The lost
+// lift is reproduced with a lone pointerdown on the select.
+test('a stage picker whose lift is lost does not freeze later taps', async ({ page }) => {
+  await startApp(page);
+  await openTools(page);
+  const stage = page.getByTestId('stage-A3');
+  await stage.dispatchEvent('pointerdown', { pointerId: 77, pointerType: 'touch', isPrimary: true });
+  await stage.selectOption('1');
+  await tap(page, page.getByTestId('parent-back'));
+  await expect(page.getByTestId('screen-home')).toBeVisible();
+  await tap(page, page.getByTestId('open-cafe'));
+  await expect(page.getByTestId('open-cafe')).toHaveCount(0);
+});

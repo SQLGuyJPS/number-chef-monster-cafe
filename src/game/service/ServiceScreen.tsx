@@ -1,3 +1,4 @@
+import { EAT_STAGGER_MS } from '../../engine/eat';
 import { useMemo, useState, type CSSProperties } from 'react';
 import {
   BUTTON_MIN,
@@ -159,8 +160,8 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor,
 
   const s3 = order.stage === 3;
   const cue = v.cue;
-  // Eating: the groups already flown leave empty cells behind (SPEC §5.6).
-  const eaten = v.eat ? v.eat.groups.slice(0, v.eat.flown).reduce((a, b) => a + b, 0) : 0;
+  // Eating: the flown plate leaves empty cells behind (SPEC §5.6).
+  const eaten = v.eat?.flown ? v.eat.items : 0;
   const cells: CellView[] = Array.from({ length: v.tray.capacity }, (_, i) => {
     if (i < eaten) return {};
     if (i >= v.tray.filled) {
@@ -387,24 +388,22 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor,
           {glyph}
         </div>
       )}
-      {v.eat &&
-        v.eat.groups.slice(0, v.eat.flown).map((size, g) => {
-          const first = v.eat!.groups.slice(0, g).reduce((a, b) => a + b, 0);
-          return Array.from({ length: size }, (_, j) => {
-            const r = v.padMode ? L.s0Display : cellRect(first + j, frames2);
-            const from = { x: r.x + r.w / 2, y: r.y + r.h / 2 - (v.padMode ? 0 : EAT_SLIDE) };
-            const style = {
-              left: from.x - CELL / 2,
-              top: from.y - CELL / 2,
-              '--dx': `${MOUTH.x - from.x}px`,
-              '--dy': `${MOUTH.y - from.y}px`,
-            } as CSSProperties;
-            return (
-              <div key={`e${first + j}`} className="eat-flight" style={style} aria-hidden="true">
-                {glyph}
-              </div>
-            );
-          });
+      {v.eat?.flown &&
+        Array.from({ length: v.eat.items }, (_, k) => {
+          const r = v.padMode ? L.s0Display : cellRect(k, frames2);
+          const from = { x: r.x + r.w / 2, y: r.y + r.h / 2 - (v.padMode ? 0 : EAT_SLIDE) };
+          const style = {
+            left: from.x - CELL / 2,
+            top: from.y - CELL / 2,
+            animationDelay: `${k * EAT_STAGGER_MS}ms`,
+            '--dx': `${MOUTH.x - from.x}px`,
+            '--dy': `${MOUTH.y - from.y}px`,
+          } as CSSProperties;
+          return (
+            <div key={`e${k}`} className="eat-flight" style={style} aria-hidden="true">
+              {glyph}
+            </div>
+          );
         })}
       {v.eat &&
         Array.from({ length: v.eat.coinsOut }, (_, k) => (

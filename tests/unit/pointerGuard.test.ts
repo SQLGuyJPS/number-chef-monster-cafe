@@ -128,6 +128,36 @@ describe('installPointerGuard', () => {
     expect(guard.activePointerId()).toBeNull();
   });
 
+  it('ignores pointers on native form controls, whose picker swallows the lift (D102)', () => {
+    class Control extends EventTarget {
+      closest(sel: string) {
+        return sel.includes('select') ? this : null;
+      }
+    }
+    const target = new Control();
+    const guard = installPointerGuard(target, () => 0);
+    target.dispatchEvent(ev('pointerdown', { pointerId: 1 }));
+    expect(guard.activePointerId()).toBeNull();
+  });
+
+  it('a value change (native picker closed) releases the active pointer', () => {
+    const { target, guard } = setup();
+    target.dispatchEvent(ev('pointerdown', { pointerId: 1 }));
+    target.dispatchEvent(new Event('change'));
+    expect(guard.activePointerId()).toBeNull();
+  });
+
+  it('touchend with no fingers left releases a pointer whose lift was lost', () => {
+    const { target, guard } = setup();
+    target.dispatchEvent(ev('pointerdown', { pointerId: 1 }));
+    target.dispatchEvent(Object.assign(new Event('touchend'), { touches: { length: 1 } }));
+    expect(guard.activePointerId()).toBe(1);
+    target.dispatchEvent(Object.assign(new Event('touchend'), { touches: { length: 0 } }));
+    expect(guard.activePointerId()).toBeNull();
+    target.dispatchEvent(ev('pointerdown', { pointerId: 2 }));
+    expect(guard.activePointerId()).toBe(2);
+  });
+
   it('dispose() removes the listeners', () => {
     const { target, guard, seen } = setup();
     guard.dispose();
