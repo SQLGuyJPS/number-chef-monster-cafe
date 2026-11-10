@@ -1,6 +1,6 @@
 # Build plan — Number Chef: Monster Café
 
-Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**; M1 playtest rounds 1–7 and the gear popup recorded in PLAYTEST.md (last 2026-11-09). **M2 started 2026-11-09.** Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
+Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**; M1 playtest rounds 1–7 and the gear popup recorded in PLAYTEST.md (last 2026-11-09). **M2 done 2026-11-10** (started 2026-11-09); waiting for the M2 playtest. Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
 
 ---
 
@@ -149,18 +149,18 @@ Order inside each milestone is the order I will work in. Every milestone ends wi
 5. *(done 2026-11-09, D101)* Eat sequence (≤ 4 s, skippable), coin flight, all SFX (§8.3), voice lines. On a correct serve the ticket's blank becomes the answer in green (D96; done first, 2026-11-09).
 6. *(done 2026-11-09 except the art)* Screens: Home (coin jar, in memory until M3a), Open the Café), Menu board (Little Menu only, A1–A3 tiles; no last-played glow, D83), Results (CLOSED sign, spoken tally, monsters served as faces, Another service / Change dish / Home). Faces show the monsters served.
 7. *(done 2026-11-09)* `lint:content` monster validation (palette contrast, bodies/extras, favourites, reactions, voice below Pip, lines, all five expressions drawn and distinct); `content:table` → `docs/CONTENT_REVIEW.md`.
-8. E2E full matrix (Chromium iPad Pro 11 + Pixel 7, WebKit iPad gen 7 + iPhone 13, portrait variants), CDP drag incl. rotated portrait, ≤ 2 taps to first order, Another service / Change dish, monster screenshot grid, throttle report.
-9. Screenshots, PLAYTEST (service length timing, monster appeal, voices on three devices), commit, stop.
+8. *(done 2026-11-10)* E2E full matrix (Chromium iPad Pro 11 + Pixel 7, WebKit iPad gen 7 + iPhone 13, portrait variants), CDP drag incl. rotated portrait, ≤ 2 taps to first order, Another service / Change dish, monster screenshot grid, throttle report.
+9. *(done 2026-11-10)* Screenshots, PLAYTEST (service length timing, monster appeal, voices on three devices), commit, stop.
 
 **Accept (SPEC §14 M2)**
 - [x] deterministic service from seed (`tests/unit/session.test.ts`)
 - [x] no adjacent repeats; at most 3 new facts per service (500 seeds × A1/A2 × ops)
-- [ ] each monster renders at all five expressions (screenshot grid)
+- [x] each monster renders at all five expressions (screenshot grid `docs/screens/M2/monster-grid.png`; `m2.spec.ts`; lint:content)
 - [x] eat + react ≤ 4 s and skippable (`tests/unit/eat.test.ts` for every answer 1–20; `m2.spec.ts` in real time)
 - [x] reduced-motion variant verified (`m2.spec.ts` gallery test: no monster animation, still poses)
-- [ ] 4× CPU throttle frame report produced (not a gate)
-- [ ] full e2e device matrix incl. CDP drag in rotated portrait
-- [ ] first run reaches the first order in ≤ 2 taps after Splash
+- [x] 4× CPU throttle frame report produced (not a gate): `docs/perf/M2-throttle.md`
+- [x] full e2e device matrix incl. CDP drag in rotated portrait (`m2-matrix.spec.ts`, six projects incl. Pixel 7)
+- [x] first run reaches the first order in ≤ 2 taps after Splash (`m2-matrix.spec.ts`)
 - [x] Another service repeats the skill; Change dish returns to the menu (e2e)
 - [x] content table generated (`docs/CONTENT_REVIEW.md`)
 - [ ] correct serve shows the answer in green in place of the dashed blank (D96, e2e)
