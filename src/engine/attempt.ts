@@ -125,7 +125,7 @@ export function stepAttempt(s: AttemptState, e: AttemptEvent): AttemptState {
  * PlateCount line (SPEC §5.5, D30): compares the served tray total with the expected one. At S0
  * there is no plate, so the monster echoes the typed number. On missing-number forms at S3/S2
  * (`group`) the monster talks about the orange group, the answer, not the tray total (D104):
- * "I see two more… I wanted three more." / "I see three taken away… I wanted four."
+ * "Two more… I wanted three. One more!" / "Three taken away… I wanted four. One more!"
  */
 export function plateCountLine(
   served: number,
