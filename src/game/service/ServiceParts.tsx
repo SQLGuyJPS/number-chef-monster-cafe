@@ -45,7 +45,9 @@ export function Ticket({
       <div className="ticket-sentence">
         {tokens.map((t, i) =>
           t.blank && solved !== undefined ? (
-            <span key={i} className="tok tok-solved" data-testid="ticket-answer">
+            // The answer takes the blank's place in the blank's own role colour (D106): green for
+            // `7 + 3 = ?`, orange for `7 + ? = 10`, so the sentence keeps its colours.
+            <span key={i} className={`tok tok-solved tok-${t.role ?? 'result'}`} data-testid="ticket-answer" data-role={t.role}>
               {solved}
             </span>
           ) : (
@@ -188,31 +190,11 @@ export function Bin({
   );
 }
 
-function HatArt() {
-  return (
-    <svg viewBox="0 0 120 110" width="100%" height="100%" aria-hidden="true">
-      <path
-        d="M30 52 Q10 50 14 32 Q18 14 38 20 Q44 4 60 6 Q78 4 82 20 Q102 14 106 32 Q110 50 90 52 L88 64 L32 64 Z"
-        fill="#fff"
-        stroke="#c9c2b4"
-        strokeWidth="3"
-      />
-      <rect x="32" y="60" width="56" height="10" rx="3" fill="#e9e3d6" />
-      <circle cx="34" cy="80" r="12" fill="#b9a7a0" />
-      <circle cx="86" cy="80" r="12" fill="#b9a7a0" />
-      <ellipse cx="60" cy="88" rx="24" ry="20" fill="#cdbdb6" />
-      <circle cx="51" cy="84" r="3.5" fill="#2b2b3a" />
-      <circle cx="69" cy="84" r="3.5" fill="#2b2b3a" />
-      <circle cx="60" cy="94" r="4" fill="#ff8fa3" />
-    </svg>
-  );
-}
-
-/** Pip's hat = Help (SPEC §7.3). */
+/** Pip = Help (SPEC §7.3): the same Pip who helps on the counter, whole, hat to tail. */
 export function PipHat(props: PartProps) {
   return (
     <Btn {...props} className="pip-hat" testId="help" label="Help">
-      <HatArt />
+      <Pip fit="tight" />
     </Btn>
   );
 }
@@ -282,29 +264,45 @@ export function HelpChoice({
   );
 }
 
-/** Door sign (leave, SPEC §5.4): small, top-left, never animates (SPEC §6.2 step 9). */
+/**
+ * Door sign (leave, SPEC §5.4): small, top-left, never animates (SPEC §6.2 step 9). A wooden sign
+ * hanging from a nail on the wall with a little door on it; the real door is part of the café
+ * scene (CafeScene), standing on the floor behind the waiting line, so nothing floats.
+ */
 export function DoorSign(props: PartProps) {
   return (
     <Btn {...props} className="door-sign" testId="door" label="Take a break">
       <svg viewBox="0 0 100 100" width="100%" height="100%" aria-hidden="true">
-        <rect x="22" y="12" width="56" height="80" rx="6" fill="#8a5a35" />
-        <rect x="30" y="20" width="40" height="64" rx="4" fill="#a8744a" />
-        <circle cx="62" cy="54" r="5" fill="#f6c445" />
+        {/* nail and string */}
+        <path d="M18 34 L50 10 L82 34" fill="none" stroke="#7a5536" strokeWidth="3" strokeLinejoin="round" />
+        <circle cx="50" cy="10" r="4.5" fill="#8f8a84" stroke="#5e5a55" strokeWidth="1.5" />
+        {/* plaque */}
+        <rect x="8" y="30" width="84" height="64" rx="12" fill="#c98b55" stroke="#8a5a35" strokeWidth="4" />
+        <path d="M14 46 H86 M14 62 H86 M14 78 H86" stroke="#b67a47" strokeWidth="2" />
+        {/* the little door on it */}
+        <rect x="35" y="38" width="30" height="48" rx="4" fill="#8a5a35" />
+        <rect x="39" y="42" width="22" height="40" rx="3" fill="#a8744a" />
+        <circle cx="56" cy="63" r="3" fill="#f6c445" />
       </svg>
     </Btn>
   );
 }
 
 /** Waiting monsters peek from the left edge (SPEC §5.4): one silhouette per remaining order. */
-export function Queue({ rect, count }: { rect: Rect; count: number }) {
+/**
+ * The waiting line (SPEC §5.4). `join` is bumped when a returning monster gets back in line (D108):
+ * the line shuffles one place right and the newcomer walks in at the back, on the left by the door.
+ */
+export function Queue({ rect, count, join = 0, joining = false }: { rect: Rect; count: number; join?: number; joining?: boolean }) {
   return (
-    <div className="queue" style={at(rect)} aria-hidden="true">
+    <div className={`queue ${joining ? 'joined' : ''}`} style={at(rect)} aria-hidden="true" key={`join${join}`}>
       {Array.from({ length: count }, (_, i) => (
         <svg
           key={i}
-          className="queue-mon"
+          className={`queue-mon ${joining && i === 0 ? 'newcomer' : ''}`}
           viewBox="0 0 100 100"
           style={{ left: 8 + i * 62, zIndex: count - i }}
+          data-testid={joining && i === 0 ? 'queue-newcomer' : undefined}
         >
           <path d="M14 98 C4 50 18 10 50 10 C82 10 96 50 86 98 Z" fill="#7b6f8f" opacity="0.55" />
           <circle cx="40" cy="44" r="7" fill="#fff" opacity="0.8" />

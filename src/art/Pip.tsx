@@ -1,13 +1,19 @@
-// Pip (SPEC §7.3, D90): the mouse chef who helps. Same head and hat as the Help button, so the
+// Pip (SPEC §7.3, D90): the mouse chef who helps. The Help button draws this same Pip, so the
 // child sees one character. viewBox 120×150 matches the counter slot (metrics PIP).
 const FUR = '#cdbdb6';
 const FUR_DARK = '#b9a7a0';
 const EAR_IN = '#f5b7c3';
 const INK = '#2b2b3a';
 
-export function Pip({ className }: { className?: string }) {
+/**
+ * `fit`: 'slot' keeps the 120×150 counter-slot box; 'tight' crops to the drawing (hat to feet, tail
+ * included) so he fills a small button, like the Help button, without being squished.
+ */
+const VIEWBOX = { slot: '0 0 120 150', tight: '8 2 108 150' } as const;
+
+export function Pip({ className, fit = 'slot' }: { className?: string; fit?: keyof typeof VIEWBOX }) {
   return (
-    <svg className={className} viewBox="0 0 120 150" width="100%" height="100%" aria-hidden="true">
+    <svg className={className} viewBox={VIEWBOX[fit]} width="100%" height="100%" aria-hidden="true">
       {/* tail */}
       <path d="M80 136 Q114 142 110 112 Q106 94 94 102" fill="none" stroke={FUR_DARK} strokeWidth="5" strokeLinecap="round" />
       {/* feet */}

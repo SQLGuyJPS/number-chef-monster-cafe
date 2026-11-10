@@ -25,7 +25,7 @@ import { Pip } from '../../art/Pip';
 import { dragTapHandlers, inRect, type StagePoint } from '../input/dragTap';
 import { TapButton } from '../input/TapButton';
 import { TenFrame, type CellView } from '../tray/TenFrame';
-import { useHold } from './useHold';
+import { useBlip, useHold } from './useHold';
 import {
   AnswerDisplay,
   Backspace,
@@ -87,9 +87,21 @@ function cellAt(p: StagePoint, frames2: boolean): number | null {
 
 const center = (r: Rect) => ({ x: r.x + r.w / 2, y: r.y + r.h / 2 });
 
+/** Logical rect of slot `k` in the taken-away row (2 × 5, SPEC §3.3). */
+function takenRect(k: number): Rect {
+  return {
+    x: L.takenAway.x + TAKEN_PAD + (k % 5) * (TAKEN_CELL + TAKEN_GAP),
+    y: L.takenAway.y + TAKEN_PAD + Math.floor(k / 5) * (TAKEN_CELL + TAKEN_GAP),
+    w: TAKEN_CELL,
+    h: TAKEN_CELL,
+  };
+}
+
 /** Gone items render as empty cells so the remaining run is what the child sees (D30). */
 function bubbleFrames(cells: ModelCell[], food: CellView['food']): CellView[][] {
-  const shown: CellView[] = cells.map((c) => (c.gone ? {} : { food, role: c.role, pop: c.pop }));
+  const shown: CellView[] = cells.map((c) =>
+    c.gone ? {} : c.spot ? { spot: true, glow: c.glow } : { food, role: c.role, pop: c.pop, glow: c.glow },
+  );
   return shown.length > 10 ? [shown.slice(0, 10), shown.slice(10)] : [shown];
 }
 
@@ -160,20 +172,30 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor,
 
   const s3 = order.stage === 3;
   const cue = v.cue;
-  // Eating: the flown plate leaves empty cells behind (SPEC §5.6).
-  const eaten = v.eat?.flown ? v.eat.items : 0;
+  // Missing-number forms: the unknown's cells (the empty spots to fill, or the items to take away)
+  // are marked orange, and S3 counts them from one (D104).
+  const unknown = task.unknown;
+  const inUnknown = (i: number) => !!unknown && i >= unknown.from && i < unknown.to;
+  // Eating: the eaten plate leaves empty cells behind, and stays gone until the next order (SPEC §5.6).
+  const plate = v.eaten;
+  const eatenCell = (i: number) => plate?.source === 'tray' && i >= plate.from && i < plate.from + plate.count;
   const cells: CellView[] = Array.from({ length: v.tray.capacity }, (_, i) => {
-    if (i < eaten) return {};
+    if (eatenCell(i)) return {};
     if (i >= v.tray.filled) {
       // Empty cells glow too: the make-ten demo flashes the gap to ten (SPEC §5.5).
-      return { pulse: cue === 'place' && i === v.tray.filled, glow: v.glow.includes(i) };
+      return {
+        pulse: cue === 'place' && i === v.tray.filled,
+        glow: v.glow.includes(i),
+        spot: inUnknown(i) && v.tray.mode === 'add',
+      };
     }
-    const role = i < v.tray.prefill ? 'prefill' : 'child';
+    const role = i < v.tray.prefill && !(v.tray.mode === 'remove' && inUnknown(i)) ? 'prefill' : 'child';
+    const popAt = unknown && v.tray.mode === 'add' ? i + 1 - v.tray.prefill : i + 1;
     return {
       food,
       role,
       // S3: running counts pop on the child's items (SPEC §1.4, §3.2).
-      pop: s3 && role === 'child' ? i + 1 : undefined,
+      pop: s3 && role === 'child' && i >= v.tray.prefill ? popAt : undefined,
       glow: v.glow.includes(i),
       pulse: cue === 'remove' && i === v.tray.filled - 1,
       fx: v.fx?.index === i ? v.fx.kind : undefined,
@@ -186,6 +208,8 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor,
   // Pip steps back instead of vanishing; the line stays away until the monster is home (D91).
   const pipShown = useHold(v.pipOut, PIP_EXIT_MS);
   const lineAway = useHold(v.pipOut || bubbleUp, MONSTER_MOVE_MS);
+  // The returning monster's walk-in plays once, as the next monster comes in (D108).
+  const joining = useBlip(v.queueJoin, 1000);
   const removed = v.removed;
   const phase = v.attempt.phase;
   const lockedPhase = phase === 'plateCount' || phase === 'worked' || phase === 'eating';
@@ -201,7 +225,7 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor,
       <DoorSign rect={L.door} onTap={onDoor} />
       {/* The waiting line steps away while Pip is out or the bubble is up, so Pip stands on a clear
           counter (D90) and the monster never walks back over it (D91). */}
-      {!lineAway && <Queue rect={L.queue} count={Math.max(0, v.remaining)} />}
+      {!lineAway && <Queue rect={L.queue} count={Math.max(0, v.remaining)} join={v.queueJoin} joining={joining} />}
       {/* The CountTogether bubble is Pip's speech while it shows (D76, D90). */}
       <Caption rect={L.caption} text={bubbleUp ? '' : v.caption} speaker={v.speaker} />
 
@@ -293,7 +317,12 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor,
               onTap={ctrl.tapTakenAway}
             >
               <TenFrame
-                cells={Array.from({ length: removed }, () => ({ food, role: 'child' as const }))}
+                cells={Array.from({ length: plate?.source === 'taken' ? 0 : removed }, (_, k) => ({
+                  food,
+                  role: 'child' as const,
+                  // S3 counts what was taken away, from one (D104).
+                  pop: s3 && unknown ? k + 1 : undefined,
+                }))}
                 cell={TAKEN_CELL}
                 gap={TAKEN_GAP}
                 pad={TAKEN_PAD}
@@ -389,9 +418,10 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor,
         </div>
       )}
       {v.eat?.flown &&
-        Array.from({ length: v.eat.items }, (_, k) => {
-          const r = v.padMode ? L.s0Display : cellRect(k, frames2);
-          const from = { x: r.x + r.w / 2, y: r.y + r.h / 2 - (v.padMode ? 0 : EAT_SLIDE) };
+        Array.from({ length: v.eat.plate.count }, (_, k) => {
+          const p = v.eat!.plate;
+          const r = p.source === 'pad' ? L.s0Display : p.source === 'taken' ? takenRect(k) : cellRect(p.from + k, frames2);
+          const from = { x: r.x + r.w / 2, y: r.y + r.h / 2 - (p.source === 'tray' ? EAT_SLIDE : 0) };
           const style = {
             left: from.x - CELL / 2,
             top: from.y - CELL / 2,

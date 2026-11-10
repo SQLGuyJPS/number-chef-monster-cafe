@@ -513,6 +513,41 @@ How to revisit: if the repeating ghost is distracting, show each hint once; `war
 **Why:** Owner playtest: the per-item counts (0.26 s apart) tripped over each other in the monster's voice.
 **How to revisit:** Owner playtest. If saying the answer (not the tray total) reads oddly on missing-amount orders, say the total instead (`runEat` in `src/game/service/controller.ts`).
 
+## D104 — Missing-number forms: the orange group is the answer (2026-11-10)
+**What:** On missing-number forms (`a + ? = c`, `? + a = c`, `m − ? = c`) at S3/S2 and on the S0 cloche model, everything points at the unknown. The tray marks it (dashed orange empty spots up to the total; for `m − ? = c` an orange ring on the items to take away). S3 tap counts say the size of the orange group from one ("one, two, three"; taken away "one … four"). PlateCount names the orange group ("Two more… I wanted three. One more!", "Three taken away… I wanted four."). The tray demo fills or removes counted from one. The monster eats only the orange group (`7 + ? = 10`: the three added; `10 − ? = 6`: the four in the taken-away row) and says that number; what it ate stays off the tray until the next order. Amends D98 (demo counts), D101 (eats the tray total) and D103's note. Implementation: `TrayTask.unknown`, `spokenCount`, `childCount`, `eatenPlate` in `engine/tray.ts`; `plateCountLine(…, group)`.
+**Why:** Owner playtest: on "What plus 5 equals 10" the answer is 5, but the monster wanted ten items, said "I see nine. I wanted ten." and ate all ten, which contradicted the answer. The owner chose this over serving these forms only at S1/S0, to try first.
+**How to revisit:** Owner playtest. If S3/S2 missing-number orders still confuse, restrict them to S1/S0 (the generator's pool by stage) and serve result forms at S3/S2.
+
+## D105 — S1 help on missing-number forms plays in the model bubble (2026-11-10)
+**What:** CountTogether on missing-number forms tells the make-ten story without first counting to the total ("Seven." / "Three empty spots." / "one, two, three" / "Seven and three more makes ten!"; `10 − ? = 6`: "Ten." / "one … four" / "Six left!" / "Four taken away!"), with empty spots drawn as dashed outlines. At S1 the Worked demo for these forms plays the same ticks in the model bubble instead of on the S3 tray (amends D71 for this case): the child's tray stays empty, FollowMe builds only the answer on it, and the finished model stays up until the serve. `missingTicks` in `engine/countTogether.ts`.
+**Why:** Owner playtest: at S1 (`1 + ? = 10`) Pip counted to ten including blue food, then counted the orange to nine, all on a tray that had started empty, with food the child never placed. The owner picked the bubble option.
+**How to revisit:** If the bubble works well, consider it for S1 result forms too (they still use the S3 tray demo).
+
+## D106 — The solved answer takes the blank's role colour (2026-11-10)
+**What:** Amends D96. On a correct serve the answer replaces the dashed blank in the blank's own role colour: green on result forms, orange on missing-number forms (blue would apply if a blank were ever the prefilled group).
+**Why:** Owner playtest: on `7 + ? = 10` both the filled-in 3 and the 10 were green, losing the sentence's colour coding.
+**How to revisit:** Owner playtest.
+
+## D107 — Results: silent count-up with tings, then one spoken total (2026-11-10)
+**What:** Supersedes D55. After the sign flips, the coin number counts up by one, silently, with a coin ting per step; the gap starts at 333 ms and eases to a 100 ms floor (`tallySchedule`, 23 coins ≈ 3.75 s). Then "You earned twenty-three coins! Great job, chef!" (`results.total`). The buttons appear only after the count; a tap anywhere during the count jumps to the total, shows the buttons 300 ms after the finger lifts, and nothing is spoken.
+**Why:** Owner playtest: the spoken count ran faster than the speech engine could say the numbers. The owner specified this behaviour and chose counting by one throughout.
+**How to revisit:** Tune `tallyDelayMs` after a device playtest.
+
+## D108 — A returning monster joins the line as the next monster comes in (2026-11-10)
+**What:** After an assisted order, the requeue no longer adds a silhouette the moment the plate is eaten. It joins when the next monster arrives: the line shuffles one place right and the newcomer walks in from the left, by the door (≈ 0.9 s, once; still with reduced motion).
+**Why:** Owner playtest: the line grew by one as the food flew into the mouth, with no visible reason. The owner proposed this animation.
+**How to revisit:** Owner playtest.
+
+## D109 — Sound effects never overlap speech (2026-11-10)
+**What:** The arrival boing plays 400 ms before the monster's first word. The crunch waits for the answer word to end, Chompers' burp plays before its thanks, and the coin tings wait for the thanks to end (each plus 120 ms for the audio context to resume). A tap that skips the meal also hushes any line, so the tings are heard. Results tings run with nothing spoken (D107). Eat + react stays ≤ 4 s of animation; waiting for a line can add to it.
+**Why:** Owner playtest: no boing, no crunch, and coin tings only when speech was cut off. iOS silences WebAudio while speech plays (D86–D88), so effects scheduled during a line were lost.
+**How to revisit:** Device playtest. If effects are still missing after a line ends, the iOS context may need a gesture to resume; then consider HTML audio elements for SFX.
+
+## D110 — Playtest polish: Blobbo's giggle, door, string lights to the shop, Pip button, Mimsy's hello (2026-11-10)
+**What:** Blobbo's reaction is now `giggle` (blushes, giggle-hops with a tilt, tiny hearts and bubbles), so it no longer looks like Wobbleton's puddle, which is unchanged. The café's string lights are no longer drawn; `StringLights` stays in `CafeScene.tsx` for the shop's Lights slot (§10). A wooden door now stands on the floor at the left (x 48–212, y 172–546); the leave button is a wooden sign hanging on the wall, with no light box (same rect and tap target). The Help button shows the new full-body Pip art (`<Pip fit="tight" />`). Mimsy's hello is "Hello, dear chef!" (was "Hello. May I order, please?").
+**Why:** Owner playtest notes on each item. The old door sign floated above the window line with a light box.
+**How to revisit:** Owner playtest.
+
 <!-- New decisions go above this line, numbered one higher than the highest existing D<n>. -->
 
 ---

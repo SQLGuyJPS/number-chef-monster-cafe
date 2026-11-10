@@ -66,7 +66,8 @@ describe('eat sequence (SPEC §5.6, D101)', () => {
   it('greets on arrival, flies, says the answer once, chews, reacts, then 3 coins land; tip at the end', async () => {
     const { c, log, tick, done, coins, serveRight, orders } = rig();
     c.start();
-    expect(log).toContain('arrive');
+    expect(log).toEqual(['arrive']); // the boing before any word (D109)
+    await tick();
     expect(log.some((l) => l.endsWith(`:${orders[0]!.monster}:hello from ${orders[0]!.monster}`))).toBe(true);
     serveRight();
     log.length = 0; // the building taps' counts
@@ -84,6 +85,10 @@ describe('eat sequence (SPEC §5.6, D101)', () => {
     expect(log).toContain('munch');
     expect(log.some((l) => l.includes(`thanks from ${orders[0]!.monster}`))).toBe(true);
     expect(log.filter((l) => l === 'coin')).toHaveLength(3);
+    // No sound effect while a line plays (D109): the crunch after the answer, the tings after the thanks.
+    const at = (f: (l: string) => boolean) => log.findIndex(f);
+    expect(at((l) => l === 'munch')).toBeGreaterThan(at((l) => l.toLowerCase().endsWith(`:${said}!`)));
+    expect(at((l) => l === 'coin')).toBeGreaterThan(at((l) => l.includes('thanks from')));
     expect(c.getView().landed).toBe(3);
 
     // Second (last) order: skip at once; coins still land, then the tip and Results.
@@ -93,6 +98,9 @@ describe('eat sequence (SPEC §5.6, D101)', () => {
     expect(c.getView().landed).toBe(6);
     expect(coins).toEqual([3, 3, 5]);
     expect(done[0]!.coins).toBe(11);
+    // The eaten plate stays off the tray through the closing line (it used to reappear).
+    expect(c.getView().finished).toBe(true);
+    expect(c.getView().eaten).toEqual({ source: 'tray', from: 0, count: orders[1]!.problem.answer });
   });
 
   it('a tap skips the flight, chewing and reaction', async () => {

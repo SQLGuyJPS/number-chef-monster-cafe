@@ -14,6 +14,8 @@ export interface CellView {
   pulse?: boolean;
   /** Demo highlight (SPEC §5.5). */
   glow?: boolean;
+  /** An empty spot the unknown fills (missing-number forms, dashed orange, D104). */
+  spot?: boolean;
   /** One-shot animation; `nonce` changes to replay it. */
   fx?: 'shake' | 'in';
   nonce?: number;
@@ -63,6 +65,7 @@ export function TenFrame({ cells, cell, gap, pad, x, y, testId, tapTargets, clas
           c?.food ? `filled role-${c.role ?? 'child'}` : 'empty',
           c?.pulse ? 'pulse' : '',
           c?.glow ? 'glow' : '',
+          c?.spot && !c.food ? 'spot' : '',
           c?.fx ? `fx-${c.fx}` : '',
         ].join(' ');
         return (

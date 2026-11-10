@@ -62,6 +62,32 @@ export const PHRASES = {
     params: { seen: 'n', wanted: 'n' },
     text: (p) => `I see ${n(p, 'seen')}… I wanted ${n(p, 'wanted')}.`,
   },
+  // Missing-number forms at S3/S2 (D104): the monster talks about the orange group, the answer
+  // ("Two more… I wanted three. One more!"), never the tray total.
+  'plate.more.oneMore': {
+    params: { seen: 'n', wanted: 'n' },
+    text: (p) => `${N(p, 'seen')} more… I wanted ${n(p, 'wanted')}. One more!`,
+  },
+  'plate.more.oneLess': {
+    params: { seen: 'n', wanted: 'n' },
+    text: (p) => `${N(p, 'seen')} more… I wanted ${n(p, 'wanted')}. One less!`,
+  },
+  'plate.more.off': {
+    params: { seen: 'n', wanted: 'n' },
+    text: (p) => `${N(p, 'seen')} more… I wanted ${n(p, 'wanted')} more.`,
+  },
+  'plate.away.oneMore': {
+    params: { seen: 'n', wanted: 'n' },
+    text: (p) => `${N(p, 'seen')} taken away… I wanted ${n(p, 'wanted')}. One more!`,
+  },
+  'plate.away.oneLess': {
+    params: { seen: 'n', wanted: 'n' },
+    text: (p) => `${N(p, 'seen')} taken away… I wanted ${n(p, 'wanted')}. One less!`,
+  },
+  'plate.away.off': {
+    params: { seen: 'n', wanted: 'n' },
+    text: (p) => `${N(p, 'seen')} taken away… I wanted ${n(p, 'wanted')}.`,
+  },
   'plate.echo': {
     params: { seen: 'n', wanted: 'n' },
     text: (p) => `${N(p, 'seen')}? I wanted ${n(p, 'wanted')}.`,
@@ -114,8 +140,11 @@ export const PHRASES = {
   /** The total named after the last row flies into the mouth (SPEC §5.6, "Eight!"). */
   'eat.total': { params: { n: 'n' }, text: (p) => `${N(p, 'n')}!` },
   'service.closed': { params: {}, text: () => 'All done! Thank you, chef!' },
-  // Results tally (SPEC §5.7, D55): the last number of the count-up.
-  'results.total': { params: { n: 'n' }, text: (p) => `${N(p, 'n')}!` },
+  // Results tally (SPEC §5.7): said once the silent count-up lands on the total.
+  'results.total': {
+    params: { n: 'n' },
+    text: (p) => `You earned ${n(p, 'n')} ${Number(p.n) === 1 ? 'coin' : 'coins'}! Great job, chef!`,
+  },
 } as const satisfies Record<string, PhraseDef>;
 
 export type PhraseKey = keyof typeof PHRASES;

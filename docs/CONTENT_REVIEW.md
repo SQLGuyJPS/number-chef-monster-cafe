@@ -134,6 +134,7 @@ Pool: 36 presentations (18 addition, 18 subtraction), 27 facts.
 
 1. One. — _glow 1_
 1. Nine empty spots. — _glow 2,3,4,5,6,7,8,9,10_
+1. one — _add one_
 1. two — _add one_
 1. three — _add one_
 1. four — _add one_
@@ -142,7 +143,6 @@ Pool: 36 presentations (18 addition, 18 subtraction), 27 facts.
 1. seven — _add one_
 1. eight — _add one_
 1. nine — _add one_
-1. ten — _add one_
 1. One and nine more makes ten! — _glow 1,2,3,4,5,6,7,8,9,10_
 
 **`10 − 1 = ?`** (countBack · sub)
@@ -154,24 +154,25 @@ Pool: 36 presentations (18 addition, 18 subtraction), 27 facts.
 **`10 − ? = 1`** (countBack · missingSub)
 
 1. Ten. — _glow 1,2,3,4,5,6,7,8,9,10_
-1. nine — _remove one_
-1. eight — _remove one_
-1. seven — _remove one_
-1. six — _remove one_
-1. five — _remove one_
-1. four — _remove one_
-1. three — _remove one_
-1. two — _remove one_
 1. one — _remove one_
+1. two — _remove one_
+1. three — _remove one_
+1. four — _remove one_
+1. five — _remove one_
+1. six — _remove one_
+1. seven — _remove one_
+1. eight — _remove one_
+1. nine — _remove one_
+1. One left! — _glow 1_
 1. Nine taken away!
 
 ## Monsters
 
 | Monster | Favourites | Voice (pitch, rate) | Hello | Thanks | Reaction |
 |---|---|---|---|---|---|
-| Blobbo | cake, strawberry | 1.15, 0.85 | Hee hee. Hello! | Hee hee! Thank you! | melt |
+| Blobbo | cake, strawberry | 1.15, 0.85 | Hee hee. Hello! | Hee hee! Thank you! | giggle |
 | Gruffles | burger, hotdog | 0.6, 0.8 | Hello, chef! | Mmm! Thank you! | stomp |
 | Zibbit | cookie, doughnut | 1.25, 0.95 | Hi hi hi! | Thanks thanks thanks! | spin |
-| Mimsy | bread, tangerine | 1.3, 0.85 | Hello. May I order, please? | Thank you very much! | hearts |
+| Mimsy | bread, tangerine | 1.3, 0.85 | Hello, dear chef! | Thank you very much! | hearts |
 | Chompers | pizza, riceball | 0.9, 0.9 | Chomp chomp! Hello! | Chomp! Thanks! | burp |
 | Wobbleton | icecream, banana | 1, 0.8 | Wibble wobble, hello! | Wobbly thanks! | puddle |

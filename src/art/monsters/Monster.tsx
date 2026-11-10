@@ -5,6 +5,8 @@ import { Zzz } from './face';
 import { specFor, type Expression } from './specs';
 import './monsters.css';
 
+const HEART = 'M0 4 C-6 -4 -14 2 0 12 C14 2 6 -4 0 4 Z';
+
 export function Monster({
   id,
   expression,
@@ -40,6 +42,24 @@ export function Monster({
             <path d="M0 4 C-6 -4 -14 2 0 12 C14 2 6 -4 0 4 Z" transform="translate(60 40) scale(1.4)" />
             <path d="M0 4 C-6 -4 -14 2 0 12 C14 2 6 -4 0 4 Z" transform="translate(142 30) scale(1.1)" />
             <path d="M0 4 C-6 -4 -14 2 0 12 C14 2 6 -4 0 4 Z" transform="translate(104 12) scale(1.7)" />
+          </g>
+        )}
+        {react && reaction === 'giggle' && (
+          <g className="m-fx m-giggles">
+            {/* Each pop is a bare <g>: the CSS animation's transform would replace a transform
+                attribute on the element it runs on, so the placement sits one level down. */}
+            <g>
+              <path d={HEART} transform="translate(50 58) scale(1.2)" fill="#ff6f9c" />
+            </g>
+            <g>
+              <circle cx={152} cy={54} r={8} fill="#eafbe0" stroke="#8fcf6e" strokeWidth={2.5} />
+            </g>
+            <g>
+              <path d={HEART} transform="translate(158 84) scale(1)" fill="#ff8fb3" />
+            </g>
+            <g>
+              <circle cx={40} cy={36} r={6} fill="#eafbe0" stroke="#8fcf6e" strokeWidth={2} />
+            </g>
           </g>
         )}
         {react && reaction === 'burp' && (

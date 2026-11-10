@@ -153,6 +153,15 @@ test('M2 screenshots', async ({ page }, info) => {
   await page.waitForTimeout(300);
   await shot('service-a3-taken-away');
 
+  // A3 at S1: Pip's make-ten story in the model bubble; the child's tray stays empty (D105).
+  await openService(page, { skill: 'A3', stage: 1, ops: 'add', seed: 4 });
+  await serveWrong(page);
+  await waitPhase(page, 'building');
+  await tapId(page, 'help');
+  await waitPhase(page, 'followMe', 40_000);
+  await page.waitForTimeout(300);
+  await shot('service-a3-s1-help');
+
   // The reaction after a first-try serve, with the answer in green on the ticket (D96, D101).
   await openService(page, { skill: 'A2', stage: 3, ops: 'add', seed: 5, timeScale: 1 });
   await serveCorrect(page);
@@ -172,5 +181,6 @@ test('M2 screenshots', async ({ page }, info) => {
     await serveCorrect(page);
   }
   await expect(page.getByTestId('results-count')).toHaveText('23', { timeout: 15_000 });
+  await expect(page.getByTestId('results-tally')).toHaveAttribute('data-done', 'true');
   await shot('results');
 });

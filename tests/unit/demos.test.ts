@@ -71,25 +71,29 @@ describe('buildDemo (SPEC §5.5)', () => {
     ]);
   });
 
-  it('A3: make ten flashes the gap and fills it; 10 − ? names what went away (D98)', () => {
+  it('A3: make ten flashes the gap and fills it counted from one; 10 − ? counts what went away (D98, D104)', () => {
     const find = (s: string) => all.find((p) => p.display.join('') === s)!;
     const ten = buildDemo(find('7+?=10'));
     expect(ten.map((s) => phrase(s.narrationKey, s.params))).toEqual([
       'Seven.',
       'Three empty spots.',
-      'eight',
-      'nine',
-      'ten',
+      'one',
+      'two',
+      'three',
       'Seven and three more makes ten!',
     ]);
     expect(ten[1]!.trayOp).toEqual({ op: 'glow', cells: [7, 8, 9] });
     expect(phrase(buildDemo(find('9+?=10'))[1]!.narrationKey)).toBe('One empty spot.');
     expect(buildDemo(find('?+3=10'))[0]!.params).toEqual({ n: 3 });
-    expect(
-      buildDemo(find('10−?=6'))
-        .map((s) => phrase(s.narrationKey, s.params))
-        .at(-1),
-    ).toBe('Four taken away!');
+    expect(buildDemo(find('10−?=6')).map((s) => phrase(s.narrationKey, s.params))).toEqual([
+      'Ten.',
+      'one',
+      'two',
+      'three',
+      'four',
+      'Six left!',
+      'Four taken away!',
+    ]);
     expect(
       buildDemo(find('10−4=?'))
         .map((s) => phrase(s.narrationKey, s.params))
