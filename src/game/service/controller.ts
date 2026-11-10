@@ -13,7 +13,7 @@ import {
 } from '../../engine/config';
 import { countTogetherTicks, type ModelCell } from '../../engine/countTogether';
 import { buildDemo, followMeCue, type FollowMeCue } from '../../engine/demos';
-import { CHEW_MS, COIN_FLY_MS, COIN_GAP_MS, REACT_MS, eatGroups, flyMs } from '../../engine/eat';
+import { CHEW_MS, COIN_FLY_MS, COIN_GAP_MS, REACT_MS, flyMs } from '../../engine/eat';
 import { attemptEvent, coinEvent, type FrozenEvt } from '../../engine/events';
 import { numberToWords } from '../../engine/numberWords';
 import { phrase, type PhraseKey, type PhraseParams } from '../../engine/phrases';
@@ -43,13 +43,13 @@ export type Mood = 'arrive' | 'idle' | 'puzzled' | 'eat' | 'delight' | 'leave';
 export type Speaker = 'monster' | 'pip';
 
 /**
- * The eat sequence (SPEC §5.6, D101): `flown` groups of food have left the tray for the mouth;
- * then chewing, the reaction (bigger after a first-try serve, D45), and the coins flying to the jar.
+ * The eat sequence (SPEC §5.6, D101, D103): the plate's `items` fly to the mouth together once
+ * `flown` is set; then chewing, the reaction (bigger after a first-try serve, D45), and the coins flying to the jar.
  */
 export interface Eat {
   step: 'fly' | 'chew' | 'react' | 'coins';
-  groups: number[];
-  flown: number;
+  items: number;
+  flown: boolean;
   firstTry: boolean;
   /** Coins launched so far (0–3); each lands COIN_FLY_MS later. */
   coinsOut: number;
@@ -508,14 +508,13 @@ export class ServiceController {
   }
 
   /**
-   * Eat sequence (SPEC §5.6, D101): food flies into the mouth in groups (≤ 5 counted one by one,
-   * else rows of five and the total), three chews, the monster's reaction and thanks, then 3 coins
+   * Eat sequence (SPEC §5.6, D101, D103): the whole plate flies into the mouth together and the
+   * monster says the answer once (no per-item counting), three chews, the monster's reaction and thanks, then 3 coins
    * fly to the jar. Any tap skips straight to the coins; a tap during the coins lands them at once.
    */
   private async runEat(my: number): Promise<void> {
     // The monster eats the plate as served: the tray total (for `7 + ? = 10`, all ten), SPEC §5.6.
     const n = this.trayTask().expected.cells;
-    const groups = eatGroups(n);
     const lines = this.lines();
     let skipped = false;
     let wake: (() => void) | null = null;
@@ -538,27 +537,22 @@ export class ServiceController {
       bubble: null,
       counting: false,
       glow: [],
-      eat: { step: 'fly', groups, flown: 0, firstTry: this.lastOutcome === 'first', coinsOut: 0 },
+      eat: { step: 'fly', items: n, flown: false, firstTry: this.lastOutcome === 'first', coinsOut: 0 },
     });
     // Let the bell ring out before the monster's first word (D86).
     await skippable(BELL_LEAD_MS);
     if (!alive()) return;
 
-    // Fly: one group at a time; ≤ 5 items are counted as they go in, more are named at the end.
-    for (let i = 0; i < groups.length && !skipped; i++) {
-      this.set((s) => ({ eat: { ...s.eat!, flown: i + 1 } }));
-      if (n <= 5) {
-        const word = numberToWords(i + 1);
-        this.set({ caption: `${word[0]!.toUpperCase()}${word.slice(1)}…` });
-        this.d.countAloud(word);
-      }
+    // Fly: the whole plate at once, and the monster says the answer (the green number on the
+    // ticket, D96) once; counting each item aloud tripped over itself (D103).
+    const answer = say('eat.total', { n: this.order.problem.answer });
+    if (!skipped) {
+      this.set((s) => ({ caption: answer, eat: { ...s.eat!, flown: true } }));
+      void this.talk(answer);
       await skippable(flyMs(n));
       if (!alive()) return;
     }
-    const total = say('eat.total', { n });
     if (!skipped) {
-      this.set({ caption: total });
-      if (n > 5) void this.talk(total);
       // Chew ×3.
       this.set((s) => ({ eat: { ...s.eat!, step: 'chew' } }));
       this.d.sfx.munch();
@@ -576,7 +570,7 @@ export class ServiceController {
     }
 
     // Coins fly to the jar one by one (SPEC §9); a tap lands the rest at once.
-    this.set((s) => ({ mood: 'delight', eat: { ...s.eat!, step: 'coins', flown: groups.length } }));
+    this.set((s) => ({ mood: 'delight', eat: { ...s.eat!, step: 'coins', flown: true } }));
     const base = this.landed;
     for (let k = 1; k <= COINS_PER_PROBLEM; k++) {
       this.set((s) => ({ eat: { ...s.eat!, coinsOut: k } }));

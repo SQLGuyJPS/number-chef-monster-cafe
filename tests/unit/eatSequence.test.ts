@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { REGULARS } from '../../src/engine/monsters';
 import { buildService } from '../../src/engine/session';
+import { numberToWords } from '../../src/engine/numberWords';
 import { ServiceController, type ServiceDeps, type ServiceSummary } from '../../src/game/service/controller';
 
 // SPEC §5.6, §9, D101: fly → chew → react → coins, any tap skips to the coins, the tip on completion.
@@ -62,14 +63,13 @@ function rig() {
 }
 
 describe('eat sequence (SPEC §5.6, D101)', () => {
-  it('greets on arrival, flies, counts small plates, chews, reacts, then 3 coins land; tip at the end', async () => {
+  it('greets on arrival, flies, says the answer once, chews, reacts, then 3 coins land; tip at the end', async () => {
     const { c, log, tick, done, coins, serveRight, orders } = rig();
     c.start();
     expect(log).toContain('arrive');
     expect(log.some((l) => l.endsWith(`:${orders[0]!.monster}:hello from ${orders[0]!.monster}`))).toBe(true);
     serveRight();
     log.length = 0; // the building taps' counts
-    const n = c.probe().expectedCells;
     const steps = new Set<string>();
     for (let i = 0; i < 60 && c.probe().index === 0; i++) {
       const e = c.getView().eat;
@@ -77,7 +77,10 @@ describe('eat sequence (SPEC §5.6, D101)', () => {
       await tick();
     }
     expect([...steps]).toEqual(['fly', 'chew', 'react', 'coins']);
-    if (n <= 5) expect(log.filter((l) => l.startsWith('count:'))).toHaveLength(n);
+    // The whole plate goes in at once and the monster says only the answer (D103).
+    expect(log.filter((l) => l.startsWith('count:'))).toHaveLength(0);
+    const said = numberToWords(orders[0]!.problem.answer);
+    expect(log.filter((l) => l.toLowerCase().endsWith(`:${said}!`))).toHaveLength(1);
     expect(log).toContain('munch');
     expect(log.some((l) => l.includes(`thanks from ${orders[0]!.monster}`))).toBe(true);
     expect(log.filter((l) => l === 'coin')).toHaveLength(3);
