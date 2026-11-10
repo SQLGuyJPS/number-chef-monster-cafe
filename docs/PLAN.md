@@ -1,6 +1,6 @@
 # Build plan — Number Chef: Monster Café
 
-Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**, waiting for the owner's M1 playtest. Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
+Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**; M1 playtest rounds 1–7 and the gear popup recorded in PLAYTEST.md (last 2026-11-09). **M2 done 2026-11-10** (started 2026-11-09); waiting for the M2 playtest. Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
 
 ---
 
@@ -142,27 +142,28 @@ Order inside each milestone is the order I will work in. Every milestone ends wi
 - [x] `attempt` and `coin` event shapes fixed (`src/engine/events.ts`, key-set test)
 
 ### M2 — Café service (5.0 h)
-1. Engine: session builder (§4.1): pool + ops filter, box weights, new-fact cap and difficulty order, no-repeat window (requeues exempt), food/monster rules, add/sub balance, requeue placement and append, pool-size guard; determinism tests.
-2. Engine: A3 generator + make-ten demo; taken-away row for `10 − ? = a`; `known` preset.
-3. Service state machine: 6 orders, queue silhouettes, requeue = same monster returns, warm-up order with ghost hand (flag in `meta`), coins in memory (§2 item 4).
-4. Art: `MonsterSpec` data + six hand-authored SVG monsters × idle/delight/eat/puzzled/sleepy, reactions, reduced-motion static poses; Pip (hand-authored art replacing the placeholder Pip from D90); café background with fallback placeholders.
-5. Eat sequence (≤ 4 s, skippable), coin flight, all SFX (§8.3), voice lines.
-6. Screens: Home (coin jar, Open the Café), Menu board (Little Menu only, A1–A3 tiles, last-played glow, A1 on first run), Results (tally, Another service / Change dish / Home).
-7. `lint:content` monster validation; `content:table` → `docs/CONTENT_REVIEW.md`.
-8. E2E full matrix (Chromium iPad Pro 11 + Pixel 7, WebKit iPad gen 7 + iPhone 13, portrait variants), CDP drag incl. rotated portrait, ≤ 2 taps to first order, Another service / Change dish, monster screenshot grid, throttle report.
-9. Screenshots, PLAYTEST (service length timing, monster appeal, voices on three devices), commit, stop.
+1. *(done 2026-11-09, D97)* Engine: session builder (§4.1): pool + ops filter, box weights, new-fact cap and difficulty order, no-repeat window (requeues exempt), food/monster rules, add/sub balance, requeue placement and append, pool-size guard; determinism tests.
+2. *(done 2026-11-09, D98)* Engine: A3 generator + make-ten demo; taken-away row for `10 − ? = a`; `known` preset (in step 1).
+3. *(done 2026-11-09, D99)* Service state machine: 6 orders, queue silhouettes, requeue = same monster returns, warm-up order with ghost hand (flag in `meta`), coins in memory (§2 item 4). The jar UI comes with Home in step 6.
+4. *(done 2026-11-09, D100)* Art: `MonsterSpec` data + six hand-authored SVG monsters × idle/delight/eat/puzzled/sleepy, reactions, reduced-motion static poses; Pip (hand-authored art replacing the placeholder Pip from D90); café background with fallback placeholders.
+5. *(done 2026-11-09, D101)* Eat sequence (≤ 4 s, skippable), coin flight, all SFX (§8.3), voice lines. On a correct serve the ticket's blank becomes the answer in green (D96; done first, 2026-11-09).
+6. *(done 2026-11-09 except the art)* Screens: Home (coin jar, in memory until M3a), Open the Café), Menu board (Little Menu only, A1–A3 tiles; no last-played glow, D83), Results (CLOSED sign, spoken tally, monsters served as faces, Another service / Change dish / Home). Faces show the monsters served.
+7. *(done 2026-11-09)* `lint:content` monster validation (palette contrast, bodies/extras, favourites, reactions, voice below Pip, lines, all five expressions drawn and distinct); `content:table` → `docs/CONTENT_REVIEW.md`.
+8. *(done 2026-11-10)* E2E full matrix (Chromium iPad Pro 11 + Pixel 7, WebKit iPad gen 7 + iPhone 13, portrait variants), CDP drag incl. rotated portrait, ≤ 2 taps to first order, Another service / Change dish, monster screenshot grid, throttle report.
+9. *(done 2026-11-10)* Screenshots, PLAYTEST (service length timing, monster appeal, voices on three devices), commit, stop.
 
 **Accept (SPEC §14 M2)**
-- [ ] deterministic service from seed
-- [ ] no adjacent repeats; at most 3 new facts per service
-- [ ] each monster renders at all five expressions (screenshot grid)
-- [ ] eat + react ≤ 4 s and skippable
-- [ ] reduced-motion variant verified
-- [ ] 4× CPU throttle frame report produced (not a gate)
-- [ ] full e2e device matrix incl. CDP drag in rotated portrait
-- [ ] first run reaches the first order in ≤ 2 taps after Splash
-- [ ] Another service repeats the skill; Change dish returns to the menu
-- [ ] content table generated
+- [x] deterministic service from seed (`tests/unit/session.test.ts`)
+- [x] no adjacent repeats; at most 3 new facts per service (500 seeds × A1/A2 × ops)
+- [x] each monster renders at all five expressions (screenshot grid `docs/screens/M2/monster-grid.png`; `m2.spec.ts`; lint:content)
+- [x] eat + react ≤ 4 s and skippable (`tests/unit/eat.test.ts` for every answer 1–20; `m2.spec.ts` in real time)
+- [x] reduced-motion variant verified (`m2.spec.ts` gallery test: no monster animation, still poses)
+- [x] 4× CPU throttle frame report produced (not a gate): `docs/perf/M2-throttle.md`
+- [x] full e2e device matrix incl. CDP drag in rotated portrait (`m2-matrix.spec.ts`, six projects incl. Pixel 7)
+- [x] first run reaches the first order in ≤ 2 taps after Splash (`m2-matrix.spec.ts`)
+- [x] Another service repeats the skill; Change dish returns to the menu (e2e)
+- [x] content table generated (`docs/CONTENT_REVIEW.md`)
+- [ ] correct serve shows the answer in green in place of the dashed blank (D96, e2e)
 
 ### M3a — Persistence and fact boxes (2.0 h)
 1. Engine: `replay` / `applyEvent`, coin totals (§11.2), fact boxes (D29 rules), `skillConfig` last-writer-wins; property test applyEvent ≡ replay.

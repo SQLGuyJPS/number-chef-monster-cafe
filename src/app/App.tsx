@@ -1,15 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { ServiceScreen } from '../game/service/ServiceScreen';
-import { planOrders, type Order } from '../engine/plan';
+import type { ServiceSummary } from '../game/service/controller';
+import { REGULARS } from '../engine/monsters';
+import { buildService, knownPreset, withWarmUp, type Order } from '../engine/session';
 import { ORDERS_PER_SERVICE } from '../engine/config';
-import { hashSeed, mulberry32 } from '../engine/rng';
+import { hashSeed } from '../engine/rng';
 import type { SkillId } from '../engine/types';
 import { newId } from '../storage/ids';
 import { configFor, loadSkillConfigs, type SkillConfigs } from './skillConfig';
 import { getStorageBoot, takeSeedOverride } from './runtime';
 import { Stage } from './Stage';
+import { CafeScene } from '../art/CafeScene';
 import { Splash } from './screens/Splash';
 import { Home } from './screens/Home';
+import { Results } from './screens/Results';
 import { Menu } from './screens/Menu';
 import { BreakDialog } from './BreakDialog';
 import { ParentScreen } from './ParentScreen';
@@ -20,15 +24,18 @@ import { setCurrentScreen } from './runtime';
 import { hush } from '../audio/speech';
 import type { ScreenId } from './pwaPolicy';
 
-type AppScreen = Extract<ScreenId, 'splash' | 'home' | 'menu' | 'service' | 'parent'>;
+type AppScreen = Extract<ScreenId, 'splash' | 'home' | 'menu' | 'service' | 'results' | 'parent'>;
 
 interface RunningService {
   svc: string;
   skill: SkillId;
+  seed: number;
   orders: Order[];
 }
 
 let serviceCounter = 0;
+/** Facts introduced earlier in this app session (stand-in for the M3a event log, D97). */
+const introducedThisSession = new Set<string>();
 
 export function App({ allowRotate }: { allowRotate: boolean }) {
   const [screen, setScreen] = useState<AppScreen>('splash');
@@ -39,6 +46,11 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   const [configs, setConfigs] = useState<SkillConfigs>({});
   const [deviceId, setDeviceId] = useState('memory');
   const [service, setService] = useState<RunningService | null>(null);
+  /** The coin jar. In memory until M3a derives it from `coin` events (D51). */
+  const [coins, setCoins] = useState(0);
+  const [results, setResults] = useState<ServiceSummary | null>(null);
+  /** First-ever warm-up order already shown on this device (SPEC §5.4, D26); `meta` store. */
+  const [warmupShown, setWarmupShown] = useState(true);
 
   // Stage/operations per skill from the ?debug picker (D52); read whenever the menu opens so the
   // tile tap can start the service synchronously, inside the user gesture.
@@ -47,8 +59,10 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
     let live = true;
     void getStorageBoot()?.then(async (boot) => {
       const c = await loadSkillConfigs(boot.storage);
+      const warm = (await boot.storage.getMeta('warmupShown')) === true;
       if (!live) return;
       setConfigs(c);
+      setWarmupShown(warm);
       setDeviceId(boot.deviceId);
     });
     return () => {
@@ -95,8 +109,29 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
     const cfg = configFor(configs, skill);
     // SPEC §4.1 step 1: seed from device, start time and a per-device counter (the e2e hook may pin it).
     const seed = takeSeedOverride() ?? hashSeed(deviceId, Date.now(), ++serviceCounter);
-    const orders = planOrders(mulberry32(seed), skill, cfg.ops, cfg.stage, ORDERS_PER_SERVICE);
-    setService({ svc: newId(), skill, orders });
+    // Until M3a there is no event log: boxes come from the known preset, and facts introduced
+    // earlier in this app session count as seen so later services move on (D97).
+    const boxes = knownPreset(skill);
+    const seen = new Set([...boxes.keys(), ...introducedThisSession]);
+    const plan = buildService({
+      seed,
+      skill,
+      ops: cfg.ops,
+      stage: cfg.stage,
+      orders: ORDERS_PER_SERVICE,
+      boxes,
+      seen,
+      monsters: REGULARS,
+    });
+    plan.newFacts.forEach((k) => introducedThisSession.add(k));
+    // The warm-up runs once per device; the flag is set as it starts, so leaving early never
+    // shows it again (SPEC §5.4).
+    const orders = warmupShown ? plan.orders : withWarmUp(plan.orders, REGULARS);
+    if (!warmupShown) {
+      setWarmupShown(true);
+      void getStorageBoot()?.then((boot) => boot.storage.setMeta('warmupShown', true));
+    }
+    setService({ svc: newId(), skill, seed, orders });
     go('service');
   };
 
@@ -105,6 +140,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
 
   return (
     <Stage allowRotate={allowRotate} background={<div className="cafe-backdrop" />}>
+      <CafeScene />
       {screen === 'splash' && (
         <Splash
           onStart={() => {
@@ -114,7 +150,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
         />
       )}
       {screen === 'home' && (
-        <Home coins={0} onOpen={() => go('menu')} onGear={() => setGearOpen(true)} />
+        <Home coins={coins} onOpen={() => go('menu')} onGear={() => setGearOpen(true)} />
       )}
       {screen === 'home' && gearOpen && (
         <GearDialog
@@ -132,11 +168,26 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
         <ServiceScreen
           key={service.svc}
           orders={service.orders}
+          seed={service.seed}
           svc={service.svc}
           dev={deviceId}
+          jar={coins}
           onDoor={() => setBreakOpen(true)}
-          // M1 ends a service back on the menu board; Results arrive in M2 (D66).
-          onDone={() => go('menu')}
+          onCoins={(n) => setCoins((c) => c + n)}
+          onDone={(summary) => {
+            setResults(summary);
+            go('results');
+          }}
+        />
+      )}
+      {screen === 'results' && service && results && (
+        <Results
+          coins={results.coins}
+          monsters={results.monsters}
+          // SPEC §5.7: Another service repeats the skill; Change dish goes back to the menu board.
+          onAnother={() => startService(service.skill)}
+          onChangeDish={() => go('menu')}
+          onHome={() => go('home')}
         />
       )}
       {breakOpen && (

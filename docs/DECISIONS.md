@@ -103,3 +103,9 @@
 | D93 | Monster's move between spots is 550 ms | SPEC §7.3 | Code and D91 text disagreed; owner confirmed 550 ms |
 | D94 | Home gear opens playtest tools before M3a (long-press 2 s, no gate) | SPEC §2.2, §5.2, §12, §14; amended by D95 | Installed app can't open `?debug`; iOS storage is per app |
 | D95 | Gear tap opens a hold-to-open popup with a filling ring; gear 88 px with real gear art | SPEC §2.2, §5.2, §12, §14 | Hold on the small gear gave no feedback and failed on devices |
+| D96 | Correct serve fills the ticket blank with the answer in green | SPEC §5.4, §14 (M2) | Show the finished true sentence at the moment of success |
+| D97 | Session builder gaps: balance-aware new facts, requeue fallback, in-memory seen until M3a | SPEC §4.1 | New-fact cap and add/sub balance conflict on the first service |
+| D98 | A3: make-ten demo lines, subtraction counts back, missing-subtrahend demo ends on what went away | SPEC §4, §5.5 | Make-ten demo and A3 subtraction strategy were open |
+| D99 | Warm-up: ghost keeps pointing until touched, flag set at start, its monster and food | SPEC §5.4 | "Taps the bin once" left the idle child and the flag timing open |
+| D100 | Monster art: shared face parts, still puzzled tilt, named ~1.4 s reactions, reduced motion = still poses, `?gallery`, café scene | SPEC §7.2, §7.4 | Look and motion of the five expressions were open |
+| D101 | Eat sequence: eats the tray total, timings, skip to coins, service jar, greetings on first visit, monster voices, +5 tip paid | SPEC §5.6, §7.2, §9 | Timings, what is eaten on missing-amount forms, and when monster lines play were open |

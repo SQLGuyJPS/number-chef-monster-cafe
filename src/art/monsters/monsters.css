@@ -1,0 +1,120 @@
+/* Monster motion (SPEC §7.2): CSS transforms only. Reduced motion drops every animation and keeps
+   the expression's still pose (and any reaction extras in their resting place). */
+.monster-art svg {
+  display: block;
+  overflow: visible;
+}
+.monster-art .m-figure,
+.monster-art .m-eyes,
+.monster-art .m-chew,
+.monster-art .m-fx {
+  transform-box: fill-box;
+}
+.monster-art .m-figure {
+  transform-origin: 50% 100%;
+}
+.monster-art .m-eyes,
+.monster-art .m-chew {
+  transform-origin: 50% 50%;
+}
+
+/* idle: gentle bob and an occasional blink */
+.monster-art.expr-idle .m-figure {
+  animation: m-bob 2.4s ease-in-out infinite;
+}
+.monster-art.expr-idle .m-eyes {
+  animation: m-blink 4.2s linear infinite;
+}
+/* puzzled: head tilt (a still pose, so it reads with reduced motion too) */
+.monster-art.expr-puzzled .m-figure {
+  transform: rotate(-9deg);
+}
+/* eat: three chews */
+.monster-art.expr-eat .m-chew {
+  animation: m-chew 0.42s ease-in-out 3;
+}
+/* sleepy: slow breathing, drifting z's */
+.monster-art.expr-sleepy .m-figure {
+  animation: m-breathe 3.6s ease-in-out infinite;
+}
+.monster-art.expr-sleepy .m-zzz {
+  animation: m-zzz 3s ease-in-out infinite;
+}
+
+@keyframes m-bob {
+  50% { transform: translateY(-4px) scaleY(1.02); }
+}
+@keyframes m-blink {
+  0%, 93%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.1); }
+}
+@keyframes m-chew {
+  50% { transform: scaleY(0.35); }
+}
+@keyframes m-breathe {
+  50% { transform: scale(1.03, 0.97); }
+}
+@keyframes m-zzz {
+  0% { opacity: 0.3; transform: translate(-6px, 6px); }
+  50% { opacity: 1; }
+  100% { opacity: 0.3; transform: translate(4px, -6px); }
+}
+
+/* Reactions (one per monster, ≈ 1.4 s so eat + react stays ≤ 4 s, SPEC §5.6). */
+.monster-art.react-melt .m-figure { animation: r-melt 1.4s ease-in-out; }
+.monster-art.react-stomp .m-figure { animation: r-stomp 1.4s ease-in-out; }
+.monster-art.react-spin .m-figure { transform-origin: 50% 50%; animation: r-spin 1.2s ease-in-out; }
+.monster-art.react-hearts .m-figure { animation: r-float 1.4s ease-in-out; }
+.monster-art.react-burp .m-figure { animation: r-burp 1.4s ease-in-out; }
+.monster-art.react-puddle .m-figure { animation: r-puddle 1.4s ease-in-out; }
+.monster-art .m-hearts { animation: r-hearts 1.4s ease-out forwards; }
+.monster-art .m-burp { transform-origin: 30% 80%; animation: r-bubble 1.4s ease-out forwards; }
+
+@keyframes r-melt {
+  35%, 65% { transform: scale(1.25, 0.62); }
+}
+@keyframes r-stomp {
+  12% { transform: translateY(-20px); }
+  22% { transform: translateY(0) scale(1.06, 0.92); }
+  28% { transform: rotate(-3deg); }
+  34% { transform: rotate(3deg); }
+  40% { transform: rotate(0); }
+  55%, 85% { transform: scale(1.03, 0.97); }
+  70% { transform: scale(0.98, 1.02); }
+}
+@keyframes r-spin {
+  15% { transform: scaleX(-1) translateY(-8px); }
+  30% { transform: scaleX(1) translateY(-14px); }
+  45% { transform: scaleX(-1) translateY(-14px); }
+  60% { transform: scaleX(1) translateY(-8px); }
+}
+@keyframes r-float {
+  40%, 70% { transform: translateY(-24px); }
+}
+@keyframes r-hearts {
+  0% { opacity: 0; transform: translateY(20px) scale(0.6); }
+  30% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-24px) scale(1); }
+}
+@keyframes r-burp {
+  20% { transform: scale(1.08, 0.94); }
+  40% { transform: scale(0.96, 1.04); }
+}
+@keyframes r-bubble {
+  0%, 15% { opacity: 0; transform: scale(0.2); }
+  60% { opacity: 1; transform: scale(1); }
+  80% { opacity: 1; transform: scale(1.15); }
+  100% { opacity: 0; transform: scale(1.3); }
+}
+@keyframes r-puddle {
+  30%, 50% { transform: scale(1.5, 0.3); }
+  70% { transform: scale(0.9, 1.15); }
+  85% { transform: scale(1.05, 0.95); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .monster-art *,
+  .monster-art {
+    animation: none !important;
+  }
+}

@@ -128,6 +128,16 @@
 .tok-result {
   color: var(--c-role-result);
 }
+.tok-solved {
+  /* D96: the answer replaces the dashed blank in result green, whatever the blank's role colour. */
+  color: var(--c-role-result);
+  animation: tok-solved-pop 320ms ease-out;
+}
+@keyframes tok-solved-pop {
+  from { transform: scale(0.4); opacity: 0; }
+  70% { transform: scale(1.15); opacity: 1; }
+  to { transform: scale(1); }
+}
 .tok-blank {
   display: inline-block;
   width: 60px;
@@ -524,6 +534,65 @@
   transform: scale(1.1);
   filter: drop-shadow(0 6px 4px rgba(0, 0, 0, 0.25));
 }
+.eat-flight {
+  position: absolute;
+  width: 88px;
+  height: 88px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-emoji);
+  font-size: 60px;
+  line-height: 1;
+  pointer-events: none;
+  z-index: 20;
+  animation: eat-fly 0.34s ease-in forwards;
+}
+@keyframes eat-fly {
+  to {
+    transform: translate(var(--dx), var(--dy)) scale(0.3);
+    opacity: 0;
+  }
+}
+/* Coins arc from the monster to the jar (SPEC §9). */
+.coin-flight {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--c-coin);
+  box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+  z-index: 21;
+  animation: coin-fly 0.45s ease-in forwards;
+}
+@keyframes coin-fly {
+  0% { transform: translate(0, 0) scale(0.6); }
+  35% { transform: translate(calc(var(--dx) * 0.3), calc(var(--dy) * 0.1 - 60px)) scale(1.1); }
+  90% { transform: translate(var(--dx), var(--dy)) scale(0.8); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(0.5); opacity: 0; }
+}
+.service-jar {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 24px;
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--c-ink);
+  pointer-events: none;
+}
+.service-jar .coin-icon {
+  width: 48px;
+  height: 48px;
+}
+/* First-try serve: the same reaction, a little bigger (visual only, D45). */
+.monster-art.big svg {
+  transform: scale(1.12);
+  transform-origin: 50% 100%;
+}
 .skip-layer {
   position: absolute;
   inset: 0;
@@ -539,13 +608,6 @@
 .monster-slot.mood-arrive {
   animation: arrive 0.5s ease-out;
 }
-.monster-slot.mood-puzzled > div {
-  transform: rotate(-12deg);
-  transition: transform 0.25s ease;
-}
-.monster-slot.mood-delight > div {
-  animation: delight 0.5s ease-in-out 2;
-}
 .monster-slot.mood-leave {
   transition: opacity 0.3s ease, transform 0.3s ease;
   opacity: 0;
@@ -554,8 +616,34 @@
 @keyframes arrive {
   from { transform: translateX(-160px); opacity: 0; }
 }
-@keyframes delight {
-  50% { transform: translateY(-26px) scale(1.06); }
+
+/* Warm-up ghost hand (SPEC §5.4, D26): taps in place over the bin or the bell. */
+.ghost-hand {
+  position: absolute;
+  z-index: 30;
+  pointer-events: none;
+  animation: ghost-tap 1.4s ease-in-out infinite;
+  transform-origin: 34px 10px;
+}
+.ghost-ripple {
+  position: absolute;
+  left: 4px;
+  top: -20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 5px solid rgba(255, 255, 255, 0.9);
+  opacity: 0;
+  animation: ghost-ripple 1.4s ease-out infinite;
+}
+@keyframes ghost-tap {
+  0%, 100% { transform: translate(14px, 18px); }
+  45%, 55% { transform: translate(0, 0) scale(0.94); }
+}
+@keyframes ghost-ripple {
+  0%, 45% { transform: scale(0.4); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: scale(1.4); opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

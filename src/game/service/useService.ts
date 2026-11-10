@@ -3,10 +3,17 @@ import { getTimeScale, setServiceProbe } from '../../app/runtime';
 import { PIP_PITCH, countAloud, hush, speakText } from '../../audio/speech';
 import { sfx } from '../../audio/sfx';
 import { newId } from '../../storage/ids';
+import { specFor } from '../../art/monsters/specs';
 import { ServiceController, type ServiceDeps, type ServiceOptions } from './controller';
 
 const browserDeps: ServiceDeps = {
-  speak: (text, who) => speakText(text, who === 'pip' ? { pitch: PIP_PITCH } : {}),
+  // Pip's pitch, or the monster's own voice (SPEC §7.2).
+  speak: (text, who, monster) =>
+    speakText(text, who === 'pip' ? { pitch: PIP_PITCH } : monster ? { ...specFor(monster).voice } : {}),
+  lines: (monster) => {
+    const s = specFor(monster);
+    return { arrive: s.lines.arrive[0] ?? '', thanks: s.lines.thanks[0] ?? '', burps: s.reactions.includes('burp') };
+  },
   countAloud,
   hush,
   sfx,

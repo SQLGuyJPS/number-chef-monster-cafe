@@ -57,7 +57,15 @@ button {
 .cafe-backdrop {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, var(--c-wall) 0 72%, var(--c-floor) 72% 100%);
+  /* Wallpaper stripes; the floor and decorations are the CafeScene SVG in the safe box (SPEC §7.4). */
+  background: repeating-linear-gradient(90deg, var(--c-wall) 0 36px, #fdd99a 36px 72px);
+}
+.cafe-scene {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  pointer-events: none;
 }
 
 .screen {
@@ -180,6 +188,75 @@ button {
 /* Brightens under the finger so a grown-up can tell the gear was hit (D95). */
 .gear:active {
   opacity: 0.7;
+}
+
+/* ---- Results (SPEC §5.7) ---- */
+.closed-sign {
+  position: absolute;
+  left: 440px;
+  top: 32px;
+  width: 400px;
+  text-align: center;
+  font-size: 80px;
+  font-weight: 700;
+  color: var(--c-chalk-ink);
+  background: var(--c-chalk);
+  border-radius: var(--radius);
+  padding: 8px 0;
+  animation: sign-flip 0.6s ease-out;
+}
+@keyframes sign-flip {
+  from { transform: rotateX(90deg); }
+  to { transform: rotateX(0deg); }
+}
+.results-tally {
+  position: absolute;
+  left: 490px;
+  top: 190px;
+  width: 300px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  border-radius: var(--radius);
+  background: var(--c-paper);
+  font-size: 96px;
+  font-weight: 700;
+}
+.results-tally .coin-icon {
+  width: 80px;
+  height: 80px;
+}
+.results-faces {
+  position: absolute;
+  left: 140px;
+  top: 360px;
+  width: 1000px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+.results-another,
+.results-change,
+.results-home {
+  position: absolute;
+  top: 520px;
+  height: 160px;
+  font-size: 44px;
+}
+.results-another {
+  left: 470px;
+  width: 340px;
+  box-shadow: 0 0 0 8px var(--c-coin);
+}
+.results-change {
+  left: 120px;
+  width: 300px;
+}
+.results-home {
+  left: 860px;
+  width: 300px;
 }
 
 /* ---- Gear popup: hold the circle to open the grown-ups' screen (D95) ---- */
@@ -399,4 +476,20 @@ html.debug-mode #root {
   border: 2px solid currentColor;
   border-radius: 14px;
   background: var(--c-bg);
+}
+
+/* ?gallery monster sheet (look-only, scrolls like ?debug). */
+.gallery {
+  padding: 16px;
+  background: var(--c-wall);
+  min-height: 100vh;
+}
+.gallery th {
+  font-size: 16px;
+  padding: 4px 8px;
+}
+.gallery td {
+  padding: 4px;
+  background: #fff6e4;
+  border-radius: 12px;
 }

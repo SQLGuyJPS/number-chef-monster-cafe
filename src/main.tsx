@@ -6,6 +6,7 @@ import './app/theme.css';
 import './app/global.css';
 import { App } from './app/App';
 import { DebugScreen } from './app/DebugScreen';
+import { MonsterGallery } from './app/MonsterGallery';
 import { parseFlags } from './app/flags';
 import { installTouchHardening } from './game/input/touchHardening';
 import { installPointerGuard } from './game/input/pointerGuard';
@@ -23,7 +24,7 @@ if (import.meta.env.VITE_E2E === '1') {
 setStorageBoot(openStorage(() => Date.now()));
 initPwa(getCurrentScreen, lastInputAt);
 
-if (flags.debug) {
+if (flags.debug || flags.gallery) {
   document.documentElement.classList.add('debug-mode');
 } else {
   installTouchHardening(document);
@@ -34,5 +35,13 @@ if (flags.debug) {
 const root = createRoot(document.getElementById('root')!);
 
 root.render(
-  <StrictMode>{flags.debug ? <DebugScreen /> : <App allowRotate={flags.allowRotate} />}</StrictMode>,
+  <StrictMode>
+    {flags.gallery ? (
+      <MonsterGallery />
+    ) : flags.debug ? (
+      <DebugScreen />
+    ) : (
+      <App allowRotate={flags.allowRotate} />
+    )}
+  </StrictMode>,
 );

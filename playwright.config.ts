@@ -1,8 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// SPEC §13.5. E2E runs against the production build with VITE_E2E=1 (CLAUDE.md). M0/M1 run a
-// narrow set: Chromium + WebKit iPad landscape, plus portrait variants for the rotated stage and an
-// iPhone landscape project for 844×390 tap sizes. The full matrix and CDP drag arrive in M2 (D36).
+// SPEC §13.5. E2E runs against the production build with VITE_E2E=1 (CLAUDE.md). The full matrix
+// from M2: Chromium iPad Pro 11 and Pixel 7 landscape, WebKit iPad gen 7 and iPhone 13 landscape,
+// and portrait variants for the rotated stage. Long flows run on the two iPads; the matrix spec
+// (m2-matrix) runs on every project, with CDP drag on every Chromium one (D36).
 const PORT = 4173;
 
 const chromiumAs = (d: (typeof devices)[string]) => ({
@@ -32,6 +33,7 @@ export default defineConfig({
       name: 'webkit-iphone-13',
       use: { ...devices['iPhone 13 landscape'], viewport: { width: 844, height: 390 } },
     },
+    { name: 'chromium-pixel-7', use: chromiumAs(devices['Pixel 7 landscape']) },
     { name: 'chromium-ipad-portrait', use: chromiumAs(devices['iPad Pro 11']) },
     {
       name: 'webkit-iphone-portrait',

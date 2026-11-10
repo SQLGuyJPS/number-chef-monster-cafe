@@ -26,3 +26,21 @@ export const COINS_PER_PROBLEM = 3;
 
 /** A1 targets ~55/45 add/sub when ops = both (SPEC §1.2). */
 export const A1_ADD_SHARE = 0.55;
+
+/** Sampling weight per fact box 0–4; new facts weigh as box 0 (SPEC §4.1 step 4). */
+export const BOX_WEIGHTS: readonly number[] = [5, 3, 2, 1, 0.5];
+
+/** New facts introduced per service, at most (SPEC §4.1 step 4, D29). */
+export const MAX_NEW_FACTS = 3;
+
+/** Requeues per service, at most (SPEC §4.1 step 7). */
+export const MAX_REQUEUES = 2;
+
+/** The monster asks for a favourite food this often (SPEC §4.1 step 6). */
+export const FAVORITE_FOOD_SHARE = 0.7;
+
+/** Warm-up order: the ghost hand shows the next step after this much idle time (SPEC §5.4, D26). */
+export const WARMUP_GHOST_IDLE_MS = 4000;
+
+/** Service tip on completion (SPEC §9): a 6-monster service pays 6 × 3 + 5 = 23. */
+export const SERVICE_TIP = 5;

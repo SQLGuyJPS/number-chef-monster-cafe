@@ -133,10 +133,14 @@ Notes:
   A hair too quick → slowed (D91). The waiting line reappeared under the monster as it walked back after count-together → line stays hidden until the monster is home (D91).
 
 ### M1 feedback round 7: quieter counting, slower hand-off (D91)
-- [ ] Pip's demo: only Pip's counting is heard as food goes in or out (no tones). Clear?
-- [ ] Counting-on / counting-back orders (S3): each tap says its number with no tone under it. Does the child still get enough feedback from a tap? Other orders (no counting) keep their tones.
-- [ ] Pip sinking back behind the counter and the monster walking back: the right pace now, or still too quick / now too slow?
-- [ ] After count-together on the first order: does the waiting line stay away until the monster is back in its spot, then fade in without overlapping it?
+- [x] Pip's demo: only Pip's counting is heard as food goes in or out (no tones). Clear?
+  Yes, only Pip's voice. Known issue, left as is by the owner: tapping the next food item before the previous count has finished cuts the counting off, and counting stays silent until the bell is pressed. Speech cancelling/sticking is accepted until recorded voice-overs replace TTS (OPEN_ITEMS, Recordings).
+- [x] Counting-on / counting-back orders (S3): each tap says its number with no tone under it. Does the child still get enough feedback from a tap? Other orders (no counting) keep their tones.
+  Yes.
+- [x] Pip sinking back behind the counter and the monster walking back: the right pace now, or still too quick / now too slow?
+  Good pace.
+- [x] After count-together on the first order: does the waiting line stay away until the monster is back in its spot, then fade in without overlapping it?
+  Yes, looks good.
 
 ## M1 — Playtest tools from the gear (D94)
 2026-11-09: the hold on the gear did nothing and gave no feedback; the gear was too small to tell → D95.
@@ -148,9 +152,39 @@ Notes:
 - [ ] The child doesn't stumble into it.
 
 ## M1 — Gear popup and hold ring (D95)
-- [ ] The gear is easy to find and hit, and looks like a gear.
-- [ ] A tap on the gear opens the popup at once.
-- [ ] Holding the circle fills the ring clockwise from the top and opens the tools when it closes (iPad, iPhone, Android).
-- [ ] Lifting early empties the ring and nothing opens.
-- [ ] **Close**, tapping outside and the back gesture all close the popup.
+2026-11-09 playtest:
+- [x] The gear is easy to find and hit, and looks like a gear.
+- [x] A tap on the gear opens the popup at once.
+- [x] Holding the circle fills the ring clockwise from the top and opens the tools when it closes (iPad, iPhone, Android).
+  Confirmed on the iPhone; iPad and Android not reported.
+- [x] Lifting early empties the ring and nothing opens.
+- [x] **Close**, tapping outside and the back gesture all close the popup.
 - [ ] What does the child do when she taps the gear?
+  Not tested yet.
+
+The D94 list above is covered by this round (the hold now goes through the popup).
+
+## M2 — Café service
+- [ ] Correct serve: the dashed blank on the ticket turns into the answer in green (D96). Does the child notice it and read the finished sentence? Does it help, or is it noise during the eating?
+- [ ] **Perfect Ten (A3)** is now playable from the menu. Do the `7 + ? = 10` orders make sense to the child (blue part on the tray, fill to ten)? Is the ticket read aloud ("Seven plus what equals ten?") understood?
+- [ ] `10 − ? = 6`: the items taken off stay in the small grid left of the tray. Does the child see that grid as the answer? Does tapping it to put one back occur to her?
+- [ ] Pip's make-ten help ("Seven." … "Three empty spots." … "Seven and three more makes ten!"): clear, too long?
+- [ ] Services now pick facts by how well they're known and bring in at most 3 new ones (D97). Until M3a this is remembered only while the app stays open. Do the first services with both operations feel too subtraction-heavy?
+- [ ] **Warm-up (first service on a device only):** a `2 + 1` cookie order comes first. If she waits, a pale hand taps the basket, then (once the cookie is on) points at the bell while Pip says "Ring the bell to serve!". To see it again on a device, it needs a fresh install or storage reset (the reset arrives in M3b). Does the hand help or confuse?
+- [ ] **A monster comes back:** after Pip's full help (the follow-me path), that monster returns 3–5 orders later saying "I'm back! Still hungry!", with one step more support, and the waiting line grows by one. Natural, or confusing?
+- [ ] **Results (closing time):** after the last monster the CLOSED sign flips, the coins count up aloud ("one, two, … ten, fifteen, eighteen!"), and the monsters served stand in a row. Pace of the count right? Does she pick **Another service** (ringed in gold), **Change dish** or **Home**?
+- [ ] **Coin jar on Home:** shows every coin earned since the app was opened (also from a café closed early). It resets on reload until M3a saves it.
+- [ ] **The six monsters** (Blobbo, Gruffles, Zibbit, Mimsy, Chompers, Wobbleton) and the new Pip. Open `…/?gallery` to see all of them with every face. Which does the child like or avoid? Any that look scary? Do the puzzled faces (head tilt, raised brow) read as "hmm", never cross?
+- [ ] Each monster's happy reaction after a correct serve (melts, stomps, spins, floats with hearts, burp bubble, wobbles into a puddle): fun, too long, distracting?
+- [ ] Café background (wallpaper, string lights, window, floor): cosy, or too busy behind the ticket and tray?
+- [ ] With the device's Reduce Motion on, the monsters stand still in their poses (no bob, no reactions).
+- [ ] **Eating:** the food flies into the monster's mouth (small plates counted "one, two, three…", bigger ones by rows and then "Eight!"), it chews, reacts and thanks her, then 3 coins fly to the jar at the bottom right. Too long, or just right? Does she tap to skip it? On `7 + ? = 10` orders the monster eats all ten: does that read right?
+- [ ] **Monster voices:** each monster has its own pitch (Gruffles deep, Mimsy and Zibbit high). Do they sound different enough on the iPad, iPhone and Android? Any voice that sounds odd or hard to understand?
+- [ ] Each monster says hello the first time it comes in a service ("Hee hee. Hello!"). Charming, or does it slow the orders down?
+- [ ] Sounds: a "boing" when a monster arrives, crunching while it chews, a "ting" for each coin, Chompers' burp. Any too loud or annoying?
+- [ ] A finished service now ends with a 5-coin tip: a 6-monster service shows 23 coins on the closing sign.
+- [ ] **Service length:** time a few whole services (6 monsters) from the first order to the CLOSED sign. This sets the play-time limit's "last customer" timing in M3b.
+- [ ] Smoothness on the real iPad: food and coin flights, monster reactions, the café background. (A 4× slowed desktop CPU showed no dropped frames, `docs/perf/M2-throttle.md`, but only the device can tell.)
+- [ ] Not yet in M2, so not a bug: progress and coins reset on reload (M3a saves them); no shop yet (M4).
+- [ ] Skim `docs/CONTENT_REVIEW.md` (sample orders, spoken lines and Pip's demos for A1–A3, and the monsters' lines). Anything that reads oddly aloud?
+

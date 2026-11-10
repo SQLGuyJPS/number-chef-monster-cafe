@@ -17,7 +17,7 @@ const LITTLE_MENU: Tile[] = [
   { id: 'A3', name: 'Perfect Ten', add: '7 + ? = 10', sub: '10 − 4' },
 ];
 
-/** SPEC §5.3. M1: A1 and A2 start a service; A3 arrives in M2 and stays inert until then. */
+/** SPEC §5.3. A1–A3 start a service (M2); later tiles stay inert until their milestone. */
 export function Menu({
   onHome,
   onPick,

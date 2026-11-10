@@ -3,13 +3,23 @@
 // deps. Scripted parts (PlateCount, CountTogether, Worked, eating) await speech that always
 // resolves (SPEC §8.1), so nothing here can hang on a missing `end` event.
 import { initialAttempt, plateCountLine, stepAttempt, trayEditable, type AttemptState, type Outcome } from '../../engine/attempt';
-import { BELL_GUARD_MS, BELL_LEAD_MS, COINS_PER_PROBLEM, HAT_PULSE_IDLE_MS } from '../../engine/config';
+import {
+  BELL_GUARD_MS,
+  BELL_LEAD_MS,
+  COINS_PER_PROBLEM,
+  SERVICE_TIP,
+  HAT_PULSE_IDLE_MS,
+  WARMUP_GHOST_IDLE_MS,
+} from '../../engine/config';
 import { countTogetherTicks, type ModelCell } from '../../engine/countTogether';
 import { buildDemo, followMeCue, type FollowMeCue } from '../../engine/demos';
+import { CHEW_MS, COIN_FLY_MS, COIN_GAP_MS, REACT_MS, eatGroups, flyMs } from '../../engine/eat';
 import { attemptEvent, coinEvent, type FrozenEvt } from '../../engine/events';
 import { numberToWords } from '../../engine/numberWords';
 import { phrase, type PhraseKey, type PhraseParams } from '../../engine/phrases';
-import type { Order } from '../../engine/plan';
+import { REGULARS, type MonsterRef } from '../../engine/monsters';
+import { hashSeed, mulberry32, type Rng } from '../../engine/rng';
+import { withRequeue, type Order } from '../../engine/session';
 import {
   check,
   isStartState,
@@ -28,9 +38,22 @@ import type { TrayTask } from '../../engine/types';
 
 /** S0 cloche (D41, D62): down = number pad; peek = the child lifted it; model = Worked/FollowMe. */
 export type Cloche = 'down' | 'peek' | 'model';
-export type Mood = 'arrive' | 'idle' | 'puzzled' | 'delight' | 'leave';
+export type Mood = 'arrive' | 'idle' | 'puzzled' | 'eat' | 'delight' | 'leave';
 /** Who says the caption line: the monster orders and reacts; Pip gives the help (SPEC §7.3, D90). */
 export type Speaker = 'monster' | 'pip';
+
+/**
+ * The eat sequence (SPEC §5.6, D101): `flown` groups of food have left the tray for the mouth;
+ * then chewing, the reaction (bigger after a first-try serve, D45), and the coins flying to the jar.
+ */
+export interface Eat {
+  step: 'fly' | 'chew' | 'react' | 'coins';
+  groups: number[];
+  flown: number;
+  firstTry: boolean;
+  /** Coins launched so far (0–3); each lands COIN_FLY_MS later. */
+  coinsOut: number;
+}
 
 export interface Flight {
   id: number;
@@ -64,6 +87,9 @@ interface State {
   helpOffer: boolean;
   drag: { x: number; y: number } | null;
   finished: boolean;
+  /** Warm-up order only: the ghost hand points at the next thing to press (SPEC §5.4, D26). */
+  ghost: 'bin' | 'bell' | null;
+  eat: Eat | null;
 }
 
 /** What the screen renders: the state plus everything derived from the engine. */
@@ -79,15 +105,37 @@ export interface ServiceView extends State {
   /** S0 FollowMe typing: the number to enter, for the digit pulse. */
   correctTyped: string | null;
   removed: number;
+  /** Silhouettes in the waiting line: orders still to come, requeues included (SPEC §5.4). */
+  remaining: number;
+  /** Coins earned this service, from its `coin` events (in memory until M3a, D51). */
+  coins: number;
+  /** Coins that have flown into the service jar so far (they land after the reaction). */
+  landed: number;
 }
 
 export interface ServiceDeps {
-  /** Pip speaks in a higher voice so the child hears who is talking (D90). */
-  speak(text: string, who?: Speaker): Promise<void>;
+  /**
+   * Pip speaks in a higher voice so the child hears who is talking (D90); a monster's lines use
+   * that monster's voice (`monster` is its id, SPEC §7.2).
+   */
+  speak(text: string, who?: Speaker, monster?: string): Promise<void>;
   /** Latest-wins counting voice (SPEC §3.3). */
   countAloud(text: string): void;
   hush(): void;
-  sfx: { place(n: number): void; remove(): void; bell(): void; correct(): void; hm(): void; wobble(): void };
+  sfx: {
+    place(n: number): void;
+    remove(): void;
+    bell(): void;
+    correct(): void;
+    hm(): void;
+    wobble(): void;
+    munch(): void;
+    burp(): void;
+    coin(): void;
+    arrive(): void;
+  };
+  /** The monster's own lines and reaction (MonsterSpec, SPEC §7.2). */
+  lines?(monster: string): { arrive: string; thanks: string; burps: boolean };
   /** Monotonic ms. */
   now(): number;
   /** Epoch ms for event timestamps. */
@@ -99,12 +147,26 @@ export interface ServiceDeps {
   clearTimeout(id: number): void;
 }
 
+/** What Results shows (SPEC §5.7): coins earned this service and the monsters served, in order. */
+export interface ServiceSummary {
+  coins: number;
+  monsters: string[];
+}
+
 export interface ServiceOptions {
   orders: Order[];
   svc: string;
   dev: string;
-  onDone: () => void;
+  onDone: (summary: ServiceSummary) => void;
+  /** Coins paid for a completed problem; the jar keeps them even if the café closes early (§5.8). */
+  onCoins?: (n: number) => void;
+  /** The service seed; requeue placement draws from it too, so a seeded service stays deterministic. */
+  seed?: number;
+  monsters?: readonly MonsterRef[];
 }
+
+/** A monster's greeting and thanks when no lines are supplied (unit tests). */
+const NO_LINES = { arrive: '', thanks: '', burps: false };
 
 /** Pip stands beside the monster while help is offered or given (D90). */
 const PIP_PHASES = new Set(['countTogether', 'offerHelp', 'worked', 'followMe']);
@@ -137,11 +199,21 @@ export class ServiceController {
   private ticketTalking = false;
   private disposed = false;
   readonly events: FrozenEvt[] = [];
+  /** The planned orders; an `assisted` order brings its monster back later (SPEC §4.1 step 7). */
+  private orders: Order[];
+  private readonly requeueRng: Rng;
+  /** Monsters that have greeted the chef this service: each says hello on its first visit only. */
+  private greeted = new Set<string>();
+  private lastOutcome: Outcome | null = null;
+  /** Coins that have landed in the service jar (the counter beside the bell). */
+  private landed = 0;
 
   constructor(
     private readonly opts: ServiceOptions,
     private readonly d: ServiceDeps,
   ) {
+    this.orders = opts.orders.slice();
+    this.requeueRng = mulberry32(hashSeed(opts.seed ?? 0, 'requeue'));
     this.lastInput = d.now();
     this.orderStarted = d.now();
     this.s = this.fresh(0);
@@ -167,16 +239,25 @@ export class ServiceController {
     return new Promise((r) => this.d.setTimeout(r, ms * this.d.timeScale()));
   }
 
+  /** Every line goes through here so monster lines get the current monster's voice. */
+  private talk(text: string, who: Speaker = 'monster'): Promise<void> {
+    return this.d.speak(text, who, who === 'monster' ? this.order.monster : undefined);
+  }
+
+  private lines() {
+    return this.d.lines?.(this.order.monster) ?? NO_LINES;
+  }
+
   // ---------- derived ----------
   private get order(): Order {
-    return this.opts.orders[this.s.index]!;
+    return this.orders[this.s.index]!;
   }
   private get stage() {
     return this.order.stage;
   }
   /** The tray shown: S1 builds the unknown; otherwise (and for every demo) the S3 tray (D71). */
   private trayTask(s: State = this.s): TrayTask {
-    const o = this.opts.orders[s.index]!;
+    const o = this.orders[s.index]!;
     return toTrayTask(o.problem, o.stage === 1 && !s.demoTray ? 1 : o.stage === 0 ? 3 : o.stage);
   }
   private entryTask(): TrayTask {
@@ -210,7 +291,8 @@ export class ServiceController {
     const followTyping = this.stage === 0 && s.attempt.phase === 'followMe' && s.s0Typing;
     return {
       ...s,
-      pipOut: PIP_PHASES.has(s.attempt.phase),
+      // Pip also steps out to tell a first-time chef to ring the bell (SPEC §5.4).
+      pipOut: PIP_PHASES.has(s.attempt.phase) || s.ghost === 'bell',
       order: this.order,
       task: this.trayTask(s),
       padMode: this.stage === 0 && s.cloche === 'down',
@@ -219,6 +301,9 @@ export class ServiceController {
       editable: this.editable(s),
       correctTyped: followTyping ? String(this.order.problem.answer) : null,
       removed: removedCount(s.tray),
+      remaining: this.orders.length - s.index - 1,
+      coins: this.events.filter((e) => e.k === 'coin').reduce((n, e) => n + (e as { n: number }).n, 0),
+      landed: this.landed,
     };
   }
 
@@ -227,7 +312,7 @@ export class ServiceController {
     const v = this.snap;
     return {
       index: v.index,
-      orders: this.opts.orders.length,
+      orders: this.orders.length,
       phase: v.attempt.phase,
       speaker: v.speaker,
       pipOut: v.pipOut,
@@ -236,6 +321,15 @@ export class ServiceController {
       form: v.order.problem.form,
       display: v.order.problem.display.join(' '),
       factKey: v.order.problem.factKey,
+      requeue: !!v.order.requeue,
+      warmUp: !!v.order.warmUp,
+      ghost: v.ghost,
+      monster: v.order.monster,
+      remaining: v.remaining,
+      coins: v.coins,
+      landed: v.landed,
+      eat: v.eat,
+      mood: v.mood,
       answer: v.order.problem.answer,
       mode: v.tray.mode,
       filled: v.tray.filled,
@@ -257,7 +351,7 @@ export class ServiceController {
 
   // ---------- lifecycle ----------
   private fresh(index: number): State {
-    const o = this.opts.orders[index]!;
+    const o = this.orders[index]!;
     return {
       index,
       tray: startState(toTrayTask(o.problem, o.stage === 0 ? 3 : o.stage)),
@@ -281,6 +375,8 @@ export class ServiceController {
       helpOffer: false,
       drag: null,
       finished: false,
+      ghost: null,
+      eat: null,
     };
   }
 
@@ -303,16 +399,26 @@ export class ServiceController {
     this.lastInput = this.d.now();
     this.s = this.fresh(index);
     this.set({});
-    this.speakTicket();
+    this.d.sfx.arrive();
+    this.speakTicket(true);
     void this.wait(600).then(() => my === this.script && this.set({ mood: 'idle' }));
   }
 
-  private speakTicket(): void {
+  /** `arrival`: a returning monster first says it is back (SPEC §4.1 step 7); replays skip that. */
+  private speakTicket(arrival = false): void {
     const t = ++this.ticketTok;
     this.ticketTalking = true;
-    void this.d.speak(ticketLine(this.order)).then(() => {
-      if (t === this.ticketTok) this.ticketTalking = false;
-    });
+    const back = arrival && this.order.requeue;
+    // A monster says hello on its first visit this service; a returning one says it is back.
+    const m = this.order.monster;
+    const hello = arrival && !back && !this.greeted.has(m) ? this.lines().arrive : '';
+    if (arrival) this.greeted.add(m);
+    const first = back ? say('order.back') : hello;
+    void (first ? this.talk(first) : Promise.resolve())
+      .then(() => (t === this.ticketTok ? this.talk(ticketLine(this.order)) : undefined))
+      .then(() => {
+        if (t === this.ticketTok) this.ticketTalking = false;
+      });
   }
 
   /**
@@ -335,10 +441,27 @@ export class ServiceController {
       const s = this.s;
       if (s.attempt.phase === 'building' && !s.finished) {
         const idle = this.d.now() - this.lastInput;
-        if (this.stage === 3 && idle > HAT_PULSE_IDLE_MS && !s.hatPulse) this.set({ hatPulse: true });
+        if (this.order.warmUp) this.warmUpIdle(idle);
+        else if (this.stage === 3 && idle > HAT_PULSE_IDLE_MS && !s.hatPulse) this.set({ hatPulse: true });
       }
       this.scheduleIdle();
     }, 1000);
+  }
+
+  /**
+   * Warm-up (SPEC §5.4, D26, D99): after 4 s without a touch the ghost hand taps the bin; once
+   * the item is on the tray, after 4 more idle seconds it hovers over the bell while Pip says what
+   * to do. The ghost only points: the child places the item and presses the bell herself.
+   */
+  private warmUpIdle(idle: number): void {
+    const s = this.s;
+    if (idle < WARMUP_GHOST_IDLE_MS || s.ghost !== null || this.ticketTalking) return;
+    if (!this.canServe(s)) {
+      this.set({ ghost: 'bin' });
+      return;
+    }
+    this.set({ ghost: 'bell', caption: say('warm.bell'), speaker: 'pip' });
+    void this.talk(say('warm.bell'), 'pip');
   }
 
   /** S0 FollowMe: once the cloche tray is complete the digits come back for the final typing (D41). */
@@ -347,13 +470,24 @@ export class ServiceController {
     if (this.stage !== 0 || s.attempt.phase !== 'followMe' || s.s0Typing) return;
     if (followMeCue(s.tray, this.trayTask(s).expected.cells) !== 'bell') return;
     this.s = { ...s, s0Typing: true, cloche: 'down', typed: '', caption: say('follow.type'), speaker: 'pip' };
-    void this.d.speak(say('follow.type'), 'pip');
+    void this.talk(say('follow.type'), 'pip');
   }
 
   // ---------- scripts ----------
+  private ctx() {
+    return { id: () => this.d.newId(), now: () => this.d.wall(), dev: this.opts.dev };
+  }
+
   private record(outcome: Outcome): void {
-    const ctx = { id: () => this.d.newId(), now: () => this.d.wall(), dev: this.opts.dev };
+    const ctx = this.ctx();
     const o = this.order;
+    this.lastOutcome = outcome;
+    // The warm-up order pays the usual coins but writes no `attempt` (SPEC §5.4, D26).
+    this.opts.onCoins?.(COINS_PER_PROBLEM);
+    if (o.warmUp) {
+      this.events.push(coinEvent(ctx, { svc: this.opts.svc, n: COINS_PER_PROBLEM }));
+      return;
+    }
     // In memory until M3a persists them (D51); the shapes are frozen (SPEC §11.2).
     this.events.push(
       attemptEvent(ctx, {
@@ -366,43 +500,128 @@ export class ServiceController {
       }),
       coinEvent(ctx, { svc: this.opts.svc, n: COINS_PER_PROBLEM }),
     );
+    // SPEC §4.1 step 7: an assisted fact comes back with the same monster, one step more support.
+    if (outcome === 'assisted') {
+      const next = withRequeue(this.orders, this.s.index, this.requeueRng, this.opts.monsters ?? REGULARS);
+      if (next) this.orders = next;
+    }
   }
 
+  /**
+   * Eat sequence (SPEC §5.6, D101): food flies into the mouth in groups (≤ 5 counted one by one,
+   * else rows of five and the total), three chews, the monster's reaction and thanks, then 3 coins
+   * fly to the jar. Any tap skips straight to the coins; a tap during the coins lands them at once.
+   */
   private async runEat(my: number): Promise<void> {
-    const n = this.order.problem.answer;
+    // The monster eats the plate as served: the tray total (for `7 + ? = 10`, all ten), SPEC §5.6.
+    const n = this.trayTask().expected.cells;
+    const groups = eatGroups(n);
+    const lines = this.lines();
+    let skipped = false;
+    let wake: (() => void) | null = null;
+    this.skipEat = () => {
+      skipped = true;
+      wake?.();
+    };
+    const skippable = async (ms: number) => {
+      if (skipped) return;
+      await Promise.race([this.wait(ms), new Promise<void>((r) => (wake = r))]);
+      wake = null;
+    };
+    const alive = () => my === this.script;
+
     this.d.sfx.correct();
-    this.set({ mood: 'delight', caption: say('serve.yum', { n }), speaker: 'monster', bubble: null, counting: false, glow: [] });
-    // Let the bell ring out before "Yum!" (D86).
-    await this.wait(BELL_LEAD_MS);
-    if (my !== this.script) return;
-    void this.d.speak(say('serve.yum', { n }));
-    // Eat + react; any tap skips ahead (SPEC §5.6, D56). The full eat sequence is M2 (D66).
-    await Promise.race([this.wait(1600), new Promise<void>((r) => (this.skipEat = r))]);
+    this.set({
+      mood: 'eat',
+      caption: '',
+      speaker: 'monster',
+      bubble: null,
+      counting: false,
+      glow: [],
+      eat: { step: 'fly', groups, flown: 0, firstTry: this.lastOutcome === 'first', coinsOut: 0 },
+    });
+    // Let the bell ring out before the monster's first word (D86).
+    await skippable(BELL_LEAD_MS);
+    if (!alive()) return;
+
+    // Fly: one group at a time; ≤ 5 items are counted as they go in, more are named at the end.
+    for (let i = 0; i < groups.length && !skipped; i++) {
+      this.set((s) => ({ eat: { ...s.eat!, flown: i + 1 } }));
+      if (n <= 5) {
+        const word = numberToWords(i + 1);
+        this.set({ caption: `${word[0]!.toUpperCase()}${word.slice(1)}…` });
+        this.d.countAloud(word);
+      }
+      await skippable(flyMs(n));
+      if (!alive()) return;
+    }
+    const total = say('eat.total', { n });
+    if (!skipped) {
+      this.set({ caption: total });
+      if (n > 5) void this.talk(total);
+      // Chew ×3.
+      this.set((s) => ({ eat: { ...s.eat!, step: 'chew' } }));
+      this.d.sfx.munch();
+      await skippable(CHEW_MS);
+      if (!alive()) return;
+    }
+    if (!skipped) {
+      // React and say thanks in the monster's own voice.
+      const thanks = lines.thanks || say('serve.yum', { n });
+      this.set((s) => ({ mood: 'delight', caption: thanks, eat: { ...s.eat!, step: 'react' } }));
+      if (lines.burps) this.d.sfx.burp();
+      void this.talk(thanks);
+      await skippable(REACT_MS);
+      if (!alive()) return;
+    }
+
+    // Coins fly to the jar one by one (SPEC §9); a tap lands the rest at once.
+    this.set((s) => ({ mood: 'delight', eat: { ...s.eat!, step: 'coins', flown: groups.length } }));
+    const base = this.landed;
+    for (let k = 1; k <= COINS_PER_PROBLEM; k++) {
+      this.set((s) => ({ eat: { ...s.eat!, coinsOut: k } }));
+      void this.wait(COIN_FLY_MS).then(() => {
+        if (!alive() || this.landed >= base + k) return;
+        this.landed = base + k;
+        this.d.sfx.coin();
+        this.set({});
+      });
+      if (k < COINS_PER_PROBLEM) await skippable(COIN_GAP_MS);
+      if (!alive()) return;
+    }
+    await skippable(COIN_FLY_MS);
+    if (!alive()) return;
     this.skipEat = null;
-    if (my !== this.script) return;
-    this.set((s) => ({ attempt: stepAttempt(s.attempt, { type: 'phaseDone' }), mood: 'leave' }));
+    this.landed = base + COINS_PER_PROBLEM;
+
+    this.set((s) => ({ attempt: stepAttempt(s.attempt, { type: 'phaseDone' }), mood: 'leave', eat: null }));
     await this.wait(350);
-    if (my !== this.script) return;
+    if (!alive()) return;
     const next = this.s.index + 1;
-    if (next < this.opts.orders.length) {
+    if (next < this.orders.length) {
       this.startOrder(next);
       return;
     }
+    // A finished service earns the tip (SPEC §9); a voluntary exit does not.
+    this.events.push(coinEvent(this.ctx(), { svc: this.opts.svc, n: SERVICE_TIP }));
+    this.opts.onCoins?.(SERVICE_TIP);
     this.set({ finished: true, caption: say('service.closed'), speaker: 'monster', mood: 'delight' });
-    await this.d.speak(say('service.closed'));
+    await this.talk(say('service.closed'));
     await this.wait(600);
-    if (my === this.script) this.opts.onDone();
+    if (alive()) {
+      this.opts.onDone({ coins: this.snap.coins, monsters: this.orders.map((o) => o.monster) });
+    }
   }
 
   private async runCountTogether(my: number): Promise<void> {
     const ticks = countTogetherTicks(this.order.problem);
     this.set({ counting: true, bubble: ticks[0]!.cells, bubbleCount: '', mood: 'idle', caption: say('ct.start'), speaker: 'pip' });
-    await this.d.speak(say('ct.start'), 'pip');
+    await this.talk(say('ct.start'), 'pip');
     for (const t of ticks.slice(1)) {
       if (my !== this.script) return;
       const line = say(t.key, t.params);
       this.set({ bubble: t.cells, bubbleCount: line });
-      await Promise.all([this.d.speak(line, 'pip'), this.wait(450)]);
+      await Promise.all([this.talk(line, 'pip'), this.wait(450)]);
     }
     if (my !== this.script) return;
     // The bubble stays up as a model until the next serve (D68); the tray was editable throughout.
@@ -434,7 +653,7 @@ export class ServiceController {
       }
       const line = say(step.narrationKey, step.params);
       this.set({ tray, glow: step.trayOp.op === 'glow' ? step.trayOp.cells : [], caption: line, speaker: 'pip' });
-      await Promise.all([this.d.speak(line, 'pip'), this.wait(step.holdMs)]);
+      await Promise.all([this.talk(line, 'pip'), this.wait(step.holdMs)]);
     }
     if (my !== this.script) return;
     // FollowMe: the tray resets to the start and the child repeats the steps (SPEC §5.5).
@@ -445,7 +664,7 @@ export class ServiceController {
       caption: say('follow.start'),
       speaker: 'pip',
     }));
-    void this.d.speak(say('follow.start'), 'pip');
+    void this.talk(say('follow.start'), 'pip');
   }
 
   private async runPlate(my: number, served: number, expected: number): Promise<void> {
@@ -455,7 +674,7 @@ export class ServiceController {
     this.set({ mood: 'puzzled', caption: text, speaker: 'monster', bubble: null, counting: false });
     await this.wait(BELL_LEAD_MS); // the bell first, then the monster (D86)
     if (my !== this.script) return;
-    await Promise.all([this.d.speak(text), this.wait(900)]);
+    await Promise.all([this.talk(text), this.wait(900)]);
     if (my !== this.script) return;
     const next = stepAttempt(this.s.attempt, { type: 'phaseDone' });
     this.lastInput = this.d.now();
@@ -464,7 +683,7 @@ export class ServiceController {
     if (next.phase === 'offerHelp') {
       const ask = say('offer.help');
       this.set({ caption: ask, speaker: 'monster', mood: 'puzzled' });
-      void this.d.speak(ask);
+      void this.talk(ask);
     } else if (next.phase === 'worked') void this.runWorked(my);
   }
 
@@ -518,7 +737,7 @@ export class ServiceController {
   // ---------- actions (bound, so the screen can pass them straight to handlers) ----------
   touch = (): void => {
     this.lastInput = this.d.now();
-    if (this.s.hatPulse) this.set({ hatPulse: false });
+    if (this.s.hatPulse || this.s.ghost) this.set({ hatPulse: false, ghost: null });
   };
 
   tapBin = (): void => this.act(tapBin);

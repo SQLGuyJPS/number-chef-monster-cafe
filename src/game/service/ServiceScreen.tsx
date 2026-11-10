@@ -1,4 +1,4 @@
-import { useMemo, type CSSProperties } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import {
   BUTTON_MIN,
   CELL,
@@ -17,10 +17,10 @@ import {
 import { getStageLayout } from '../../app/Stage';
 import { FOODS } from '../../engine/foods';
 import type { ModelCell } from '../../engine/countTogether';
-import type { Order } from '../../engine/plan';
+import type { Order } from '../../engine/session';
 import { ticketRoles } from '../../engine/tray';
-import { PlaceholderMonster } from '../../art/PlaceholderMonster';
-import { PlaceholderPip } from '../../art/PlaceholderPip';
+import { Monster } from '../../art/monsters/Monster';
+import { Pip } from '../../art/Pip';
 import { dragTapHandlers, inRect, type StagePoint } from '../input/dragTap';
 import { TapButton } from '../input/TapButton';
 import { TenFrame, type CellView } from '../tray/TenFrame';
@@ -34,6 +34,7 @@ import {
   ClocheLid,
   DigitButton,
   DoorSign,
+  GhostHand,
   HelpChoice,
   ModelBubble,
   PeekButton,
@@ -44,14 +45,20 @@ import {
   type TicketToken,
 } from './ServiceParts';
 import { useService } from './useService';
+import type { ServiceSummary } from './controller';
 import './service.css';
 
 interface Props {
   orders: Order[];
+  /** Service seed: requeues are placed from it too (SPEC §4.1). */
+  seed: number;
   svc: string;
   dev: string;
-  onDone: () => void;
+  onDone: (summary: ServiceSummary) => void;
+  onCoins?: (n: number) => void;
   onDoor: () => void;
+  /** Coins in the jar when the service started; landed coins add to it (SPEC §9). */
+  jar?: number;
 }
 
 /** Tray rect for the layout (SPEC §3.3, §5.4). */
@@ -85,8 +92,15 @@ function bubbleFrames(cells: ModelCell[], food: CellView['food']): CellView[][] 
   return shown.length > 10 ? [shown.slice(0, 10), shown.slice(10)] : [shown];
 }
 
-export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
-  const { view: v, ctrl } = useService({ orders, svc, dev, onDone });
+/** Where food and coins leave from / fly to (stage px). */
+const MOUTH = { x: L.monsterZone.x + L.monsterZone.w / 2, y: L.monsterZone.y + L.monsterZone.h * 0.6 };
+const JAR = { x: 1096, y: 590, w: 160, h: 96 };
+/** The tray slides up toward the monster while it eats (SPEC §5.6). */
+const EAT_SLIDE = 30;
+
+export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor, jar = 0 }: Props) {
+  const [jarStart] = useState(jar);
+  const { view: v, ctrl } = useService({ orders, seed, svc, dev, onDone, onCoins });
   const { order, task } = v;
   const food = order.food;
   const glyph = FOODS[food].glyph;
@@ -145,9 +159,13 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
 
   const s3 = order.stage === 3;
   const cue = v.cue;
+  // Eating: the groups already flown leave empty cells behind (SPEC §5.6).
+  const eaten = v.eat ? v.eat.groups.slice(0, v.eat.flown).reduce((a, b) => a + b, 0) : 0;
   const cells: CellView[] = Array.from({ length: v.tray.capacity }, (_, i) => {
+    if (i < eaten) return {};
     if (i >= v.tray.filled) {
-      return { pulse: cue === 'place' && i === v.tray.filled };
+      // Empty cells glow too: the make-ten demo flashes the gap to ten (SPEC §5.5).
+      return { pulse: cue === 'place' && i === v.tray.filled, glow: v.glow.includes(i) };
     }
     const role = i < v.tray.prefill ? 'prefill' : 'child';
     return {
@@ -169,7 +187,7 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
   const lineAway = useHold(v.pipOut || bubbleUp, MONSTER_MOVE_MS);
   const removed = v.removed;
   const phase = v.attempt.phase;
-  const lockedPhase = phase === "plateCount" || phase === "worked" || phase === "eating";
+  const lockedPhase = phase === 'plateCount' || phase === 'worked' || phase === 'eating';
 
   return (
     <div
@@ -182,7 +200,7 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
       <DoorSign rect={L.door} onTap={onDoor} />
       {/* The waiting line steps away while Pip is out or the bubble is up, so Pip stands on a clear
           counter (D90) and the monster never walks back over it (D91). */}
-      {!lineAway && <Queue rect={L.queue} count={Math.max(0, orders.length - v.index - 1)} />}
+      {!lineAway && <Queue rect={L.queue} count={Math.max(0, v.remaining)} />}
       {/* The CountTogether bubble is Pip's speech while it shows (D76, D90). */}
       <Caption rect={L.caption} text={bubbleUp ? '' : v.caption} speaker={v.speaker} />
 
@@ -192,7 +210,14 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
         data-testid="monster"
         data-mood={v.mood}
       >
-        <PlaceholderMonster size={bubbleUp ? L.monsterAside.w : L.monsterZone.w} />
+        <Monster
+          id={order.monster}
+          expression={v.mood === 'delight' || v.mood === 'eat' || v.mood === 'puzzled' ? v.mood : 'idle'}
+          react={v.eat?.step === 'react'}
+          // A first-try serve gets a bigger reaction (visual only, D45).
+          className={v.eat?.firstTry && v.eat.step === 'react' ? 'big' : undefined}
+          size={bubbleUp ? L.monsterAside.w : L.monsterZone.w}
+        />
       </div>
       {pipShown && (
         <div
@@ -200,17 +225,22 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
           style={at(L.pip)}
           data-testid={v.pipOut ? 'pip' : 'pip-leaving'}
         >
-          <PlaceholderPip />
+          <Pip />
         </div>
       )}
       {bubbleUp && (
-        <ModelBubble rect={L.bubble} frames={bubbleFrames(v.bubble!, food)} caption={v.bubbleCount} />
+        <ModelBubble
+          rect={L.bubble}
+          frames={bubbleFrames(v.bubble!, food)}
+          caption={v.bubbleCount}
+        />
       )}
       <Ticket
         key={v.index}
         rect={bubbleUp ? L.ticketCounting : L.ticket}
         tokens={tokens}
         food={food}
+        solved={phase === 'eating' || phase === 'done' ? order.problem.answer : undefined}
         onTap={ctrl.replayTicket}
       />
 
@@ -222,7 +252,10 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
               style={at({ x: tray.x - 20, y: tray.y + tray.h - 14, w: tray.w + 40, h: 28 })}
             />
           )}
-          <div className={`tray ${v.editable ? '' : 'locked'}`}>
+          <div
+            className={`tray ${v.editable ? '' : 'locked'}`}
+            style={v.eat ? { transform: `translateY(-${EAT_SLIDE}px)`, transition: 'transform 0.3s ease' } : undefined}
+          >
             <TenFrame
               cells={cells.slice(0, 10)}
               cell={CELL}
@@ -276,7 +309,9 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
             pulsing={cue === 'place' || (cue === 'putBack' && !v.tray.takenAwayRow)}
             wobble={v.binWobble}
           />
-          {order.stage === 0 && <ClocheLid rect={L.clocheLid} onTap={ctrl.lowerCloche} dim={v.cloche !== 'peek'} />}
+          {order.stage === 0 && (
+            <ClocheLid rect={L.clocheLid} onTap={ctrl.lowerCloche} dim={v.cloche !== 'peek'} />
+          )}
         </>
       )}
 
@@ -284,12 +319,21 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
         <>
           <PeekButton rect={L.s0Peek} onTap={ctrl.peek} dim={v.attempt.phase !== 'building'} />
           <AnswerDisplay rect={L.s0Display} value={v.typed} />
-          <Backspace rect={L.s0Backspace} onTap={ctrl.backspace} pulsing={v.correctTyped !== null && !v.correctTyped.startsWith(v.typed)} />
+          <Backspace
+            rect={L.s0Backspace}
+            onTap={ctrl.backspace}
+            pulsing={v.correctTyped !== null && !v.correctTyped.startsWith(v.typed)}
+          />
           {Array.from({ length: 10 }, (_, d) => (
             <DigitButton
               key={d}
               digit={d}
-              rect={{ x: L.s0Digits.x + d * (BUTTON_MIN + L.s0DigitGap), y: L.s0Digits.y, w: BUTTON_MIN, h: BUTTON_MIN }}
+              rect={{
+                x: L.s0Digits.x + d * (BUTTON_MIN + L.s0DigitGap),
+                y: L.s0Digits.y,
+                w: BUTTON_MIN,
+                h: BUTTON_MIN,
+              }}
               onTap={() => ctrl.digit(d)}
               pulsing={
                 v.correctTyped !== null &&
@@ -301,10 +345,16 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
         </>
       )}
 
+      {v.ghost && <GhostHand target={v.ghost === 'bin' ? L.bin : L.bell} name={v.ghost} />}
       {phase === 'offerHelp' && (
         <HelpChoice yes={L.offerYes} no={L.offerNo} onYes={ctrl.help} onNo={ctrl.declineHelp} />
       )}
-      <PipHat rect={L.help} onTap={ctrl.help} pulsing={v.hatPulse || v.helpOffer || phase === 'offerHelp'} dim={lockedPhase} />
+      <PipHat
+        rect={L.help}
+        onTap={ctrl.help}
+        pulsing={v.hatPulse || v.helpOffer || phase === 'offerHelp'}
+        dim={lockedPhase}
+      />
       <Bell
         rect={L.bell}
         onTap={ctrl.serve}
@@ -329,10 +379,53 @@ export function ServiceScreen({ orders, svc, dev, onDone, onDoor }: Props) {
         );
       })}
       {v.drag && (
-        <div className="drag-ghost" style={{ left: v.drag.x - CELL / 2, top: v.drag.y - CELL / 2 }} aria-hidden="true">
+        <div
+          className="drag-ghost"
+          style={{ left: v.drag.x - CELL / 2, top: v.drag.y - CELL / 2 }}
+          aria-hidden="true"
+        >
           {glyph}
         </div>
       )}
+      {v.eat &&
+        v.eat.groups.slice(0, v.eat.flown).map((size, g) => {
+          const first = v.eat!.groups.slice(0, g).reduce((a, b) => a + b, 0);
+          return Array.from({ length: size }, (_, j) => {
+            const r = v.padMode ? L.s0Display : cellRect(first + j, frames2);
+            const from = { x: r.x + r.w / 2, y: r.y + r.h / 2 - (v.padMode ? 0 : EAT_SLIDE) };
+            const style = {
+              left: from.x - CELL / 2,
+              top: from.y - CELL / 2,
+              '--dx': `${MOUTH.x - from.x}px`,
+              '--dy': `${MOUTH.y - from.y}px`,
+            } as CSSProperties;
+            return (
+              <div key={`e${first + j}`} className="eat-flight" style={style} aria-hidden="true">
+                {glyph}
+              </div>
+            );
+          });
+        })}
+      {v.eat &&
+        Array.from({ length: v.eat.coinsOut }, (_, k) => (
+          <div
+            key={`c${k}`}
+            className="coin-flight"
+            style={
+              {
+                left: MOUTH.x - 22,
+                top: MOUTH.y - 60,
+                '--dx': `${JAR.x + 40 - MOUTH.x}px`,
+                '--dy': `${JAR.y + JAR.h / 2 - MOUTH.y + 60}px`,
+              } as CSSProperties
+            }
+            aria-hidden="true"
+          />
+        ))}
+      <div className="service-jar" style={at(JAR)} data-testid="service-jar" data-count={jarStart + v.landed}>
+        <span className="coin-icon" aria-hidden="true" />
+        <span className="coin-count">{jarStart + v.landed}</span>
+      </div>
       {v.attempt.phase === 'eating' && (
         // Any tap skips the eat/react time (SPEC §5.6, D56).
         <TapButton className="skip-layer" testId="skip" label="Skip" onTap={ctrl.skip}>

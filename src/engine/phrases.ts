@@ -44,6 +44,9 @@ export const PHRASES = {
     text: (p) => `${N(p, 'a')} minus ${n(p, 'b')} ${plural(p)}, please!`,
   },
 
+  // A requeue is the same monster coming back (SPEC §4.1 step 7); names arrive with M7 renaming.
+  'order.back': { params: {}, text: () => "I'm back! Still hungry!" },
+
   'count.n': { params: { n: 'n' }, text: (p) => n(p, 'n') },
 
   // PlateCount (SPEC §5.5, D30): the monster counts what was served, then names what it wanted.
@@ -89,6 +92,17 @@ export const PHRASES = {
     text: (p) => `You know ${n(p, 'a')} and ${n(p, 'a')} is ${n(p, 'sum')}.`,
   },
   'demo.near.more': { params: { n: 'n' }, text: (p) => `One more makes ${n(p, 'n')}!` },
+  'demo.away': { params: { n: 'n' }, text: (p) => `${N(p, 'n')} taken away!` },
+  // Make ten (A3, SPEC §5.5, D98).
+  'demo.ten.gap': { params: { n: 'n' }, text: (p) => `${N(p, 'n')} empty spots.` },
+  'demo.ten.gap1': { params: {}, text: () => 'One empty spot.' },
+  'demo.ten.make': {
+    params: { a: 'n', b: 'n' },
+    text: (p) => `${N(p, 'a')} and ${n(p, 'b')} more makes ten!`,
+  },
+
+  // Warm-up order (SPEC §5.4, D26): Pip says what to do while the ghost hand points at the bell.
+  'warm.bell': { params: {}, text: () => 'Ring the bell to serve!' },
 
   // FollowMe (SPEC §5.5).
   'follow.start': { params: {}, text: () => 'Your turn! Follow me.' },
@@ -97,7 +111,11 @@ export const PHRASES = {
 
   // Correct serve (the full eat sequence is M2).
   'serve.yum': { params: { n: 'n' }, text: (p) => `Yum! ${N(p, 'n')}!` },
+  /** The total named after the last row flies into the mouth (SPEC §5.6, "Eight!"). */
+  'eat.total': { params: { n: 'n' }, text: (p) => `${N(p, 'n')}!` },
   'service.closed': { params: {}, text: () => 'All done! Thank you, chef!' },
+  // Results tally (SPEC §5.7, D55): the last number of the count-up.
+  'results.total': { params: { n: 'n' }, text: (p) => `${N(p, 'n')}!` },
 } as const satisfies Record<string, PhraseDef>;
 
 export type PhraseKey = keyof typeof PHRASES;

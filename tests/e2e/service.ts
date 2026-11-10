@@ -4,6 +4,9 @@ import { tap } from './helpers';
 /** What `window.__ncmc.service()` returns (src/game/service/controller.ts probe). */
 export interface Probe {
   index: number;
+  eat: { step: string; flown: number; groups: number[]; firstTry: boolean; coinsOut: number } | null;
+  landed: number;
+  mood: string;
   phase: string;
   attempt: number;
   stage: number;
@@ -22,6 +25,14 @@ export interface Probe {
   canServe: boolean;
   cue: string | null;
   caption: string;
+  orders: number;
+  factKey: string;
+  requeue: boolean;
+  warmUp: boolean;
+  ghost: 'bin' | 'bell' | null;
+  monster: string;
+  remaining: number;
+  coins: number;
   events: { k: string; outcome?: string; stage?: number; fact?: string }[];
 }
 
@@ -29,6 +40,7 @@ interface Hooks {
   setTimeScale(s: number): void;
   setSeed(s: number | null): void;
   setSkillConfig(skill: string, stage: number, ops: string): Promise<void>;
+  setWarmupShown(shown: boolean): Promise<void>;
   service(): Probe | undefined;
 }
 declare global {
@@ -56,7 +68,7 @@ export async function stubSpeechNeverEnds(page: Page): Promise<void> {
       paused: false,
       speak: (u: { text: string; pitch: number }) => {
         spoken.push(u.text);
-        if (u.pitch > 1) pip.push(u.text);
+        if (u.pitch >= 1.5) pip.push(u.text); // PIP_PITCH; monster voices stay below it
       },
       cancel: () => void window.__cancels++,
       pause: () => undefined,
@@ -73,12 +85,14 @@ export async function stubSpeechNeverEnds(page: Page): Promise<void> {
 }
 
 export interface OpenOptions {
-  skill?: 'A1' | 'A2';
+  skill?: 'A1' | 'A2' | 'A3';
   stage?: 0 | 1 | 2 | 3;
   ops?: 'both' | 'add' | 'sub';
   seed?: number;
   /** Scales speech timeouts and scripted holds; 1 = real time. */
   timeScale?: number;
+  /** Keep the first-ever warm-up order (SPEC §5.4); off by default so tests start on the skill. */
+  warmUp?: boolean;
 }
 
 /** Splash → Home → Menu → tile, with stage/ops set through the e2e hook (same store as ?debug). */
@@ -87,8 +101,9 @@ export async function openService(page: Page, o: OpenOptions = {}): Promise<void
   await page.goto('./');
   await page.waitForFunction(() => !!window.__ncmc);
   await page.evaluate(
-    async ({ skill, stage, ops, seed, timeScale }) => {
+    async ({ skill, stage, ops, seed, timeScale, warmUp }) => {
       await window.__ncmc.setSkillConfig(skill, stage, ops);
+      await window.__ncmc.setWarmupShown(!warmUp);
       window.__ncmc.setTimeScale(timeScale);
       window.__ncmc.setSeed(seed);
       // Phase recorder: every phase the service passes through, in order.
@@ -98,7 +113,14 @@ export async function openService(page: Page, o: OpenOptions = {}): Promise<void
         if (p && window.__phases.at(-1) !== p) window.__phases.push(p);
       }, 10);
     },
-    { skill: o.skill ?? 'A1', stage: o.stage ?? 3, ops: o.ops ?? 'both', seed: o.seed ?? 1, timeScale: o.timeScale ?? 0.1 },
+    {
+      skill: o.skill ?? 'A1',
+      stage: o.stage ?? 3,
+      ops: o.ops ?? 'both',
+      seed: o.seed ?? 1,
+      timeScale: o.timeScale ?? 0.1,
+      warmUp: o.warmUp ?? false,
+    },
   );
   await tap(page, page.getByTestId('splash'));
   await tap(page, page.getByTestId('open-cafe'));

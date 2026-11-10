@@ -1,7 +1,7 @@
 import { mkdirSync } from 'node:fs';
-import { test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { startApp, tap } from './helpers';
-import { openService, serveWrong, tapId, waitPhase } from './service';
+import { openService, probe, serveCorrect, serveWrong, tapId, waitPhase } from './service';
 
 // Milestone screenshots (SPEC §13.5) into docs/screens/<milestone>/. Runs only when asked:
 //   npx cross-env NCMC_SCREENS=M0 playwright test screens --project=chromium-ipad-pro-11 --project=webkit-iphone-13 --project=chromium-ipad-portrait
@@ -109,4 +109,68 @@ test('service screenshots', async ({ page }, info) => {
   await tapId(page, 'bin');
   await page.waitForTimeout(300);
   await shot('service-s0-cloche');
+});
+
+// M2 additions (SPEC §13.5 "as built so far"): A3, the eat reaction, the warm-up ghost, Results,
+// and the monster grid (every monster × expression; iPad only, it is one sheet).
+test('M2 screenshots', async ({ page }, info) => {
+  test.skip(!SERVICE_SHOTS.includes(info.project.name), 'service shots at 1194×834 and 844×390');
+  test.setTimeout(120_000);
+  const dir = `docs/screens/${milestone}`;
+  mkdirSync(dir, { recursive: true });
+  const vp = page.viewportSize()!;
+  const tag = `${vp.width}x${vp.height}`;
+  const still = () =>
+    page.addStyleTag({ content: '*{animation:none!important;transition:none!important}' }).catch(() => undefined);
+  const shot = async (name: string, freeze = true) => {
+    if (freeze) await still();
+    await page.screenshot({ path: `${dir}/${name}-${tag}.png` });
+  };
+
+  if (info.project.name === 'chromium-ipad-pro-11') {
+    await page.setViewportSize({ width: 1000, height: 1100 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('./?gallery');
+    await page.getByTestId('gallery').waitFor();
+    await page.screenshot({ path: `${dir}/monster-grid.png`, fullPage: true });
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.setViewportSize(vp);
+  }
+
+  await openService(page, { skill: 'A3', stage: 3, ops: 'add', seed: 4 });
+  await tapId(page, 'bin');
+  await page.waitForTimeout(300);
+  await shot('service-a3-make-ten');
+
+  await openService(page, { skill: 'A3', stage: 3, ops: 'sub', seed: 11 });
+  for (let i = 0; i < 6 && (await probe(page)).form !== 'missingSub'; i++) {
+    await serveCorrect(page);
+    await expect.poll(async () => (await probe(page)).index, { timeout: 10_000 }).toBe(i + 1);
+    await waitPhase(page, 'building');
+  }
+  await tapId(page, 'tray-cell-9');
+  await tapId(page, 'tray-cell-8');
+  await page.waitForTimeout(300);
+  await shot('service-a3-taken-away');
+
+  // The reaction after a first-try serve, with the answer in green on the ticket (D96, D101).
+  await openService(page, { skill: 'A2', stage: 3, ops: 'add', seed: 5, timeScale: 1 });
+  await serveCorrect(page);
+  await expect.poll(async () => (await probe(page)).eat?.step, { timeout: 8000 }).toBe('react');
+  await page.waitForTimeout(500);
+  await shot('service-eat-react', false);
+
+  await openService(page, { skill: 'A2', stage: 1, ops: 'both', seed: 3, warmUp: true, timeScale: 1 });
+  // Real time: greeting and order are read first, then 4 s without a touch.
+  await expect(page.getByTestId('ghost-hand')).toBeVisible({ timeout: 15_000 });
+  await shot('service-warmup-ghost');
+
+  await openService(page, { skill: 'A1', stage: 3, ops: 'add', seed: 8 });
+  for (let i = 0; i < 6; i++) {
+    await expect.poll(async () => (await probe(page))?.index, { timeout: 10_000 }).toBe(i);
+    await waitPhase(page, 'building');
+    await serveCorrect(page);
+  }
+  await expect(page.getByTestId('results-count')).toHaveText('23', { timeout: 15_000 });
+  await shot('results');
 });
