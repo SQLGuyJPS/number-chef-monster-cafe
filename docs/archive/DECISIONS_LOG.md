@@ -548,6 +548,11 @@ How to revisit: if the repeating ghost is distracting, show each hint once; `war
 **Why:** Owner playtest notes on each item. The old door sign floated above the window line with a light box.
 **How to revisit:** Owner playtest.
 
+## D111 — Family devices recorded; baseline iOS/iPadOS 18+ (2026-11-11)
+**What:** The child plays on an **iPad 7th gen** (primary; A10, 3 GB, newest OS iPadOS 18), an **iPhone 17** (iOS 26) and a **Pixel 10 Pro** (Android 16, Chrome). Consequences: (1) the baseline becomes iOS/iPadOS 18+ and a recent Chrome on Android (amends D37's iOS 15.4+); (2) the performance target is the iPad 7th gen, which has the same A10 chip as the 6th gen, so the §2.4 budgets (≤ 300 SVG nodes, ≤ 30 confetti, no filters on animated nodes) stay as they are; (3) the emoji limit rises from Unicode 9.0 to 15.0 (amends D10): `scripts/emoji-versions.json` `maxUnicode` 15.0; the allowlist itself is unchanged, and the version-only denials (cupcake, sandwich, pie) are dropped; (4) `navigator.audioSession` is present on every target iOS device, so the parent Help needs no silent-switch note, but the feature check stays (Chrome has no `audioSession`); (5) the "below Android 8 / iOS 12" glyph text fallback is dropped (it was never built); (6) the e2e matrix is unchanged: iPad gen 7 matches the iPad, and the smaller iPhone 13 and Pixel 7 viewports are conservative stand-ins for the iPhone 17 and Pixel 10 Pro.
+**Why:** The owner listed the devices (OPEN_ITEMS "Device details"). The iPad's chip sets the speed budget; its OS sets the feature baseline. iOS 18.0 renders Emoji 15.1 and Android 16 renders Emoji 16, so Unicode 15.0 single codepoints are safe everywhere.
+**How to revisit:** If the iPad is not on iPadOS 18 (Settings → General → About), update it or lower the baseline. The ES2020 build target could move to ES2022 under this baseline; left as is because nothing needs it. Revisit the emoji limit if an older device joins.
+
 <!-- New decisions go above this line, numbered one higher than the highest existing D<n>. -->
 
 ---

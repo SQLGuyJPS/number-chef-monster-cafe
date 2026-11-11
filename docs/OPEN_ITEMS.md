@@ -13,8 +13,8 @@ Claude Code will use the noted default until you answer. Answer in DECISIONS.md 
 | Profiles | One child profile for now; a profile for a younger sibling later | D9, M11 |
 | The child's level | Knows +1 and doubles (1+1 … 9+9) from flash cards; learning number sentences with sums under ten; can do take-away word problems | D16 |
 | Custom content | Parent focus list of specific facts (+ rename monsters) | M7 |
-| Devices | iPhone, iPad, and a parent's Android phone, all used by the child | D15 |
-| Platform baseline | iOS 15.4+ and a recent Chrome on Android; `navigator.audioSession` is a progressive enhancement. The actual device list is still not provided (see Device details) | D37 |
+| Devices | iPad 7th gen (primary), iPhone 17, Pixel 10 Pro, all used by the child | D15, D111 |
+| Platform baseline | iOS/iPadOS 18+ (the iPad 7th gen's newest) and a recent Chrome on Android; emoji up to Unicode 15.0 | D37, D111 |
 | Syncing | Merge by exported file is fine | D15 (M7) |
 | Parent gate | Multiplication question is OK | SPEC §12 |
 | Story tickets | Declined | D21 |
@@ -46,8 +46,7 @@ Claude Code will use the noted default until you answer. Answer in DECISIONS.md 
 | 10 | **Small gaps:** who voices the ticket; where removed items go. | Ticket read in the monster's voice (pitch/rate), Pip voices help and counting; removed items fly to the bin, except for missing-subtrahend forms where they stay in the taken-away row (D30). |
 
 ## Device details to send
-- iPad model + iOS version; iPhone model + iOS version; the Android phone's model + Chrome version.
-- Oldest device that must work (the baseline is iOS 15.4+, D37; tell me if an older device matters).
+- Models recorded (D111). Still useful: confirm the iPad is on iPadOS 18 (Settings → General → About).
 - Whether the iPad/iPhone use rotation lock or a silent switch (affects portrait behavior and WebAudio).
 - Whether you use Guided Access (iOS) / Screen Pinning (Android) — worth enabling to keep the child inside the app; the optional play-time limit only controls time, not what else the device can do.
 
