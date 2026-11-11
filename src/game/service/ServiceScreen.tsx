@@ -19,7 +19,7 @@ import { getStageLayout } from '../../app/Stage';
 import { FOODS } from '../../engine/foods';
 import type { ModelCell } from '../../engine/countTogether';
 import type { Order } from '../../engine/session';
-import { ticketRoles } from '../../engine/tray';
+import { marksAtStart, orangeCells, ticketRoles } from '../../engine/tray';
 import { Monster } from '../../art/monsters/Monster';
 import { Pip } from '../../art/Pip';
 import { dragTapHandlers, inRect, type StagePoint } from '../input/dragTap';
@@ -172,10 +172,13 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor,
 
   const s3 = order.stage === 3;
   const cue = v.cue;
-  // Missing-number forms: the unknown's cells (the empty spots to fill, or the items to take away)
-  // are marked orange, and S3 counts them from one (D104).
+  // The orange group's cells (the empty spots to fill, or the items to take away) are marked from
+  // the start on missing-number forms and at S3 (D104, D111); S3 missing forms count them from one.
   const unknown = task.unknown;
-  const inUnknown = (i: number) => !!unknown && i >= unknown.from && i < unknown.to;
+  const orange = marksAtStart(task, order.stage) ? orangeCells(task) : null;
+  const inOrange = (i: number) => !!orange && i >= orange.from && i < orange.to;
+  // A removed item leaves a dashed orange outline, so what was taken away stays visible (D111).
+  const removedCell = (i: number) => v.tray.mode === 'remove' && i >= v.tray.filled && i < v.tray.prefill;
   // Eating: the eaten plate leaves empty cells behind, and stays gone until the next order (SPEC §5.6).
   const plate = v.eaten;
   const eatenCell = (i: number) => plate?.source === 'tray' && i >= plate.from && i < plate.from + plate.count;
@@ -186,10 +189,10 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor,
       return {
         pulse: cue === 'place' && i === v.tray.filled,
         glow: v.glow.includes(i),
-        spot: inUnknown(i) && v.tray.mode === 'add',
+        spot: (inOrange(i) && v.tray.mode === 'add') || removedCell(i),
       };
     }
-    const role = i < v.tray.prefill && !(v.tray.mode === 'remove' && inUnknown(i)) ? 'prefill' : 'child';
+    const role = i < v.tray.prefill && !(v.tray.mode === 'remove' && inOrange(i)) ? 'prefill' : 'child';
     const popAt = unknown && v.tray.mode === 'add' ? i + 1 - v.tray.prefill : i + 1;
     return {
       food,

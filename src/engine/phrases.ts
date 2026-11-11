@@ -62,31 +62,16 @@ export const PHRASES = {
     params: { seen: 'n', wanted: 'n' },
     text: (p) => `I see ${n(p, 'seen')}… I wanted ${n(p, 'wanted')}.`,
   },
-  // Missing-number forms at S3/S2 (D104): the monster talks about the orange group, the answer
-  // ("Two more… I wanted three. One more!"), never the tray total.
-  'plate.more.oneMore': {
-    params: { seen: 'n', wanted: 'n' },
-    text: (p) => `${N(p, 'seen')} more… I wanted ${n(p, 'wanted')}. One more!`,
+  // Missing-number forms at S3/S2 (D104, D111): the monster talks about the orange group, the
+  // answer, never the tray total: "Only two? I wanted three. One more please!". Taken-away forms
+  // use the same words; the taken-away row shows what "more" means.
+  'plate.only.more': {
+    params: { seen: 'n', wanted: 'n', diff: 'n' },
+    text: (p) => `Only ${n(p, 'seen')}? I wanted ${n(p, 'wanted')}. ${N(p, 'diff')} more please!`,
   },
-  'plate.more.oneLess': {
-    params: { seen: 'n', wanted: 'n' },
-    text: (p) => `${N(p, 'seen')} more… I wanted ${n(p, 'wanted')}. One less!`,
-  },
-  'plate.more.off': {
-    params: { seen: 'n', wanted: 'n' },
-    text: (p) => `${N(p, 'seen')} more… I wanted ${n(p, 'wanted')} more.`,
-  },
-  'plate.away.oneMore': {
-    params: { seen: 'n', wanted: 'n' },
-    text: (p) => `${N(p, 'seen')} taken away… I wanted ${n(p, 'wanted')}. One more!`,
-  },
-  'plate.away.oneLess': {
-    params: { seen: 'n', wanted: 'n' },
-    text: (p) => `${N(p, 'seen')} taken away… I wanted ${n(p, 'wanted')}. One less!`,
-  },
-  'plate.away.off': {
-    params: { seen: 'n', wanted: 'n' },
-    text: (p) => `${N(p, 'seen')} taken away… I wanted ${n(p, 'wanted')}.`,
+  'plate.only.less': {
+    params: { seen: 'n', wanted: 'n', diff: 'n' },
+    text: (p) => `${N(p, 'seen')}? I wanted ${n(p, 'wanted')}. ${N(p, 'diff')} less please!`,
   },
   'plate.echo': {
     params: { seen: 'n', wanted: 'n' },
@@ -122,6 +107,11 @@ export const PHRASES = {
   // Make ten (A3, SPEC §5.5, D98).
   'demo.ten.gap': { params: { n: 'n' }, text: (p) => `${N(p, 'n')} empty spots.` },
   'demo.ten.gap1': { params: {}, text: () => 'One empty spot.' },
+  // S1 missing addend (D111): the bubble shows only the answer, so the line names only it.
+  'demo.more.makes': {
+    params: { n: 'n', total: 'n' },
+    text: (p) => `${N(p, 'n')} more makes ${n(p, 'total')}!`,
+  },
   'demo.ten.make': {
     params: { a: 'n', b: 'n' },
     text: (p) => `${N(p, 'a')} and ${n(p, 'b')} more makes ten!`,

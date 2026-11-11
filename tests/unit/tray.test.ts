@@ -3,6 +3,8 @@ import { BUILT_SKILLS, pool } from '../../src/engine/generators';
 import {
   check,
   isStartState,
+  marksAtStart,
+  orangeCells,
   removeLast,
   removedCount,
   startState,
@@ -253,5 +255,29 @@ describe('ticket roles (D30): by role on the tray, not by position', () => {
     expect(ticketRoles(MISSING_ADD)).toEqual(['prefill', 'op', 'child', 'op', 'result']);
     expect(ticketRoles(MISSING_ADD_FIRST)).toEqual(['child', 'op', 'prefill', 'op', 'result']);
     expect(ticketRoles(MISSING_SUB)).toEqual(['prefill', 'op', 'child', 'op', 'result']);
+  });
+});
+
+describe('orange marks on the guided tray (D104, D111)', () => {
+  const any = (form: string) => pool('A2').find((p) => p.form === form)!;
+  it('result forms: the spots to fill / the items to take away; marked at the start only at S3 and S0', () => {
+    const sub = any('sub');
+    const t = toTrayTask(sub, 3);
+    const [m, b] = sub.operands as number[];
+    expect(orangeCells(t)).toEqual({ from: m! - b!, to: m });
+    expect(marksAtStart(t, 3)).toBe(true);
+    expect(marksAtStart(toTrayTask(sub, 2), 2)).toBe(false);
+    expect(marksAtStart(toTrayTask(sub, 0), 0)).toBe(true);
+    const add = any('add');
+    const [x] = add.operands as number[];
+    expect(orangeCells(toTrayTask(add, 3))).toEqual({ from: x, to: add.answer });
+    // S1 holds only the answer: nothing to mark.
+    expect(orangeCells(toTrayTask(add, 1))).toBeNull();
+  });
+  it('missing-number forms: the unknown, marked at S2 too', () => {
+    const p = pool('A3').find((q) => q.form === 'missingAddend')!;
+    const t = toTrayTask(p, 2);
+    expect(orangeCells(t)).toEqual(t.unknown);
+    expect(marksAtStart(t, 2)).toBe(true);
   });
 });

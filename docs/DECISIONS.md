@@ -111,10 +111,11 @@
 | D101 | Eat sequence: eats the tray total, timings, skip to coins, service jar, greetings on first visit, monster voices, +5 tip paid | SPEC §5.6, §7.2, §9; flight amended by D103; what is eaten amended by D104 | Timings, what is eaten on missing-amount forms, and when monster lines play were open |
 | D102 | Pointer guard ignores native form controls; `change` / no-finger `touchend` release it | SPEC §2.3 | Stage picker froze every tap in the app |
 | D103 | Plate flies in together; monster says only the answer | SPEC §5.6 | Per-item counts tripped over each other |
-| D104 | Missing-number forms: the orange group is the answer (marks, counts, PlateCount, demo, what is eaten) | SPEC §3.2, §3.3, §5.5, §5.6 | Monster wanted and ate the total, not the answer |
-| D105 | S1 help on missing-number forms plays in the model bubble; CountTogether tells the make-ten story | SPEC §5.5 | Pip counted food the child never placed on an empty S1 tray |
+| D104 | Missing-number forms: the orange group is the answer (marks, counts, PlateCount, demo, what is eaten) | SPEC §3.2, §3.3, §5.5, §5.6; PlateCount words and marks amended by D111 | Monster wanted and ate the total, not the answer |
+| D105 | S1 help on missing-number forms plays in the model bubble; CountTogether tells the make-ten story | SPEC §5.5; S1 bubble amended by D111 | Pip counted food the child never placed on an empty S1 tray |
 | D106 | The solved answer takes the blank's role colour | SPEC §5.4 | Missing-number answers showed green like the total |
-| D107 | Results: silent count-up by one with tings, then one spoken total; buttons after; tap skips | SPEC §5.7 | Spoken count outran the speech engine |
+| D107 | Results: silent count-up by one with tings, then one spoken total; buttons after; tap skips | SPEC §5.7; pace amended by D111 | Spoken count outran the speech engine |
 | D108 | A returning monster joins the line as the next monster comes in | SPEC §5.4 | Line grew during the meal for no visible reason |
-| D109 | Sound effects never overlap speech | SPEC §5.6, §8.1 | iOS dropped boing, crunch and tings under speech |
+| D109 | Sound effects never overlap speech | SPEC §5.6, §8.1; settle amended by D111 | iOS dropped boing, crunch and tings under speech |
 | D110 | Blobbo's giggle, grounded door, string lights to the shop, Pip button art, shorter Mimsy hello | SPEC §5.4, §7.2, §7.4 | Owner playtest polish |
+| D111 | Rings follow Pip's model (S3 marks result forms, removed items leave dashed orange); "Only two?" PlateCount; S1 bubble shows only the answer; tally ≈ 3 s; 300 ms sound settle | SPEC §3.2, §5.5, §5.6, §5.7, §8.1 | Owner playtest round 2 |

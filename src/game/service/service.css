@@ -329,6 +329,15 @@
   font-weight: 700;
   color: var(--c-role-result);
 }
+/* "Seven and three more makes ten!" spilled out of the bubble at 40 px (D111): longer lines get a
+   smaller size and may wrap to two lines, still below the frames. */
+.bubble-count.long {
+  top: 214px;
+  padding: 0 14px;
+  white-space: normal;
+  font-size: 28px;
+  line-height: 1.05;
+}
 
 /* ---- S0 number pad (D32, D48) ---- */
 .digit {

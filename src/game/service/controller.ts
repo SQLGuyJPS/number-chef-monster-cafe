@@ -181,7 +181,8 @@ export interface ServiceOptions {
  * before them to end, plus a short settle so the audio context is running again.
  */
 const ARRIVE_SFX_MS = 400;
-const SPEECH_SETTLE_MS = 120;
+// 300 ms, not 120: on devices a sound right after a line was still lost at times (D111).
+const SPEECH_SETTLE_MS = 300;
 /** Chompers' burp plays before its thanks, for the same reason. */
 const BURP_MS = 450;
 
@@ -651,7 +652,7 @@ export class ServiceController {
   }
 
   private async runCountTogether(my: number): Promise<void> {
-    const ticks = countTogetherTicks(this.order.problem);
+    const ticks = countTogetherTicks(this.order.problem, this.stage);
     this.set({ counting: true, bubble: ticks[0]!.cells, bubbleCount: '', mood: 'idle', caption: say('ct.start'), speaker: 'pip' });
     await this.talk(say('ct.start'), 'pip');
     for (const t of ticks.slice(1)) {
@@ -718,15 +719,15 @@ export class ServiceController {
   }
 
   /**
-   * S1 missing-number forms (D105): the child's tray holds only the answer, so Pip shows the whole
-   * story in the model bubble (the known part, the empty spots or the items going, counted from
-   * one), then FollowMe builds just the answer on the child's own empty tray. The bubble stays up
+   * S1 missing-number forms (D105, D111): the child's tray holds only the answer, so Pip shows just
+   * the answer in the model bubble, counted from one, then FollowMe builds it on the child's own
+   * empty tray. The bubble stays up
    * as the model until the serve.
    */
   private async runBubbleWorked(my: number): Promise<void> {
     const t1 = toTrayTask(this.order.problem, 1);
     this.set({ tray: startState(t1), counting: true, glow: [], mood: 'idle', caption: '', speaker: 'pip' });
-    if (!(await this.playTicks(my, missingTicks(this.order.problem)))) return;
+    if (!(await this.playTicks(my, missingTicks(this.order.problem, this.stage)))) return;
     this.set((s) => ({
       attempt: stepAttempt(s.attempt, { type: 'phaseDone' }),
       counting: false,

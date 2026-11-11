@@ -125,7 +125,7 @@ export function stepAttempt(s: AttemptState, e: AttemptEvent): AttemptState {
  * PlateCount line (SPEC §5.5, D30): compares the served tray total with the expected one. At S0
  * there is no plate, so the monster echoes the typed number. On missing-number forms at S3/S2
  * (`group`) the monster talks about the orange group, the answer, not the tray total (D104):
- * "Two more… I wanted three. One more!" / "Three taken away… I wanted four. One more!"
+ * "Only two? I wanted three. One more please!" (D111), for added and taken-away groups alike.
  */
 export function plateCountLine(
   served: number,
@@ -137,10 +137,10 @@ export function plateCountLine(
   if (stage === 0) return { key: 'plate.echo', params };
   const short = served === expected - 1;
   const over = served === expected + 1;
-  if (group === 'more')
-    return { key: short ? 'plate.more.oneMore' : over ? 'plate.more.oneLess' : 'plate.more.off', params };
-  if (group === 'away')
-    return { key: short ? 'plate.away.oneMore' : over ? 'plate.away.oneLess' : 'plate.away.off', params };
+  if (group) {
+    const diff = Math.abs(expected - served);
+    return { key: served < expected ? 'plate.only.more' : 'plate.only.less', params: { ...params, diff } };
+  }
   if (short) return { key: 'plate.oneMore', params };
   if (over) return { key: 'plate.oneLess', params };
   return { key: 'plate.off', params };

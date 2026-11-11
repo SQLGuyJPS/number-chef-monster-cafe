@@ -79,16 +79,16 @@ describe('missing-number forms: the orange group is the answer (D104)', () => {
 
   it('PlateCount talks about the orange group', () => {
     const say = (l: ReturnType<typeof plateCountLine>) => phrase(l.key, l.params);
-    expect(say(plateCountLine(2, 3, 3, 'more'))).toBe('Two more… I wanted three. One more!');
-    expect(say(plateCountLine(4, 3, 2, 'more'))).toBe('Four more… I wanted three. One less!');
-    expect(say(plateCountLine(1, 5, 3, 'more'))).toBe('One more… I wanted five more.');
-    expect(say(plateCountLine(3, 4, 3, 'away'))).toBe('Three taken away… I wanted four. One more!');
-    expect(say(plateCountLine(2, 4, 3, 'away'))).toBe('Two taken away… I wanted four.');
+    expect(say(plateCountLine(2, 3, 3, 'more'))).toBe('Only two? I wanted three. One more please!');
+    expect(say(plateCountLine(4, 3, 2, 'more'))).toBe('Four? I wanted three. One less please!');
+    expect(say(plateCountLine(1, 5, 3, 'more'))).toBe('Only one? I wanted five. Four more please!');
+    expect(say(plateCountLine(3, 4, 3, 'away'))).toBe('Only three? I wanted four. One more please!');
+    expect(say(plateCountLine(6, 4, 3, 'away'))).toBe('Six? I wanted four. Two less please!');
     expect(say(plateCountLine(7, 8, 3))).toBe('I see seven… I wanted eight. One more!');
   });
 
   it('the model bubble tells the same story and ends on the answer (D105)', () => {
-    const add = missingTicks(find('7+?=10'));
+    const add = missingTicks(find('7+?=10'), 3);
     expect(add.map((t) => phrase(t.key, t.params))).toEqual([
       'Seven.',
       'Three empty spots.',
@@ -99,7 +99,7 @@ describe('missing-number forms: the orange group is the answer (D104)', () => {
     ]);
     expect(add[0]!.cells.filter((c) => c.spot)).toHaveLength(3);
     expect(add.at(-1)!.cells.filter((c) => c.role === 'child' && !c.spot)).toHaveLength(3);
-    const sub = missingTicks(find('10−?=6'));
+    const sub = missingTicks(find('10−?=6'), 2);
     expect(sub.map((t) => phrase(t.key, t.params))).toEqual([
       'Ten.',
       'one',
@@ -111,9 +111,27 @@ describe('missing-number forms: the orange group is the answer (D104)', () => {
     ]);
     expect(sub.at(-1)!.cells.filter((c) => c.gone)).toHaveLength(4);
     // CountTogether: "Let's count together." then the same story; no second count to the total.
-    const ct = countTogetherTicks(find('?+3=10')).map((t) => phrase(t.key, t.params));
+    const ct = countTogetherTicks(find('?+3=10'), 3).map((t) => phrase(t.key, t.params));
     expect(ct[0]).toBe("Let's count together.");
-    expect(ct.slice(1)).toEqual(missingTicks(find('?+3=10')).map((t) => phrase(t.key, t.params)));
+    expect(ct.slice(1)).toEqual(missingTicks(find('?+3=10'), 3).map((t) => phrase(t.key, t.params)));
+  });
+
+  it('S1: the bubble shows only the answer, as the child builds it (D111)', () => {
+    const add = missingTicks(find('7+?=10'), 1);
+    expect(add.map((t) => phrase(t.key, t.params))).toEqual([
+      'Three empty spots.',
+      'one',
+      'two',
+      'three',
+      'Three more makes ten!',
+    ]);
+    for (const t of add) expect(t.cells).toHaveLength(3);
+    expect(add[0]!.cells.every((c) => c.spot && c.role === 'child')).toBe(true);
+    const sub = missingTicks(find('10−?=6'), 1);
+    expect(sub.map((t) => phrase(t.key, t.params))).toEqual(['one', 'two', 'three', 'four', 'Four taken away!']);
+    expect(sub.at(-1)!.cells.every((c) => c.role === 'child' && !c.spot && !c.gone)).toBe(true);
+    const ct = countTogetherTicks(find('10−?=6'), 1).map((t) => phrase(t.key, t.params));
+    expect(ct).toEqual(["Let's count together.", 'one', 'two', 'three', 'four', 'Four taken away!']);
   });
 });
 
@@ -128,7 +146,7 @@ describe('service controller on missing-number forms', () => {
     expect(log).toEqual(['count:one', 'count:two']);
     c.serve();
     await tick(4);
-    expect(log.some((l) => l === 'say:Two more… I wanted three. One more!')).toBe(true);
+    expect(log.some((l) => l === 'say:Only two? I wanted three. One more please!')).toBe(true);
     c.tapBin();
     c.serve();
     expect(c.getView().eat?.plate).toEqual({ source: 'tray', from: 7, count: 3 });
@@ -150,7 +168,9 @@ describe('service controller on missing-number forms', () => {
     }
     const v = c.getView();
     expect(v.attempt.phase).toBe('followMe');
-    expect(v.bubble?.filter((x) => x.role === 'prefill')).toHaveLength(7); // the model stays up
+    // D111: the S1 bubble shows only the answer, as the child builds it.
+    expect(v.bubble?.filter((x) => x.role === 'prefill')).toHaveLength(0);
+    expect(v.bubble).toHaveLength(3);
     expect(v.task.expected.cells).toBe(3);
     expect(v.cue).toBe('place');
   });

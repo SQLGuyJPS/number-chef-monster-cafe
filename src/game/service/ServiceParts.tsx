@@ -416,6 +416,8 @@ export function Caption({
 
 /** Bubble border width (service.css .model-bubble); children are placed inside it. */
 const BUBBLE_BORDER = 4;
+/** Longest line that fits the bubble at full size ("Let's count together." fits); longer ones shrink (D111). */
+const BUBBLE_SHORT_LINE = 22;
 /** Frames band inside the bubble, below the title line and above the running count (D84). */
 const FRAMES_TOP = 68;
 const FRAMES_H = frameSize(MODEL_ONE.cell, MODEL_ONE.gap, MODEL_ONE.pad).h;
@@ -454,7 +456,7 @@ export function ModelBubble({
           className="mini"
         />
       ))}
-      <div className="bubble-count" data-testid="bubble-count">
+      <div className={`bubble-count${caption.length > BUBBLE_SHORT_LINE ? ' long' : ''}`} data-testid="bubble-count">
         {caption}
       </div>
     </div>

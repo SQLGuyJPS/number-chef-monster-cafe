@@ -204,3 +204,14 @@ Notes (owner, 2026-11-10, rounds 0–1): green answer on the ticket: keep. Subtr
 - [ ] **Sounds (D109):** a boing before each monster speaks, a crunch after it says the answer, a ting per coin after its thanks. Do you hear all three on the iPad, iPhone and Android now? (If not, tell me which and on which device.)
 - [ ] **Art (D110):** Blobbo's new reaction (blushes, giggle-hops, tiny hearts and bubbles) vs. Wobbleton's puddle; the new door on the left wall and the hanging wooden sign (leave button); no string lights (they return as a shop item); the full-body Pip on the Help button; Mimsy's shorter hello ("Hello, dear chef!").
 - [ ] At the end of a service the eaten food no longer comes back on the tray during "All done!".
+
+Notes (owner, 2026-11-11, round 2): answer colour, returning monster, art and the empty tray at "All done!": good. Sounds are heard unless speech blocks them. Acted on in round 3 below (D111).
+
+### M2 feedback round 3 (D111)
+- [ ] **Subtraction rings, `10 − 9 = ?`:** at **S3** the nine to take away have orange rings and the one to keep is blue, like Pip's model; each item you take off leaves a dashed orange outline. At **S2** all start blue, and each item taken off leaves a dashed orange outline. Right?
+- [ ] **Addition at S3, `7 + 3 = ?`:** cells 8–10 now start with a dashed orange outline, like Pip's model (S2: plain empty cells). Helpful, or too much of a giveaway?
+- [ ] **Missing-number wrong serve:** "Only two? I wanted three. One more please!"; off by more: "Only one? I wanted three. Two more please!"; too many: "Four? I wanted three. One less please!". Taken-away orders use the same words. Other orders still say "I see seven… I wanted eight. One more!".
+- [ ] **S1 help on missing numbers:** the bubble now shows only the answer, the way the child builds it ("Three empty spots." / "one, two, three" / "Three more makes ten!"; `10 − ? = 6`: "one … four" / "Four taken away!"). Can the child copy it now?
+- [ ] **Bubble text:** "Seven and three more makes ten!" (S3/S2) now fits inside the bubble. Check on the iPhone too.
+- [ ] **Closing time:** about 3 s for 23 coins. Pace right?
+- [ ] **Sounds:** each sound now waits 0.3 s after a line ends (was 0.12 s). Still lost anywhere? If so, tell me which sound, on which device, and after which line.

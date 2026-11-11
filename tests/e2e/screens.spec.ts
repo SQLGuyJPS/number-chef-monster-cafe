@@ -70,6 +70,13 @@ test('service screenshots', async ({ page }, info) => {
   await page.waitForTimeout(500);
   await shot('service-s3-remove');
 
+  // S2 subtraction: all blue at the start; a removed item leaves a dashed orange outline (D111).
+  await openService(page, { skill: 'A2', stage: 2, ops: 'sub', seed: 5 });
+  await tapId(page, 'tray-cell-0');
+  await tapId(page, 'tray-cell-0');
+  await page.waitForTimeout(500);
+  await shot('service-s2-remove');
+
   await openService(page, { skill: 'A2', stage: 3, ops: 'add', seed: 3, timeScale: 1 });
   await tapId(page, 'help');
   await waitPhase(page, 'countTogether');
@@ -153,7 +160,15 @@ test('M2 screenshots', async ({ page }, info) => {
   await page.waitForTimeout(300);
   await shot('service-a3-taken-away');
 
-  // A3 at S1: Pip's make-ten story in the model bubble; the child's tray stays empty (D105).
+  // A3 at S3: CountTogether ends on "… makes ten!", which fits inside the bubble (D111).
+  await openService(page, { skill: 'A3', stage: 3, ops: 'add', seed: 4 });
+  await tapId(page, 'help');
+  await waitPhase(page, 'countTogether');
+  await waitPhase(page, 'building', 40_000);
+  await page.waitForTimeout(300);
+  await shot('service-a3-count-together');
+
+  // A3 at S1: only the answer in the bubble, as the child builds it (D105, D111).
   await openService(page, { skill: 'A3', stage: 1, ops: 'add', seed: 4 });
   await serveWrong(page);
   await waitPhase(page, 'building');

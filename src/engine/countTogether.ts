@@ -1,9 +1,9 @@
 // CountTogether (SPEC §5.5, D42c): the model bubble shows the problem, blue group then orange
 // group, and Pip counts with running numbers, ending at the answer. Missing-number forms count only
-// the unknown, from one, in the bubble's own picture (D104, D105): the same ticks are Pip's Worked
-// demo at S1, where the child's tray holds only the answer and must not fill with other food.
+// the unknown, from one, in the bubble's own picture (D104, D105). At S1 the child's tray holds only
+// the answer, so the bubble shows only the answer too, and the child can copy it exactly (D111).
 import type { PhraseKey, PhraseParams } from './phrases';
-import type { Problem } from './types';
+import type { Problem, Stage } from './types';
 
 export interface ModelCell {
   role: 'prefill' | 'child';
@@ -28,10 +28,15 @@ const cellsOf = (blue: number, orange: number): ModelCell[] => [
   ...Array.from({ length: orange }, () => ({ role: 'child' as const })),
 ];
 
-export function countTogetherTicks(p: Problem): CountTick[] {
+export function countTogetherTicks(p: Problem, stage: Stage): CountTick[] {
   if (p.form === 'missingAddend' || p.form === 'missingSub') {
-    const demo = missingTicks(p);
-    return [{ key: 'ct.start', params: {}, cells: demo[0]!.cells.map((c) => ({ ...c, glow: false })) }, ...demo];
+    const demo = missingTicks(p, stage);
+    // S1 opens on the answer's empty spots; S3/S2 on the first picture of the story.
+    const start =
+      stage === 1
+        ? Array.from({ length: p.answer }, () => ({ role: 'child' as const, spot: true }))
+        : demo[0]!.cells.map((c) => ({ ...c, glow: false }));
+    return [{ key: 'ct.start', params: {}, cells: start }, ...demo];
   }
   const known = p.operands.filter((o): o is number => o !== null);
   const ticks: CountTick[] = [];
@@ -70,7 +75,8 @@ export function countTogetherTicks(p: Problem): CountTick[] {
  * counted from one, "Seven and three more makes ten!". `m − ? = c`: "Ten.", the orange items go
  * counted from one, "Six left!", "Four taken away!".
  */
-export function missingTicks(p: Problem): CountTick[] {
+export function missingTicks(p: Problem, stage: Stage): CountTick[] {
+  if (stage === 1) return answerOnlyTicks(p);
   const known = p.operands.filter((o): o is number => o !== null);
   const snap = (cells: ModelCell[]) => cells.map((c) => ({ ...c }));
   const ticks: CountTick[] = [];
@@ -120,5 +126,35 @@ export function missingTicks(p: Problem): CountTick[] {
   ticks.push({ key: 'demo.left', params: { n: left }, cells: snap(cells) });
   glowOnly(cells, 0, 0);
   ticks.push({ key: 'ct.away', params: { n: away }, cells: snap(cells) });
+  return ticks;
+}
+
+/**
+ * S1 missing-number forms (D111): only the answer, as the child builds it on the S1 tray. The
+ * answer's spots show dashed and fill counted from one; the ticket still carries the known part.
+ * `7 + ? = 10`: "Three empty spots." "one, two, three" "Three more makes ten!".
+ * `10 − ? = 6`: "one … four" "Four taken away!".
+ */
+function answerOnlyTicks(p: Problem): CountTick[] {
+  const n = p.answer;
+  const snap = (cells: ModelCell[]) => cells.map((c) => ({ ...c }));
+  const cells: ModelCell[] = Array.from({ length: n }, () => ({ role: 'child' as const, spot: true }));
+  const ticks: CountTick[] = [];
+  if (p.form === 'missingAddend') {
+    cells.forEach((c) => (c.glow = true));
+    ticks.push({ key: n === 1 ? 'demo.ten.gap1' : 'demo.ten.gap', params: { n }, cells: snap(cells) });
+    cells.forEach((c) => (c.glow = false));
+  }
+  for (let i = 1; i <= n; i++) {
+    cells[i - 1] = { role: 'child', pop: i };
+    ticks.push({ key: 'count.n', params: { n: i }, cells: snap(cells) });
+  }
+  cells.forEach((c) => (c.glow = true));
+  if (p.form === 'missingAddend') {
+    const total = p.operands.find((o): o is number => o !== null)! + n;
+    ticks.push({ key: 'demo.more.makes', params: { n, total }, cells: snap(cells) });
+  } else {
+    ticks.push({ key: 'ct.away', params: { n }, cells: snap(cells) });
+  }
   return ticks;
 }

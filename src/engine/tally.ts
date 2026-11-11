@@ -4,10 +4,10 @@
 
 /** First step: about three numbers a second, slow enough to follow the first few. */
 export const TALLY_START_MS = 333;
-/** Cap: ten a second. Faster than this and the numbers blur. */
-export const TALLY_FLOOR_MS = 100;
-/** How quickly the pace eases from start to cap (steps per e-fold). 23 coins ≈ 3.8 s. */
-const TALLY_EASE_STEPS = 7;
+/** Cap: about eleven a second. Faster than this and the numbers blur. */
+export const TALLY_FLOOR_MS = 90;
+/** How quickly the pace eases from start to cap (steps per e-fold). 23 coins ≈ 3.1 s (D111). */
+const TALLY_EASE_STEPS = 4;
 
 /** Delay before step `i` (i = 0 is the step from 1 to 2): eases exponentially down to the cap. */
 export function tallyDelayMs(i: number): number {

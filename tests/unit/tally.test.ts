@@ -26,11 +26,11 @@ describe('Results tally schedule (SPEC §5.7)', () => {
     expect(gaps.at(-1)).toBeLessThanOrEqual(TALLY_FLOOR_MS + 5);
   });
 
-  it('takes a sensible time: about 4 s for a full service, never long for a big one', () => {
+  it('takes a sensible time: about 3 s for a full service, never long for a big one (D111)', () => {
     const dur = (t: number) => tallySchedule(t).at(-1)!.atMs;
-    expect(dur(23)).toBeGreaterThanOrEqual(3_000);
-    expect(dur(23)).toBeLessThanOrEqual(4_500);
-    expect(dur(29)).toBeLessThanOrEqual(5_000);
+    expect(dur(23)).toBeGreaterThanOrEqual(2_700);
+    expect(dur(23)).toBeLessThanOrEqual(3_300);
+    expect(dur(29)).toBeLessThanOrEqual(4_000);
     expect(dur(5)).toBeLessThanOrEqual(1_400);
   });
 });

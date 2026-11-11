@@ -112,6 +112,24 @@ export function spokenCount(task: TrayTask, effect: { count: number }, after: Tr
   return task.unknown ? childCount(after) : effect.count;
 }
 
+/**
+ * The orange group's cells on the guided tray (SPEC §3.2): the spots to fill (add mode) or the
+ * items to take away from the end (remove mode). Null on the S1 tray, which is all answer.
+ */
+export function orangeCells(task: TrayTask): { from: number; to: number } | null {
+  const pre = task.prefill.frameCells;
+  if (pre === 0 && task.mode === 'add') return null;
+  return task.mode === 'add' ? { from: pre, to: task.expected.cells } : { from: task.expected.cells, to: pre };
+}
+
+/**
+ * Whether the orange group is marked before the child acts (D104, D111): always on missing-number
+ * forms; on result forms only with full support (S3, and the S0 cloche model, which is the S3
+ * tray), as in Pip's model. At S2 result forms show orange only where the child has acted.
+ */
+export const marksAtStart = (task: TrayTask, stage: Stage): boolean =>
+  !!task.unknown || stage === 3 || stage === 0;
+
 /** What the monster eats on a correct serve (SPEC §5.6, D104): always the answer. */
 export type Plate =
   | { source: 'tray'; from: number; count: number }
