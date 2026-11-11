@@ -330,8 +330,12 @@ test('a whole service of six orders ends on Results; Another service, Change dis
   await expect(page.getByTestId('screen-results')).toBeVisible({ timeout: 10_000 });
   // The tally counts up to the exact total: 6 orders × 3 coins + the 5-coin tip (SPEC §9).
   await expect(page.getByTestId('results-count')).toHaveText('23', { timeout: 15_000 });
+  await expect(page.getByTestId('results-tally')).toHaveAttribute('data-done', 'true');
   await expect(page.locator('.results-face')).toHaveCount(6);
-  expect(await page.evaluate(() => window.__spoken.includes('Twenty-three!'))).toBe(true);
+  // The count itself is silent (a coin ting per step); the total is said once at the end.
+  await expect
+    .poll(() => page.evaluate(() => window.__spoken.filter((t) => t.startsWith('You earned'))))
+    .toEqual(['You earned twenty-three coins! Great job chef!']);
 
   // Another service repeats the skill (a new service starts at order 0).
   await tapId(page, 'results-another');
@@ -342,6 +346,43 @@ test('a whole service of six orders ends on Results; Another service, Change dis
   // Close it from the door: no tip for leaving early; Home's jar keeps every coin earned (23).
   await tapId(page, 'door');
   await tapId(page, 'close-cafe');
+  await expect(page.getByTestId('coin-jar')).toContainText('23');
+});
+
+test('Results: buttons wait for the count; a tap skips to the total with no speech (SPEC §5.7)', async ({
+  page,
+}) => {
+  test.setTimeout(90_000);
+  await openService(page, { skill: 'A1', stage: 3, seed: 8 });
+  for (let i = 0; i < 6; i++) {
+    await expect.poll(async () => (await probe(page))?.index).toBe(i);
+    await waitPhase(page, 'building');
+    // Real time for the last order, so the count on Results lasts long enough to watch and skip.
+    if (i === 5) await page.evaluate(() => window.__ncmc.setTimeScale(1));
+    await serveCorrect(page);
+  }
+  await expect(page.getByTestId('screen-results')).toBeVisible({ timeout: 30_000 });
+  const count = page.getByTestId('results-count');
+  // Mid-count: a number between 1 and 22 shows, and no button exists yet.
+  await expect.poll(async () => Number(await count.textContent()), { timeout: 5_000 }).toBeGreaterThan(0);
+  expect(Number(await count.textContent())).toBeLessThan(23);
+  await expect(page.getByTestId('results-tally')).toHaveAttribute('data-done', 'false');
+  for (const id of ['results-another', 'results-change', 'results-home'])
+    await expect(page.getByTestId(id)).toHaveCount(0);
+
+  // A tap on the count skips it; the screen stays (the skip tap presses nothing).
+  await page.evaluate(() => (window.__spoken.length = 0));
+  await tapId(page, 'results-tally');
+  await expect(count).toHaveText('23');
+  await expect(page.getByTestId('results-tally')).toHaveAttribute('data-done', 'true');
+  await expect(page.getByTestId('results-another')).toBeVisible();
+  await expect(page.getByTestId('screen-results')).toBeVisible();
+  // Longer than the rest of the count plus the beat before the total would have been said.
+  await page.waitForTimeout(5_000);
+  expect(await page.evaluate(() => window.__spoken.filter((t) => t.startsWith('You earned')))).toEqual([]);
+  await expect(count).toHaveText('23');
+
+  await tapId(page, 'results-home');
   await expect(page.getByTestId('coin-jar')).toContainText('23');
 });
 

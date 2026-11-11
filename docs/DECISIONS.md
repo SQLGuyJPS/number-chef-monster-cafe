@@ -62,7 +62,7 @@
 | D52 | `?debug` picker stored under `debugSkillConfig` | Implementation only | Per-device home before the event log |
 | D53 | Home gear inert before M3a | Superseded by D94 | No target yet |
 | D54 | Waiting service worker activates on cold launch or 30 s Home idle | SPEC §2, §15 | "When idle" had no threshold |
-| D55 | Results tally by ones to ten, then fives, to the exact total | SPEC §5.7 | End point was unspecified |
+| D55 | Results tally by ones to ten, then fives, to the exact total | Superseded by D107 | End point was unspecified |
 | D56 | Tap-to-skip exempt from the eat lock | SPEC §2.3, §5.6 | Skip must work during eating |
 | D57 | Tier 1 renders only `frames1`; model supports `frames2` | SPEC §3.3 | A1–A3 never exceed 10 |
 | D58 | Service worker registered from app code | Implementation only | Inline script blocked by CSP |
@@ -78,7 +78,7 @@
 | D68 | CountTogether details (bell off while counting, bubble stays, count back) | SPEC §5.5 | §5.5 left these open |
 | D69 | `TrayTask` refinement for S0 (`expected.typed`) | SPEC §3.1 | S0 needs both the typed answer and a tray |
 | D70 | Caption slot; captions ≤ 8 words, ticket lines ≤ 12 | SPEC §13.2; slot superseded by D76 | Mock had no caption slot |
-| D71 | Worked/FollowMe always on the S3 tray; FollowMe ends right | SPEC §5.5; take-back cue superseded by D82 | No strategy visible on an empty tray |
+| D71 | Worked/FollowMe always on the S3 tray; FollowMe ends right | SPEC §5.5; take-back cue superseded by D82; S1 missing-number forms by D105 | No strategy visible on an empty tray |
 | D72 | A1/A2 strategy tags, difficulty and doubles wording | SPEC §4, §5.5 | Mapping was unspecified; caption limit |
 | D73 | Layout mock removed; service controller is a plain class | Implementation only; controller noted in SPEC §2 | Avoid a drifting second layout; hooks lint |
 | D74 | CI actions on current majors | Implementation only | Node 20 deprecation |
@@ -103,11 +103,18 @@
 | D93 | Monster's move between spots is 550 ms | SPEC §7.3 | Code and D91 text disagreed; owner confirmed 550 ms |
 | D94 | Home gear opens playtest tools before M3a (long-press 2 s, no gate) | SPEC §2.2, §5.2, §12, §14; amended by D95 | Installed app can't open `?debug`; iOS storage is per app |
 | D95 | Gear tap opens a hold-to-open popup with a filling ring; gear 88 px with real gear art | SPEC §2.2, §5.2, §12, §14 | Hold on the small gear gave no feedback and failed on devices |
-| D96 | Correct serve fills the ticket blank with the answer in green | SPEC §5.4, §14 (M2) | Show the finished true sentence at the moment of success |
+| D96 | Correct serve fills the ticket blank with the answer in green | SPEC §5.4, §14 (M2); colour amended by D106 | Show the finished true sentence at the moment of success |
 | D97 | Session builder gaps: balance-aware new facts, requeue fallback, in-memory seen until M3a | SPEC §4.1 | New-fact cap and add/sub balance conflict on the first service |
-| D98 | A3: make-ten demo lines, subtraction counts back, missing-subtrahend demo ends on what went away | SPEC §4, §5.5 | Make-ten demo and A3 subtraction strategy were open |
+| D98 | A3: make-ten demo lines, subtraction counts back, missing-subtrahend demo ends on what went away | SPEC §4, §5.5; demo counts amended by D104 | Make-ten demo and A3 subtraction strategy were open |
 | D99 | Warm-up: ghost keeps pointing until touched, flag set at start, its monster and food | SPEC §5.4 | "Taps the bin once" left the idle child and the flag timing open |
 | D100 | Monster art: shared face parts, still puzzled tilt, named ~1.4 s reactions, reduced motion = still poses, `?gallery`, café scene | SPEC §7.2, §7.4 | Look and motion of the five expressions were open |
-| D101 | Eat sequence: eats the tray total, timings, skip to coins, service jar, greetings on first visit, monster voices, +5 tip paid | SPEC §5.6, §7.2, §9; flight amended by D103 | Timings, what is eaten on missing-amount forms, and when monster lines play were open |
+| D101 | Eat sequence: eats the tray total, timings, skip to coins, service jar, greetings on first visit, monster voices, +5 tip paid | SPEC §5.6, §7.2, §9; flight amended by D103; what is eaten amended by D104 | Timings, what is eaten on missing-amount forms, and when monster lines play were open |
 | D102 | Pointer guard ignores native form controls; `change` / no-finger `touchend` release it | SPEC §2.3 | Stage picker froze every tap in the app |
 | D103 | Plate flies in together; monster says only the answer | SPEC §5.6 | Per-item counts tripped over each other |
+| D104 | Missing-number forms: the orange group is the answer (marks, counts, PlateCount, demo, what is eaten) | SPEC §3.2, §3.3, §5.5, §5.6 | Monster wanted and ate the total, not the answer |
+| D105 | S1 help on missing-number forms plays in the model bubble; CountTogether tells the make-ten story | SPEC §5.5 | Pip counted food the child never placed on an empty S1 tray |
+| D106 | The solved answer takes the blank's role colour | SPEC §5.4 | Missing-number answers showed green like the total |
+| D107 | Results: silent count-up by one with tings, then one spoken total; buttons after; tap skips | SPEC §5.7 | Spoken count outran the speech engine |
+| D108 | A returning monster joins the line as the next monster comes in | SPEC §5.4 | Line grew during the meal for no visible reason |
+| D109 | Sound effects never overlap speech | SPEC §5.6, §8.1 | iOS dropped boing, crunch and tings under speech |
+| D110 | Blobbo's giggle, grounded door, string lights to the shop, Pip button art, shorter Mimsy hello | SPEC §5.4, §7.2, §7.4 | Owner playtest polish |

@@ -192,3 +192,15 @@ The D94 list above is covered by this round (the hold now goes through the popup
 
 - [ ] Skim `docs/CONTENT_REVIEW.md` (sample orders, spoken lines and Pip's demos for A1–A3, and the monsters' lines). Anything that reads oddly aloud?
 
+
+Notes (owner, 2026-11-10, rounds 0–1): green answer on the ticket: keep. Subtraction balance: fine for now, keep watching. Warm-up ghost hand: needs more testing. Coin jar, monsters, voices, tip (23), service length and smoothness: fine. Stage picker fix works. "Three!" (the answer) is right. Content review: nothing odd. Reduced Motion: not tested yet. Acted on in round 2 below (D104–D110).
+
+### M2 feedback round 2 (D104–D110)
+- [ ] **Perfect Ten at S3/S2, missing numbers** (`7 + ? = 10`, `? + 5 = 10`, `10 − ? = 6`): the empty spots up to ten have a dashed orange outline (for `10 − ?` the items to take away have orange rings). S3 counts only the orange group, from one. A wrong serve says "Two more… I wanted three. One more!" / "Three taken away… I wanted four.", and the monster eats only the orange group and says its number. Does it make sense now, or should these orders appear only at S1/S0 (D104)?
+- [ ] **Pip's help on these orders:** CountTogether and the demo now go "Seven." / "Three empty spots." / "one, two, three" / "Seven and three more makes ten!". At **S1**, Pip shows this in the bubble, the tray stays empty, then she builds just the three (D105). Clear?
+- [ ] The filled-in answer is now orange on missing-number orders (green on the others), so the 10 stays the only green (D106).
+- [ ] **Closing time:** the coin number ticks up by one with a ting each, slowly then faster (≈ 4 s for 23), then "You earned twenty-three coins! Great job, chef!". The buttons appear only afterwards; a tap during the count jumps to the total with no speech (D107). Pace right? Are the tings heard on the iPad?
+- [ ] **Returning monster:** the line now grows only when the next monster comes in: the silhouettes shuffle right and a new one walks in from the door (D108). Does it read as "someone got back in line"?
+- [ ] **Sounds (D109):** a boing before each monster speaks, a crunch after it says the answer, a ting per coin after its thanks. Do you hear all three on the iPad, iPhone and Android now? (If not, tell me which and on which device.)
+- [ ] **Art (D110):** Blobbo's new reaction (blushes, giggle-hops, tiny hearts and bubbles) vs. Wobbleton's puddle; the new door on the left wall and the hanging wooden sign (leave button); no string lights (they return as a shop item); the full-body Pip on the Help button; Mimsy's shorter hello ("Hello, dear chef!").
+- [ ] At the end of a service the eaten food no longer comes back on the tray during "All done!".

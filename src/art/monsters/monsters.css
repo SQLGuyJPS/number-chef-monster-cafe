@@ -61,7 +61,7 @@
 }
 
 /* Reactions (one per monster, ≈ 1.4 s so eat + react stays ≤ 4 s, SPEC §5.6). */
-.monster-art.react-melt .m-figure { animation: r-melt 1.4s ease-in-out; }
+.monster-art.react-giggle .m-figure { animation: r-giggle 1.3s ease-in-out; }
 .monster-art.react-stomp .m-figure { animation: r-stomp 1.4s ease-in-out; }
 .monster-art.react-spin .m-figure { transform-origin: 50% 50%; animation: r-spin 1.2s ease-in-out; }
 .monster-art.react-hearts .m-figure { animation: r-float 1.4s ease-in-out; }
@@ -69,9 +69,48 @@
 .monster-art.react-puddle .m-figure { animation: r-puddle 1.4s ease-in-out; }
 .monster-art .m-hearts { animation: r-hearts 1.4s ease-out forwards; }
 .monster-art .m-burp { transform-origin: 30% 80%; animation: r-bubble 1.4s ease-out forwards; }
+/* Blobbo's shy giggle: blushes, then little giggle-hops with a tilt each way while tiny hearts and
+   bubbles pop up. Hops and tilts, never a squash, so it never reads like Wobbleton's puddle. A
+   first-try serve (.big, D45) hops a little higher. Fill mode `both` hides the pops until their
+   delay; with reduced motion they simply rest beside the blushing pose. */
+.monster-art .m-blush { animation: r-blush 1.3s ease-out forwards; }
+.monster-art .m-giggles > * { transform-box: fill-box; transform-origin: 50% 100%; }
+.monster-art .m-giggles > :nth-child(1) { animation: r-giggle-pop 0.8s ease-out 0.1s both; }
+.monster-art .m-giggles > :nth-child(2) { animation: r-giggle-pop 0.8s ease-out 0.35s both; }
+.monster-art .m-giggles > :nth-child(3) { animation: r-giggle-pop 0.8s ease-out 0.55s both; }
+.monster-art .m-giggles > :nth-child(4) { animation: r-giggle-pop 0.7s ease-out 0.6s both; }
+.monster-art.big.react-giggle .m-figure { animation-name: r-giggle-big; }
 
-@keyframes r-melt {
-  35%, 65% { transform: scale(1.25, 0.62); }
+@keyframes r-giggle {
+  10% { transform: translateY(-12px) rotate(-6deg); }
+  20% { transform: translateY(0) rotate(0); }
+  32% { transform: translateY(-12px) rotate(6deg); }
+  44% { transform: translateY(0) rotate(0); }
+  56% { transform: translateY(-9px) rotate(-5deg); }
+  68% { transform: translateY(0) rotate(0); }
+  76% { transform: rotate(4deg); }
+  84% { transform: rotate(-4deg); }
+  92% { transform: rotate(2deg); }
+}
+@keyframes r-giggle-big {
+  10% { transform: translateY(-20px) rotate(-7deg); }
+  20% { transform: translateY(0) rotate(0); }
+  32% { transform: translateY(-20px) rotate(7deg); }
+  44% { transform: translateY(0) rotate(0); }
+  56% { transform: translateY(-15px) rotate(-6deg); }
+  68% { transform: translateY(0) rotate(0); }
+  76% { transform: rotate(5deg); }
+  84% { transform: rotate(-5deg); }
+  92% { transform: rotate(2deg); }
+}
+@keyframes r-blush {
+  0% { opacity: 0; }
+  20%, 100% { opacity: 1; }
+}
+@keyframes r-giggle-pop {
+  0% { opacity: 0; transform: translateY(10px) scale(0.4); }
+  35% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-22px) scale(1.05); }
 }
 @keyframes r-stomp {
   12% { transform: translateY(-20px); }

@@ -34,6 +34,7 @@ function guidedTask(p: Problem): Omit<TrayTask, 'layout'> {
         mode: 'add',
         takenAwayRow: false,
         expected: { cells: a + p.answer },
+        unknown: { from: a, to: a + p.answer },
       };
     }
     case 'missingSub': // m − ? = c: remove until c remain; removed items stay in the row.
@@ -42,6 +43,7 @@ function guidedTask(p: Problem): Omit<TrayTask, 'layout'> {
         mode: 'remove',
         takenAwayRow: true,
         expected: { cells: known[1]! },
+        unknown: { from: known[1]!, to: known[0]! },
       };
   }
 }
@@ -50,6 +52,7 @@ function guidedTask(p: Problem): Omit<TrayTask, 'layout'> {
 export function toTrayTask(p: Problem, stage: Stage): TrayTask {
   const g = guidedTask(p);
   if (stage === 1) {
+    // S1 builds only the unknown, so the whole tray already is the answer: no `unknown` range.
     return {
       layout: layoutFor(0, p.answer),
       prefill: { frameCells: 0, locked: false },
@@ -95,6 +98,31 @@ export function startState(task: TrayTask): TrayState {
 /** Items taken off in remove mode; for missing-subtrahend forms they sit in the taken-away row. */
 export const removedCount = (s: TrayState): number =>
   s.mode === 'remove' ? Math.max(0, s.prefill - s.filled) : 0;
+
+/** The orange group: items the child added (add mode) or took away (remove mode). */
+export const childCount = (s: TrayState): number =>
+  s.mode === 'remove' ? removedCount(s) : Math.max(0, s.filled - s.prefill);
+
+/**
+ * The number an S3 tap says (SPEC §3.3). Result forms count the tray (counting on, or back for
+ * `m − b = ?`); missing-number forms count the unknown group from one, so the last number said is
+ * the answer (D104). 0 (the last added item sent back) says nothing.
+ */
+export function spokenCount(task: TrayTask, effect: { count: number }, after: TrayState): number {
+  return task.unknown ? childCount(after) : effect.count;
+}
+
+/** What the monster eats on a correct serve (SPEC §5.6, D104): always the answer. */
+export type Plate =
+  | { source: 'tray'; from: number; count: number }
+  | { source: 'taken'; count: number }
+  | { source: 'pad'; count: number };
+export function eatenPlate(task: TrayTask, answer: number, typed = false): Plate {
+  if (typed) return { source: 'pad', count: answer };
+  if (task.unknown && task.takenAwayRow) return { source: 'taken', count: answer };
+  if (task.unknown) return { source: 'tray', from: task.unknown.from, count: answer };
+  return { source: 'tray', from: 0, count: task.expected.cells };
+}
 
 export type TrayEffect =
   | { kind: 'placed'; index: number; count: number } // count = running total said at S3

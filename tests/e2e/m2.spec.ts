@@ -50,6 +50,8 @@ test('A3 make-ten help: wrong, wrong, yes → Pip flashes the gap to ten, then F
   await openService(page, { skill: 'A3', stage: 3, ops: 'add', seed: 4 });
   const s = await probe(page);
   expect(s.form).toBe('missingAddend');
+  // The empty spots up to ten are marked orange (D104).
+  await expect(page.locator('[data-testid="tray"] .tf-cell.spot')).toHaveCount(10 - s.prefill);
   await serveWrong(page);
   await waitPhase(page, 'building');
   await serveWrong(page);
@@ -60,6 +62,29 @@ test('A3 make-ten help: wrong, wrong, yes → Pip flashes the gap to ten, then F
   expect(pip.some((l) => /empty spots?\./.test(l))).toBe(true);
   expect(pip.some((l) => l.endsWith('more makes ten!'))).toBe(true);
   await followMe(page);
+  await ringBell(page);
+  await expect.poll(async () => (await probe(page)).events[0]?.outcome).toBe('assisted');
+  // The monster eats only the orange group, and the answer shows in the blank's orange (D104, D106).
+  const e = await probe(page);
+  expect(e.eat?.plate).toEqual({ source: 'tray', from: s.prefill, count: s.answer });
+  await expect(page.getByTestId('ticket-answer')).toHaveAttribute('data-role', 'child');
+});
+
+test('A3 at S1: Pip shows the make-ten story in the bubble; the child builds only the answer (D105)', async ({ page }) => {
+  test.setTimeout(90_000);
+  await openService(page, { skill: 'A3', stage: 1, ops: 'add', seed: 4 });
+  const s = await probe(page);
+  expect(s.form).toBe('missingAddend');
+  await serveWrong(page);
+  await waitPhase(page, 'building');
+  await tapId(page, 'help');
+  await waitPhase(page, 'worked');
+  await expect(page.getByTestId('model-bubble')).toBeVisible();
+  expect((await probe(page)).filled).toBe(0);
+  await waitPhase(page, 'followMe', 40_000);
+  expect((await probe(page)).expectedCells).toBe(s.answer);
+  await followMe(page);
+  expect((await probe(page)).filled).toBe(s.answer);
   await ringBell(page);
   await expect.poll(async () => (await probe(page)).events[0]?.outcome).toBe('assisted');
 });
@@ -82,6 +107,11 @@ test('an assisted order brings the same monster back later with more support; co
   await ringBell(page);
   await expect.poll(async () => (await probe(page)).orders).toBe(7);
   expect((await probe(page)).coins).toBe(3);
+  // The line grows only as the next monster comes in, with the newcomer walking in (D108).
+  expect((await probe(page)).remaining).toBe(5);
+  await expect.poll(async () => (await probe(page)).index).toBe(1);
+  await expect(page.getByTestId('queue-newcomer')).toHaveCount(1);
+  expect((await probe(page)).remaining).toBe(5);
 
   // Play on until the monster comes back.
   for (let i = 1; i < 7; i++) {
@@ -195,8 +225,13 @@ test('eat sequence: fly, chew, react within 4 s, then 3 coins land in the jar; a
   const steps = await page.evaluate(() => (window as unknown as { __eat: [string, number][] }).__eat);
   expect(steps.map((s) => s[0])).toEqual(['fly', 'chew', 'react', 'coins']);
   const coinsAt = steps.find((s) => s[0] === 'coins')![1];
-  // Bell lead (0.5 s) + eat and react ≤ 4 s; a little slack for the 20 ms sampling and the tap.
-  expect(coinsAt - t0).toBeLessThan(500 + 4000 + 300);
+  // Bell lead (0.5 s) + eat and react ≤ 4 s, but the crunch and the coins now wait for the answer
+  // and the thanks to finish (D109). Headless Chromium has no voices, so lines run to their
+  // fallback timeout (SPEC §8.1): allow for those two lines on top.
+  const chewAt = steps.find((s) => s[0] === 'chew')![1];
+  const reactAt = steps.find((s) => s[0] === 'react')![1];
+  expect(reactAt - chewAt).toBeGreaterThan(900); // the three chews
+  expect(coinsAt - t0).toBeLessThan(500 + 4000 + 1200 + 3000 + 300);
   expect((await probe(page)).landed).toBe(3);
 
   // Second order: tap during the flight and it goes straight to the coins.

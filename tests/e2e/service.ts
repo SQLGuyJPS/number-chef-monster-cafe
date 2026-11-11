@@ -4,7 +4,7 @@ import { tap } from './helpers';
 /** What `window.__ncmc.service()` returns (src/game/service/controller.ts probe). */
 export interface Probe {
   index: number;
-  eat: { step: string; flown: boolean; items: number; firstTry: boolean; coinsOut: number } | null;
+  eat: { step: string; flown: boolean; plate: { source: string; count: number; from?: number }; firstTry: boolean; coinsOut: number } | null;
   landed: number;
   mood: string;
   phase: string;

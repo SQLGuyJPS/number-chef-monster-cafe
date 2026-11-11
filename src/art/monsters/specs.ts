@@ -8,7 +8,7 @@ export const EXPRESSIONS = ['idle', 'delight', 'eat', 'puzzled', 'sleepy'] as co
 export type Expression = (typeof EXPRESSIONS)[number];
 
 /** One celebration per monster (SPEC §7.2 roster); CSS keyframes `react-<id>` in monsters.css. */
-export const REACTIONS = ['melt', 'stomp', 'spin', 'hearts', 'burp', 'puddle', 'faint', 'sparkles'] as const;
+export const REACTIONS = ['giggle', 'stomp', 'spin', 'hearts', 'burp', 'puddle', 'faint', 'sparkles'] as const;
 export type ReactionId = (typeof REACTIONS)[number];
 
 export const BODIES = ['blob', 'tall', 'round', 'square', 'jelly', 'fluffy'] as const;
@@ -45,7 +45,7 @@ export const MONSTER_SPECS: readonly MonsterSpec[] = [
     voice: { pitch: 1.15, rate: 0.85 },
     personality: 'shy giggler',
     favorites: ['cake', 'strawberry'],
-    reactions: ['melt'],
+    reactions: ['giggle'],
     lines: { arrive: ['Hee hee. Hello!'], thanks: ['Hee hee! Thank you!'] },
   },
   {
@@ -88,7 +88,7 @@ export const MONSTER_SPECS: readonly MonsterSpec[] = [
     personality: 'tiny and polite',
     favorites: ['bread', 'tangerine'],
     reactions: ['hearts'],
-    lines: { arrive: ['Hello. May I order, please?'], thanks: ['Thank you very much!'] },
+    lines: { arrive: ['Hello, dear chef!'], thanks: ['Thank you very much!'] },
   },
   {
     id: 'chompers',

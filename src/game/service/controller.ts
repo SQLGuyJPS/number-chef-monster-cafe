@@ -11,7 +11,7 @@ import {
   HAT_PULSE_IDLE_MS,
   WARMUP_GHOST_IDLE_MS,
 } from '../../engine/config';
-import { countTogetherTicks, type ModelCell } from '../../engine/countTogether';
+import { countTogetherTicks, missingTicks, type CountTick, type ModelCell } from '../../engine/countTogether';
 import { buildDemo, followMeCue, type FollowMeCue } from '../../engine/demos';
 import { CHEW_MS, COIN_FLY_MS, COIN_GAP_MS, REACT_MS, flyMs } from '../../engine/eat';
 import { attemptEvent, coinEvent, type FrozenEvt } from '../../engine/events';
@@ -22,14 +22,18 @@ import { hashSeed, mulberry32, type Rng } from '../../engine/rng';
 import { withRequeue, type Order } from '../../engine/session';
 import {
   check,
+  childCount,
+  eatenPlate,
   isStartState,
   removeLast,
   removedCount,
+  spokenCount,
   startState,
   tapBin,
   tapItem,
   tapTakenAway,
   toTrayTask,
+  type Plate,
   type TrayEffect,
   type TrayResult,
   type TrayState,
@@ -43,12 +47,13 @@ export type Mood = 'arrive' | 'idle' | 'puzzled' | 'eat' | 'delight' | 'leave';
 export type Speaker = 'monster' | 'pip';
 
 /**
- * The eat sequence (SPEC §5.6, D101, D103): the plate's `items` fly to the mouth together once
- * `flown` is set; then chewing, the reaction (bigger after a first-try serve, D45), and the coins flying to the jar.
+ * The eat sequence (SPEC §5.6, D101, D103): the `plate` (always the answer, D104) flies to the
+ * mouth together once `flown` is set; then chewing, the reaction (bigger after a first-try serve,
+ * D45), and the coins flying to the jar.
  */
 export interface Eat {
   step: 'fly' | 'chew' | 'react' | 'coins';
-  items: number;
+  plate: Plate;
   flown: boolean;
   firstTry: boolean;
   /** Coins launched so far (0–3); each lands COIN_FLY_MS later. */
@@ -90,6 +95,10 @@ interface State {
   /** Warm-up order only: the ghost hand points at the next thing to press (SPEC §5.4, D26). */
   ghost: 'bin' | 'bell' | null;
   eat: Eat | null;
+  /** What the monster ate: those items stay off the tray until the next order (also on the closing line). */
+  eaten: Plate | null;
+  /** Bumped when a returning monster joins the back of the line as the next monster arrives (D108). */
+  queueJoin: number;
 }
 
 /** What the screen renders: the state plus everything derived from the engine. */
@@ -165,6 +174,17 @@ export interface ServiceOptions {
   monsters?: readonly MonsterRef[];
 }
 
+/**
+ * Sound effects never share the air with speech (D109): on iOS WebAudio goes silent while the
+ * speech engine talks, so the boing, the munch and the coin tings were lost under the lines. The
+ * boing gets this long before the monster's first word; the munch and the coins wait for the line
+ * before them to end, plus a short settle so the audio context is running again.
+ */
+const ARRIVE_SFX_MS = 400;
+const SPEECH_SETTLE_MS = 120;
+/** Chompers' burp plays before its thanks, for the same reason. */
+const BURP_MS = 450;
+
 /** A monster's greeting and thanks when no lines are supplied (unit tests). */
 const NO_LINES = { arrive: '', thanks: '', burps: false };
 
@@ -207,6 +227,8 @@ export class ServiceController {
   private lastOutcome: Outcome | null = null;
   /** Coins that have landed in the service jar (the counter beside the bell). */
   private landed = 0;
+  /** A requeue was planned during this order; it joins the line when the next monster arrives (D108). */
+  private joinPending = false;
 
   constructor(
     private readonly opts: ServiceOptions,
@@ -301,7 +323,9 @@ export class ServiceController {
       editable: this.editable(s),
       correctTyped: followTyping ? String(this.order.problem.answer) : null,
       removed: removedCount(s.tray),
-      remaining: this.orders.length - s.index - 1,
+      // A requeue joins the line only when the next monster comes in, so the line never grows
+      // while the child watches the meal (D108).
+      remaining: this.orders.length - s.index - 1 - (this.joinPending ? 1 : 0),
       coins: this.events.filter((e) => e.k === 'coin').reduce((n, e) => n + (e as { n: number }).n, 0),
       landed: this.landed,
     };
@@ -329,6 +353,8 @@ export class ServiceController {
       coins: v.coins,
       landed: v.landed,
       eat: v.eat,
+      eaten: v.eaten,
+      queueJoin: v.queueJoin,
       mood: v.mood,
       answer: v.order.problem.answer,
       mode: v.tray.mode,
@@ -377,6 +403,8 @@ export class ServiceController {
       finished: false,
       ghost: null,
       eat: null,
+      eaten: null,
+      queueJoin: (this.s as State | undefined)?.queueJoin ?? 0,
     };
   }
 
@@ -398,9 +426,12 @@ export class ServiceController {
     this.orderStarted = this.d.now();
     this.lastInput = this.d.now();
     this.s = this.fresh(index);
-    this.set({});
+    const join = this.joinPending;
+    this.joinPending = false;
+    this.set(join ? { queueJoin: this.s.queueJoin + 1 } : {});
+    // The boing first, then the monster talks: iOS silences WebAudio while speech plays (D109).
     this.d.sfx.arrive();
-    this.speakTicket(true);
+    void this.wait(ARRIVE_SFX_MS).then(() => my === this.script && this.speakTicket(true));
     void this.wait(600).then(() => my === this.script && this.set({ mood: 'idle' }));
   }
 
@@ -503,7 +534,10 @@ export class ServiceController {
     // SPEC §4.1 step 7: an assisted fact comes back with the same monster, one step more support.
     if (outcome === 'assisted') {
       const next = withRequeue(this.orders, this.s.index, this.requeueRng, this.opts.monsters ?? REGULARS);
-      if (next) this.orders = next;
+      if (next) {
+        this.orders = next;
+        this.joinPending = true;
+      }
     }
   }
 
@@ -513,8 +547,10 @@ export class ServiceController {
    * fly to the jar. Any tap skips straight to the coins; a tap during the coins lands them at once.
    */
   private async runEat(my: number): Promise<void> {
-    // The monster eats the plate as served: the tray total (for `7 + ? = 10`, all ten), SPEC §5.6.
-    const n = this.trayTask().expected.cells;
+    // The monster eats the answer (D104): the whole plate for result forms and at S1, the orange
+    // group for missing-number forms (`7 + ? = 10`: the three added, not all ten), the typed number at S0.
+    const typed = this.stage === 0 && this.s.cloche === 'down';
+    const plate = eatenPlate(this.trayTask(), this.order.problem.answer, typed);
     const lines = this.lines();
     let skipped = false;
     let wake: (() => void) | null = null;
@@ -522,9 +558,11 @@ export class ServiceController {
       skipped = true;
       wake?.();
     };
-    const skippable = async (ms: number) => {
+    /** Waits for `ms` and/or `also` (a line ending), whichever is later; a tap cuts it short. */
+    const skippable = async (ms: number, also?: Promise<void>) => {
       if (skipped) return;
-      await Promise.race([this.wait(ms), new Promise<void>((r) => (wake = r))]);
+      const done = also ? Promise.all([this.wait(ms), also]) : this.wait(ms);
+      await Promise.race([done, new Promise<void>((r) => (wake = r))]);
       wake = null;
     };
     const alive = () => my === this.script;
@@ -537,19 +575,19 @@ export class ServiceController {
       bubble: null,
       counting: false,
       glow: [],
-      eat: { step: 'fly', items: n, flown: false, firstTry: this.lastOutcome === 'first', coinsOut: 0 },
+      eat: { step: 'fly', plate, flown: false, firstTry: this.lastOutcome === 'first', coinsOut: 0 },
     });
     // Let the bell ring out before the monster's first word (D86).
     await skippable(BELL_LEAD_MS);
     if (!alive()) return;
 
-    // Fly: the whole plate at once, and the monster says the answer (the green number on the
+    // Fly: the whole plate at once, and the monster says the answer (the number now on the
     // ticket, D96) once; counting each item aloud tripped over itself (D103).
     const answer = say('eat.total', { n: this.order.problem.answer });
     if (!skipped) {
-      this.set((s) => ({ caption: answer, eat: { ...s.eat!, flown: true } }));
-      void this.talk(answer);
-      await skippable(flyMs(n));
+      this.set((s) => ({ caption: answer, eat: { ...s.eat!, flown: true }, eaten: plate }));
+      // The crunch waits for the word to end (D109).
+      await skippable(flyMs(plate.count), this.talk(answer).then(() => this.wait(SPEECH_SETTLE_MS)));
       if (!alive()) return;
     }
     if (!skipped) {
@@ -560,17 +598,22 @@ export class ServiceController {
       if (!alive()) return;
     }
     if (!skipped) {
-      // React and say thanks in the monster's own voice.
-      const thanks = lines.thanks || say('serve.yum', { n });
+      // React and say thanks in the monster's own voice; the coins wait for the thanks (D109).
+      const thanks = lines.thanks || say('serve.yum', { n: this.order.problem.answer });
       this.set((s) => ({ mood: 'delight', caption: thanks, eat: { ...s.eat!, step: 'react' } }));
       if (lines.burps) this.d.sfx.burp();
-      void this.talk(thanks);
-      await skippable(REACT_MS);
+      const said = (lines.burps ? this.wait(BURP_MS) : Promise.resolve()).then(() =>
+        alive() && !skipped ? this.talk(thanks).then(() => this.wait(SPEECH_SETTLE_MS)) : undefined,
+      );
+      await skippable(REACT_MS, said);
       if (!alive()) return;
     }
+    // A tap skipped ahead: stop any line still playing so the tings are heard (D109).
+    if (skipped) this.d.hush();
+    this.set((s) => ({ eaten: plate, eat: { ...s.eat!, flown: true } }));
 
     // Coins fly to the jar one by one (SPEC §9); a tap lands the rest at once.
-    this.set((s) => ({ mood: 'delight', eat: { ...s.eat!, step: 'coins', flown: true } }));
+    this.set((s) => ({ mood: 'delight', eat: { ...s.eat!, step: 'coins' } }));
     const base = this.landed;
     for (let k = 1; k <= COINS_PER_PROBLEM; k++) {
       this.set((s) => ({ eat: { ...s.eat!, coinsOut: k } }));
@@ -622,7 +665,20 @@ export class ServiceController {
     this.set((s) => ({ counting: false, attempt: stepAttempt(s.attempt, { type: 'phaseDone' }) }));
   }
 
+  /** Plays model-bubble ticks with Pip counting (CountTogether, and Worked at S1, D105). */
+  private async playTicks(my: number, ticks: CountTick[]): Promise<boolean> {
+    for (const t of ticks) {
+      if (my !== this.script) return false;
+      const line = say(t.key, t.params);
+      this.set({ bubble: t.cells, bubbleCount: line, speaker: 'pip' });
+      await Promise.all([this.talk(line, 'pip'), this.wait(t.key === 'count.n' ? 450 : 700)]);
+    }
+    return my === this.script;
+  }
+
   private async runWorked(my: number): Promise<void> {
+    const p = this.order.problem;
+    if (this.stage === 1 && (p.form === 'missingAddend' || p.form === 'missingSub')) return this.runBubbleWorked(my);
     const t3 = toTrayTask(this.order.problem, 3);
     this.set({
       demoTray: true,
@@ -661,9 +717,32 @@ export class ServiceController {
     void this.talk(say('follow.start'), 'pip');
   }
 
-  private async runPlate(my: number, served: number, expected: number): Promise<void> {
+  /**
+   * S1 missing-number forms (D105): the child's tray holds only the answer, so Pip shows the whole
+   * story in the model bubble (the known part, the empty spots or the items going, counted from
+   * one), then FollowMe builds just the answer on the child's own empty tray. The bubble stays up
+   * as the model until the serve.
+   */
+  private async runBubbleWorked(my: number): Promise<void> {
+    const t1 = toTrayTask(this.order.problem, 1);
+    this.set({ tray: startState(t1), counting: true, glow: [], mood: 'idle', caption: '', speaker: 'pip' });
+    if (!(await this.playTicks(my, missingTicks(this.order.problem)))) return;
+    this.set((s) => ({
+      attempt: stepAttempt(s.attempt, { type: 'phaseDone' }),
+      counting: false,
+      // The finished model stays up, unlit, while the child builds the answer.
+      bubble: s.bubble?.map((c) => ({ ...c, glow: false })) ?? null,
+      tray: startState(t1),
+      bubbleCount: say('follow.start'),
+      caption: say('follow.start'),
+      speaker: 'pip',
+    }));
+    void this.talk(say('follow.start'), 'pip');
+  }
+
+  private async runPlate(my: number, served: number, expected: number, group?: 'more' | 'away'): Promise<void> {
     this.d.sfx.hm();
-    const line = plateCountLine(served, expected, this.stage);
+    const line = plateCountLine(served, expected, this.stage, group);
     const text = say(line.key, line.params);
     this.set({ mood: 'puzzled', caption: text, speaker: 'monster', bubble: null, counting: false });
     await this.wait(BELL_LEAD_MS); // the bell first, then the monster (D86)
@@ -695,16 +774,21 @@ export class ServiceController {
     // S3 counts aloud (counting on / counting back); S2 and below: tones only (SPEC §3.2). A tap
     // gets a count or a tone, never both: the tone stepped on the spoken number (D91).
     const voice = this.stage === 3;
-    const cue = (count: number, tone: () => void) => (voice ? this.d.countAloud(numberToWords(count)) : tone());
+    // Missing-number forms count the orange group from one, so the last number said is the answer
+    // (D104); sending the last one back leaves nothing to say, so that tap gets its tone.
+    const task = this.trayTask();
+    const cue = (count: number, tone: () => void) =>
+      voice && count > 0 ? this.d.countAloud(numberToWords(count)) : tone();
+    const said = (eff: { count: number }) => spokenCount(task, eff, r.state);
     const fx = (kind: 'shake' | 'in', index: number) => ({ index, kind, nonce: ++this.nonce });
     switch (e.kind) {
       case 'placed':
       case 'putBack':
-        cue(e.count, () => this.d.sfx.place(e.count));
+        cue(said(e), () => this.d.sfx.place(e.count));
         this.set({ tray: r.state, fx: fx('in', e.index) });
         break;
       case 'removed':
-        cue(e.count, () => this.d.sfx.remove());
+        cue(said(e), () => this.d.sfx.remove());
         this.set({ tray: r.state });
         this.flyAway(e);
         break;
@@ -765,9 +849,12 @@ export class ServiceController {
       void this.runEat(my);
     } else if (next.phase === 'plateCount') {
       const s0 = this.stage === 0;
-      const served = s0 ? Number(s.typed) : s.tray.filled;
-      const expected = s0 ? this.order.problem.answer : this.trayTask(s).expected.cells;
-      void this.runPlate(my, served, expected);
+      const task = this.trayTask(s);
+      if (s0) void this.runPlate(my, Number(s.typed), this.order.problem.answer);
+      // Missing-number forms: the monster counts the orange group, the answer (D104).
+      else if (task.unknown)
+        void this.runPlate(my, childCount(s.tray), this.order.problem.answer, task.takenAwayRow ? 'away' : 'more');
+      else void this.runPlate(my, s.tray.filled, task.expected.cells);
     }
   };
 

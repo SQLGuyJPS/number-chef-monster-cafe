@@ -58,5 +58,12 @@ export interface TrayTask {
    * answer is typed, so `typed` holds the number to enter (refines SPEC §3.1, D69).
    */
   expected: { cells: number; typed?: number };
+  /**
+   * Missing-number forms on the guided tray (S3/S2, and the S0 cloche model): the cells that hold
+   * the unknown, the orange group the answer counts. `a + ? = c`: the empty spots [a, c) the child
+   * fills; `m − ? = c`: the items [c, m) the child takes away. The tray counts, PlateCount and the
+   * monster's meal are about this group, so everything points at the answer (D104).
+   */
+  unknown?: { from: number; to: number };
   entry?: 'numpad1' | 'numpad2';
 }

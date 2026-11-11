@@ -129,8 +129,7 @@
   color: var(--c-role-result);
 }
 .tok-solved {
-  /* D96: the answer replaces the dashed blank in result green, whatever the blank's role colour. */
-  color: var(--c-role-result);
+  /* D96, D106: the answer replaces the dashed blank in the blank's role colour (tok-<role>). */
   animation: tok-solved-pop 320ms ease-out;
 }
 @keyframes tok-solved-pop {
@@ -184,7 +183,8 @@
   opacity: 0.35;
 }
 .door-sign {
-  background: rgba(255, 253, 246, 0.6);
+  /* Hangs on the wall itself (no box): the whole 112 px square stays the tap target. */
+  background: none;
   border-radius: 18px;
 }
 .bin {
@@ -246,6 +246,28 @@
   bottom: 0;
   width: 84px;
   height: 96px;
+}
+/* D108: a returning monster gets back in line as the next monster comes in. The line shuffles one
+   place right (the front monster went to the counter) and the newcomer walks in from the door. */
+.queue.joined {
+  animation: none;
+}
+.queue.joined .queue-mon {
+  animation: queue-shuffle 0.6s ease-out both;
+}
+.queue.joined .queue-mon.newcomer {
+  animation: queue-newcomer 0.9s ease-out both;
+}
+@keyframes queue-shuffle {
+  from { transform: translateX(-62px); }
+}
+@keyframes queue-newcomer {
+  0% { transform: translateX(-120px); opacity: 0; }
+  40% { opacity: 1; }
+  60% { transform: translateX(-12px) translateY(-8px); }
+  80% { transform: translateX(0) translateY(0); }
+  90% { transform: translateY(-5px); }
+  100% { transform: none; opacity: 1; }
 }
 
 /* ---- Taken-away row (SPEC §3.3) ---- */
@@ -490,6 +512,10 @@
 .tf-cell.glow {
   box-shadow: 0 0 0 6px #fff6a8, 0 0 24px 8px #ffd84a;
   z-index: 1;
+}
+.tf-cell.empty.spot {
+  /* An empty spot the unknown fills (D104): dashed orange, so the gap to fill is visible. */
+  border: 4px dashed var(--c-role-child);
 }
 .tf-cell.empty.pulse {
   border: 5px dashed var(--c-role-child);

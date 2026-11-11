@@ -15,7 +15,7 @@ export interface DrawProps {
 const line = { stroke: INK, strokeWidth: 3, strokeLinejoin: 'round' as const };
 
 /** Blobbo: green one-eyed blob, shy giggler. */
-function Blobbo({ e, s }: DrawProps) {
+function Blobbo({ e, s, react }: DrawProps) {
   const p = s.palette;
   return (
     <g>
@@ -34,6 +34,20 @@ function Blobbo({ e, s }: DrawProps) {
         <Eye cx={100} cy={92} r={26} e={e} brow="up" />
       </g>
       <Cheeks pts={[[62, 118], [138, 118]]} r={10} e={e} />
+      {/* Shy giggle (monsters.css): a deep blush with little blush strokes, inside the figure so it
+          hops along with him. */}
+      {react && (
+        <g className="m-blush">
+          <ellipse cx={60} cy={118} rx={15} ry={9} fill="#ff7fa8" opacity={0.85} />
+          <ellipse cx={140} cy={118} rx={15} ry={9} fill="#ff7fa8" opacity={0.85} />
+          <path
+            d="M52 114 l-3 7 M60 114 l-3 7 M68 114 l-3 7 M135 114 l-3 7 M143 114 l-3 7 M151 114 l-3 7"
+            stroke="#d6457a"
+            strokeWidth={2}
+            strokeLinecap="round"
+          />
+        </g>
+      )}
       <Mouth cx={100} cy={126} w={24} kind={s.mouth} e={e} />
     </g>
   );

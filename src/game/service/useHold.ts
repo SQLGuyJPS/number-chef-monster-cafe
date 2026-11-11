@@ -15,3 +15,15 @@ export function useHold(on: boolean, ms: number): boolean {
   }, [on, held, ms]);
   return on || held;
 }
+
+/** True for `ms` after `nonce` changes (never for the initial 0): plays a one-shot animation once. */
+export function useBlip(nonce: number, ms: number): boolean {
+  const [seen, setSeen] = useState(0);
+  const active = nonce !== 0 && nonce !== seen;
+  useEffect(() => {
+    if (!active) return;
+    const t = window.setTimeout(() => setSeen(nonce), ms);
+    return () => window.clearTimeout(t);
+  }, [active, nonce, ms]);
+  return active;
+}
