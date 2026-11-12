@@ -1,6 +1,6 @@
 # Build plan — Number Chef: Monster Café
 
-Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**; M1 playtest rounds 1–7 and the gear popup recorded in PLAYTEST.md (last 2026-11-09). **M2 done 2026-11-10** (started 2026-11-09); waiting for the M2 playtest. Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
+Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**; M1 playtest rounds 1–7 and the gear popup recorded in PLAYTEST.md (last 2026-11-09). **M2 done 2026-11-10** (started 2026-11-09); waiting for the M2 playtest. **M2b (device speed test, D112) added by the owner and done 2026-11-12**; waiting for the iPad result. Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
 
 ---
 
@@ -11,9 +11,10 @@ Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 r
 | M0 Foundations | 2 | **2.5** | PWA + CSP-in-prod + rotated stage + back guard + portrait e2e is a lot of plumbing to get green on two browser engines. |
 | M1 Core loop (incl. layout mock) | 3.5 | **5.0** | 0.5 mock + engine (generators, tray, check, demos, attempt flow) + tray UI with drag + all four stages incl. S0 cloche help path + TTS + e2e. Densest milestone. |
 | M2 Café service | 3.25 | **5.0** | Six monsters × five expressions is the single biggest art job (~1.5 h); session builder with requeue rules is test-heavy; full e2e device matrix + CDP drag. |
+| M2b Device speed test | — | **1.5** | Added by the owner (D112): `?speedtest` screen, two ramps, smooth rule, report and share, unit + quick e2e. |
 | M3a Persistence + fact boxes | — | **2.0** | Event log, replay ≡ applyEvent property test, IDB stores, resume, minimal Skills list. |
 | M3b Hand-off ready | — | **3.0** | §6.5 alone is ~20 test cases with fake monotonic and wall clocks; plus gate, parent area, export/replace import/reset. |
-| **Tier 1 total** | ≈ 10 (guide) | **≈ 17.5** | |
+| **Tier 1 total** | ≈ 10 (guide) | **≈ 19.0** | |
 
 The 10 h guide is exceeded (allowed by D44). The figure excludes fixes from each playtest (SPEC §14 says each milestone starts with them); budget ~0.5 h per round. The estimate is driven by what the spec requires, not by optional polish; I have not cut scope to fit. If you want it shorter, the cheapest levers are yours to choose (e.g. fewer monsters in M2, deferring the 4× CPU throttle report), and each would need a DECISIONS entry.
 
@@ -164,6 +165,18 @@ Order inside each milestone is the order I will work in. Every milestone ends wi
 - [x] Another service repeats the skill; Change dish returns to the menu (e2e)
 - [x] content table generated (`docs/CONTENT_REVIEW.md`)
 - [ ] correct serve shows the answer in green in place of the dashed blank (D96, e2e)
+
+### M2b — Device speed test (1.5 h, added by the owner, D112)
+1. *(done 2026-11-12)* `speedStats.ts` (pure): plan, smooth rule, ramp verdict, budget, report text; unit tests.
+2. *(done 2026-11-12)* `?speedtest` flag; `SpeedTest.tsx`: intro with warnings, the real stage with the café, a chewing monster, flying food and still/moving copies; calibration; warm-up and frame recording per step; one retry; Stop and backgrounding end the run; wake lock; results table, report text, Share / copy.
+3. *(done 2026-11-12)* `countSvgElements` (`src/app/svgCount.ts`); a button in the playtest tools (`?debug` and the Home gear).
+4. *(done 2026-11-12)* `speedtest.spec.ts`; screenshots in `docs/screens/M2b/`; PLAYTEST; commit, stop.
+
+**Accept (SPEC §14 M2b)**
+- [x] `check` green; unit tests for the smooth rule, budget and report (`tests/unit/speedStats.test.ts`)
+- [x] quick-mode e2e runs both ramps and reports, zero external requests (Chromium iPad Pro 11, WebKit iPad gen 7, WebKit iPhone 13)
+- [x] Stop ends the run early and still reports (e2e)
+- [x] no link from the child UI; the playtest tools open it (e2e)
 
 ### M3a — Persistence and fact boxes (2.0 h)
 1. Engine: `replay` / `applyEvent`, coin totals (§11.2), fact boxes (D29 rules), `skillConfig` last-writer-wins; property test applyEvent ≡ replay.

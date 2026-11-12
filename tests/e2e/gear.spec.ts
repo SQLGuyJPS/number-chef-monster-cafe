@@ -104,10 +104,22 @@ test('a stage picker whose lift is lost does not freeze later taps', async ({ pa
   await startApp(page);
   await openTools(page);
   const stage = page.getByTestId('stage-A3');
-  await stage.dispatchEvent('pointerdown', { pointerId: 77, pointerType: 'touch', isPrimary: true });
+  await stage.dispatchEvent('pointerdown', {
+    pointerId: 77,
+    pointerType: 'touch',
+    isPrimary: true,
+  });
   await stage.selectOption('1');
   await tap(page, page.getByTestId('parent-back'));
   await expect(page.getByTestId('screen-home')).toBeVisible();
   await tap(page, page.getByTestId('open-cafe'));
   await expect(page.getByTestId('open-cafe')).toHaveCount(0);
+});
+
+test('the playtest tools behind the gear open the speed test (D112)', async ({ page }) => {
+  await startApp(page);
+  await openTools(page);
+  await page.getByTestId('open-speedtest').scrollIntoViewIfNeeded();
+  await tap(page, page.getByTestId('open-speedtest'));
+  await expect(page.getByTestId('st-start')).toBeVisible();
 });

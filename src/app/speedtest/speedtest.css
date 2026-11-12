@@ -1,0 +1,88 @@
+/* `?speedtest` (D112). The running view is the real stage; these rules only place the load. */
+.st-copies,
+.st-live {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.st-copy {
+  position: absolute;
+}
+/* Still copies stand in for shop decorations: no animation at all. */
+.st-still .monster-art,
+.st-still .monster-art * {
+  animation: none !important;
+}
+.st-live-monster {
+  position: absolute;
+  left: 620px;
+  top: 250px;
+}
+/* The eat sequence chews three times; here it chews for the whole run. */
+.st-live .monster-art.expr-eat .m-chew {
+  animation-iteration-count: infinite;
+}
+.st-fly {
+  position: absolute;
+  left: 300px;
+  top: 560px;
+  font-family: 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif;
+  font-size: 64px;
+  line-height: 1;
+  animation: st-fly 1.2s ease-in infinite;
+}
+@keyframes st-fly {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(440px, -260px) scale(0.5);
+  }
+}
+.st-hud {
+  position: absolute;
+  left: 16px;
+  top: 12px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  font-size: 22px;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 14px;
+  padding: 8px 8px 8px 16px;
+}
+.st-hud button,
+.st-open,
+.st-big {
+  min-height: 56px;
+  min-width: 112px;
+  padding: 0 20px;
+  font-size: 20px;
+  border: 2px solid currentColor;
+  border-radius: 14px;
+  background: var(--c-bg);
+}
+.speedtest {
+  max-width: 900px;
+}
+.speedtest .st-start {
+  margin-top: 8px;
+}
+.st-warn {
+  font-weight: 700;
+}
+.st-report {
+  display: block;
+  width: 100%;
+  margin: 16px 0;
+  font:
+    13px/1.4 ui-monospace,
+    Menlo,
+    monospace;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.speedtest td {
+  word-break: normal;
+  padding-right: 16px;
+}

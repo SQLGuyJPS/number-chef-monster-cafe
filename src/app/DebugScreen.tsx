@@ -21,15 +21,26 @@ async function collect(): Promise<Info> {
   ];
   const boot = await getStorageBoot();
   if (boot) {
-    rows.push(['Storage', boot.degraded ? `memory (IndexedDB failed: ${boot.error ?? '?'})` : boot.storage.kind]);
+    rows.push([
+      'Storage',
+      boot.degraded ? `memory (IndexedDB failed: ${boot.error ?? '?'})` : boot.storage.kind,
+    ]);
     rows.push(['Schema version', String(boot.schemaVersion)]);
     rows.push(['Device id', boot.deviceId]);
     const counts = await boot.storage.counts();
-    rows.push(['Store rows', Object.entries(counts).map(([k, v]) => `${k} ${v}`).join(' · ')]);
+    rows.push([
+      'Store rows',
+      Object.entries(counts)
+        .map(([k, v]) => `${k} ${v}`)
+        .join(' · '),
+    ]);
   }
   // Feature-detected: missing on Safari before 17 (D44g).
   const st = navigator.storage;
-  rows.push(['Persisted', st?.persisted ? String(await st.persisted()) : 'not available on this device']);
+  rows.push([
+    'Persisted',
+    st?.persisted ? String(await st.persisted()) : 'not available on this device',
+  ]);
   if (st?.estimate) {
     const e = await st.estimate();
     const mb = (n?: number) => (n === undefined ? '?' : `${(n / 1048576).toFixed(1)} MB`);
@@ -41,7 +52,7 @@ async function collect(): Promise<Info> {
 }
 
 /**
- * Build/storage info, the stage/operations picker and the sound test. Shown by the `?debug` screen
+ * Build/storage info, the stage/operations picker, the sound test and the speed-test link. Shown by the `?debug` screen
  * and, before M3a, by the grown-ups' screen behind the Home gear (D94).
  */
 export function PlaytestTools() {
@@ -68,6 +79,16 @@ export function PlaytestTools() {
       {!info && <p>Loading…</p>}
       <SkillPicker />
       <AudioTest />
+      <h2>Speed test</h2>
+      <p>How many drawing pieces this device can show smoothly (D112). About 2 minutes.</p>
+      <button
+        type="button"
+        className="st-open"
+        data-testid="open-speedtest"
+        onClick={() => (location.href = `${location.pathname}?speedtest`)}
+      >
+        Open the speed test
+      </button>
     </>
   );
 }

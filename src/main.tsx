@@ -7,6 +7,7 @@ import './app/global.css';
 import { App } from './app/App';
 import { DebugScreen } from './app/DebugScreen';
 import { MonsterGallery } from './app/MonsterGallery';
+import { SpeedTest } from './app/speedtest/SpeedTest';
 import { parseFlags } from './app/flags';
 import { installTouchHardening } from './game/input/touchHardening';
 import { installPointerGuard } from './game/input/pointerGuard';
@@ -24,7 +25,7 @@ if (import.meta.env.VITE_E2E === '1') {
 setStorageBoot(openStorage(() => Date.now()));
 initPwa(getCurrentScreen, lastInputAt);
 
-if (flags.debug || flags.gallery) {
+if (flags.debug || flags.gallery || flags.speedtest) {
   document.documentElement.classList.add('debug-mode');
 } else {
   installTouchHardening(document);
@@ -36,7 +37,9 @@ const root = createRoot(document.getElementById('root')!);
 
 root.render(
   <StrictMode>
-    {flags.gallery ? (
+    {flags.speedtest ? (
+      <SpeedTest quick={flags.speedtest === 'quick'} />
+    ) : flags.gallery ? (
       <MonsterGallery />
     ) : flags.debug ? (
       <DebugScreen />
