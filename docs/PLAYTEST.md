@@ -204,3 +204,12 @@ Notes (owner, 2026-11-10, rounds 0–1): green answer on the ticket: keep. Subtr
 - [ ] **Sounds (D109):** a boing before each monster speaks, a crunch after it says the answer, a ting per coin after its thanks. Do you hear all three on the iPad, iPhone and Android now? (If not, tell me which and on which device.)
 - [ ] **Art (D110):** Blobbo's new reaction (blushes, giggle-hops, tiny hearts and bubbles) vs. Wobbleton's puddle; the new door on the left wall and the hanging wooden sign (leave button); no string lights (they return as a shop item); the full-body Pip on the Help button; Mimsy's shorter hello ("Hello, dear chef!").
 - [ ] At the end of a service the eaten food no longer comes back on the tray during "All done!".
+
+## M2b — Device speed test (D112; no child needed, about 2 minutes per device)
+How to run: open the app from the **Home Screen icon**, tap the gear, hold the circle for 2 s, scroll to **Speed test**, tap *Open the speed test*, then *Start*. Before starting: Low Power Mode off, Reduce Motion off (Settings → Accessibility → Motion), landscape, don't touch the screen until the results show. When done, tap *Share results* and send me the text (or paste it here).
+- [x] **iPad 7th gen** (this one sets the budget): results text sent 2026-11-12 → budget 4,800 on screen, 650 moving (D113). It also showed iPadOS 18.7, so the D111 baseline check is done.
+- [ ] iPhone 17 (for information): results text sent.
+- [ ] Pixel 10 Pro (for information; open the gear the same way): results text sent.
+- [ ] Did the screen dim or lock during the run, or did anything else go wrong?
+- [ ] While it ran, did the moving monsters look smooth to your eye at the step it called "smooth"?
+

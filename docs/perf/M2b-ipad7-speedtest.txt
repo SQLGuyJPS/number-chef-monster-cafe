@@ -1,0 +1,24 @@
+Number Chef speed test
+Version 0.0.1+9a0210a · 2026-11-12 13:29
+Device: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.7.8 Safari/605.1.15
+Screen: 1080×790 @2x · Home Screen app: yes
+
+Base scene: 76 elements, median 17.0 ms.
+Still elements: smooth up to 8052 (the most tested; no limit found). Suggested budget 4800.
+Moving elements: smooth up to 1091, rough at 1579. Suggested budget 650.
+
+ramp | elements | median | p95 | worst | hitches | smooth
+base | 76 | 17.0 ms | 18.0 ms | 19.0 ms | 0.0% | yes
+still | 326 | 17.0 ms | 18.0 ms | 20.0 ms | 0.0% | yes
+still | 572 | 17.0 ms | 17.0 ms | 18.0 ms | 0.0% | yes
+still | 1091 | 17.0 ms | 18.0 ms | 20.0 ms | 0.0% | yes
+still | 1579 | 17.0 ms | 18.0 ms | 19.0 ms | 0.0% | yes
+still | 2056 | 17.0 ms | 17.0 ms | 20.0 ms | 0.0% | yes
+still | 3064 | 17.0 ms | 18.0 ms | 20.0 ms | 0.0% | yes
+still | 4073 | 17.0 ms | 18.0 ms | 37.0 ms | 0.4% | yes
+still | 6077 | 17.0 ms | 17.0 ms | 20.0 ms | 0.0% | yes
+still | 8052 | 17.0 ms | 17.0 ms | 24.0 ms | 0.0% | yes
+moving | 326 | 17.0 ms | 17.0 ms | 23.0 ms | 0.0% | yes
+moving | 572 | 17.0 ms | 17.0 ms | 19.0 ms | 0.0% | yes
+moving | 1091 | 20.0 ms | 23.0 ms | 31.0 ms | 0.0% | yes
+moving | 1579 | 23.0 ms | 26.0 ms | 28.0 ms | 0.0% | NO

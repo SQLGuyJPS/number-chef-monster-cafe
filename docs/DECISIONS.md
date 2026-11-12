@@ -119,3 +119,5 @@
 | D109 | Sound effects never overlap speech | SPEC §5.6, §8.1 | iOS dropped boing, crunch and tings under speech |
 | D110 | Blobbo's giggle, grounded door, string lights to the shop, Pip button art, shorter Mimsy hello | SPEC §5.4, §7.2, §7.4 | Owner playtest polish |
 | D111 | Family devices recorded; baseline iOS/iPadOS 18+, emoji ≤ Unicode 15.0 | SPEC §0, §2, §2.4, §7.1, §8.1, §11.3, §13.5 | Owner listed iPad 7th gen, iPhone 17, Pixel 10 Pro |
+| D112 | M2b device speed test (`?speedtest`); 300-element budget provisional until the iPad result | SPEC §2.2, §2.4, §13.5, §14; budget figure replaced by D113 | Redesigns and shop decorations need a measured budget, not a guess |
+| D113 | SVG budget from the iPad: ≤ 4,800 elements on screen, ≤ 650 moving; e2e checks every screen | SPEC §2.4, §13.5, §14 | iPad 7th gen speed test: still art free past 8,000, moving smooth to ~1,100 |

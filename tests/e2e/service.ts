@@ -4,7 +4,13 @@ import { tap } from './helpers';
 /** What `window.__ncmc.service()` returns (src/game/service/controller.ts probe). */
 export interface Probe {
   index: number;
-  eat: { step: string; flown: boolean; plate: { source: string; count: number; from?: number }; firstTry: boolean; coinsOut: number } | null;
+  eat: {
+    step: string;
+    flown: boolean;
+    plate: { source: string; count: number; from?: number };
+    firstTry: boolean;
+    coinsOut: number;
+  } | null;
   landed: number;
   mood: string;
   phase: string;
@@ -42,6 +48,8 @@ interface Hooks {
   setSkillConfig(skill: string, stage: number, ops: string): Promise<void>;
   setWarmupShown(shown: boolean): Promise<void>;
   service(): Probe | undefined;
+  screen(): string;
+  svgCounts(): { total: number; moving: number };
 }
 declare global {
   interface Window {
@@ -155,7 +163,9 @@ export async function trayTo(page: Page, target: number): Promise<void> {
 /** A tray value that is wrong but not the start state (the bell is disabled there). */
 export function wrongTarget(s: Probe): number {
   const e = s.expectedCells;
-  const candidates = [e - 1, e + 1, e - 2, e + 2].filter((t) => t >= 0 && t <= 10 && t !== s.prefill && t !== e);
+  const candidates = [e - 1, e + 1, e - 2, e + 2].filter(
+    (t) => t >= 0 && t <= 10 && t !== s.prefill && t !== e,
+  );
   if (s.mode === 'add') return candidates.find((t) => t >= s.prefill)!;
   return candidates.find((t) => t <= s.prefill)!;
 }
@@ -179,7 +189,8 @@ export async function serveCorrect(page: Page): Promise<void> {
 
 export async function serveWrong(page: Page): Promise<void> {
   const s = await probe(page);
-  if (s.stage === 0 && s.cloche === 'down') await typeNumber(page, s.answer === 1 ? 2 : s.answer - 1);
+  if (s.stage === 0 && s.cloche === 'down')
+    await typeNumber(page, s.answer === 1 ? 2 : s.answer - 1);
   else await trayTo(page, wrongTarget(s));
   await ringBell(page);
 }
