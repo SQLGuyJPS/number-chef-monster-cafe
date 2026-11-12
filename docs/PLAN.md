@@ -53,10 +53,10 @@ None of these re-open a decided item. On approval I record each accepted one as 
 
 ### 3.2 iOS Safari audio, speech and storage
 - WebAudio is suspended until a gesture and again after backgrounding → `resume()` on every `pointerdown` when not `running`.
-- Silent switch mutes WebAudio unless `navigator.audioSession.type = 'playback'` (iOS 17+ only; older iOS stays silent with the switch on → documented in parent Help).
+- Silent switch mutes WebAudio unless `navigator.audioSession.type = 'playback'` (iOS 17+; every target iOS device has it since D111, feature check kept).
 - `speechSynthesis` needs priming inside a gesture; `cancel()` before each non-queued line; voices arrive late (`voiceschanged` + retries). The game must stay fully playable with no voices (captions always on).
 - Storage eviction after 7 days applies to Safari tabs, not Home Screen apps; tab and installed app have separate storage → "install before first play" in README and PLAYTEST (no detection code).
-- `navigator.storage.persist()/estimate()` missing before Safari 17 → feature-detect, show "not available on this device".
+- `navigator.storage.persist()/estimate()` missing before Safari 17 → feature-detect, show "not available on this device" (should not happen on the D111 devices).
 - Never await a non-IDB promise inside an IDB transaction (Safari auto-commits). One transaction per completed problem.
 
 ### 3.3 Touch handling

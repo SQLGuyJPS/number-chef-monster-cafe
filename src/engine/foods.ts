@@ -1,4 +1,4 @@
-// Food allowlist (SPEC §7.1): Unicode ≤ 9.0, each glyph reads as one countable unit (D35).
+// Food allowlist (SPEC §7.1): Unicode ≤ 15.0 (D111), each glyph reads as one countable unit (D35).
 // `lint:content` checks every glyph against scripts/emoji-versions.json.
 export const FOOD_IDS = [
   'cookie',

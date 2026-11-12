@@ -1,6 +1,6 @@
 {
-  "$comment": "SPEC §7.1, D35: Unicode version of each emoji the app may use (allow) and known rejects (deny, with why). lint:content fails on any pictographic codepoint in src/ that is not allowed here at Unicode <= 9.0.",
-  "maxUnicode": 9.0,
+  "$comment": "SPEC §7.1, D35: Unicode version of each emoji the app may use (allow) and known rejects (deny, with why). lint:content fails on any pictographic codepoint in src/ that is not allowed here at Unicode <= 15.0 (D111).",
+  "maxUnicode": 15.0,
   "allow": {
     "1F36A": { "name": "cookie", "unicode": 6.0 },
     "1F369": { "name": "doughnut", "unicode": 6.0 },
@@ -21,9 +21,6 @@
   },
   "deny": {
     "1F352": { "name": "cherries", "unicode": 6.0, "why": "shows two cherries (D35)" },
-    "1F95E": { "name": "pancakes", "unicode": 9.0, "why": "shows a stack (D35)" },
-    "1F9C1": { "name": "cupcake", "unicode": 11.0, "why": "Unicode 11" },
-    "1F96A": { "name": "sandwich", "unicode": 10.0, "why": "Unicode 10" },
-    "1F967": { "name": "pie", "unicode": 10.0, "why": "Unicode 10" }
+    "1F95E": { "name": "pancakes", "unicode": 9.0, "why": "shows a stack (D35)" }
   }
 }

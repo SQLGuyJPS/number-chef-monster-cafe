@@ -17,7 +17,7 @@
 | D7 | Play allowance with parent-only unlock | SPEC §6 | Hand over the device for a defined period without nagging |
 | D8 | One landscape layout; portrait rotates the stage | SPEC §2.2 | iOS cannot lock orientation; looks landscape at once |
 | D9 | Single profile now; profiles in M11 | SPEC §11.3, §14 | A sibling is not a v1 user |
-| D10 | Unicode ≤ 9 emoji foods; SVG packs and monsters | SPEC §7.1 | Renders on older tablets |
+| D10 | Unicode ≤ 9 emoji foods; SVG packs and monsters | Partly superseded by D111 (limit now Unicode ≤ 15.0) | Renders on older tablets |
 | D11 | No zero answers in tray stages | SPEC §4 | An empty-tray answer deadlocks the bell |
 | D12 | PWA update by prompt + silent activation | SPEC §2, §15 | `autoUpdate` reloads under a playing child |
 | D13 | Chef hat criteria | Removed (D28) | Hats no longer exist |
@@ -44,7 +44,7 @@
 | D34 | `? + a = c` stays in A3/A4 | SPEC §1.2, §4 | It is a commuted missing addend |
 | D35 | Foods must be one obvious unit (no 🍒 🥞) | SPEC §7.1 | Two cherries would be counted as two |
 | D36 | Tier 1 scope: M3a/M3b split, migrations harness, layout mock first | SPEC §11.3, §13.5, §14 | Estimate was optimistic |
-| D37 | Platform baseline iOS 15.4+ and known platform risks | SPEC §0, §2, §2.3, §8.1, §11.4, §11.6 | Known traps are cheaper planned than found |
+| D37 | Platform baseline iOS 15.4+ and known platform risks | Partly superseded by D111 (baseline iOS 18+); risks live in SPEC §0, §2, §2.3, §8.1, §11.4, §11.6 | Known traps are cheaper planned than found |
 | D38 | Family details generalized in the public repo | SPEC §15 | The repo is public |
 | D39 | Assumptions applying D29–D38 (event shapes, guard, PlateCount, colors) | SPEC §4.1, §5.5, §6.2, §11.2; take-one-back superseded by D82, resume window by D40 | Close gaps with the smallest rule |
 | D40 | Lock clears resume; lock outside a service; grace cutoff pays nothing | SPEC §5.8, §6.2 | The post-unlock offer could never fire; missing cases |
@@ -118,3 +118,4 @@
 | D108 | A returning monster joins the line as the next monster comes in | SPEC §5.4 | Line grew during the meal for no visible reason |
 | D109 | Sound effects never overlap speech | SPEC §5.6, §8.1 | iOS dropped boing, crunch and tings under speech |
 | D110 | Blobbo's giggle, grounded door, string lights to the shop, Pip button art, shorter Mimsy hello | SPEC §5.4, §7.2, §7.4 | Owner playtest polish |
+| D111 | Family devices recorded; baseline iOS/iPadOS 18+, emoji ≤ Unicode 15.0 | SPEC §0, §2, §2.4, §7.1, §8.1, §11.3, §13.5 | Owner listed iPad 7th gen, iPhone 17, Pixel 10 Pro |

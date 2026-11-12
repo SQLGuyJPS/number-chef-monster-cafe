@@ -12,7 +12,7 @@ A static, offline-capable web app (PWA) in which a young child runs a monster ca
 
 Audience: one young child (first-year primary school level), who reads easy chapter books, has little writing practice and is good at dragging (D38). The parent is technical and plays the role of tester and configurator.
 
-Targets: iPad Safari (primary), iPhone Safari, Android Chrome; the child may use all three. Baseline iOS 15.4+ and a recent Chrome on Android; `navigator.audioSession` (iOS 17+) is a progressive enhancement (D37). Landscape layout (portrait shows the rotated stage, D8). Progress is stored per device and merged by exported file (§11). Works offline after first load. No backend, accounts, analytics, ads, external links, or purchases. All data local.
+Targets: iPad Safari (primary), iPhone Safari, Android Chrome; the child may use all three. The family's devices are an iPad 7th gen, an iPhone 17 and a Pixel 10 Pro (D111). Baseline iOS/iPadOS 18+ (the newest the iPad 7th gen runs) and a recent Chrome on Android (D111, amends D37); `navigator.audioSession` (iOS 17+) is therefore on every target iOS device but stays feature-detected. Landscape layout (portrait shows the rotated stage, D8). Progress is stored per device and merged by exported file (§11). Works offline after first load. No backend, accounts, analytics, ads, external links, or purchases. All data local.
 
 Build budget (D20, D36, D44): **Tier 1 (M0, M1, M2, M3a, M3b) is a playable game in ≈ 10 agentic hours**, a guide rather than a cap; **Tier 2 (M4–M11)** is bonus work in any order with no upper limit. `PLAN.md` holds the authoritative per-milestone estimates; the figures in §14 are indicative.
 
@@ -84,7 +84,7 @@ Yes, with these constraints (all encoded below):
 
 | Concern | Decision |
 |---|---|
-| Language/build | TypeScript (strict), Vite, ES2020 target; baseline iOS 15.4+ / recent Chrome on Android (`100dvh` and `crypto.randomUUID` need iOS 15.4+, D37). |
+| Language/build | TypeScript (strict), Vite, ES2020 target; baseline iOS/iPadOS 18+ / recent Chrome on Android (D111; `100dvh` and `crypto.randomUUID` need iOS 15.4+, D37). |
 | UI | React 18, function components. The service is a plain controller class read through `useSyncExternalStore` (D73); elsewhere a small reducer + context; no state library. |
 | Styling | Plain CSS (or CSS modules) with custom properties. No CSS-in-JS. |
 | Animation | CSS transforms/opacity and Web Animations API. No animation library. Animate only transform/opacity. |
@@ -140,7 +140,7 @@ ESLint MUST forbid `src/engine/**` importing `react`, `react-dom`, or touching `
 - `text-size-adjust: 100%`; `overscroll-behavior: none` also disables pull-to-refresh.
 
 ### 2.4 Performance
-Target: iPad 6th gen / iPhone 8-class. ≤ 300 SVG nodes on screen; confetti ≤ 30 particles; no CSS `filter`/`backdrop-filter`/large shadows on animated nodes. A 4× CPU-throttled e2e run measures frame deltas during the eat animation and **reports** them; it is not a gate. Smoothness is judged on the real iPad (D37).
+Target: iPad 7th gen, the slowest family device (D111; same A10 chip as the 6th gen, so the budgets are unchanged). ≤ 300 SVG nodes on screen; confetti ≤ 30 particles; no CSS `filter`/`backdrop-filter`/large shadows on animated nodes. A 4× CPU-throttled e2e run measures frame deltas during the eat animation and **reports** them; it is not a gate. Smoothness is judged on the real iPad (D37).
 
 ---
 
@@ -412,11 +412,11 @@ Default Off: a fresh install never accumulates time, locks, or cues; choosing a 
 
 ## 7. Art
 
-### 7.1 Foods (D10, D35)
-Emoji at first via `<Food id>`; each id also has an optional SVG sprite path so art can be swapped without touching game code. **Allowlist, Unicode ≤ 9.0 (Emoji ≤ 3.0), each 1 codepoint or a simple VS16 sequence:**
+### 7.1 Foods (D10, D35, D111)
+Emoji at first via `<Food id>`; each id also has an optional SVG sprite path so art can be swapped without touching game code. **Allowlist, Unicode ≤ 15.0 (every target device renders it, D111), each 1 codepoint or a simple VS16 sequence:**
 🍪 cookie (6.0), 🍩 doughnut (6.0), 🍕 pizza (6.0), 🍔 burger (6.0), 🌭 hot dog (8.0), 🥐 croissant (9.0), 🍞 bread (6.0), 🍰 cake slice (6.0), 🍓 strawberry (6.0), 🍎 apple (6.0), 🍌 banana (6.0), 🍊 tangerine (6.0), 🍙 rice ball (6.0), 🍦 soft ice cream (6.0), 🥕 carrot (9.0), 🌮 taco (8.0).
-Every food must read as **one obvious unit** to a counting child. Not allowed: 🍒 (two cherries), 🥞 (a stack), 🧁 (11.0), 🥪 (10.0), 🥧 (10.0), anything newer. `lint:content` fails on any non-allowlisted codepoint in `src/`, scanning against `scripts/emoji-versions.json`.
-- Each `FoodId` carries `{glyph, singular, plural}` for spoken lines and captions; below Android 8 / iOS 12 the glyph falls back to the plural name in a rounded tile.
+Every food must read as **one obvious unit** to a counting child. Not allowed: 🍒 (two cherries), 🥞 (a stack), anything newer than Unicode 15.0. Newer foods (e.g. 🧁 cupcake, 🥨 pretzel, 🥟 dumpling, 🧇 waffle) are allowed by version but join the list only by the owner's choice, after the one-unit check. `lint:content` fails on any non-allowlisted codepoint in `src/`, scanning against `scripts/emoji-versions.json`.
+- Each `FoodId` carries `{glyph, singular, plural}` for spoken lines and captions. No text fallback for missing glyphs: every target device renders the allowlist (D111).
 - One food type per order. Each monster has two favorites.
 - Emoji are absolutely positioned HTML elements (never SVG `<text>`) with `font-family: "Apple Color Emoji","Noto Color Emoji","Segoe UI Emoji"` and a fixed `font-size` per cell size; no clipping at 44 px cells.
 
@@ -455,7 +455,7 @@ Layered SVG scene: wall, floor, window, a wooden door standing on the floor at t
 ### 8.1 Rules
 - **Unlock and recovery (D86, D87, D88):** every `pointerdown` checks the `AudioContext`. A suspended one is resumed. One that is interrupted, closed, or "running" with a clock frozen for 600 ms is closed and replaced inside that tap (plus one silent sample, which older iOS needs to unlock output) — but never while `speechSynthesis.speaking` is true, since a new context takes the audio session from the speech engine; a `speaking` flag stuck true for more than 9 s is ignored. A sound effect asked for while the context is not running resumes it and plays once it is running, within 250 ms, instead of being skipped (iOS pauses WebAudio while speech plays).
 - **SFX never share the air with speech (D109):** iOS silences WebAudio while speech plays. The arrival boing plays 0.4 s before the monster's first word; the crunch waits for the answer word, Chompers' burp comes before its thanks, the coin tings wait for the thanks, and the Results tings run with nothing spoken.
-- Set `navigator.audioSession.type='playback'` when available so the iPhone silent switch does not mute WebAudio; document the silent switch in the parent Help.
+- Set `navigator.audioSession.type='playback'` when available so the iPhone silent switch does not mute WebAudio. Every target iOS device has it (iOS 17+, D111), so no silent-switch note is needed in the parent Help; the feature check stays.
 - **Never block game flow on speech.** `speak()` resolves on `end` **or** after a fallback timeout of `clamp(1200, 400 + 90 ms × chars / rate, 8000)` (`rate` default 0.85; iOS sometimes never fires `onend`, and its start-up latency means a shorter timeout clips lines; tune on the iPad, D37); "busy" ends when a line really ends (`end`/`error`), the timeout is only the fallback (D75). A line (not a count) that has not fired `start` 1.5 s after `speak()` is cancelled and spoken once more with a fresh timeout (lines whose fallback is under 1.5 s, like "Yum!", are already settled and not retried), and a paused engine is resumed before each line (D88).
 - Captions always show (the monster's caption bubble or Pip's, §5.4, §7.3); with no voices the game is fully playable.
 
@@ -543,7 +543,7 @@ IndexedDB database `ncmc-v1` (§11.5). Stores: `meta` (schemaVersion, deviceId =
 - Never `await` a non-IDB promise inside an IDB transaction (Safari auto-commits). One transaction per completed problem appends its events (`attempt`, if any, and `coin`) and updates `resume`. The in-memory derived state is the read source.
 - `Storage` interface with `IdbStorage` and `MemoryStorage`; if IDB fails to open, run in memory and show a parent-only banner.
 - `schemaVersion` with ordered `migrations[]` (event upcasters). Tier 1 ships `schemaVersion: 1` with an **empty migration list and its test harness** (D36); from the first schema change on, each change bumps the version and adds a migration with a fixture test. Unknown future versions refuse import with a clear message.
-- `navigator.storage.persist()` after the first tap and on parent-area open; `persisted` and `estimate()` shown there. Both are feature-detected (missing on Safari before 17); when missing the parent area says "not available on this device" (D44).
+- `navigator.storage.persist()` after the first tap and on parent-area open; `persisted` and `estimate()` shown there. Both are feature-detected (present on every target device, D111, but missing on Safari before 17); when missing the parent area says "not available on this device" (D44).
 
 ### 11.4 Eviction reality (document in parent Help)
 Safari tabs can have script-writable storage evicted after 7 days of non-use; **installed Home Screen apps are exempt** (D14). The app therefore (a) shows "Install to Home Screen" how-tos for iOS and Android in the parent area, (b) shows "last backup N days ago" with Back up now, (c) keeps the latest auto snapshot, (d) says "install to the Home Screen before the first play": on iOS a Home Screen app and a Safari tab keep separate storage. Documentation only (README, PLAYTEST, parent Help); no detection code (D37).
@@ -607,7 +607,7 @@ Every engine rule in §3, §4, §6, §9 and §11 has a unit test; these MUST exi
 - Storage: migration harness, export→import round trip, checksum, corrupt input rejected, snapshot before import/replace/reset, namespace test (§11.5). Economy sums. Play allowance: §6.5. `toStageCoords` in both orientations with safe-area remap. `engine/` import-purity lint.
 
 ### 13.5 E2E (Playwright)
-- Projects (full matrix from M2; M1 runs tap in landscape on Chromium plus one WebKit iPad project, with the M0 portrait tap test green throughout, D36, D44): Chromium iPad Pro 11 landscape (1194×834) and Pixel 7 landscape (915×412); WebKit iPad gen 7 landscape (1080×810) and iPhone 13 landscape (844×390); portrait variants (iPad 834×1194, iPhone 390×844) for the rotated stage. `hasTouch: true`. The e2e environment installs **Noto Color Emoji**; emoji appearance is judged only on real devices (D37).
+- Projects (full matrix from M2; M1 runs tap in landscape on Chromium plus one WebKit iPad project, with the M0 portrait tap test green throughout, D36, D44): Chromium iPad Pro 11 landscape (1194×834) and Pixel 7 landscape (915×412); WebKit iPad gen 7 landscape (1080×810) and iPhone 13 landscape (844×390); Pixel 7 and iPhone 13 stand in for the family's Pixel 10 Pro and iPhone 17, whose screens are larger (D111); portrait variants (iPad 834×1194, iPhone 390×844) for the rotated stage. `hasTouch: true`. The e2e environment installs **Noto Color Emoji**; emoji appearance is judged only on real devices (D37).
 - Playwright has **no touch drag API**: taps use `page.touchscreen.tap`; drag tests dispatch CDP `Input.dispatchTouchEvent` in Chromium only (in rotated portrait from M2). Everything also works by tapping, so most flows test by tap.
 - `VITE_E2E=1` builds expose `window.__ncmc` (seed, time scale, fake clock, skill config, state dump); production builds contain no `__ncmc` (test).
 - Flows: first run → one full service per track; skill pick → service → Another service repeats the skill → Change dish returns to the menu; parent stage/operations changes reach the next service; wrong → wrong → offer → yes → demo → follow-me (bell pulses, child presses it) → requeue (same monster returns); offer → no → wrong → demo; Help then a wrong serve goes straight to Worked; S0 number pad; tap an item to send it back (both modes); remove-from-end; taken-away row; shop buy/equip persists across reload; parent gate lockout; allowance runs out → wind-down → locked Home → survives reload → parent unlock → no resume offer (D40); export → reset → import; two-context merge; rotated portrait renders and taps/drags land; back gesture shows the break dialog; offline reload; zero external requests; no scroll/zoom on double-tap; tap-target sizes at 844×390.

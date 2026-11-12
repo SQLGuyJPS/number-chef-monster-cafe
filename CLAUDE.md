@@ -37,7 +37,7 @@ E2E runs against the production build with `VITE_E2E=1`; hooks at `window.__ncmc
 - Storage access only through the `Storage` interface. Never await a non-IDB promise inside an IDB transaction. Ship `schemaVersion: 1` with an empty migration list and its test harness (D36); from the first schema change on, every change bumps `schemaVersion` and adds a migration with a fixture test.
 - Speech must never block game flow (resolve on `end` or timeout). Child-facing text is always spoken as words, never digits or symbols.
 - No runtime network requests. No analytics, no external links, no third-party scripts or CDN fonts. CSP stays as in SPEC §2 (`default-src 'self'` plus inline styles).
-- Emoji: only the allowlist in SPEC §7.1 (Unicode ≤ 9.0). `lint:content` enforces.
+- Emoji: only the allowlist in SPEC §7.1 (Unicode ≤ 15.0, D111). `lint:content` enforces.
 
 ## Child-safety/UX invariants (tests exist; do not weaken)
 - No buzzers, fail screens, red X's, lost coins, countdown visible to the child, streaks, daily-login rewards, ads, or external links.

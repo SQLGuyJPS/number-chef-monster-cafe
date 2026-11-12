@@ -2,7 +2,7 @@
 
 What the agent cannot verify here (CLAUDE.md, SPEC §13.6). Tick, and add notes. The agent reads this at the start of the next milestone.
 
-**Before the first real play:** install to the Home Screen, then play from the icon. On iOS the Home Screen app and a Safari tab keep separate storage (SPEC §11.4). Playtest progress gets reset once before real use (D44).
+**Before the first real play:** check the iPad is on iPadOS 18 (Settings → General → About; the baseline, D111), install to the Home Screen, then play from the icon. On iOS the Home Screen app and a Safari tab keep separate storage (SPEC §11.4). Playtest progress gets reset once before real use (D44).
 
 ## Always (every milestone)
 - [ ] Did the child understand the ticket unaided?
