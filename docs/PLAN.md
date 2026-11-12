@@ -1,6 +1,6 @@
 # Build plan — Number Chef: Monster Café
 
-Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**; M1 playtest rounds 1–7 and the gear popup recorded in PLAYTEST.md (last 2026-11-09). **M2 done 2026-11-10** (started 2026-11-09); waiting for the M2 playtest. **M2b (device speed test, D112) added by the owner and done 2026-11-12**; waiting for the iPad result. Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
+Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**; M1 playtest rounds 1–7 and the gear popup recorded in PLAYTEST.md (last 2026-11-09). **M2 done 2026-11-10** (started 2026-11-09); waiting for the M2 playtest. **M2b (device speed test, D112) added by the owner and done 2026-11-12**; the iPad result set the SVG budget (D113, 2026-11-12). Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
 
 ---
 
@@ -177,6 +177,7 @@ Order inside each milestone is the order I will work in. Every milestone ends wi
 - [x] quick-mode e2e runs both ramps and reports, zero external requests (Chromium iPad Pro 11, WebKit iPad gen 7, WebKit iPhone 13)
 - [x] Stop ends the run early and still reports (e2e)
 - [x] no link from the child UI; the playtest tools open it (e2e)
+- [x] owner's iPad result recorded (`docs/perf/M2b-ipad7-speedtest.txt`); budget set by D113 and checked by `budget.spec.ts`
 
 ### M3a — Persistence and fact boxes (2.0 h)
 1. Engine: `replay` / `applyEvent`, coin totals (§11.2), fact boxes (D29 rules), `skillConfig` last-writer-wins; property test applyEvent ≡ replay.
