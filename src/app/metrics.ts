@@ -142,3 +142,107 @@ export const SERVICE = {
   pip: PIP,
   monsterAsideForPip: ASIDE_FOR_PIP,
 } as const satisfies Record<string, Rect | number>;
+
+// ---------------------------------------------------------------------------------------------
+// Over-the-counter layout: PROPOSAL for the layout mock (`?mock`), not used by the service yet.
+// The child stands behind the counter: a status bar on top, the café room with the monster behind
+// the counter in the middle, and the counter top as the bottom band holding tray, basket, Pip's
+// hat and the bell in one row. Basket on the dominant-hand side; Pip and the bell on the other.
+// All counter-band rects below are for a right-handed child; `mirrorX` gives the left-handed ones.
+// ---------------------------------------------------------------------------------------------
+
+export type BasketSide = 'right' | 'left';
+export type MonsterCut = 'full' | 'waist';
+
+/** Status bar bottom and the counter's far edge (stage y). */
+export const BAR_H = 120;
+export const COUNTER_Y = 432;
+/** Pip's hat and the bell in the counter row (≈ 65 CSS px at 844×390; ≥ BUTTON_MIN). */
+const ROW_BTN = 120;
+/** Vertical centre of the counter band (y 448–712). */
+const ROW_MID = 580;
+const rowY = (h: number) => ROW_MID - h / 2;
+
+export const mirrorX = (r: Rect): Rect => ({ ...r, x: STAGE_W - r.x - r.w });
+
+const C_TRAY1: Rect = { x: 364, y: rowY(FRAME.h), w: FRAME.w, h: FRAME.h };
+const C_TRAY2_W = 2 * FRAME.w + FRAMES_GAP; // 1016
+
+/** One layout per mock variant; every rect a tap target or a band the child must see. */
+export const COUNTER = {
+  /** Status bar (y 0–120): leave sign, coin jar, waiting line walking to the café door icon. */
+  bar: {
+    door: { x: 8, y: 4, w: BUTTON_MIN, h: BUTTON_MIN },
+    jar: { x: 136, y: 14, w: 176, h: 92 },
+    line: { x: 328, y: 8, w: 824, h: 108 },
+    shop: { x: 1160, y: 8, w: 112, h: 108 },
+    /** Mini monsters in the line (real monsters, small), back of the line on the left. */
+    mini: 76,
+    miniStep: 84,
+  },
+  /** Room (y 120–432): monster behind the counter, caption left of it, ticket right of it. */
+  scene: {
+    caption: { x: 226, y: 140, w: 270, h: 124 },
+    ticket: { x: 808, y: 140, w: TICKET_W, h: 220 },
+    ticketCounting: { x: TICKET_COUNTING_X, y: 140, w: TICKET_W, h: 220 },
+    /** Full height: whole body, standing on the counter's far edge. */
+    monsterFull: { x: 520, y: COUNTER_Y - 240, w: 240, h: 240 },
+    /** Waist: bigger, the lower 30 % (feet and lower belly) hidden behind the counter. */
+    monsterWaist: { x: 490, y: COUNTER_Y - 210, w: 300, h: 300 },
+    /** Pip pops up behind the counter, under the caption, clear of the waist-size monster. */
+    pip: { x: 344, y: COUNTER_Y - 150, w: 124, h: 155 },
+    /** CountTogether: Pip and the shrunken monster step left, the bubble fills to the ticket. */
+    pipCounting: { x: 262, y: COUNTER_Y - 150, w: 124, h: 155 },
+    monsterAside: { x: 120, y: COUNTER_Y - 120, w: 120, h: 120 },
+    bubble: { x: 404, y: 140, w: TICKET_COUNTING_X - 16 - 404, h: 282 },
+  },
+  /** Counter band (y 448–712), right-handed. */
+  s3: {
+    help: { x: 24, y: rowY(ROW_BTN), w: ROW_BTN, h: ROW_BTN },
+    bell: { x: 160, y: rowY(ROW_BTN), w: ROW_BTN, h: ROW_BTN },
+    tray: C_TRAY1,
+    bin: { x: 924, y: rowY(130), w: 300, h: 130 },
+  },
+  /**
+   * Missing-subtrahend forms: the taken-away row takes the basket's place. On these forms the
+   * basket has no job of its own (tapping it does exactly what tapping the row does, D42a), and
+   * removed items fly to the row.
+   */
+  taken: {
+    takenAway: { x: 908, y: rowY(TAKEN_FRAME.h), w: TAKEN_FRAME.w, h: TAKEN_FRAME.h },
+  },
+  /**
+   * Two-frame tray (A5+): 1016 px leaves no room for a 300-px basket beside it. Pip's hat sits on
+   * the bell in one column and the basket stands upright and narrow; nothing below its minimum.
+   */
+  frames2: {
+    help: { x: 8, y: 460, w: BUTTON_MIN, h: BUTTON_MIN },
+    bell: { x: 8, y: 588, w: BUTTON_MIN, h: BUTTON_MIN },
+    tray: { x: 132, y: rowY(FRAME.h), w: C_TRAY2_W, h: FRAME.h },
+    bin: { x: 1160, y: 460, w: BUTTON_MIN, h: 240 },
+  },
+  /** S0 pad: Pip, bell, Peek, display, backspace in the upper row; ten digits below. */
+  s0: {
+    help: { x: 24, y: 456, w: ROW_BTN, h: ROW_BTN },
+    bell: { x: 160, y: 456, w: ROW_BTN, h: ROW_BTN },
+    peek: { x: 400, y: 460, w: 128, h: BUTTON_MIN },
+    display: { x: 544, y: 460, w: 240, h: BUTTON_MIN },
+    backspace: { x: 800, y: 460, w: 128, h: BUTTON_MIN },
+    digits: { x: centeredX(10 * BUTTON_MIN + 9 * 8), y: 592, w: 10 * BUTTON_MIN + 9 * 8, h: BUTTON_MIN },
+    digitGap: 8,
+  },
+  /** S0 cloche lifted: the tray shifts toward Pip so the lid fits between it and the basket. */
+  cloche: {
+    tray: { x: 300, y: rowY(FRAME.h), w: FRAME.w, h: FRAME.h },
+    lid: { x: 812, y: rowY(BUTTON_MIN), w: BUTTON_MIN, h: BUTTON_MIN },
+    bin: { x: 940, y: rowY(130), w: 300, h: 130 },
+  },
+  /** Help offer: two 220-px picture buttons over the (hidden) tray. */
+  offer: {
+    yes: { x: 362, y: rowY(220), w: 220, h: 220 },
+    no: { x: 642, y: rowY(220), w: 220, h: 220 },
+  },
+} as const;
+
+/** A counter-band rect for the child's basket side. */
+export const forSide = (r: Rect, side: BasketSide): Rect => (side === 'left' ? mirrorX(r) : r);
