@@ -179,28 +179,28 @@ Order inside each milestone is the order I will work in. Every milestone ends wi
 - [x] no link from the child UI; the playtest tools open it (e2e)
 - [x] owner's iPad result recorded (`docs/perf/M2b-ipad7-speedtest.txt`); budget set by D113 and checked by `budget.spec.ts`
 
-### Counter layout change (owner request before M3a) — mock done, waiting for OK
-Service screen seen from behind the counter. Mock: `?mock` (or the two buttons on `?debug`), switches `v=s3|taken|frames2|s0|cloche|offer|count`, `monster=full|waist`, `basket=right|left`. Geometry: `COUNTER` in `src/app/metrics.ts` (not used by the real service yet). Shots: `docs/screens/counter-mock/`. Fit is tested: `tests/unit/counterLayout.test.ts` (no overlaps, inside the band, both sides) and `tests/e2e/counterMock.spec.ts` (every variant and side ≥ 44/56 CSS px at 844×390).
+### Counter layout change (owner request before M3a) — mock rev 2, waiting for OK
+Service screen seen from behind the counter. Mock: `?mock` (or the buttons on `?debug`); switches `v=s3|taken|frames2a|frames2b|frames2c|s0|cloche|offer|count`, `basket=right|left`, `window=behind|door`, `line=1..10`. Geometry: `COUNTER` in `src/app/metrics.ts` (not used by the real service yet). Shots: `docs/screens/counter-mock/`. Fit is tested: `tests/unit/counterLayout.test.ts` (no overlaps, inside the band, both sides) and `tests/e2e/counterMock.spec.ts` (every variant and side ≥ 44/56 CSS px at 844×390; element counts within D113).
 
-Bands: status bar y 0–120 (leave sign, coin jar, waiting line → shop icon) · room y 120–432 (door + street window + table, caption · monster · ticket) · counter y 432–720 (one row).
+Bands: status bar y 0–120 (leave sign, coin jar, waiting line → shop icon) · room y 120–432 (door, table and chairs; street window behind the monster; caption · monster · ticket) · counter y 432–720 (one row).
+
+**Rev 2 (owner feedback):** monsters stand full height (the waist cut stays only as `monster=waist`); the street window sits behind the monster, between caption and ticket (`window=door` shows the old spot); chairs redrawn as front-view chairs whose backs are two posts with a rail and a slat; Pip's hat has no box, just a soft shadow on the counter; three two-frame alternatives below.
 
 | Check | Fits? | Proposal |
 |---|---|---|
 | S3/S2/S1 one frame | yes | Pip 120 · bell 120 · tray 496 · basket 300 in one row; mirrored for left-handed |
-| Two-frame tray (A5+, M5; Big Bites/A2 is one frame) | **no** as one row: 1016 + 300 + 2 buttons > 1280 | Pip's hat on top of the bell in one 112-px column; basket stands upright and narrow (112 × 240). Cells stay 88. |
+| Two-frame tray (A5+, M5; Big Bites/A2 is one frame) | **no** as one row: 1016 + 300 + 2 buttons > 1280 | **Owner picks one:** **A** tighter tray (cell gaps 4, padding 8, cells stay 88), Pip on the bell in one column, a 172 × 240 crate with a three-row heap · **B** full-size basket on the back counter beside the monster under a shorter ticket (176), Pip and bell side by side in the row; left-handed puts the basket under the caption, where Pip's helper spot and the CountTogether spots are, so those would have to move right of the monster · **C** two-row counter for two-frame skills: the counter edge rises to y 370, the tray spans the top row, Pip, bell and a shallow 300 × 112 basket share a bottom row; the room is shorter, so CountTogether needs a compact bubble (two small frames fit in 240) |
 | Taken-away row | **no** beside the basket (1404 px) | The row takes the basket's place on missing-subtrahend forms: there the basket does exactly what the row does (D42a) |
 | S0 number pad | yes | Pip, bell, Peek, display, backspace in the upper row; digits 0–9 below, same order on both sides |
 | Cloche (Peek/Worked/FollowMe) | yes, tight | Tray shifts 64 px toward Pip; lid (112) between tray and basket |
 | Help offer | yes | Two 220 buttons over the hidden tray; basket dims |
-| Pip helper spot | yes | Pops up behind the counter under the caption (x 344–468), clear of the waist-size monster |
-| CountTogether | yes | Same bubble as today; Pip and the small monster step left in front of the table; the line no longer has to hide (it is in the bar) |
+| Pip helper spot | yes | Pops up behind the counter under the caption (x 344–468) |
+| CountTogether | yes | Same bubble as today; Pip and the small monster step left in front of the table; the line stays (it is in the bar) |
 | 44/56 px minimums | yes | cells 47.7, Pip/bell 65, door/digits/lid 60.7 CSS px |
 
-Waiting line: real mini monsters in plan order, front at the shop door. A requeued monster stands at its real place (D43: 3–5 orders later) with a small circling-arrow badge, and still joins as the next monster comes in (D108). **Budget:** five real minis cost 153 SVG nodes; the screen totals 315 (> 300, SPEC §2.4). Fix when built: simplified head-only minis (~10 nodes each).
+Waiting line: **real mini monsters, idling** (rev 1 planned head-only icons to fit the old 300-element budget; D113 lifts it to 4,800 on screen / 650 moving). Measured worst case, nine minis during CountTogether: 489 on screen, 300 moving. A long line squeezes its spacing to stay in the bar. A requeued monster stands at its real place (D43: 3–5 orders later) with a small circling-arrow badge, and still joins as the next monster comes in (D108).
 
-Monster cut: *full* = whole body standing at the counter edge (240 px, as today); *waist* = 300 px with the lower 30 % behind the counter. Short monsters (Blobbo) show little body at the waist.
-
-New per-device setting "Basket side: right (default) / left" goes in the gear tools when the layout is built. Decisions (layout, basket side, frames2 column, taken-away replaces basket, line with real positions) are recorded once the mock is approved, as with the M1 mock.
+New per-device setting "Basket side: right (default) / left" goes in the gear tools when the layout is built. Decisions (layout, basket side, two-frame choice, taken-away replaces basket, line with real positions, full-height monsters, window behind the monster) are recorded once the mock is approved, as with the M1 mock.
 
 ### M3a — Persistence and fact boxes (2.0 h)
 1. Engine: `replay` / `applyEvent`, coin totals (§11.2), fact boxes (D29 rules), `skillConfig` last-writer-wins; property test applyEvent ≡ replay.

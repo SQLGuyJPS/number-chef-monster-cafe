@@ -167,6 +167,11 @@ export const mirrorX = (r: Rect): Rect => ({ ...r, x: STAGE_W - r.x - r.w });
 
 const C_TRAY1: Rect = { x: 364, y: rowY(FRAME.h), w: FRAME.w, h: FRAME.h };
 const C_TRAY2_W = 2 * FRAME.w + FRAMES_GAP; // 1016
+/** Alternative A: the same 88-px cells with tighter gaps and padding. */
+export const TIGHT = { cell: CELL, gap: 4, pad: 8, framesGap: 12 } as const;
+const TIGHT_FRAME = frameSize(TIGHT.cell, TIGHT.gap, TIGHT.pad); // 472 × 196
+/** Alternative C: the counter edge for skills that use two frames. */
+export const COUNTER_Y_TWO_ROW = 370;
 
 /** One layout per mock variant; every rect a tap target or a band the child must see. */
 export const COUNTER = {
@@ -212,14 +217,37 @@ export const COUNTER = {
     takenAway: { x: 908, y: rowY(TAKEN_FRAME.h), w: TAKEN_FRAME.w, h: TAKEN_FRAME.h },
   },
   /**
-   * Two-frame tray (A5+): 1016 px leaves no room for a 300-px basket beside it. Pip's hat sits on
-   * the bell in one column and the basket stands upright and narrow; nothing below its minimum.
+   * Two-frame tray (A5+): 1016 px leaves no room for a 300-px basket beside Pip and the bell.
+   * Three alternatives for the owner to choose from (none drops below a minimum):
+   * A — tighter tray: cell gaps 4 and padding 8 (cells stay 88), Pip's hat on the bell in one
+   *     column, a 172-px upright crate.
+   * B — basket on the back counter: full-size basket beside the monster on the dominant side under
+   *     a shorter ticket; Pip and the bell side by side in the row with the tray.
+   * C — two-row counter: the counter edge rises to y 370 for two-frame skills; the tray spans the
+   *     top row; Pip, the bell and a full-width, shallow basket share a bottom row.
    */
-  frames2: {
+  frames2a: {
     help: { x: 8, y: 460, w: BUTTON_MIN, h: BUTTON_MIN },
     bell: { x: 8, y: 588, w: BUTTON_MIN, h: BUTTON_MIN },
-    tray: { x: 132, y: rowY(FRAME.h), w: C_TRAY2_W, h: FRAME.h },
-    bin: { x: 1160, y: 460, w: BUTTON_MIN, h: 240 },
+    tray: { x: 132, y: rowY(TIGHT_FRAME.h), w: 2 * TIGHT_FRAME.w + TIGHT.framesGap, h: TIGHT_FRAME.h },
+    bin: { x: 1100, y: 460, w: 172, h: 240 },
+  },
+  frames2b: {
+    help: { x: 16, y: rowY(BUTTON_MIN), w: BUTTON_MIN, h: BUTTON_MIN },
+    bell: { x: 136, y: rowY(BUTTON_MIN), w: BUTTON_MIN, h: BUTTON_MIN },
+    tray: { x: 256, y: rowY(FRAME.h), w: C_TRAY2_W, h: FRAME.h },
+    /** In the room, on the counter's far edge (y 312–432), under the shorter ticket. */
+    bin: { x: 838, y: COUNTER_Y - 120, w: 300, h: 120 },
+    ticket: { x: 808, y: 130, w: TICKET_W, h: 176 },
+  },
+  frames2c: {
+    counterY: COUNTER_Y_TWO_ROW,
+    help: { x: 32, y: 600, w: BUTTON_MIN, h: BUTTON_MIN },
+    bell: { x: 160, y: 600, w: BUTTON_MIN, h: BUTTON_MIN },
+    tray: { x: centeredX(C_TRAY2_W), y: COUNTER_Y_TWO_ROW + 12, w: C_TRAY2_W, h: FRAME.h },
+    bin: { x: 948, y: 600, w: 300, h: BUTTON_MIN },
+    monster: { x: 520, y: COUNTER_Y_TWO_ROW - 240, w: 240, h: 240 },
+    ticket: { x: 808, y: 134, w: TICKET_W, h: 220 },
   },
   /** S0 pad: Pip, bell, Peek, display, backspace in the upper row; ten digits below. */
   s0: {

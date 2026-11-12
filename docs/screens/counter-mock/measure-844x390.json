@@ -1,6 +1,22 @@
 {
-  "svgNodes": 315,
-  "lineSvgNodes": 153,
+  "svgCounts": {
+    "v=s3": {
+      "total": 338,
+      "moving": 161
+    },
+    "v=s3&line=9": {
+      "total": 461,
+      "moving": 272
+    },
+    "v=count&line=9": {
+      "total": 489,
+      "moving": 300
+    },
+    "v=frames2c&line=9": {
+      "total": 472,
+      "moving": 283
+    }
+  },
   "targets": [
     {
       "id": "door",

@@ -69,30 +69,40 @@
   position: absolute;
 }
 
-/* ---- frames2: upright, narrow basket ---- */
+/* ---- Pip's hat: Pip himself is the button, no box; a soft shadow stands him on the counter ---- */
+.counter-mock .pip-hat {
+  background: radial-gradient(ellipse 42% 7% at 50% 95%, rgba(0, 0, 0, 0.16), transparent 100%);
+}
+
+/* ---- two-frame alternative A: an upright crate with a three-row heap ---- */
 .mock-tall-bin {
   position: absolute;
   overflow: hidden;
-  border-radius: var(--radius);
 }
-.mock-tall-bin span {
+.mock-heap-row {
   position: absolute;
-  width: 56px;
-  text-align: center;
+  left: 0;
+  right: 0;
+  height: 58px;
+  display: flex;
+  justify-content: center;
   font-family: var(--font-emoji);
   font-size: 48px;
   line-height: 1;
 }
-.mock-tall-bin span:nth-child(1) { left: 2px; top: 12px; transform: rotate(-10deg); }
-.mock-tall-bin span:nth-child(2) { left: 52px; top: 20px; transform: rotate(8deg); }
-.mock-tall-bin span:nth-child(3) { left: 4px; top: 66px; transform: rotate(6deg); }
-.mock-tall-bin span:nth-child(4) { left: 54px; top: 74px; transform: rotate(-8deg); }
-.mock-tall-bin span:nth-child(5) { left: 2px; top: 120px; transform: rotate(-4deg); }
-.mock-tall-bin span:nth-child(6) { left: 52px; top: 126px; transform: rotate(10deg); }
+.mock-heap-row span {
+  width: 44px;
+  text-align: center;
+}
+.mock-heap-row span:nth-child(odd) { transform: translateY(5px) rotate(-9deg); }
+.mock-heap-row span:nth-child(even) { transform: rotate(8deg); }
+.mock-heap-row.r0 { top: 30px; left: -10px; right: 10px; filter: brightness(0.9); }
+.mock-heap-row.r1 { top: 60px; left: 10px; right: -10px; filter: brightness(0.95); }
+.mock-heap-row.r2 { top: 90px; }
 .mock-tall-bin .bin-crate {
-  height: 74px;
-  left: 4px;
-  right: 4px;
+  height: 112px;
+  left: 6px;
+  right: 6px;
 }
 
 /* ---- owner's switches, outside the stage ---- */

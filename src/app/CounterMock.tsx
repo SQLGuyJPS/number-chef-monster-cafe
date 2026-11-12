@@ -1,7 +1,8 @@
 // `?mock`: static layout mock for the over-the-counter service screen (owner request before M3a).
 // Look only: nothing here is wired to the controller, and taps do nothing. URL parameters pick what
 // it shows, so screenshots are reproducible:
-//   v=s3|taken|frames2|s0|cloche|offer|count   monster=full|waist   basket=right|left
+//   v=s3|taken|frames2a|frames2b|frames2c|s0|cloche|offer|count   basket=right|left
+//   window=behind|door   line=1..10   monster=full|waist (owner chose full height; waist kept for reference)
 // A small toolbar outside the stage flips the same switches by hand; `&clean` hides it.
 import type { ReactNode } from 'react';
 import {
@@ -13,6 +14,8 @@ import {
   FRAME,
   FRAME_PADDING,
   FRAMES_GAP,
+  TIGHT,
+  frameSize,
   TAKEN_CELL,
   TAKEN_GAP,
   TAKEN_PAD,
@@ -21,7 +24,7 @@ import {
   type MonsterCut,
   type Rect,
 } from './metrics';
-import { CoinJarIcon, CounterScene, ShopIcon } from '../art/CounterScene';
+import { CoinJarIcon, CounterScene, ShopIcon, type WindowSpot } from '../art/CounterScene';
 import { Monster } from '../art/monsters/Monster';
 import { Pip } from '../art/Pip';
 import { FOODS, type FoodId } from '../engine/foods';
@@ -46,13 +49,17 @@ import {
 import '../game/service/service.css';
 import './counterMock.css';
 
-export const MOCK_VARIANTS = ['s3', 'taken', 'frames2', 's0', 'cloche', 'offer', 'count'] as const;
+export const MOCK_VARIANTS = ['s3', 'taken', 'frames2a', 'frames2b', 'frames2c', 's0', 'cloche', 'offer', 'count'] as const;
 export type MockVariant = (typeof MOCK_VARIANTS)[number];
 
 export interface MockOptions {
   variant: MockVariant;
   monster: MonsterCut;
   basket: BasketSide;
+  /** Street window behind the monster (default) or beside the door, as in the first mock. */
+  windowSpot: WindowSpot;
+  /** Monsters waiting in line (default 5; 9 is the longest a service of 8 with two requeues gets). */
+  line: number;
   clean: boolean;
 }
 
@@ -63,6 +70,8 @@ export function parseMockOptions(search: string): MockOptions {
     variant: v && (MOCK_VARIANTS as readonly string[]).includes(v) ? v : 's3',
     monster: q.get('monster') === 'waist' ? 'waist' : 'full',
     basket: q.get('basket') === 'left' ? 'left' : 'right',
+    windowSpot: q.get('window') === 'door' ? 'door' : 'behind',
+    line: Math.max(1, Math.min(10, Number(q.get('line')) || 5)),
     clean: q.has('clean'),
   };
 }
@@ -78,6 +87,13 @@ interface Sample {
   speaker: 'monster' | 'pip';
 }
 const tok = (text: string, role?: TicketToken['role'], blank = false): TicketToken => ({ text, role, blank });
+const TWO_FRAME: Sample = {
+  monster: 'gruffles',
+  food: 'burger',
+  tokens: [tok('8', 'prefill'), tok('+'), tok('5', 'child'), tok('='), tok('?', 'result', true)],
+  caption: 'Eight plus five burgers, please!',
+  speaker: 'monster',
+};
 const SAMPLES: Record<MockVariant, Sample> = {
   s3: {
     monster: 'blobbo',
@@ -93,13 +109,9 @@ const SAMPLES: Record<MockVariant, Sample> = {
     caption: 'Ten take away what makes six?',
     speaker: 'monster',
   },
-  frames2: {
-    monster: 'gruffles',
-    food: 'burger',
-    tokens: [tok('8', 'prefill'), tok('+'), tok('5', 'child'), tok('='), tok('?', 'result', true)],
-    caption: 'Eight plus five burgers, please!',
-    speaker: 'monster',
-  },
+  frames2a: TWO_FRAME,
+  frames2b: TWO_FRAME,
+  frames2c: TWO_FRAME,
   s0: {
     monster: 'mimsy',
     food: 'bread',
@@ -134,13 +146,10 @@ const SAMPLES: Record<MockVariant, Sample> = {
  * The waiting line, front first. Chompers needed help two orders ago and was requeued 3–5 orders
  * later (D43), so it stands at its real place in the line, not at the back.
  */
-const LINE: { id: string; back?: boolean }[] = [
-  { id: 'gruffles' },
-  { id: 'chompers', back: true },
-  { id: 'mimsy' },
-  { id: 'wobbleton' },
-  { id: 'zibbit' },
-];
+const LINE_IDS = ['gruffles', 'chompers', 'mimsy', 'wobbleton', 'zibbit', 'blobbo', 'gruffles', 'mimsy', 'zibbit', 'wobbleton'];
+/** Front first; places 2 and 7 are requeued monsters standing where their order really is. */
+const lineOf = (n: number): { id: string; back?: boolean }[] =>
+  LINE_IDS.slice(0, n).map((id, i) => ({ id, back: i === 1 || i === 6 }));
 
 function cellsFor(prefill: number, child: number, cap: number, food: FoodId, popFrom = prefill): CellView[] {
   return Array.from({ length: cap }, (_, i) =>
@@ -152,17 +161,19 @@ function cellsFor(prefill: number, child: number, cap: number, food: FoodId, pop
   );
 }
 
-function Tray({ rect, cells }: { rect: Rect; cells: CellView[] }) {
+function Tray({ rect, cells, tight = false }: { rect: Rect; cells: CellView[]; tight?: boolean }) {
+  const g = tight ? TIGHT : { cell: CELL, gap: CELL_GAP, pad: FRAME_PADDING, framesGap: FRAMES_GAP };
+  const fw = tight ? frameSize(g.cell, g.gap, g.pad).w : FRAME.w;
   return (
     <div className="tray">
       {[0, 1].slice(0, cells.length > 10 ? 2 : 1).map((f) => (
         <TenFrame
           key={f}
           cells={cells.slice(f * 10, f * 10 + 10)}
-          cell={CELL}
-          gap={CELL_GAP}
-          pad={FRAME_PADDING}
-          x={rect.x + f * (FRAME.w + FRAMES_GAP)}
+          cell={g.cell}
+          gap={g.gap}
+          pad={g.pad}
+          x={rect.x + f * (fw + g.framesGap)}
           y={rect.y}
           tapTargets
           testId="tray"
@@ -184,20 +195,37 @@ function CounterMonster({ id, rect, cut }: { id: string; rect: Rect; cut: Monste
 }
 
 export function CounterMock({ opts }: { opts: MockOptions }) {
-  const { variant, monster: cut, basket } = opts;
+  const { variant, monster: cut, basket, windowSpot } = opts;
+  const twoRow = variant === 'frames2c';
+  const counterY = twoRow ? COUNTER.frames2c.counterY : COUNTER_Y;
+  const LINE = lineOf(opts.line);
+  const step = Math.min(COUNTER.bar.miniStep, (COUNTER.bar.line.w - 16) / LINE.length);
   const s = SAMPLES[variant];
   const side = (r: Rect) => forSide(r, basket);
   const { bar, scene } = COUNTER;
   const counting = variant === 'count';
   const pipOut = variant === 'offer' || counting;
-  const monsterRect = counting ? scene.monsterAside : cut === 'waist' ? scene.monsterWaist : scene.monsterFull;
+  const monsterRect = counting
+    ? scene.monsterAside
+    : twoRow
+      ? COUNTER.frames2c.monster
+      : cut === 'waist'
+        ? scene.monsterWaist
+        : scene.monsterFull;
+  const ticketRect = counting
+    ? scene.ticketCounting
+    : variant === 'frames2b'
+      ? COUNTER.frames2b.ticket
+      : twoRow
+        ? COUNTER.frames2c.ticket
+        : scene.ticket;
   // Waist mode: the aside monster is cut too, so it reads as the same monster stepping aside.
   const asideRect = cut === 'waist' ? { ...scene.monsterAside, y: COUNTER_Y - 90, w: 150, h: 150, x: 105 } : monsterRect;
 
   const band: ReactNode[] = [];
   const helpBell = (help: Rect, bell: Rect) => {
     band.push(<PipHat key="help" rect={side(help)} onTap={noop} pulsing={variant === 'offer'} />);
-    band.push(<Bell key="bell" rect={side(bell)} onTap={noop} dim={variant !== 's3' && variant !== 'taken'} />);
+    band.push(<Bell key="bell" rect={side(bell)} onTap={noop} dim={variant === 'offer' || variant === 'count' || variant === 'cloche'} />);
   };
   switch (variant) {
     case 's3':
@@ -226,16 +254,36 @@ export function CounterMock({ opts }: { opts: MockOptions }) {
       );
       break;
     }
-    case 'frames2':
-      helpBell(COUNTER.frames2.help, COUNTER.frames2.bell);
-      band.push(<Tray key="tray" rect={side(COUNTER.frames2.tray)} cells={cellsFor(8, 5, 20, s.food)} />);
+    case 'frames2a': {
+      // A: tighter tray, Pip on the bell, an upright crate with a three-row heap.
+      helpBell(COUNTER.frames2a.help, COUNTER.frames2a.bell);
+      band.push(<Tray key="tray" tight rect={side(COUNTER.frames2a.tray)} cells={cellsFor(8, 5, 20, s.food)} />);
       band.push(
-        <div key="bin" className="mock-tall-bin" data-tap="button" data-testid="bin" style={at(side(COUNTER.frames2.bin))}>
-          {Array.from({ length: 6 }, (_, k) => (
-            <span key={k}>{FOODS[s.food].glyph}</span>
+        <div key="bin" className="svc-btn mock-tall-bin" data-tap="button" data-testid="bin" style={at(side(COUNTER.frames2a.bin))}>
+          {[0, 1, 2].map((row) => (
+            <div key={row} className={`mock-heap-row r${row}`}>
+              {[0, 1, 2].map((k) => (
+                <span key={k}>{FOODS[s.food].glyph}</span>
+              ))}
+            </div>
           ))}
           <div className="bin-crate" />
         </div>,
+      );
+      break;
+    }
+    case 'frames2b':
+      // B: the basket moves up onto the back counter beside the monster; Pip and the bell side by side.
+      helpBell(COUNTER.frames2b.help, COUNTER.frames2b.bell);
+      band.push(<Tray key="tray" rect={side(COUNTER.frames2b.tray)} cells={cellsFor(8, 5, 20, s.food)} />);
+      band.push(<Bin key="bin" rect={side(COUNTER.frames2b.bin)} food={s.food} handlers={{}} />);
+      break;
+    case 'frames2c':
+      // C: the counter rises; the tray spans the top row, Pip, the bell and a shallow basket below.
+      helpBell(COUNTER.frames2c.help, COUNTER.frames2c.bell);
+      band.push(<Tray key="tray" rect={side(COUNTER.frames2c.tray)} cells={cellsFor(8, 5, 20, s.food)} />);
+      band.push(
+        <Bin key="bin" rect={side(COUNTER.frames2c.bin)} food={s.food} handlers={{}} />,
       );
       break;
     case 's0': {
@@ -289,7 +337,7 @@ export function CounterMock({ opts }: { opts: MockOptions }) {
       data-variant={variant}
       data-basket={basket}
     >
-      <CounterScene />
+      <CounterScene counterY={counterY} windowSpot={windowSpot} />
 
       {/* ---- status bar ---- */}
       <DoorSign rect={bar.door} onTap={noop} />
@@ -303,9 +351,9 @@ export function CounterMock({ opts }: { opts: MockOptions }) {
         <div className="mock-path" />
         {[...LINE].reverse().map((m, i) => (
           <div
-            key={m.id}
+            key={`${m.id}${i}`}
             className={`mock-mini ${m.back ? 'back-again' : ''}`}
-            style={{ left: bar.line.w - (LINE.length - i) * bar.miniStep - 8, width: bar.mini, height: bar.mini }}
+            style={{ left: bar.line.w - (LINE.length - i) * step - 8, width: bar.mini, height: bar.mini, zIndex: i }}
             data-testid={m.back ? 'queue-returning' : undefined}
           >
             <Monster id={m.id} expression="idle" size={bar.mini} />
@@ -349,7 +397,7 @@ export function CounterMock({ opts }: { opts: MockOptions }) {
           caption="one"
         />
       )}
-      <Ticket rect={counting ? scene.ticketCounting : scene.ticket} tokens={s.tokens} food={s.food} />
+      <Ticket rect={ticketRect} tokens={s.tokens} food={s.food} />
 
       {/* ---- counter band ---- */}
       {band}
@@ -359,7 +407,7 @@ export function CounterMock({ opts }: { opts: MockOptions }) {
 
 /** Hand switches for the owner, outside the stage so they never cover the layout. */
 export function MockToolbar({ opts }: { opts: MockOptions }) {
-  const go = (patch: Partial<Record<'v' | 'monster' | 'basket', string>>) => {
+  const go = (patch: Partial<Record<'v' | 'window' | 'basket', string>>) => {
     const q = new URLSearchParams(location.search);
     for (const [k, v] of Object.entries(patch)) q.set(k, v);
     location.search = q.toString();
@@ -371,8 +419,8 @@ export function MockToolbar({ opts }: { opts: MockOptions }) {
           <option key={v}>{v}</option>
         ))}
       </select>
-      <button type="button" onClick={() => go({ monster: opts.monster === 'full' ? 'waist' : 'full' })}>
-        Monster: {opts.monster === 'full' ? 'full height' : 'to the waist'}
+      <button type="button" onClick={() => go({ window: opts.windowSpot === 'behind' ? 'door' : 'behind' })}>
+        Window: {opts.windowSpot === 'behind' ? 'behind the monster' : 'by the door'}
       </button>
       <button type="button" onClick={() => go({ basket: opts.basket === 'right' ? 'left' : 'right' })}>
         Basket: {opts.basket}

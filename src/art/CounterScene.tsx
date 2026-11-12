@@ -15,10 +15,17 @@ const WOOD = '#b98352';
 const WOOD_DARK = '#8a5a35';
 const COUNTER_TOP = '#d9a066';
 const COUNTER_GRAIN = '#c98f58';
-/** The wainscot ends and the floor starts here; the room's back wall is far away, so things are small. */
-const FLOOR_Y = 330;
+export type WindowSpot = 'behind' | 'door';
 
-export function CounterScene() {
+/**
+ * `counterY`: the counter's far edge (432; 370 for the two-row counter, alternative C). The floor
+ * line follows it so the table stays in view. `windowSpot`: the street window behind the monster
+ * (seen around it) or beside the door (where the caption bubble covers it).
+ */
+export function CounterScene({ counterY = COUNTER_Y, windowSpot = 'behind' }: { counterY?: number; windowSpot?: WindowSpot }) {
+  // The wainscot ends and the floor starts here; the back wall is far away, so things are small.
+  const FLOOR_Y = counterY === COUNTER_Y ? 330 : 300;
+  const WAINSCOT = FLOOR_Y - 68;
   return (
     <svg className="cafe-scene" viewBox="0 0 1280 720" width="1280" height="720" aria-hidden="true">
       <defs>
@@ -29,8 +36,8 @@ export function CounterScene() {
       </defs>
       {/* back wall, wainscot, floor */}
       <rect x={-1000} y={-600} width={3280} height={FLOOR_Y + 600} fill="url(#cm-wall)" />
-      <rect x={-1000} y={262} width={3280} height={FLOOR_Y - 262} fill={PANEL} />
-      <rect x={-1000} y={256} width={3280} height={8} fill={TRIM} />
+      <rect x={-1000} y={WAINSCOT} width={3280} height={FLOOR_Y - WAINSCOT} fill={PANEL} />
+      <rect x={-1000} y={WAINSCOT - 6} width={3280} height={8} fill={TRIM} />
       <rect x={-1000} y={FLOOR_Y} width={3280} height={300} fill={FLOOR_A} />
       {[0, 1, 2, 3].map((i) => (
         <rect key={i} x={-1000} y={FLOOR_Y + 14 + i * 26} width={3280} height={12} fill={FLOOR_B} opacity={0.5} />
@@ -38,8 +45,21 @@ export function CounterScene() {
       <rect x={-1000} y={FLOOR_Y} width={3280} height={5} fill="rgba(0,0,0,0.08)" />
 
       <FrontDoor x={36} y={124} w={148} h={FLOOR_Y - 124} />
-      <StreetWindow x={208} y={142} w={214} h={150} />
-      <TableAndChairs cx={232} />
+      {windowSpot === 'door' ? (
+        <StreetWindow x={208} y={142} w={214} h={150} />
+      ) : (
+        <>
+          {/* the street window right behind the monster, between the caption and the ticket, so the street shows around it */}
+          <StreetWindow x={512} y={146} w={286} h={WAINSCOT - 16 - 146} />
+          {/* beside the door, under the caption: a small picture in the wall-art slot */}
+          <g transform="translate(228 170)" opacity={0.6} data-slot="wallArt">
+            <rect x={0} y={0} width={86} height={70} rx={6} fill="#fffaf0" stroke="#c98b55" strokeWidth={6} />
+            <path d="M6 62 Q28 30 46 50 Q60 36 80 62 Z" fill="#a8d88a" />
+            <circle cx={62} cy={22} r={8} fill="#ffd56b" />
+          </g>
+        </>
+      )}
+      <TableAndChairs cx={232} floorY={FLOOR_Y} />
 
       {/* right wall: a little shelf with cups and a plant, mostly behind the ticket */}
       <g opacity={0.8}>
@@ -51,20 +71,20 @@ export function CounterScene() {
         <path d="M1216 292 q-30 -30 -14 -58 q8 24 14 30 q6 -30 22 -36 q6 30 -22 64 Z" fill="#8fbf6a" />
       </g>
       {/* counter: the far edge the monster stands behind, then the top the child works on */}
-      <rect x={-1000} y={COUNTER_Y} width={3280} height={16} fill={WOOD_DARK} />
-      <rect x={-1000} y={COUNTER_Y + 2} width={3280} height={4} fill="#a8744a" />
-      <rect x={-1000} y={COUNTER_Y + 16} width={3280} height={900} fill={COUNTER_TOP} />
+      <rect x={-1000} y={counterY} width={3280} height={16} fill={WOOD_DARK} />
+      <rect x={-1000} y={counterY + 2} width={3280} height={4} fill="#a8744a" />
+      <rect x={-1000} y={counterY + 16} width={3280} height={900} fill={COUNTER_TOP} />
       {[60, 140, 230, 330].map((dy, i) => (
         <path
           key={dy}
-          d={`M-1000 ${COUNTER_Y + dy} C ${200 + i * 90} ${COUNTER_Y + dy - 6}, ${700 - i * 60} ${COUNTER_Y + dy + 8}, 2280 ${COUNTER_Y + dy}`}
+          d={`M-1000 ${counterY + dy} C ${200 + i * 90} ${counterY + dy - 6}, ${700 - i * 60} ${counterY + dy + 8}, 2280 ${counterY + dy}`}
           fill="none"
           stroke={COUNTER_GRAIN}
           strokeWidth={3}
           opacity={0.6}
         />
       ))}
-      <rect x={-1000} y={COUNTER_Y + 16} width={3280} height={10} fill="rgba(0,0,0,0.08)" />
+      <rect x={-1000} y={counterY + 16} width={3280} height={10} fill="rgba(0,0,0,0.08)" />
 
       {/* status bar: a cream board with a wooden trim, running past the safe box */}
       <rect x={-1000} y={-600} width={3280} height={600 + BAR_H} fill="#f7e6c4" />
@@ -132,26 +152,35 @@ function StreetWindow({ x, y, w, h }: { x: number; y: number; w: number; h: numb
   );
 }
 
-/** One round table with a chair either side; their legs go behind the counter. */
-function TableAndChairs({ cx }: { cx: number }) {
-  const chair = (x: number, flip: boolean) => (
-    <g transform={`translate(${x} 0) scale(${flip ? -1 : 1} 1)`}>
-      <rect x={-6} y={318} width={12} height={130} rx={4} fill="#8c6a4e" />
-      <rect x={-6} y={318} width={46} height={10} rx={4} fill="#8c6a4e" />
-      <rect x={-6} y={346} width={46} height={10} rx={4} fill="#8c6a4e" />
-      <rect x={-8} y={386} width={62} height={14} rx={6} fill="#c96f6f" />
-      <rect x={42} y={398} width={8} height={50} fill="#8c6a4e" />
+/**
+ * One round table with a chair either side, seen from the front: each chair back is two posts
+ * joined by a top rail and a slat, so it reads as one piece. Legs go behind the counter.
+ */
+function TableAndChairs({ cx, floorY }: { cx: number; floorY: number }) {
+  const seat = floorY + 56;
+  const top = floorY + 38;
+  const LEG = '#8c6a4e';
+  const chair = (x: number) => (
+    <g>
+      <rect x={x - 26} y={seat - 64} width={7} height={140} rx={3} fill={LEG} />
+      <rect x={x + 19} y={seat - 64} width={7} height={140} rx={3} fill={LEG} />
+      <rect x={x - 29} y={seat - 70} width={58} height={13} rx={6} fill={LEG} />
+      <rect x={x - 22} y={seat - 40} width={44} height={8} rx={3} fill={LEG} />
+      <rect x={x - 33} y={seat} width={66} height={11} rx={5} fill="#c96f6f" />
+      <rect x={x - 33} y={seat + 8} width={66} height={5} rx={2} fill="#a85a5a" />
+      <rect x={x - 29} y={seat + 12} width={6} height={60} fill={LEG} />
+      <rect x={x + 23} y={seat + 12} width={6} height={60} fill={LEG} />
     </g>
   );
   return (
     <g data-slot="table" opacity={0.92}>
-      {chair(cx - 112, false)}
-      {chair(cx + 112, true)}
-      <rect x={cx - 6} y={372} width={12} height={80} fill="#7a5536" />
-      <ellipse cx={cx} cy={372} rx={70} ry={14} fill="#a87445" />
-      <ellipse cx={cx} cy={368} rx={70} ry={14} fill="#c98b55" />
-      <path d={`M${cx - 10} 350 h20 v12 q-10 6 -20 0 Z`} fill="#fffaf0" />
-      <ellipse cx={cx + 30} cy={366} rx={16} ry={4} fill="#fffaf0" />
+      {chair(cx - 100)}
+      {chair(cx + 100)}
+      <rect x={cx - 6} y={top} width={12} height={80} fill="#7a5536" />
+      <ellipse cx={cx} cy={top + 4} rx={70} ry={14} fill="#a87445" />
+      <ellipse cx={cx} cy={top} rx={70} ry={14} fill="#c98b55" />
+      <path d={`M${cx - 10} ${top - 18} h20 v12 q-10 6 -20 0 Z`} fill="#fffaf0" />
+      <ellipse cx={cx + 30} cy={top - 2} rx={16} ry={4} fill="#fffaf0" />
     </g>
   );
 }
