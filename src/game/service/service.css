@@ -141,9 +141,9 @@
   display: inline-block;
   width: 60px;
   height: 76px;
-  border: 6px dashed currentColor;
-  border-radius: 12px;
-  box-sizing: border-box;
+}
+.tok-blank svg {
+  display: block;
 }
 
 /* ---- Buttons in the service bands ---- */

@@ -15,16 +15,10 @@ const WOOD = '#b98352';
 const WOOD_DARK = '#8a5a35';
 const COUNTER_TOP = '#d9a066';
 const COUNTER_GRAIN = '#c98f58';
-export type WindowSpot = 'behind' | 'door';
 
-/**
- * `counterY`: the counter's far edge (432; 370 for the two-row counter, alternative C). The floor
- * line follows it so the table stays in view. `windowSpot`: the street window behind the monster
- * (seen around it) or beside the door (where the caption bubble covers it).
- */
-export function CounterScene({ counterY = COUNTER_Y, windowSpot = 'behind' }: { counterY?: number; windowSpot?: WindowSpot }) {
+export function CounterScene() {
   // The wainscot ends and the floor starts here; the back wall is far away, so things are small.
-  const FLOOR_Y = counterY === COUNTER_Y ? 330 : 300;
+  const FLOOR_Y = 330;
   const WAINSCOT = FLOOR_Y - 68;
   return (
     <svg className="cafe-scene" viewBox="0 0 1280 720" width="1280" height="720" aria-hidden="true">
@@ -45,20 +39,8 @@ export function CounterScene({ counterY = COUNTER_Y, windowSpot = 'behind' }: { 
       <rect x={-1000} y={FLOOR_Y} width={3280} height={5} fill="rgba(0,0,0,0.08)" />
 
       <FrontDoor x={36} y={124} w={148} h={FLOOR_Y - 124} />
-      {windowSpot === 'door' ? (
-        <StreetWindow x={208} y={142} w={214} h={150} />
-      ) : (
-        <>
-          {/* the street window right behind the monster, between the caption and the ticket, so the street shows around it */}
-          <StreetWindow x={512} y={146} w={286} h={WAINSCOT - 16 - 146} />
-          {/* beside the door, under the caption: a small picture in the wall-art slot */}
-          <g transform="translate(228 170)" opacity={0.6} data-slot="wallArt">
-            <rect x={0} y={0} width={86} height={70} rx={6} fill="#fffaf0" stroke="#c98b55" strokeWidth={6} />
-            <path d="M6 62 Q28 30 46 50 Q60 36 80 62 Z" fill="#a8d88a" />
-            <circle cx={62} cy={22} r={8} fill="#ffd56b" />
-          </g>
-        </>
-      )}
+      {/* one street window beside the door (owner kept it here rather than behind the monster) */}
+      <StreetWindow x={208} y={142} w={214} h={150} />
       <TableAndChairs cx={232} floorY={FLOOR_Y} />
 
       {/* right wall: a little shelf with cups and a plant, mostly behind the ticket */}
@@ -71,20 +53,20 @@ export function CounterScene({ counterY = COUNTER_Y, windowSpot = 'behind' }: { 
         <path d="M1216 292 q-30 -30 -14 -58 q8 24 14 30 q6 -30 22 -36 q6 30 -22 64 Z" fill="#8fbf6a" />
       </g>
       {/* counter: the far edge the monster stands behind, then the top the child works on */}
-      <rect x={-1000} y={counterY} width={3280} height={16} fill={WOOD_DARK} />
-      <rect x={-1000} y={counterY + 2} width={3280} height={4} fill="#a8744a" />
-      <rect x={-1000} y={counterY + 16} width={3280} height={900} fill={COUNTER_TOP} />
+      <rect x={-1000} y={COUNTER_Y} width={3280} height={16} fill={WOOD_DARK} />
+      <rect x={-1000} y={COUNTER_Y + 2} width={3280} height={4} fill="#a8744a" />
+      <rect x={-1000} y={COUNTER_Y + 16} width={3280} height={900} fill={COUNTER_TOP} />
       {[60, 140, 230, 330].map((dy, i) => (
         <path
           key={dy}
-          d={`M-1000 ${counterY + dy} C ${200 + i * 90} ${counterY + dy - 6}, ${700 - i * 60} ${counterY + dy + 8}, 2280 ${counterY + dy}`}
+          d={`M-1000 ${COUNTER_Y + dy} C ${200 + i * 90} ${COUNTER_Y + dy - 6}, ${700 - i * 60} ${COUNTER_Y + dy + 8}, 2280 ${COUNTER_Y + dy}`}
           fill="none"
           stroke={COUNTER_GRAIN}
           strokeWidth={3}
           opacity={0.6}
         />
       ))}
-      <rect x={-1000} y={counterY + 16} width={3280} height={10} fill="rgba(0,0,0,0.08)" />
+      <rect x={-1000} y={COUNTER_Y + 16} width={3280} height={10} fill="rgba(0,0,0,0.08)" />
 
       {/* status bar: a cream board with a wooden trim, running past the safe box */}
       <rect x={-1000} y={-600} width={3280} height={600 + BAR_H} fill="#f7e6c4" />

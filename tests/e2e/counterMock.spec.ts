@@ -5,7 +5,7 @@ import { MIN_BUTTON_CSS_PX, MIN_CELL_CSS_PX } from '../../src/app/metrics';
 // Over-the-counter layout mock (`?mock`, owner request before M3a). Tap sizes are asserted at
 // 844×390 for every variant on both basket sides; screenshots only when NCMC_SCREENS is set:
 //   npx cross-env NCMC_SCREENS=counter-mock playwright test counterMock --project=chromium-ipad-pro-11 --project=webkit-iphone-13
-const VARIANTS = ['s3', 'taken', 'frames2a', 'frames2b', 'frames2c', 's0', 'cloche', 'offer', 'count'] as const;
+const VARIANTS = ['s3', 'taken', 'frames2', 's0', 'cloche', 'offer', 'count'] as const;
 const SIDES = ['right', 'left'] as const;
 
 async function open(page: Page, q: string) {
@@ -53,12 +53,10 @@ test('counter mock screenshots', async ({ page }, info) => {
     await page.addStyleTag({ content: '*{animation:none!important;transition:none!important}' });
     await page.screenshot({ path: `${dir}/${name}-${tag}.png` });
   };
-  // Monsters at full height (owner's choice), window behind the monster, both basket sides.
+  // Monsters at full height (owner's choice), window by the door, both basket sides.
   for (const side of SIDES) await shot(`v=s3&basket=${side}`, `s3-basket-${side}`);
-  await shot('v=s3&window=door', 's3-window-by-door');
-  // Two-frame tray: three alternatives for the owner, right-handed; B also left-handed.
-  for (const v of ['frames2a', 'frames2b', 'frames2c']) await shot(`v=${v}`, `two-frames-${v.slice(-1)}`);
-  await shot('v=frames2b&basket=left', 'two-frames-b-basket-left');
+  // Two-frame tray (owner's pick, A with a two-row heap), both basket sides.
+  for (const side of SIDES) await shot(`v=frames2&basket=${side}`, `two-frames-basket-${side}`);
   // The other fit checks, and the longest line (8 orders, two requeues).
   for (const v of ['taken', 's0', 'cloche', 'offer', 'count']) await shot(`v=${v}`, `fit-${v}`);
   await shot('v=s3&line=9', 'line-of-nine');
@@ -67,7 +65,7 @@ test('counter mock screenshots', async ({ page }, info) => {
   // animations running: the longest line of real mini monsters, all idling.
   type Hooks = { svgCounts: () => { total: number; moving: number } };
   const counts: Record<string, { total: number; moving: number }> = {};
-  for (const q of ['v=s3', 'v=s3&line=9', 'v=count&line=9', 'v=frames2c&line=9']) {
+  for (const q of ['v=s3', 'v=s3&line=9', 'v=count&line=9', 'v=frames2&line=9']) {
     await open(page, q);
     await page.waitForTimeout(300);
     counts[q] = await page.evaluate(() => (window as unknown as { __ncmc: Hooks }).__ncmc.svgCounts());

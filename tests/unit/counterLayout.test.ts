@@ -5,7 +5,6 @@ import {
   CELL,
   COUNTER,
   COUNTER_Y,
-  COUNTER_Y_TWO_ROW,
   MIN_BUTTON_CSS_PX,
   MIN_CELL_CSS_PX,
   STAGE_H,
@@ -31,9 +30,7 @@ const digits = (): Rect[] =>
 const VARIANTS: Record<string, Rect[]> = {
   s3: [COUNTER.s3.help, COUNTER.s3.bell, COUNTER.s3.tray, COUNTER.s3.bin],
   taken: [COUNTER.s3.help, COUNTER.s3.bell, COUNTER.s3.tray, COUNTER.taken.takenAway],
-  frames2a: [COUNTER.frames2a.help, COUNTER.frames2a.bell, COUNTER.frames2a.tray, COUNTER.frames2a.bin],
-  frames2b: [COUNTER.frames2b.help, COUNTER.frames2b.bell, COUNTER.frames2b.tray],
-  frames2c: [COUNTER.frames2c.help, COUNTER.frames2c.bell, COUNTER.frames2c.tray, COUNTER.frames2c.bin],
+  frames2: [COUNTER.frames2.help, COUNTER.frames2.bell, COUNTER.frames2.tray, COUNTER.frames2.bin],
   s0: [COUNTER.s0.help, COUNTER.s0.bell, COUNTER.s0.peek, COUNTER.s0.display, COUNTER.s0.backspace, ...digits()],
   cloche: [COUNTER.s3.help, COUNTER.s3.bell, COUNTER.cloche.tray, COUNTER.cloche.lid, COUNTER.cloche.bin],
   offer: [COUNTER.s3.help, COUNTER.s3.bell, COUNTER.offer.yes, COUNTER.offer.no, COUNTER.s3.bin],
@@ -50,7 +47,7 @@ describe('counter layout proposal', () => {
         for (const r of rs) {
           expect(r.x).toBeGreaterThanOrEqual(0);
           expect(r.x + r.w).toBeLessThanOrEqual(STAGE_W);
-          expect(r.y).toBeGreaterThanOrEqual(name === 'frames2c' ? COUNTER_Y_TWO_ROW : COUNTER_Y);
+          expect(r.y).toBeGreaterThanOrEqual(COUNTER_Y);
           expect(r.y + r.h).toBeLessThanOrEqual(STAGE_H);
         }
         for (let i = 0; i < rs.length; i++)
@@ -74,23 +71,6 @@ describe('counter layout proposal', () => {
     expect(CELL * PHONE_SCALE).toBeGreaterThanOrEqual(MIN_CELL_CSS_PX);
     const buttons = [...Object.values(VARIANTS).flat().filter((r) => r.w < 400), COUNTER.bar.door];
     for (const r of buttons) expect(Math.min(r.w, r.h) * PHONE_SCALE).toBeGreaterThanOrEqual(MIN_BUTTON_CSS_PX);
-  });
-
-  it('B: the basket on the back counter clears the shorter ticket and the monster', () => {
-    const { bin, ticket } = COUNTER.frames2b;
-    expect(bin.y + bin.h).toBe(COUNTER_Y);
-    expect(overlaps(bin, ticket)).toBe(false);
-    expect(overlaps(bin, COUNTER.scene.monsterFull)).toBe(false);
-    expect(ticket.y).toBeGreaterThanOrEqual(BAR_H);
-  });
-
-  it('C: the room above the raised counter still holds the monster and ticket', () => {
-    const { monster, ticket, counterY, tray } = COUNTER.frames2c;
-    expect(monster.y).toBeGreaterThanOrEqual(BAR_H);
-    expect(monster.y + monster.h).toBe(counterY);
-    expect(ticket.y).toBeGreaterThanOrEqual(BAR_H);
-    expect(ticket.y + ticket.h).toBeLessThanOrEqual(counterY);
-    expect(tray.y).toBeGreaterThanOrEqual(counterY);
   });
 
   it('status bar and room stay clear of each other and of the counter', () => {

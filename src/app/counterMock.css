@@ -74,7 +74,7 @@
   background: radial-gradient(ellipse 42% 7% at 50% 95%, rgba(0, 0, 0, 0.16), transparent 100%);
 }
 
-/* ---- two-frame alternative A: an upright crate with a three-row heap ---- */
+/* ---- two-frame tray: an upright crate with a two-row heap ---- */
 .mock-tall-bin {
   position: absolute;
   overflow: hidden;
@@ -96,11 +96,10 @@
 }
 .mock-heap-row span:nth-child(odd) { transform: translateY(5px) rotate(-9deg); }
 .mock-heap-row span:nth-child(even) { transform: rotate(8deg); }
-.mock-heap-row.r0 { top: 30px; left: -10px; right: 10px; filter: brightness(0.9); }
-.mock-heap-row.r1 { top: 60px; left: 10px; right: -10px; filter: brightness(0.95); }
-.mock-heap-row.r2 { top: 90px; }
+.mock-heap-row.r0 { top: 26px; left: -10px; right: 10px; filter: brightness(0.92); }
+.mock-heap-row.r1 { top: 52px; left: 10px; right: -10px; }
 .mock-tall-bin .bin-crate {
-  height: 112px;
+  height: 118px;
   left: 6px;
   right: 6px;
 }

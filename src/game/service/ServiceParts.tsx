@@ -59,12 +59,37 @@ export function Ticket({
                 t.blank ? 'tok-blank' : '',
               ].join(' ')}
             >
-              {t.blank ? '' : t.text}
+              {t.blank ? <BlankBox /> : t.text}
             </span>
           ),
         )}
       </div>
     </TapButton>
+  );
+}
+
+/**
+ * The dashed box for the unknown (SPEC §5.4). Drawn as SVG, not a dashed CSS border: Safari lays
+ * out each side's dashes on its own, so at the phone's ≈ 0.54 scale the corners came out uneven.
+ * `pathLength` spreads 12 equal dashes round the outline at every size.
+ */
+function BlankBox() {
+  return (
+    <svg viewBox="0 0 60 76" width="100%" height="100%" aria-hidden="true">
+      <rect
+        x={3}
+        y={3}
+        width={54}
+        height={70}
+        rx={9}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={6}
+        pathLength={24}
+        strokeDasharray="1.25 0.75"
+        strokeDashoffset={0.6}
+      />
+    </svg>
   );
 }
 
