@@ -38,6 +38,22 @@ test('every mock variant keeps the 844×390 tap minimums on both basket sides', 
     }
 });
 
+test('the two-frame crate holds its whole heap, tilt included, on both sides', async ({ page }) => {
+  for (const side of SIDES) {
+    await open(page, `v=frames2&basket=${side}`);
+    const worst = await page.evaluate(() => {
+      const crate = document.querySelector('.mock-tall-bin .bin-crate')!.getBoundingClientRect();
+      return Math.min(
+        ...[...document.querySelectorAll('.mock-heap-row span')].flatMap((el) => {
+          const g = el.getBoundingClientRect();
+          return [g.left - crate.left, crate.right - g.right];
+        }),
+      );
+    });
+    expect(worst, `${side}: food past the crate's sides`).toBeGreaterThanOrEqual(0);
+  }
+});
+
 const milestone = process.env.NCMC_SCREENS;
 const SHOT_PROJECTS = ['chromium-ipad-pro-11', 'webkit-iphone-13'];
 
