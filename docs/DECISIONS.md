@@ -70,8 +70,8 @@
 | D60 | Toolchain versions (TS 6.0, ESLint 9, …) | Implementation only | `typescript-eslint` support |
 | D61 | M0 test and tooling assumptions | Implementation only, except (f) turn cue → SPEC §2.2 | Gaps between spec and tools |
 | D62 | M1 layout geometry (S0 rows, taken-away grid, ring colors, cloche) | SPEC §3.3, §5.4; partly superseded by D63–D65, D73, D82, D84 | Bands could not hold 112 px buttons |
-| D63 | Owner mock review: line by the door, bin centred, row and lid left | SPEC §5.4; ticket/bell/bubble superseded by D64, D65, D84 | Problem centred above the tray |
-| D64 | Bell in the bottom band next to the bin; two-frame tray centred | SPEC §5.4; monster/bubble superseded by D65, D84 | Bell belongs by the basket |
+| D63 | Owner mock review: line by the door, bin centred, row and lid left | SPEC §5.4; ticket/bell/bubble superseded by D64, D65, D84; line, bin, row and lid superseded by D114, D117, D118 | Problem centred above the tray |
+| D64 | Bell in the bottom band next to the bin; two-frame tray centred | SPEC §5.4; monster/bubble superseded by D65, D84; bell and two-frame tray superseded by D114, D116 | Bell belongs by the basket |
 | D65 | Monster centred, ticket right beside it, slides right for the bubble | SPEC §5.4; bubble superseded by D84 | Off-centre monster felt wrong |
 | D66 | M1 stand-in service (uniform plan, "Yum!", back to menu) | SPEC §14 (M1) | Builder, eating and Results are M2/M3a |
 | D67 | S0 Peek marks Help without CountTogether or advancing | SPEC §3.4, §5.4; flow after a miss by D89 | Peek shows a model, not the script |
@@ -98,7 +98,7 @@
 | D88 | Building cuts the order; no audio rebuild during speech; line retry | SPEC §5.4, §8.1 | Rebuilds stole the audio session; eager child |
 | D89 | First miss names the number; second offers help; third demos | SPEC §1.1, §3.4, §5.5 | One slip needs no long interruption |
 | D90 | Pip is the visible helper (placeholder Pip, own voice and caption) | SPEC §5.4, §5.5, §7.3 | "Want Pip to help?" named someone who never helped |
-| D91 | A tap gets a count or a tone; Pip steps back slowly; line waits | SPEC §1.4, §3.2, §3.3, §5.4, §7.3, §8.3; move time amended by D93 | Tones stepped on counts; hand-off felt abrupt |
+| D91 | A tap gets a count or a tone; Pip steps back slowly; line waits | SPEC §1.4, §3.2, §3.3, §5.4, §7.3, §8.3; move time amended by D93; line no longer hides (D118) | Tones stepped on counts; hand-off felt abrupt |
 | D92 | Decisions folded into SPEC; DECISIONS becomes an index; finished docs archived | This file; SPEC header; CLAUDE.md | Context cost and SPEC/DECISIONS contradictions |
 | D93 | Monster's move between spots is 550 ms | SPEC §7.3 | Code and D91 text disagreed; owner confirmed 550 ms |
 | D94 | Home gear opens playtest tools before M3a (long-press 2 s, no gate) | SPEC §2.2, §5.2, §12, §14; amended by D95 | Installed app can't open `?debug`; iOS storage is per app |
@@ -115,9 +115,15 @@
 | D105 | S1 help on missing-number forms plays in the model bubble; CountTogether tells the make-ten story | SPEC §5.5 | Pip counted food the child never placed on an empty S1 tray |
 | D106 | The solved answer takes the blank's role colour | SPEC §5.4 | Missing-number answers showed green like the total |
 | D107 | Results: silent count-up by one with tings, then one spoken total; buttons after; tap skips | SPEC §5.7 | Spoken count outran the speech engine |
-| D108 | A returning monster joins the line as the next monster comes in | SPEC §5.4 | Line grew during the meal for no visible reason |
+| D108 | A returning monster joins the line as the next monster comes in | SPEC §5.4; position amended by D118 (its real place, not the back) | Line grew during the meal for no visible reason |
 | D109 | Sound effects never overlap speech | SPEC §5.6, §8.1 | iOS dropped boing, crunch and tings under speech |
 | D110 | Blobbo's giggle, grounded door, string lights to the shop, Pip button art, shorter Mimsy hello | SPEC §5.4, §7.2, §7.4 | Owner playtest polish |
 | D111 | Family devices recorded; baseline iOS/iPadOS 18+, emoji ≤ Unicode 15.0 | SPEC §0, §2, §2.4, §7.1, §8.1, §11.3, §13.5 | Owner listed iPad 7th gen, iPhone 17, Pixel 10 Pro |
 | D112 | M2b device speed test (`?speedtest`); 300-element budget provisional until the iPad result | SPEC §2.2, §2.4, §13.5, §14; budget figure replaced by D113 | Redesigns and shop decorations need a measured budget, not a guess |
 | D113 | SVG budget from the iPad: ≤ 4,800 elements on screen, ≤ 650 moving; e2e checks every screen | SPEC §2.4, §13.5, §14 | iPad 7th gen speed test: still art free past 8,000, moving smooth to ~1,100 |
+| D114 | Service screen seen from behind the counter: status bar, room, one counter row; full-height monsters; window by the door | SPEC §5.4, §5.5, §7.3, §7.4 | Owner wanted to stand behind a café counter, not inside a house |
+| D115 | Basket side setting (right default / left), per device; mirrors the counter row only | SPEC §5.4, §12 | The dragging hand should not cross the body |
+| D116 | Two-frame tray: 88-px cells with tighter gaps, Pip on the bell, upright crate with a two-row heap | SPEC §3.3, §5.4 | Two frames, basket and two buttons did not fit one row |
+| D117 | Taken-away row takes the basket's place | SPEC §3.3, §5.4 | No room beside the basket; there the basket does what the row does |
+| D118 | Waiting line in the status bar: real minis, requeue at its real place with a badge, never hides | SPEC §5.4 | Owner request; D113 budget allows real monsters |
+| D119 | Ticket blank drawn as an SVG outline with even dashes | implementation | Dashed CSS border uneven at the corners in WebKit at phone scale |

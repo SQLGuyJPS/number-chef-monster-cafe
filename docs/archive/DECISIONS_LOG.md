@@ -621,3 +621,33 @@ How to revisit: if the repeating ghost is distracting, show each hint once; `war
 - Whether the explicit bell press is discoverable to the child unaided (tutorial mitigates).
 - Whether FollowMe feels tedious after wrong-wrong (steps capped at 10; tune in playtest).
 - Estimate risk: M1 and M2 are the densest; the Tier 1 estimate (target ≈ 10 h, redone in PLAN.md per D36) has no slack. Expect M1 to run over if drag, TTS, and demos all land at once.
+
+## D114 — Service screen seen from behind the counter (2026-11-13)
+**What:** Replaces the M2 service layout (D62–D65 geometry) with an over-the-counter view, settled by a static mock (`?mock`, three owner review rounds). Three bands in the 1280×720 safe box: a **status bar** (y 0–120: leave sign, coin jar, waiting line walking to a small open-door shop icon), the **room** (y 120–432: the front door with one street window beside it, one table with two front-view chairs, caption · monster · ticket), and the **counter top** (y 432–720), where Pip's hat (Help), the bell, the tray and the basket sit in one row. Monsters stand **full height** behind the counter's far edge (240 px, as in M2). The street window stays beside the door (behind the monster was tried and not kept). Pip's hat is Pip alone with a soft shadow on the counter, no box. Pip's helper spot is behind the counter under the caption; CountTogether keeps its bubble, and Pip and the shrunken monster step left in front of the table. S0: Pip, bell, Peek, display and backspace in an upper row, the ten digits below. Cloche: the tray shifts toward Pip and the lid sits between tray and basket. Help offer: two 220 px buttons over the hidden tray. The proposal geometry is `COUNTER` in `src/app/metrics.ts`; it replaces `SERVICE` when the screen is built. All targets keep ≥ 44/56 CSS px at 844×390 (unit and e2e tests).
+**Why:** Owner request before M3a: the service should feel like standing behind a café counter, not inside a house. References were used for the camera angle only, not their art. The waist cut was mocked and declined: short monsters (Blobbo) showed little more than an eye.
+**How to revisit:** The screen is built before M3a; playtest whether the child finds the bell and Help in the counter row, and whether the room reads as a café. Screenshots of the approved mock: `docs/screens/counter-mock/`.
+
+## D115 — Basket side: a per-device setting (2026-11-13)
+**What:** New per-device setting **Basket side: right (default) / left**. The basket goes on the child's dominant-hand side; Pip's hat and the bell go on the other. Left mirrors the counter row only (`mirrorX`); the room, the status bar and the digit order (0–9 left to right, a small number line) do not mirror. Stored with the other per-device settings; set in the playtest tools (gear) until M3b, then in the parent area's Settings.
+**Why:** Owner request: the hand that drags from the basket to the tray should not cross the body.
+**How to revisit:** If the child switches hands, or if Help and the bell turn out to want the dominant side.
+
+## D116 — Two-frame tray in the counter row (2026-11-13)
+**What:** Two frames side by side (A5+) plus a 300-px basket and two buttons do not fit 1280 px. Of three mocked options the owner picked A: the frames keep **88-px cells** but use **gap 4, padding 8** (472 × 196 each) and a **12-px gap between frames** (956 wide); Pip's hat sits on the bell in one 112-px column on the non-dominant side; the basket is an **upright crate (172 × 200) with a two-row heap**. A third heap row was tried and looked precarious. Every item of the heap stays inside the crate (e2e). Declined: B (basket on the back counter beside the monster under a shorter ticket; left-handed it took Pip's helper spot) and C (a two-row counter for two-frame skills, which shortened the room).
+**Why:** Keeps the tap minimums (cells 47.7 CSS px) and the full one-row counter without moving anything into the room.
+**How to revisit:** At the M5 playtest: whether the tighter gaps still show the five wall clearly, and whether the crate reads as the same basket.
+
+## D117 — The taken-away row takes the basket's place (2026-11-13)
+**What:** On missing-subtrahend forms (S3/S2) the taken-away row (324 × 138) sits where the basket is, on the dominant side, and the basket is not shown. Amends D63's position (left of the tray).
+**Why:** Beside the tray, the basket, Pip and the bell the row needs 1404 px. On these forms the basket has no job of its own: tapping it does exactly what tapping the row does (D42a, `tapTakenAway`), and removed items fly to the row.
+**How to revisit:** If the child looks for the basket on these orders.
+
+## D118 — The waiting line in the status bar, real monsters at their real places (2026-11-13)
+**What:** The waiting line moves from the room to the status bar: small real monsters (76 px, idling), in plan order, the front one next to the shop icon. A long line squeezes its spacing to stay in the bar. A requeued monster stands at its **real place** in the line (D43: 3–5 orders later), marked with a small circling-arrow badge, instead of at the back (amends D108's position; its timing stays: it joins as the next monster comes in). The line no longer hides while Pip is out or the CountTogether bubble is up (amends D91), because it is no longer on the counter.
+**Why:** Owner request. Real monsters let the child see who is coming and who is coming back. The D113 budget allows it: nine idling minis during CountTogether measured 489 elements on screen and 300 moving (budget 4,800 / 650). The first mock planned head-only icons for the old 300-element budget; D113 lifted that.
+**How to revisit:** If the bar feels busy, the minis can stop idling (they then count only against the total).
+
+## D119 — The ticket's blank is an SVG outline with even dashes (2026-11-13)
+**What:** The dashed box for the unknown on the ticket is drawn as an SVG rounded rectangle with `pathLength` and 12 equal dashes, not a dashed CSS border. Implementation only; SPEC §5.4's rule (a dashed box, so colour is never the only cue) is unchanged.
+**Why:** The owner noticed uneven corners in the mock; the M2 screenshots show the same in the real game. Safari lays out each side of a dashed border on its own, so at the phone's ≈ 0.54 scale the dashes did not meet evenly at the corners.
+**How to revisit:** Check on the real iPhone.

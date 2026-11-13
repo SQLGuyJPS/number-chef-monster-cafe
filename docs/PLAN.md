@@ -179,7 +179,7 @@ Order inside each milestone is the order I will work in. Every milestone ends wi
 - [x] no link from the child UI; the playtest tools open it (e2e)
 - [x] owner's iPad result recorded (`docs/perf/M2b-ipad7-speedtest.txt`); budget set by D113 and checked by `budget.spec.ts`
 
-### Counter layout change (owner request before M3a) — mock rev 3, waiting for OK
+### Counter layout change (owner request before M3a) — mock approved 2026-11-13 (D114–D119); build next
 Service screen seen from behind the counter. Mock: `?mock` (or the buttons on `?debug`); switches `v=s3|taken|frames2|s0|cloche|offer|count`, `basket=right|left`, `line=1..10`. Geometry: `COUNTER` in `src/app/metrics.ts` (not used by the real service yet). Shots: `docs/screens/counter-mock/`. Fit is tested: `tests/unit/counterLayout.test.ts` (no overlaps, inside the band, both sides) and `tests/e2e/counterMock.spec.ts` (every variant and side ≥ 44/56 CSS px at 844×390; element counts within D113).
 
 Bands: status bar y 0–120 (leave sign, coin jar, waiting line → shop icon) · room y 120–432 (door and street window, table and chairs, caption · monster · ticket) · counter y 432–720 (one row).
@@ -202,7 +202,7 @@ Waiting line: **real mini monsters, idling** (rev 1 planned head-only icons for 
 
 Ticket fix found on the way (real game, not only the mock): the blank's dashed CSS border came out uneven at the corners in WebKit at phone scale (visible in `docs/screens/M2/service-s3-add-844x390.png`). The blank is now an SVG outline with 12 evenly spaced dashes (`BlankBox` in `ServiceParts.tsx`); M1/M2 e2e still green.
 
-New per-device setting "Basket side: right (default) / left" goes in the gear tools when the layout is built. Decisions (layout, basket side, two-frame layout, taken-away replaces basket, line with real positions, full-height monsters) are recorded once the mock is approved, as with the M1 mock.
+New per-device setting "Basket side: right (default) / left" goes in the gear tools when the layout is built. Decisions recorded: D114 layout, D115 basket side, D116 two-frame tray, D117 taken-away row in the basket's place, D118 waiting line, D119 ticket blank.
 
 ### M3a — Persistence and fact boxes (2.0 h)
 1. Engine: `replay` / `applyEvent`, coin totals (§11.2), fact boxes (D29 rules), `skillConfig` last-writer-wins; property test applyEvent ≡ replay.
