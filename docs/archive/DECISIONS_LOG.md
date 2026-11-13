@@ -651,3 +651,9 @@ How to revisit: if the repeating ghost is distracting, show each hint once; `war
 **What:** The dashed box for the unknown on the ticket is drawn as an SVG rounded rectangle with `pathLength` and 12 equal dashes, not a dashed CSS border. Implementation only; SPEC §5.4's rule (a dashed box, so colour is never the only cue) is unchanged.
 **Why:** The owner noticed uneven corners in the mock; the M2 screenshots show the same in the real game. Safari lays out each side of a dashed border on its own, so at the phone's ≈ 0.54 scale the dashes did not meet evenly at the corners.
 **How to revisit:** Check on the real iPhone.
+
+## D120 — The line walks left; the cloche lid is centred by eye (2026-11-14)
+**What:** (1) Status bar order is door sign · coin jar · little café (x 328–440) · waiting line (x 448–1272); the front of the line stands next to the café and the line steps left as each monster goes to the counter. Amends D118's direction (it walked right to a shop icon at the far right). The jar keeps its spot, so Home can show it in the same place. (2) S0 lifted cloche: tray x 304, basket x 960, and the lid placed so its drawing (tilted dome plus the "123" badge, which reaches 16 px further toward the basket) is centred between the plate's rim and the crate's side, not its tap box; mirrored for a left-handed child, lid tilt and badge included. Amends D114's cloche geometry.
+**Why:** Owner review. Monsters come in at the room's door on the left and leave that way, so a line walking right read backwards. The lid looked off centre: it overlapped the plate's rim on one side and left a wide gap on the other.
+**How to revisit:** If the line reads better walking toward the monster, or the lid's art changes (then re-measure `LID_ART_SHIFT`).
+

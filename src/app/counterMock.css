@@ -27,3 +27,66 @@
   font: inherit;
   padding: 6px 10px;
 }
+
+/* ---- Splash and Home over the counter (mock) ---- */
+.front-sign {
+  position: absolute;
+  left: 400px;
+  width: 480px;
+  top: 0;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  color: var(--c-ink);
+}
+.front-sign-wide {
+  left: 0;
+  width: 1280px;
+}
+.front-title {
+  font-size: 72px;
+  font-weight: 700;
+  line-height: 1;
+}
+.front-sub {
+  font-size: 48px;
+  color: var(--c-ink-soft);
+  line-height: 1;
+}
+.front-monster {
+  position: absolute;
+}
+.front-tap {
+  position: absolute;
+  left: 400px;
+  top: 500px;
+  width: 480px;
+  height: 160px;
+  display: grid;
+  place-items: center;
+  background: var(--c-paper);
+  border-radius: 28px;
+  border: 5px solid #e2d8c3;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
+  font-size: 56px;
+  font-weight: 700;
+  color: var(--c-primary);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+.front-open {
+  position: absolute;
+  left: 390px;
+  top: 490px;
+  width: 500px;
+  height: 180px;
+  display: grid;
+  place-items: center;
+  font-size: 60px;
+}
+.front-gear {
+  left: auto;
+  right: 8px;
+  top: 16px;
+}

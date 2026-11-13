@@ -127,3 +127,4 @@
 | D117 | Taken-away row takes the basket's place | SPEC §3.3, §5.4 | No room beside the basket; there the basket does what the row does |
 | D118 | Waiting line in the status bar: real minis, requeue at its real place with a badge, never hides | SPEC §5.4 | Owner request; D113 budget allows real monsters |
 | D119 | Ticket blank drawn as an SVG outline with even dashes | implementation | Dashed CSS border uneven at the corners in WebKit at phone scale |
+| D120 | Line walks left into the little café beside the jar; cloche lid centred by eye | SPEC §5.4; amends D118 (direction) and D114 (cloche spacing) | Monsters arrived from the left but queued toward the right; lid looked off centre |

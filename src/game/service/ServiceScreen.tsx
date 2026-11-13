@@ -5,6 +5,7 @@ import {
   COUNTER,
   COUNTER_Y,
   PIP_EXIT_MS,
+  PLATE_BLEED,
   TAKEN_CELL,
   TAKEN_GAP,
   TAKEN_PAD,
@@ -278,7 +279,7 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor,
       {showTray && (
         <>
           {order.stage === 0 && (
-            <div className="cloche-plate" style={at({ x: tray.x - 20, y: tray.y + tray.h - 14, w: tray.w + 40, h: 28 })} />
+            <div className="cloche-plate" style={at({ x: tray.x - PLATE_BLEED, y: tray.y + tray.h - 14, w: tray.w + 2 * PLATE_BLEED, h: 28 })} />
           )}
           <div
             className={`tray ${v.editable ? '' : 'locked'}`}

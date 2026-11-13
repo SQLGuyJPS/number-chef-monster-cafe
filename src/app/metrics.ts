@@ -90,15 +90,34 @@ const C_TRAY1: Rect = { x: 364, y: rowY(FRAME.h), w: FRAME.w, h: FRAME.h };
 export const TIGHT = { cell: CELL, gap: 4, pad: 8, framesGap: 12 } as const;
 const TIGHT_FRAME = frameSize(TIGHT.cell, TIGHT.gap, TIGHT.pad); // 472 × 196
 
+/** The cloche's plate shows this far past the tray on each side (service.css .cloche-plate). */
+export const PLATE_BLEED = 20;
+/** The crate is drawn this far inside the basket's tap box (service.css .bin-crate). */
+export const CRATE_INSET = 10;
+const CLOCHE_TRAY: Rect = { x: 304, y: rowY(FRAME.h), w: FRAME.w, h: FRAME.h };
+const CLOCHE_BIN: Rect = { x: 960, y: rowY(130), w: 300, h: 130 };
+/**
+ * The lid's drawing (the tilted dome plus its "123" badge) reaches further toward the basket than
+ * toward the tray, so what the eye sees is centred this far toward the basket from its tap box.
+ */
+export const LID_ART_SHIFT = 16;
+const CLOCHE_LID_X = Math.round(
+  (CLOCHE_TRAY.x + CLOCHE_TRAY.w + PLATE_BLEED + CLOCHE_BIN.x + CRATE_INSET) / 2 - BUTTON_MIN / 2 - LID_ART_SHIFT,
+);
+
 /** One layout per mock variant; every rect a tap target or a band the child must see. */
 export const COUNTER = {
-  /** Status bar (y 0–120): leave sign, coin jar, waiting line walking to the café door icon. */
+  /**
+   * Status bar (y 0–120): leave sign, coin jar, the little café, and the waiting line walking left
+   * into it (D120), the way monsters come in at the room's door on the left. The jar keeps one spot
+   * on every screen that shows it.
+   */
   bar: {
     door: { x: 8, y: 4, w: BUTTON_MIN, h: BUTTON_MIN },
     jar: { x: 136, y: 14, w: 176, h: 92 },
-    line: { x: 328, y: 8, w: 824, h: 108 },
-    shop: { x: 1160, y: 8, w: 112, h: 108 },
-    /** Mini monsters in the line (real monsters, small), back of the line on the left. */
+    shop: { x: 328, y: 8, w: 112, h: 108 },
+    line: { x: 448, y: 8, w: 824, h: 108 },
+    /** Mini monsters in the line (real monsters, small), front of the line at the café, on the left. */
     mini: 76,
     miniStep: 84,
   },
@@ -155,11 +174,14 @@ export const COUNTER = {
     digits: { x: centeredX(10 * BUTTON_MIN + 9 * 8), y: 592, w: 10 * BUTTON_MIN + 9 * 8, h: BUTTON_MIN },
     digitGap: 8,
   },
-  /** S0 cloche lifted: the tray shifts toward Pip so the lid fits between it and the basket. */
+  /**
+   * S0 cloche lifted: the tray shifts toward Pip and the basket toward the edge, and the lid sits
+   * centred between what the eye sees (D120): the plate's rim and the crate's side.
+   */
   cloche: {
-    tray: { x: 300, y: rowY(FRAME.h), w: FRAME.w, h: FRAME.h },
-    lid: { x: 812, y: rowY(BUTTON_MIN), w: BUTTON_MIN, h: BUTTON_MIN },
-    bin: { x: 940, y: rowY(130), w: 300, h: 130 },
+    tray: CLOCHE_TRAY,
+    lid: { x: CLOCHE_LID_X, y: rowY(BUTTON_MIN), w: BUTTON_MIN, h: BUTTON_MIN },
+    bin: CLOCHE_BIN,
   },
   /** Help offer: two 220-px picture buttons over the (hidden) tray. */
   offer: {

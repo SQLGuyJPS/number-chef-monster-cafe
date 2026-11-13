@@ -333,8 +333,8 @@ export function DoorSign(props: PartProps) {
 }
 
 /**
- * The waiting line in the status bar (SPEC §5.4, D118): small real monsters, idling, walking toward
- * the shop icon on the right, front of the line nearest it. A long line squeezes its spacing to stay
+ * The waiting line in the status bar (SPEC §5.4, D118, D120): small real monsters, idling, walking
+ * left toward the little café, front of the line nearest it. A long line squeezes its spacing to stay
  * in the bar. A returning monster stands at its real place with a circling-arrow badge; when it
  * joins (as the next monster comes in, D108) it hops in at that place while the line slides along.
  */
@@ -362,8 +362,9 @@ export function WaitingLine({
           <div
             key={m.key}
             className={['line-mon', m.back ? 'back-again' : '', newcomer ? 'newcomer' : ''].join(' ')}
-            // Front first: the front monster stands next to the shop; the rest stretch back left.
-            style={{ left: rect.w - (i + 1) * step - 8, width: mini, height: mini, zIndex: line.length - i }}
+            // Front first: the front monster stands next to the café on the left; the rest stretch
+            // back to the right (D120).
+            style={{ left: 8 + i * step, width: mini, height: mini, zIndex: line.length - i }}
             data-testid={newcomer ? 'queue-newcomer' : m.back ? 'queue-returning' : 'queue-mon'}
           >
             <Monster id={m.monster} expression="idle" size={mini} />

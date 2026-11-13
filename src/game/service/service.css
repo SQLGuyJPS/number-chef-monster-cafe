@@ -428,6 +428,15 @@
   font-weight: 700;
   transform: rotate(18deg);
 }
+/* Left-handed (D115): the lid leans the other way and its badge faces the basket, as a mirror. */
+.basket-left .cloche-lid {
+  transform: rotate(18deg);
+}
+.basket-left .lid-badge {
+  right: auto;
+  left: -6px;
+  transform: rotate(-18deg);
+}
 .cloche-plate {
   border-radius: 50%;
   background: #d7dde6;

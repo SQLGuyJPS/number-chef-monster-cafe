@@ -9,6 +9,9 @@ import {
   MIN_CELL_CSS_PX,
   STAGE_H,
   STAGE_W,
+  CRATE_INSET,
+  LID_ART_SHIFT,
+  PLATE_BLEED,
   forSide,
   mirrorX,
   type BasketSide,
@@ -126,6 +129,28 @@ describe('service counter layout (counterLayout)', () => {
         for (let j = i + 1; j < cells.length; j++) expect(overlaps(cells[i]!, cells[j]!)).toBe(false);
       expect(L.tallBin).toBe(frames2);
     }
+  });
+
+  it('the lifted lid sits centred between the plate rim and the crate side, both sides (D120)', () => {
+    for (const side of ['right', 'left'] as BasketSide[]) {
+      const L = counterLayout({ ...base, side, stage0: true });
+      const right = side === 'right';
+      const plateEdge = right ? L.tray.x + L.tray.w + PLATE_BLEED : L.tray.x - PLATE_BLEED;
+      const crateEdge = right ? L.bin!.x + CRATE_INSET : L.bin!.x + L.bin!.w - CRATE_INSET;
+      // The drawing sits LID_ART_SHIFT toward the basket from the tap box.
+      const art = { ...L.lid, x: L.lid.x + (right ? LID_ART_SHIFT : -LID_ART_SHIFT) };
+      const gapTray = right ? art.x - plateEdge : plateEdge - (art.x + art.w);
+      const gapCrate = right ? crateEdge - (art.x + art.w) : art.x - crateEdge;
+      expect(Math.abs(gapTray - gapCrate)).toBeLessThanOrEqual(1);
+      expect(Math.min(gapTray, gapCrate)).toBeGreaterThanOrEqual(12);
+    }
+  });
+
+  it('the waiting line walks left into the little café, right after the coin jar (D120)', () => {
+    const { bar } = COUNTER;
+    expect(bar.shop.x).toBeGreaterThan(bar.jar.x + bar.jar.w);
+    expect(bar.line.x).toBeGreaterThanOrEqual(bar.shop.x + bar.shop.w);
+    expect(bar.line.x + bar.line.w).toBeLessThanOrEqual(STAGE_W);
   });
 
   it('S0 uses the pad row for Pip and the bell; the lifted cloche uses the shifted tray', () => {

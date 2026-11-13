@@ -11,6 +11,8 @@ import {
   CELL_GAP,
   COUNTER,
   COUNTER_Y,
+  GEAR_SIZE,
+  PLATE_BLEED,
   FRAME,
   FRAME_PADDING,
   FRAMES_GAP,
@@ -25,6 +27,7 @@ import {
   type Rect,
 } from './metrics';
 import { CounterScene } from '../art/CounterScene';
+import { GEAR_PATH } from '../art/gearIcon';
 import { Monster } from '../art/monsters/Monster';
 import { Pip } from '../art/Pip';
 import type { FoodId } from '../engine/foods';
@@ -53,7 +56,10 @@ import {
 import '../game/service/service.css';
 import './counterMock.css';
 
-export const MOCK_VARIANTS = ['s3', 'taken', 'frames2', 's0', 'cloche', 'offer', 'count'] as const;
+const SERVICE_VARIANTS = ['s3', 'taken', 'frames2', 's0', 'cloche', 'offer', 'count'] as const;
+type ServiceVariant = (typeof SERVICE_VARIANTS)[number];
+/** `splash` and `home`: the other screens redrawn over the counter (owner request, D120 review). */
+export const MOCK_VARIANTS = [...SERVICE_VARIANTS, 'splash', 'home'] as const;
 export type MockVariant = (typeof MOCK_VARIANTS)[number];
 
 export interface MockOptions {
@@ -95,7 +101,7 @@ const TWO_FRAME: Sample = {
   caption: 'Eight plus five burgers, please!',
   speaker: 'monster',
 };
-const SAMPLES: Record<MockVariant, Sample> = {
+const SAMPLES: Record<ServiceVariant, Sample> = {
   s3: {
     monster: 'blobbo',
     food: 'strawberry',
@@ -194,6 +200,64 @@ function CounterMonster({ id, rect, cut }: { id: string; rect: Rect; cut: Monste
 }
 
 export function CounterMock({ opts }: { opts: MockOptions }) {
+  if (opts.variant === 'splash' || opts.variant === 'home') return <FrontMock screen={opts.variant} />;
+  return <ServiceMock opts={{ ...opts, variant: opts.variant }} />;
+}
+
+/**
+ * Splash and Home seen from behind the same counter, so the café looks the same before, during and
+ * after a service. The cream board on top is the café's name sign on Splash; on Home it carries
+ * the coin jar in the same spot as during the service, the name, and the grown-ups' gear in its
+ * corner. Blobbo (and on Home Pip, SPEC §5.2) stand behind the counter; the counter top holds the
+ * one thing to tap.
+ */
+function FrontMock({ screen }: { screen: 'splash' | 'home' }) {
+  const { bar, scene } = COUNTER;
+  return (
+    <div className={`screen counter-mock front-mock front-${screen}`} data-testid="counter-mock" data-variant={screen}>
+      <CounterScene />
+      {screen === 'splash' ? (
+        <>
+          <div className="front-sign front-sign-wide">
+            <span className="front-title">Number Chef</span>
+            <span className="front-sub">Monster Café</span>
+          </div>
+          <div className="front-monster" style={at(scene.monsterFull)}>
+            <Monster id="blobbo" expression="idle" size={scene.monsterFull.w} />
+          </div>
+          <div className="front-tap" data-tap="button" data-testid="splash">
+            Tap to start
+          </div>
+        </>
+      ) : (
+        <>
+          <CoinJar rect={bar.jar} count={12} />
+          <div className="front-sign">
+            <span className="front-title">Monster Café</span>
+          </div>
+          <div className="gear front-gear" data-tap="button" data-testid="gear" style={{ width: GEAR_SIZE, height: GEAR_SIZE }}>
+            <svg viewBox="0 0 24 24" width={GEAR_SIZE * 0.66} height={GEAR_SIZE * 0.66} aria-hidden="true">
+              <path fill="currentColor" fillRule="evenodd" d={GEAR_PATH} />
+            </svg>
+          </div>
+          <div className="front-monster" style={at(scene.monsterFull)}>
+            <Monster id="blobbo" expression="idle" size={scene.monsterFull.w} />
+          </div>
+          <div className="pip-well" style={at({ ...scene.pip, h: COUNTER_Y + 4 - scene.pip.y })}>
+            <div style={{ width: scene.pip.w, height: scene.pip.h }}>
+              <Pip />
+            </div>
+          </div>
+          <div className="btn btn-primary front-open" data-tap="button" data-testid="open-cafe">
+            Open the Café
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function ServiceMock({ opts }: { opts: MockOptions & { variant: ServiceVariant } }) {
   const { variant, monster: cut, basket } = opts;
   const LINE = lineOf(opts.line);
   const s = SAMPLES[variant];
@@ -271,7 +335,7 @@ export function CounterMock({ opts }: { opts: MockOptions }) {
       helpBell(COUNTER.s3.help, COUNTER.s3.bell);
       const t = side(COUNTER.cloche.tray);
       band.push(
-        <div key="plate" className="cloche-plate" style={at({ x: t.x - 20, y: t.y + t.h - 14, w: t.w + 40, h: 28 })} />,
+        <div key="plate" className="cloche-plate" style={at({ x: t.x - PLATE_BLEED, y: t.y + t.h - 14, w: t.w + 2 * PLATE_BLEED, h: 28 })} />,
       );
       band.push(<Tray key="tray" rect={t} cells={cellsFor(4, 3, 10, s.food)} />);
       band.push(<Bin key="bin" rect={side(COUNTER.cloche.bin)} food={s.food} handlers={{}} />);
@@ -295,7 +359,7 @@ export function CounterMock({ opts }: { opts: MockOptions }) {
 
   return (
     <div
-      className={`screen service counter-mock phase-${variant === 'offer' ? 'offerHelp' : 'building'}`}
+      className={`screen service counter-mock basket-${basket} phase-${variant === 'offer' ? 'offerHelp' : 'building'}`}
       data-testid="counter-mock"
       data-variant={variant}
       data-basket={basket}
