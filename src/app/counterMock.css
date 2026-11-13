@@ -11,99 +11,6 @@
 .counter-mock .mock-pip {
   overflow: hidden;
 }
-/* Pip stands under the caption's middle in this layout, so the tail moves right. */
-.counter-mock .caption.from-pip::before {
-  left: 150px;
-}
-.counter-mock .caption.from-pip::after {
-  left: 155px;
-}
-
-/* ---- status bar ---- */
-.mock-jar {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 48px;
-  font-weight: 700;
-  color: var(--c-ink);
-}
-.mock-jar-icon {
-  width: 70px;
-  height: 80px;
-}
-.mock-line {
-  position: absolute;
-}
-.mock-path {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 14px;
-  border-bottom: 5px dotted rgba(138, 90, 53, 0.45);
-}
-.mock-mini {
-  position: absolute;
-  bottom: 6px;
-}
-/* The returning monster: a soft ring and a little circling-arrow badge ("back again"). */
-.mock-mini.back-again::before {
-  content: '';
-  position: absolute;
-  left: 4px;
-  right: 4px;
-  bottom: -2px;
-  height: 16px;
-  border-radius: 50%;
-  background: rgba(74, 143, 216, 0.35);
-}
-.mock-back-badge {
-  position: absolute;
-  right: -8px;
-  top: -6px;
-  width: 32px;
-  height: 32px;
-}
-.mock-shop {
-  position: absolute;
-}
-
-/* ---- Pip's hat: Pip himself is the button, no box; a soft shadow stands him on the counter ---- */
-.counter-mock .pip-hat {
-  background: radial-gradient(ellipse 42% 7% at 50% 95%, rgba(0, 0, 0, 0.16), transparent 100%);
-}
-
-/* ---- two-frame tray: an upright crate with a two-row heap ---- */
-.mock-tall-bin {
-  position: absolute;
-  overflow: hidden;
-}
-.mock-heap-row {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 58px;
-  display: flex;
-  justify-content: center;
-  font-family: var(--font-emoji);
-  font-size: 40px;
-  line-height: 1;
-}
-.mock-heap-row span {
-  width: 40px;
-  text-align: center;
-}
-.mock-heap-row span:nth-child(odd) { transform: translateY(5px) rotate(-9deg); }
-.mock-heap-row span:nth-child(even) { transform: rotate(8deg); }
-.mock-heap-row.r0 { top: 36px; left: -8px; right: 8px; filter: brightness(0.92); }
-.mock-heap-row.r1 { top: 60px; left: 4px; right: -4px; }
-.mock-tall-bin .bin-crate {
-  height: 118px;
-  left: 6px;
-  right: 6px;
-}
-
 /* ---- owner's switches, outside the stage ---- */
 .mock-toolbar {
   position: fixed;
@@ -119,8 +26,4 @@
 .mock-toolbar button {
   font: inherit;
   padding: 6px 10px;
-}
-/* Bleed behind the stage: cream bar colour above, counter wood below (iPad letterbox). */
-.counter-backdrop {
-  background: linear-gradient(to bottom, #f7e6c4 0 50%, #d9a066 50% 100%);
 }

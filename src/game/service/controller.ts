@@ -101,6 +101,17 @@ interface State {
   queueJoin: number;
 }
 
+/** One monster in the waiting line (SPEC §5.4, D118). */
+export interface LineSpot {
+  /** Stable per planned order, so the line can slide when the front monster leaves. */
+  key: number;
+  monster: string;
+  /** A returning (requeued) monster: it wears the circling-arrow badge. */
+  back: boolean;
+  /** Joined the line as this order's monster came in (D108). */
+  joined: boolean;
+}
+
 /** What the screen renders: the state plus everything derived from the engine. */
 export interface ServiceView extends State {
   /** Pip is out beside the monster: offering help or giving it (D90). */
@@ -114,8 +125,10 @@ export interface ServiceView extends State {
   /** S0 FollowMe typing: the number to enter, for the digit pulse. */
   correctTyped: string | null;
   removed: number;
-  /** Silhouettes in the waiting line: orders still to come, requeues included (SPEC §5.4). */
+  /** Monsters waiting in line: orders still to come, requeues included (SPEC §5.4). */
   remaining: number;
+  /** The waiting line, front first, in plan order: a requeue stands at its real place (D118). */
+  line: LineSpot[];
   /** Coins earned this service, from its `coin` events (in memory until M3a, D51). */
   coins: number;
   /** Coins that have flown into the service jar so far (they land after the reaction). */
@@ -227,8 +240,12 @@ export class ServiceController {
   private lastOutcome: Outcome | null = null;
   /** Coins that have landed in the service jar (the counter beside the bell). */
   private landed = 0;
-  /** A requeue was planned during this order; it joins the line when the next monster arrives (D108). */
-  private joinPending = false;
+  /** A requeue planned during this order; it joins the line when the next monster arrives (D108). */
+  private pendingJoin: Order | null = null;
+  /** The requeue that joined the line as the current monster came in. */
+  private joined: Order | null = null;
+  private lineKeys = new WeakMap<Order, number>();
+  private nextLineKey = 0;
 
   constructor(
     private readonly opts: ServiceOptions,
@@ -325,10 +342,23 @@ export class ServiceController {
       removed: removedCount(s.tray),
       // A requeue joins the line only when the next monster comes in, so the line never grows
       // while the child watches the meal (D108).
-      remaining: this.orders.length - s.index - 1 - (this.joinPending ? 1 : 0),
+      remaining: this.lineOf(s.index).length,
+      line: this.lineOf(s.index),
       coins: this.events.filter((e) => e.k === 'coin').reduce((n, e) => n + (e as { n: number }).n, 0),
       landed: this.landed,
     };
+  }
+
+  /** Orders after `index`, front first; a requeue not yet joined is left out (D108). */
+  private lineOf(index: number): LineSpot[] {
+    return this.orders
+      .slice(index + 1)
+      .filter((o) => o !== this.pendingJoin)
+      .map((o) => {
+        let key = this.lineKeys.get(o);
+        if (key === undefined) this.lineKeys.set(o, (key = this.nextLineKey++));
+        return { key, monster: o.monster, back: !!o.requeue, joined: o === this.joined };
+      });
   }
 
   /** e2e state dump (SPEC §13.5). */
@@ -350,6 +380,7 @@ export class ServiceController {
       ghost: v.ghost,
       monster: v.order.monster,
       remaining: v.remaining,
+      line: v.line.map((m) => `${m.monster}${m.back ? '*' : ''}`).join(' '),
       coins: v.coins,
       landed: v.landed,
       eat: v.eat,
@@ -426,8 +457,9 @@ export class ServiceController {
     this.orderStarted = this.d.now();
     this.lastInput = this.d.now();
     this.s = this.fresh(index);
-    const join = this.joinPending;
-    this.joinPending = false;
+    const join = this.pendingJoin;
+    this.pendingJoin = null;
+    this.joined = join;
     this.set(join ? { queueJoin: this.s.queueJoin + 1 } : {});
     // The boing first, then the monster talks: iOS silences WebAudio while speech plays (D109).
     this.d.sfx.arrive();
@@ -535,8 +567,8 @@ export class ServiceController {
     if (outcome === 'assisted') {
       const next = withRequeue(this.orders, this.s.index, this.requeueRng, this.opts.monsters ?? REGULARS);
       if (next) {
+        this.pendingJoin = next.find((o) => !this.orders.includes(o)) ?? null;
         this.orders = next;
-        this.joinPending = true;
       }
     }
   }

@@ -11,6 +11,9 @@ import { configFor, loadSkillConfigs, type SkillConfigs } from './skillConfig';
 import { getStorageBoot, takeSeedOverride } from './runtime';
 import { Stage } from './Stage';
 import { CafeScene } from '../art/CafeScene';
+import { CounterScene } from '../art/CounterScene';
+import { loadBasketSide } from './basketSide';
+import type { BasketSide } from './metrics';
 import { Splash } from './screens/Splash';
 import { Home } from './screens/Home';
 import { Results } from './screens/Results';
@@ -51,6 +54,8 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   const [results, setResults] = useState<ServiceSummary | null>(null);
   /** First-ever warm-up order already shown on this device (SPEC §5.4, D26); `meta` store. */
   const [warmupShown, setWarmupShown] = useState(true);
+  /** Per-device basket side (D115), read with the skill configs so a service starts with it. */
+  const [basket, setBasket] = useState<BasketSide>('right');
 
   // Stage/operations per skill from the ?debug picker (D52); read whenever the menu opens so the
   // tile tap can start the service synchronously, inside the user gesture.
@@ -60,8 +65,10 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
     void getStorageBoot()?.then(async (boot) => {
       const c = await loadSkillConfigs(boot.storage);
       const warm = (await boot.storage.getMeta('warmupShown')) === true;
+      const side = await loadBasketSide(boot.storage);
       if (!live) return;
       setConfigs(c);
+      setBasket(side);
       setWarmupShown(warm);
       setDeviceId(boot.deviceId);
     });
@@ -139,8 +146,12 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   if (screen === 'parent') return <ParentScreen onBack={() => go('home')} />;
 
   return (
-    <Stage allowRotate={allowRotate} background={<div className="cafe-backdrop" />}>
-      <CafeScene />
+    <Stage
+      allowRotate={allowRotate}
+      background={<div className={`cafe-backdrop ${screen === 'service' ? 'counter-backdrop' : ''}`} />}
+    >
+      {/* The service is seen from behind the counter (D114); the other screens keep the room. */}
+      {screen === 'service' ? <CounterScene /> : <CafeScene />}
       {screen === 'splash' && (
         <Splash
           onStart={() => {
@@ -172,6 +183,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
           svc={service.svc}
           dev={deviceId}
           jar={coins}
+          basket={basket}
           onDoor={() => setBreakOpen(true)}
           onCoins={(n) => setCoins((c) => c + n)}
           onDone={(summary) => {

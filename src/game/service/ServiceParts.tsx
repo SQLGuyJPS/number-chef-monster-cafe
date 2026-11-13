@@ -4,6 +4,9 @@ import { FOODS, type FoodId } from '../../engine/foods';
 import type { Rect } from '../../app/metrics';
 import { TenFrame, type CellView, type ItemRole } from '../tray/TenFrame';
 import { Pip } from '../../art/Pip';
+import { Monster } from '../../art/monsters/Monster';
+import { CoinJarIcon, ShopIcon } from '../../art/CounterScene';
+import type { LineSpot } from './controller';
 import { MODEL_FRAMES_GAP, MODEL_ONE, MODEL_TWO, frameSize } from '../../app/metrics';
 
 export const at = (r: Rect): CSSProperties => ({ left: r.x, top: r.y, width: r.w, height: r.h });
@@ -174,18 +177,35 @@ export function Bin({
   handlers,
   pulsing,
   wobble,
+  tall = false,
 }: {
   rect: Rect;
   food: FoodId;
   handlers: Record<string, unknown>;
   pulsing?: boolean;
   wobble?: number;
+  /** Two-frame tray (D116): an upright crate with a two-row heap of three. */
+  tall?: boolean;
 }) {
   const g = FOODS[food].glyph;
   // Tap or drag (SPEC §3.3), so not a TapButton: handlers come from dragTapHandlers.
-  const cls = ['svc-btn', 'bin', pulsing ? 'pulse' : '', wobble ? `wobble-${wobble % 2}` : ''].join(
-    ' ',
-  );
+  const cls = ['svc-btn', 'bin', tall ? 'tall' : '', pulsing ? 'pulse' : '', wobble ? `wobble-${wobble % 2}` : '']
+    .filter(Boolean)
+    .join(' ');
+  if (tall)
+    return (
+      <div className={cls} style={at(rect)} data-tap="button" data-testid="bin" aria-label="Food bin" {...handlers}>
+        {/* Two rows only: a third, perched on top, looked precarious (D116). */}
+        {[0, 1].map((row) => (
+          <div key={row} className={`heap-row r${row}`}>
+            {[0, 1, 2].map((k) => (
+              <span key={k}>{g}</span>
+            ))}
+          </div>
+        ))}
+        <div className="bin-crate" />
+      </div>
+    );
   return (
     <div
       className={cls}
@@ -291,8 +311,7 @@ export function HelpChoice({
 
 /**
  * Door sign (leave, SPEC §5.4): small, top-left, never animates (SPEC §6.2 step 9). A wooden sign
- * hanging from a nail on the wall with a little door on it; the real door is part of the café
- * scene (CafeScene), standing on the floor behind the waiting line, so nothing floats.
+ * hanging from a nail on the status bar's board with a little door on it.
  */
 export function DoorSign(props: PartProps) {
   return (
@@ -313,27 +332,73 @@ export function DoorSign(props: PartProps) {
   );
 }
 
-/** Waiting monsters peek from the left edge (SPEC §5.4): one silhouette per remaining order. */
 /**
- * The waiting line (SPEC §5.4). `join` is bumped when a returning monster gets back in line (D108):
- * the line shuffles one place right and the newcomer walks in at the back, on the left by the door.
+ * The waiting line in the status bar (SPEC §5.4, D118): small real monsters, idling, walking toward
+ * the shop icon on the right, front of the line nearest it. A long line squeezes its spacing to stay
+ * in the bar. A returning monster stands at its real place with a circling-arrow badge; when it
+ * joins (as the next monster comes in, D108) it hops in at that place while the line slides along.
  */
-export function Queue({ rect, count, join = 0, joining = false }: { rect: Rect; count: number; join?: number; joining?: boolean }) {
+export function WaitingLine({
+  rect,
+  line,
+  mini,
+  maxStep,
+  joining,
+}: {
+  rect: Rect;
+  line: LineSpot[];
+  mini: number;
+  maxStep: number;
+  /** The join animation is playing (a short blip after the monster comes in). */
+  joining: boolean;
+}) {
+  const step = Math.min(maxStep, (rect.w - 16) / Math.max(1, line.length));
   return (
-    <div className={`queue ${joining ? 'joined' : ''}`} style={at(rect)} aria-hidden="true" key={`join${join}`}>
-      {Array.from({ length: count }, (_, i) => (
-        <svg
-          key={i}
-          className={`queue-mon ${joining && i === 0 ? 'newcomer' : ''}`}
-          viewBox="0 0 100 100"
-          style={{ left: 8 + i * 62, zIndex: count - i }}
-          data-testid={joining && i === 0 ? 'queue-newcomer' : undefined}
-        >
-          <path d="M14 98 C4 50 18 10 50 10 C82 10 96 50 86 98 Z" fill="#7b6f8f" opacity="0.55" />
-          <circle cx="40" cy="44" r="7" fill="#fff" opacity="0.8" />
-          <circle cx="62" cy="44" r="7" fill="#fff" opacity="0.8" />
-        </svg>
-      ))}
+    <div className="waiting-line" style={at(rect)} data-testid="queue" data-count={line.length} aria-hidden="true">
+      <div className="line-path" />
+      {line.map((m, i) => {
+        const newcomer = joining && m.joined;
+        return (
+          <div
+            key={m.key}
+            className={['line-mon', m.back ? 'back-again' : '', newcomer ? 'newcomer' : ''].join(' ')}
+            // Front first: the front monster stands next to the shop; the rest stretch back left.
+            style={{ left: rect.w - (i + 1) * step - 8, width: mini, height: mini, zIndex: line.length - i }}
+            data-testid={newcomer ? 'queue-newcomer' : m.back ? 'queue-returning' : 'queue-mon'}
+          >
+            <Monster id={m.monster} expression="idle" size={mini} />
+            {m.back && (
+              <svg className="back-badge" viewBox="0 0 30 30" aria-hidden="true">
+                <circle cx={15} cy={15} r={13.5} fill="#fff" stroke="#4a8fd8" strokeWidth={3} />
+                {/* "back again": a circling arrow, like the try-again picture (D90) */}
+                <path d="M9.5 19.5 A7 7 0 1 1 15 22" fill="none" stroke="#4a8fd8" strokeWidth={3} strokeLinecap="round" />
+                <path d="M5.5 16.5 L9.6 22.8 L13.2 16.4 Z" fill="#4a8fd8" />
+              </svg>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Coin jar in the status bar (SPEC §5.4, §9); the coins fly into it. */
+export function CoinJar({ rect, count }: { rect: Rect; count: number }) {
+  return (
+    <div className="service-jar" style={at(rect)} data-testid="service-jar" data-count={count}>
+      <div className="jar-icon">
+        <CoinJarIcon />
+      </div>
+      <span className="coin-count">{count}</span>
+    </div>
+  );
+}
+
+/** Where the line walks to: the café's open door, small (SPEC §5.4). */
+export function ShopDoor({ rect }: { rect: Rect }) {
+  return (
+    <div className="shop-door" style={at(rect)} aria-hidden="true">
+      <ShopIcon />
     </div>
   );
 }

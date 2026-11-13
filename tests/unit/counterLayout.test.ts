@@ -10,11 +10,13 @@ import {
   STAGE_H,
   STAGE_W,
   forSide,
+  mirrorX,
   type BasketSide,
   type Rect,
 } from '../../src/app/metrics';
+import { cellRect, counterLayout } from '../../src/game/service/counterLayout';
 
-// Over-the-counter layout proposal (`?mock`): every variant fits the 1280×720 safe box with no
+// Over-the-counter service layout (SPEC §5.4, D114–D118): every variant fits the 1280×720 safe box with no
 // overlapping tap targets, on both basket sides, and nothing drops below the 844×390 minimums.
 const PHONE_SCALE = Math.min(844 / STAGE_W, 390 / STAGE_H);
 
@@ -39,7 +41,7 @@ const VARIANTS: Record<string, Rect[]> = {
 const overlaps = (a: Rect, b: Rect) =>
   a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
 
-describe('counter layout proposal', () => {
+describe('counter layout table', () => {
   for (const side of ['right', 'left'] as BasketSide[]) {
     for (const [name, rects] of Object.entries(VARIANTS)) {
       it(`${name}, basket ${side}: inside the counter band, no overlaps`, () => {
@@ -86,5 +88,53 @@ describe('counter layout proposal', () => {
     expect(overlaps(scene.bubble, scene.pipCounting)).toBe(false);
     expect(overlaps(scene.bubble, scene.ticketCounting)).toBe(false);
     expect(overlaps(scene.pipCounting, scene.monsterAside)).toBe(false);
+  });
+});
+
+describe('service counter layout (counterLayout)', () => {
+  const base = { frames2: false, takenAwayRow: false, stage0: false, padMode: false };
+
+  it('mirrors the counter row for a left-handed child, not the digits', () => {
+    const r = counterLayout({ ...base, side: 'right' });
+    const l = counterLayout({ ...base, side: 'left' });
+    expect(l.bin).toEqual(mirrorX(r.bin!));
+    expect(l.help).toEqual(mirrorX(r.help));
+    expect(l.tray).toEqual(mirrorX(r.tray));
+    expect(l.digit(0)).toEqual(r.digit(0));
+    expect(l.digit(0).x).toBeLessThan(l.digit(9).x);
+  });
+
+  it('the taken-away row takes the basket’s place (D117)', () => {
+    for (const side of ['right', 'left'] as BasketSide[]) {
+      const L = counterLayout({ ...base, side, takenAwayRow: true });
+      expect(L.bin).toBeNull();
+      const withBin = counterLayout({ ...base, side });
+      expect(Math.sign(L.takenAway.x - L.tray.x)).toBe(Math.sign(withBin.bin!.x - withBin.tray.x));
+    }
+  });
+
+  it('every tray cell sits inside the tray, both layouts, and no two overlap', () => {
+    for (const frames2 of [false, true]) {
+      const L = counterLayout({ ...base, side: 'right', frames2 });
+      const cells = Array.from({ length: frames2 ? 20 : 10 }, (_, i) => cellRect(i, L.tray, L.frame));
+      for (const c of cells) {
+        expect(c.x).toBeGreaterThanOrEqual(L.tray.x);
+        expect(c.x + c.w).toBeLessThanOrEqual(L.tray.x + L.tray.w);
+        expect(c.y + c.h).toBeLessThanOrEqual(L.tray.y + L.tray.h);
+      }
+      for (let i = 0; i < cells.length; i++)
+        for (let j = i + 1; j < cells.length; j++) expect(overlaps(cells[i]!, cells[j]!)).toBe(false);
+      expect(L.tallBin).toBe(frames2);
+    }
+  });
+
+  it('S0 uses the pad row for Pip and the bell; the lifted cloche uses the shifted tray', () => {
+    const pad = counterLayout({ ...base, side: 'right', stage0: true, padMode: true });
+    expect(pad.help).toEqual(COUNTER.s0.help);
+    const lifted = counterLayout({ ...base, side: 'right', stage0: true });
+    expect(lifted.tray).toEqual(COUNTER.cloche.tray);
+    expect(lifted.bin).toEqual(COUNTER.cloche.bin);
+    expect(overlaps(lifted.lid, lifted.tray)).toBe(false);
+    expect(overlaps(lifted.lid, lifted.bin!)).toBe(false);
   });
 });

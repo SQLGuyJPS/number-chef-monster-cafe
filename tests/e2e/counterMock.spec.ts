@@ -38,13 +38,15 @@ test('every mock variant keeps the 844×390 tap minimums on both basket sides', 
     }
 });
 
-test('the two-frame crate holds its whole heap, tilt included, on both sides', async ({ page }) => {
+test('the two-frame crate holds its whole heap, tilt included, on both sides', async ({ page }, info) => {
+  // Measured along the screen's x axis, which is the stage's only when the stage is not rotated.
+  test.skip(info.project.name.includes('portrait'), 'landscape only: the rotated stage swaps the axes');
   for (const side of SIDES) {
     await open(page, `v=frames2&basket=${side}`);
     const worst = await page.evaluate(() => {
-      const crate = document.querySelector('.mock-tall-bin .bin-crate')!.getBoundingClientRect();
+      const crate = document.querySelector('.bin.tall .bin-crate')!.getBoundingClientRect();
       return Math.min(
-        ...[...document.querySelectorAll('.mock-heap-row span')].flatMap((el) => {
+        ...[...document.querySelectorAll('.bin.tall .heap-row span')].flatMap((el) => {
           const g = el.getBoundingClientRect();
           return [g.left - crate.left, crate.right - g.right];
         }),

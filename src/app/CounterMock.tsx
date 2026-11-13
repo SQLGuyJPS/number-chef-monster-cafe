@@ -24,10 +24,11 @@ import {
   type MonsterCut,
   type Rect,
 } from './metrics';
-import { CoinJarIcon, CounterScene, ShopIcon } from '../art/CounterScene';
+import { CounterScene } from '../art/CounterScene';
 import { Monster } from '../art/monsters/Monster';
 import { Pip } from '../art/Pip';
-import { FOODS, type FoodId } from '../engine/foods';
+import type { FoodId } from '../engine/foods';
+import type { LineSpot } from '../game/service/controller';
 import { TenFrame, type CellView } from '../game/tray/TenFrame';
 import {
   AnswerDisplay,
@@ -36,13 +37,16 @@ import {
   Bin,
   Caption,
   ClocheLid,
+  CoinJar,
   DigitButton,
   DoorSign,
   HelpChoice,
   ModelBubble,
   PeekButton,
   PipHat,
+  ShopDoor,
   Ticket,
+  WaitingLine,
   at,
   type TicketToken,
 } from '../game/service/ServiceParts';
@@ -143,8 +147,8 @@ const SAMPLES: Record<MockVariant, Sample> = {
  */
 const LINE_IDS = ['gruffles', 'chompers', 'mimsy', 'wobbleton', 'zibbit', 'blobbo', 'gruffles', 'mimsy', 'zibbit', 'wobbleton'];
 /** Front first; places 2 and 7 are requeued monsters standing where their order really is. */
-const lineOf = (n: number): { id: string; back?: boolean }[] =>
-  LINE_IDS.slice(0, n).map((id, i) => ({ id, back: i === 1 || i === 6 }));
+const lineOf = (n: number): LineSpot[] =>
+  LINE_IDS.slice(0, n).map((monster, key) => ({ key, monster, back: key === 1 || key === 6, joined: false }));
 
 function cellsFor(prefill: number, child: number, cap: number, food: FoodId, popFrom = prefill): CellView[] {
   return Array.from({ length: cap }, (_, i) =>
@@ -192,7 +196,6 @@ function CounterMonster({ id, rect, cut }: { id: string; rect: Rect; cut: Monste
 export function CounterMock({ opts }: { opts: MockOptions }) {
   const { variant, monster: cut, basket } = opts;
   const LINE = lineOf(opts.line);
-  const step = Math.min(COUNTER.bar.miniStep, (COUNTER.bar.line.w - 16) / LINE.length);
   const s = SAMPLES[variant];
   const side = (r: Rect) => forSide(r, basket);
   const { bar, scene } = COUNTER;
@@ -243,18 +246,7 @@ export function CounterMock({ opts }: { opts: MockOptions }) {
       // Tighter tray, Pip on the bell, an upright crate with a two-row heap.
       helpBell(COUNTER.frames2.help, COUNTER.frames2.bell);
       band.push(<Tray key="tray" tight rect={side(COUNTER.frames2.tray)} cells={cellsFor(8, 5, 20, s.food)} />);
-      band.push(
-        <div key="bin" className="svc-btn mock-tall-bin" data-tap="button" data-testid="bin" style={at(side(COUNTER.frames2.bin))}>
-          {[0, 1].map((row) => (
-            <div key={row} className={`mock-heap-row r${row}`}>
-              {[0, 1, 2].map((k) => (
-                <span key={k}>{FOODS[s.food].glyph}</span>
-              ))}
-            </div>
-          ))}
-          <div className="bin-crate" />
-        </div>,
-      );
+      band.push(<Bin key="bin" tall rect={side(COUNTER.frames2.bin)} food={s.food} handlers={{}} />);
       break;
     }
     case 's0': {
@@ -312,36 +304,9 @@ export function CounterMock({ opts }: { opts: MockOptions }) {
 
       {/* ---- status bar ---- */}
       <DoorSign rect={bar.door} onTap={noop} />
-      <div className="mock-jar" style={at(bar.jar)} data-testid="service-jar">
-        <div className="mock-jar-icon">
-          <CoinJarIcon />
-        </div>
-        <span className="coin-count">12</span>
-      </div>
-      <div className="mock-line" style={at(bar.line)} data-testid="queue">
-        <div className="mock-path" />
-        {[...LINE].reverse().map((m, i) => (
-          <div
-            key={`${m.id}${i}`}
-            className={`mock-mini ${m.back ? 'back-again' : ''}`}
-            style={{ left: bar.line.w - (LINE.length - i) * step - 8, width: bar.mini, height: bar.mini, zIndex: i }}
-            data-testid={m.back ? 'queue-returning' : undefined}
-          >
-            <Monster id={m.id} expression="idle" size={bar.mini} />
-            {m.back && (
-              <svg className="mock-back-badge" viewBox="0 0 30 30" aria-hidden="true">
-                <circle cx={15} cy={15} r={13.5} fill="#fff" stroke="#4a8fd8" strokeWidth={3} />
-                {/* "back again": a circling arrow, like the try-again picture (D90) */}
-                <path d="M9.5 19.5 A7 7 0 1 1 15 22" fill="none" stroke="#4a8fd8" strokeWidth={3} strokeLinecap="round" />
-                <path d="M5.5 16.5 L9.6 22.8 L13.2 16.4 Z" fill="#4a8fd8" />
-              </svg>
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="mock-shop" style={at(bar.shop)}>
-        <ShopIcon />
-      </div>
+      <CoinJar rect={bar.jar} count={12} />
+      <WaitingLine rect={bar.line} line={LINE} mini={bar.mini} maxStep={bar.miniStep} joining={false} />
+      <ShopDoor rect={bar.shop} />
 
       {/* ---- room ---- */}
       {counting ? (

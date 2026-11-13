@@ -60,6 +60,10 @@ button {
   /* Wallpaper stripes; the floor and decorations are the CafeScene SVG in the safe box (SPEC §7.4). */
   background: repeating-linear-gradient(90deg, var(--c-wall) 0 36px, #fdd99a 36px 72px);
 }
+/* Service (D114): cream status-bar colour above, counter wood below, for the iPad letterbox. */
+.cafe-backdrop.counter-backdrop {
+  background: linear-gradient(to bottom, #f7e6c4 0 50%, #d9a066 50% 100%);
+}
 .cafe-scene {
   position: absolute;
   left: 0;

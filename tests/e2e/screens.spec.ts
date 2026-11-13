@@ -1,7 +1,7 @@
 import { mkdirSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import { startApp, tap } from './helpers';
-import { openService, probe, serveCorrect, serveWrong, tapId, waitPhase } from './service';
+import { followMe, openService, probe, ringBell, serveCorrect, serveWrong, tapId, waitPhase } from './service';
 
 // Milestone screenshots (SPEC §13.5) into docs/screens/<milestone>/. Runs only when asked:
 //   npx cross-env NCMC_SCREENS=M0 playwright test screens --project=chromium-ipad-pro-11 --project=webkit-iphone-13 --project=chromium-ipad-portrait
@@ -183,4 +183,58 @@ test('M2 screenshots', async ({ page }, info) => {
   await expect(page.getByTestId('results-count')).toHaveText('23', { timeout: 15_000 });
   await expect(page.getByTestId('results-tally')).toHaveAttribute('data-done', 'true');
   await shot('results');
+});
+
+// Counter layout build (D114–D118): the left-handed counter row and the waiting line with a
+// returning monster at its real place.
+test('counter layout screenshots', async ({ page }, info) => {
+  test.skip(!SERVICE_SHOTS.includes(info.project.name), 'service shots at 1194×834 and 844×390');
+  test.setTimeout(180_000);
+  const dir = `docs/screens/${milestone}`;
+  mkdirSync(dir, { recursive: true });
+  const vp = page.viewportSize()!;
+  const tag = `${vp.width}x${vp.height}`;
+  const shot = async (name: string) => {
+    await page.addStyleTag({ content: '*{animation:none!important;transition:none!important}' }).catch(() => undefined);
+    await page.screenshot({ path: `${dir}/${name}-${tag}.png` });
+  };
+
+  await openService(page, { skill: 'A2', stage: 3, ops: 'add', seed: 3, basket: 'left' });
+  await tapId(page, 'bin');
+  await tapId(page, 'bin');
+  await page.waitForTimeout(300);
+  await shot('left-s3-add');
+
+  await openService(page, { skill: 'A2', stage: 0, seed: 9, basket: 'left' });
+  await tapId(page, 'digit-7');
+  await shot('left-s0-pad');
+  await tapId(page, 'peek');
+  await page.waitForTimeout(300);
+  await shot('left-s0-cloche');
+
+  await openService(page, { skill: 'A3', stage: 3, ops: 'sub', seed: 11, basket: 'left' });
+  for (let i = 0; i < 6 && (await probe(page)).form !== 'missingSub'; i++) {
+    await serveCorrect(page);
+    await expect.poll(async () => (await probe(page)).index, { timeout: 10_000 }).toBe(i + 1);
+    await waitPhase(page, 'building');
+  }
+  await tapId(page, 'tray-cell-9');
+  await tapId(page, 'tray-cell-8');
+  await page.waitForTimeout(300);
+  await shot('left-a3-taken-away');
+
+  // An assisted order: its monster comes back 3–5 orders later and waits at that place (D118).
+  await openService(page, { skill: 'A2', stage: 2, ops: 'add', seed: 21 });
+  await serveWrong(page);
+  await waitPhase(page, 'building');
+  await serveWrong(page);
+  await waitPhase(page, 'offerHelp');
+  await tapId(page, 'offer-yes');
+  await waitPhase(page, 'followMe', 40_000);
+  await followMe(page);
+  await ringBell(page);
+  await expect.poll(async () => (await probe(page)).index, { timeout: 15_000 }).toBe(1);
+  await waitPhase(page, 'building');
+  await page.waitForTimeout(1200);
+  await shot('line-returning-monster');
 });
