@@ -1,8 +1,10 @@
 import { IdbStorage } from './idb';
 import { MemoryStorage } from './memory';
 import { newId } from './ids';
-import { SCHEMA_VERSION, UnknownSchemaVersionError } from './migrations';
+import { migrateEvents, migrations, SCHEMA_VERSION, UnknownSchemaVersionError, type Migration } from './migrations';
 import type { Storage } from './types';
+import type { Evt } from '../engine/events';
+import { emptyDerived } from '../engine/replay';
 
 export interface StorageBoot {
   storage: Storage;
@@ -40,13 +42,42 @@ export async function ensureMeta(storage: Storage, now: () => number): Promise<{
     await storage.setMeta('createdAt', now());
   }
   if (schemaVersion > SCHEMA_VERSION) throw new UnknownSchemaVersionError(schemaVersion, SCHEMA_VERSION);
-  // schemaVersion < SCHEMA_VERSION: migrate events here once the first migration exists (D36).
   let deviceId = await storage.getMeta('deviceId');
   if (!deviceId) {
     deviceId = newId();
     await storage.setMeta('deviceId', deviceId);
   }
+  if (schemaVersion < SCHEMA_VERSION) {
+    await migrateStored(storage, schemaVersion, deviceId, now);
+    schemaVersion = SCHEMA_VERSION;
+  }
   return { deviceId, schemaVersion };
+}
+
+/**
+ * Upcasts the stored log (SPEC §11.3, D36): a snapshot of the data as it was first, then the
+ * upcast events and an emptied state cache (rebuilt by the next replay), then the new version.
+ */
+export async function migrateStored(
+  storage: Storage,
+  from: number,
+  deviceId: string,
+  now: () => number,
+  list: readonly Migration[] = migrations,
+  target: number = SCHEMA_VERSION,
+): Promise<void> {
+  const events = await storage.loadEvents();
+  const upcast = migrateEvents(events, from, list, target) as Evt[];
+  await storage.putSnapshot({
+    takenAt: now(),
+    reason: 'migration',
+    schemaVersion: from,
+    deviceId,
+    events,
+    settings: await storage.allSettings(),
+  });
+  await storage.commit({ events: upcast, state: { throughEventCount: -1, derived: emptyDerived() } });
+  await storage.setMeta('schemaVersion', target);
 }
 
 export async function openStorage(now: () => number): Promise<StorageBoot> {

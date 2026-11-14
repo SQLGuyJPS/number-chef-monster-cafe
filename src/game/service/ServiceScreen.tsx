@@ -1,5 +1,5 @@
 import { EAT_STAGGER_MS } from '../../engine/eat';
-import { useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import {
   CELL,
   COUNTER,
@@ -47,7 +47,13 @@ import {
 } from './ServiceParts';
 import { useService } from './useService';
 import { cellRect, counterLayout, type CounterRects } from './counterLayout';
-import type { ServiceSummary, ServiceView } from './controller';
+import type {
+  ProblemRecord,
+  ServiceController,
+  ServiceResume,
+  ServiceSummary,
+  ServiceView,
+} from './controller';
 import './service.css';
 
 interface Props {
@@ -58,6 +64,12 @@ interface Props {
   dev: string;
   onDone: (summary: ServiceSummary) => void;
   onCoins?: (n: number) => void;
+  /** Each completed problem's events and resume row (SPEC §11.3). */
+  onRecord?: (r: ProblemRecord) => void;
+  /** Continue a stored service (SPEC §5.8). */
+  resume?: ServiceResume;
+  /** The running controller, for a partial `serviceEnd` when the café closes early (§5.8). */
+  ctrlRef?: { current: ServiceController | null };
   onDoor: () => void;
   /** Coins in the jar when the service started; landed coins add to it (SPEC §9). */
   jar?: number;
@@ -109,9 +121,29 @@ const JAR = BAR.jar;
 /** The tray slides up toward the monster while it eats (SPEC §5.6). */
 const EAT_SLIDE = 30;
 
-export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor, jar = 0, basket = 'right' }: Props) {
+export function ServiceScreen({
+  orders,
+  seed,
+  svc,
+  dev,
+  onDone,
+  onCoins,
+  onRecord,
+  resume,
+  ctrlRef,
+  onDoor,
+  jar = 0,
+  basket = 'right',
+}: Props) {
   const [jarStart] = useState(jar);
-  const { view: v, ctrl } = useService({ orders, seed, svc, dev, onDone, onCoins });
+  const { view: v, ctrl } = useService({ orders, seed, svc, dev, onDone, onCoins, onRecord, ...(resume ? { resume } : {}) });
+  useEffect(() => {
+    if (!ctrlRef) return;
+    ctrlRef.current = ctrl;
+    return () => {
+      if (ctrlRef.current === ctrl) ctrlRef.current = null;
+    };
+  }, [ctrl, ctrlRef]);
   const { order, task } = v;
   const food = order.food;
   const glyph = FOODS[food].glyph;

@@ -169,10 +169,35 @@ export interface ServiceDeps {
   clearTimeout(id: number): void;
 }
 
-/** What Results shows (SPEC §5.7): coins earned this service and the monsters served, in order. */
+/** What Results shows (SPEC §5.7) and what `serviceEnd` records (SPEC §11.2). */
 export interface ServiceSummary {
+  /** Coins earned this service, tip included (a resumed service counts its earlier coins too). */
   coins: number;
   monsters: string[];
+  tip: number;
+  /** Orders the service ended with, requeues included. */
+  served: number;
+  activeMs: number;
+}
+
+/** Written after each completed problem (SPEC §11.3, §11.6): its events and where the service stands. */
+export interface ProblemRecord {
+  events: FrozenEvt[];
+  orders: Order[];
+  /** The next order to play. */
+  nextIndex: number;
+  results: (Outcome | null)[];
+  /** Coins this service has paid so far, earlier sittings included. */
+  coins: number;
+  activeMs: number;
+}
+
+/** Where a resumed service picks up (SPEC §5.8, D43). */
+export interface ServiceResume {
+  index: number;
+  coins: number;
+  results: (Outcome | null)[];
+  activeMs: number;
 }
 
 export interface ServiceOptions {
@@ -185,6 +210,10 @@ export interface ServiceOptions {
   /** The service seed; requeue placement draws from it too, so a seeded service stays deterministic. */
   seed?: number;
   monsters?: readonly MonsterRef[];
+  /** One call per completed problem, before the eat sequence, so what the child sees is kept. */
+  onRecord?: (r: ProblemRecord) => void;
+  /** Continue a stored service from `index` (the plan in `orders` is the stored one). */
+  resume?: ServiceResume;
 }
 
 /**
@@ -246,6 +275,14 @@ export class ServiceController {
   private joined: Order | null = null;
   private lineKeys = new WeakMap<Order, number>();
   private nextLineKey = 0;
+  /** Outcome per completed order (null for the warm-up), for the resume snapshot. */
+  private results: (Outcome | null)[];
+  /** Coins from earlier sittings of a resumed service. */
+  private readonly priorCoins: number;
+  private readonly priorActiveMs: number;
+  private readonly startedAt: number;
+  /** The completion tip (SPEC §9), recorded in `serviceEnd` rather than as a coin event. */
+  private tip = 0;
 
   constructor(
     private readonly opts: ServiceOptions,
@@ -255,8 +292,22 @@ export class ServiceController {
     this.requeueRng = mulberry32(hashSeed(opts.seed ?? 0, 'requeue'));
     this.lastInput = d.now();
     this.orderStarted = d.now();
-    this.s = this.fresh(0);
+    this.startedAt = d.now();
+    this.results = opts.resume?.results.slice() ?? [];
+    this.priorCoins = opts.resume?.coins ?? 0;
+    this.priorActiveMs = opts.resume?.activeMs ?? 0;
+    this.s = this.fresh(this.firstIndex());
     this.snap = this.derive();
+  }
+
+  private firstIndex(): number {
+    const i = this.opts.resume?.index ?? 0;
+    return Math.min(Math.max(0, i), this.orders.length - 1);
+  }
+
+  /** Active time so far (M3a: wall time on the service screen; M12 adds the idle pause). */
+  activeMs(): number {
+    return this.priorActiveMs + (this.d.now() - this.startedAt);
   }
 
   // ---------- store ----------
@@ -345,9 +396,13 @@ export class ServiceController {
       // while the child watches the meal (D108).
       remaining: line.length,
       line,
-      coins: this.events.filter((e) => e.k === 'coin').reduce((n, e) => n + (e as { n: number }).n, 0),
+      coins: this.coinsSoFar() + this.tip,
       landed: this.landed,
     };
+  }
+
+  private coinsSoFar(): number {
+    return this.priorCoins + this.events.filter((e) => e.k === 'coin').reduce((n, e) => n + (e as { n: number }).n, 0);
   }
 
   /** Orders after `index`, front first; a requeue not yet joined is left out (D108). */
@@ -442,7 +497,7 @@ export class ServiceController {
 
   start(): void {
     this.disposed = false;
-    this.startOrder(0);
+    this.startOrder(this.firstIndex());
     this.scheduleIdle();
   }
 
@@ -549,11 +604,14 @@ export class ServiceController {
     // The warm-up order pays the usual coins but writes no `attempt` (SPEC §5.4, D26).
     this.opts.onCoins?.(COINS_PER_PROBLEM);
     if (o.warmUp) {
-      this.events.push(coinEvent(ctx, { svc: this.opts.svc, n: COINS_PER_PROBLEM }));
+      const coin = coinEvent(ctx, { svc: this.opts.svc, n: COINS_PER_PROBLEM });
+      this.events.push(coin);
+      this.results[this.s.index] = null;
+      this.emitRecord([coin]);
       return;
     }
-    // In memory until M3a persists them (D51); the shapes are frozen (SPEC §11.2).
-    this.events.push(
+    // The shapes are frozen (SPEC §11.2); onRecord writes them with the resume row in one transaction.
+    const fresh: FrozenEvt[] = [
       attemptEvent(ctx, {
         svc: this.opts.svc,
         fact: o.problem.factKey,
@@ -563,7 +621,9 @@ export class ServiceController {
         ms: this.d.now() - this.orderStarted,
       }),
       coinEvent(ctx, { svc: this.opts.svc, n: COINS_PER_PROBLEM }),
-    );
+    ];
+    this.events.push(...fresh);
+    this.results[this.s.index] = outcome;
     // SPEC §4.1 step 7: an assisted fact comes back with the same monster, one step more support.
     if (outcome === 'assisted') {
       const next = withRequeue(this.orders, this.s.index, this.requeueRng, this.opts.monsters ?? REGULARS);
@@ -572,6 +632,18 @@ export class ServiceController {
         this.orders = next;
       }
     }
+    this.emitRecord(fresh);
+  }
+
+  private emitRecord(events: FrozenEvt[]): void {
+    this.opts.onRecord?.({
+      events,
+      orders: this.orders.slice(),
+      nextIndex: this.s.index + 1,
+      results: this.results.slice(),
+      coins: this.coinsSoFar(),
+      activeMs: this.activeMs(),
+    });
   }
 
   /**
@@ -672,15 +744,26 @@ export class ServiceController {
       this.startOrder(next);
       return;
     }
-    // A finished service earns the tip (SPEC §9); a voluntary exit does not.
-    this.events.push(coinEvent(this.ctx(), { svc: this.opts.svc, n: SERVICE_TIP }));
+    // A finished service earns the tip (SPEC §9), kept in its `serviceEnd`; a voluntary exit does not.
+    this.tip = SERVICE_TIP;
     this.opts.onCoins?.(SERVICE_TIP);
     this.set({ finished: true, caption: say('service.closed'), speaker: 'monster', mood: 'delight' });
     await this.talk(say('service.closed'));
     await this.wait(600);
     if (alive()) {
-      this.opts.onDone({ coins: this.snap.coins, monsters: this.orders.map((o) => o.monster) });
+      this.opts.onDone(this.summary());
     }
+  }
+
+  /** Also used for a partial end (Close the café): no tip, orders served so far. */
+  summary(): ServiceSummary {
+    return {
+      coins: this.coinsSoFar() + this.tip,
+      monsters: this.orders.map((o) => o.monster),
+      tip: this.tip,
+      served: this.results.length,
+      activeMs: this.activeMs(),
+    };
   }
 
   private async runCountTogether(my: number): Promise<void> {

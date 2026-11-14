@@ -225,3 +225,13 @@ How to run: open the app from the **Home Screen icon**, tap the gear, hold the c
 - [ ] Did the screen dim or lock during the run, or did anything else go wrong?
 - [ ] While it ran, did the moving monsters look smooth to your eye at the step it called "smooth"?
 
+
+## M3a — Progress is kept; stage and operations per dish
+Use the **Home Screen app** on each device (a Safari tab keeps separate progress on iOS). The first time this build opens, the stage/operations you set in the old playtest picker carry over (D125).
+- [ ] **Coins stay.** Play two or three orders, then swipe the app away (kill it) and reopen. The jar shows the coins the child saw fly in. Notes:
+- [ ] **Continue dinner service?** After that reopen, the question appears on Home (Pip asks it aloud). *Keep cooking* picks up at the next monster in the same line-up; *Not now* gives a normal Home, and it does not ask again. Is the question clear to the child, and should she answer it or you? Notes:
+- [ ] **Close the café** (door sign → Close the café) keeps the coins and goes Home without asking at once; the next launch asks. Is that the right moment, or should it ask every time Home opens? Notes:
+- [ ] **Stage and operations knobs.** Gear → hold the circle → *Skills*: change a dish's stage (S3 Guided … S0 Numeral) and operations (both / addition only / subtraction only). The next service of that dish uses it; a running service does not change. Are these the right knobs, named so you understand them? Notes:
+- [ ] **Progress list** (same screen): after a few services, do the numbers match what you saw (services, problems, first try, Pip helped)? Boxes move only for a right first answer at S1/S0 (so at S3 they stay put). Is anything missing that you would check every week? Notes:
+- [ ] **Storage** (same screen): "Kept safe by the browser" should say *yes* for the Home Screen app on the iPad and iPhone (it may say *no* in a Safari tab), and "Space used" shows a size. Notes per device:
+- [ ] **Two devices stay separate.** Progress on the iPad does not appear on the phone (syncing is Export/Import, M3b and M7).

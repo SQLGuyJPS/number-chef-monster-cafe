@@ -17,6 +17,7 @@ import { installAudioResume } from './audio/unlock';
 import { openStorage } from './storage/open';
 import { getCurrentScreen, lastInputAt, setPointerGuard, setStorageBoot } from './app/runtime';
 import { initPwa } from './app/pwa';
+import { startProgress } from './app/progress';
 
 const flags = parseFlags(location.search);
 
@@ -24,7 +25,10 @@ if (import.meta.env.VITE_E2E === '1') {
   void import('./app/e2eHooks').then((m) => m.installE2eHooks());
 }
 
-setStorageBoot(openStorage(() => Date.now()));
+const storageBoot = openStorage(() => Date.now());
+setStorageBoot(storageBoot);
+// The event log loads beside the Splash, so Home's coin jar is ready by the first tap (SPEC §11.3).
+void startProgress(storageBoot);
 initPwa(getCurrentScreen, lastInputAt);
 
 if (flags.mock) {

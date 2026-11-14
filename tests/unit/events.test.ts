@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { attemptEvent, coinEvent, OUTCOMES } from '../../src/engine/events';
+import { attemptEvent, coinEvent, OUTCOMES, serviceEndEvent, skillConfigEvent } from '../../src/engine/events';
 
 // SPEC §11.2, D36: the attempt and coin shapes are frozen in M1. Changing these keys needs a
 // schema migration; this test is the tripwire.
@@ -51,5 +51,24 @@ describe('frozen event shapes', () => {
 
   it('the four outcomes, spelled as in SPEC §3.4', () => {
     expect(OUTCOMES).toEqual(['first', 'afterHint', 'fixed', 'assisted']);
+  });
+
+  it('serviceEnd and skillConfig carry the SPEC §11.2 keys', () => {
+    const end = serviceEndEvent(ctx, {
+      svc: 's1',
+      skill: 'A1',
+      seed: 7,
+      orders: 6,
+      served: 3,
+      tip: 0,
+      activeMs: 1234.6,
+      partial: true,
+    });
+    expect(Object.keys(end).sort()).toEqual(
+      ['activeMs', 'dev', 'id', 'k', 'orders', 'partial', 'seed', 'served', 'skill', 'svc', 't', 'tip', 'v'],
+    );
+    expect(end.activeMs).toBe(1235);
+    const cfg = skillConfigEvent(ctx, { skill: 'A2', stage: 1, ops: 'add' });
+    expect(Object.keys(cfg).sort()).toEqual(['dev', 'id', 'k', 'ops', 'skill', 'stage', 't', 'v']);
   });
 });

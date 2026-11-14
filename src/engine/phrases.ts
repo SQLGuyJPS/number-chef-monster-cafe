@@ -140,6 +140,8 @@ export const PHRASES = {
   /** The total named after the last row flies into the mouth (SPEC §5.6, "Eight!"). */
   'eat.total': { params: { n: 'n' }, text: (p) => `${N(p, 'n')}!` },
   'service.closed': { params: {}, text: () => 'All done! Thank you, chef!' },
+  // Offered on launch when a service was left unfinished less than 2 h ago (SPEC §5.8).
+  'resume.ask': { params: {}, text: () => 'Continue dinner service?' },
   // Results tally (SPEC §5.7): said once the silent count-up lands on the total.
   'results.total': {
     params: { n: 'n' },

@@ -2,10 +2,16 @@ import { describe, expect, it } from 'vitest';
 import { REGULARS } from '../../src/engine/monsters';
 import { buildService } from '../../src/engine/session';
 import { numberToWords } from '../../src/engine/numberWords';
-import { ServiceController, type ServiceDeps, type ServiceSummary } from '../../src/game/service/controller';
+import {
+  ServiceController,
+  type ProblemRecord,
+  type ServiceDeps,
+  type ServiceOptions,
+  type ServiceSummary,
+} from '../../src/game/service/controller';
 
 // SPEC §5.6, §9, D101: fly → chew → react → coins, any tap skips to the coins, the tip on completion.
-function rig() {
+function rig(extra: Partial<ServiceOptions> = {}) {
   const log: string[] = [];
   let clock = 0;
   let timers: (() => void)[] = [];
@@ -46,7 +52,7 @@ function rig() {
   }).orders;
   const coins: number[] = [];
   const c = new ServiceController(
-    { orders, svc: 's', dev: 'd', onDone: (s) => void done.push(s), onCoins: (n) => void coins.push(n) },
+    { orders, svc: 's', dev: 'd', onDone: (s) => void done.push(s), onCoins: (n) => void coins.push(n), ...extra },
     deps,
   );
   const tick = async () => {
@@ -117,5 +123,38 @@ describe('eat sequence (SPEC §5.6, D101)', () => {
     expect(steps.has('chew')).toBe(false);
     expect(steps.has('react')).toBe(false);
     expect(log).not.toContain('munch');
+  });
+});
+
+describe('persistence hooks (SPEC §11.3, §11.6)', () => {
+  it('each completed problem reports its events and where the service stands; the tip is not a coin event', async () => {
+    const records: ProblemRecord[] = [];
+    const { c, tick, done, serveRight } = rig({ onRecord: (r) => void records.push(r) });
+    c.start();
+    serveRight();
+    expect(records).toHaveLength(1);
+    expect(records[0]!.events.map((e) => e.k)).toEqual(['attempt', 'coin']);
+    expect(records[0]).toMatchObject({ nextIndex: 1, results: ['first'], coins: 3 });
+    c.skip();
+    for (let i = 0; i < 60 && c.probe().index === 0; i++) await tick();
+    serveRight();
+    c.skip();
+    for (let i = 0; i < 60 && done.length === 0; i++) await tick();
+    expect(records).toHaveLength(2);
+    expect(c.events.filter((e) => e.k === 'coin')).toHaveLength(2);
+    expect(done[0]).toMatchObject({ coins: 11, tip: 5, served: 2 });
+  });
+
+  it('a resumed service starts at the stored order and counts the coins of the earlier sitting', async () => {
+    const { c, tick, done, serveRight } = rig({
+      resume: { index: 1, coins: 3, results: ['first'], activeMs: 5000 },
+    });
+    c.start();
+    expect(c.probe().index).toBe(1);
+    serveRight();
+    c.skip();
+    for (let i = 0; i < 60 && done.length === 0; i++) await tick();
+    expect(done[0]).toMatchObject({ coins: 11, tip: 5, served: 2 });
+    expect(done[0]!.activeMs).toBeGreaterThan(5000);
   });
 });

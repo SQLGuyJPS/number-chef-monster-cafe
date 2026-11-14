@@ -53,10 +53,10 @@ async function collect(): Promise<Info> {
 }
 
 /**
- * Build/storage info, the stage/operations picker, the sound test and the speed-test link. Shown by the `?debug` screen
- * and, before M3a, by the grown-ups' screen behind the Home gear (D94).
+ * Build/storage info, the stage/operations picker, the sound test and the speed-test link. Shown by
+ * the `?debug` screen and, below the Skills and progress lists, by the grown-ups' screen (D94).
  */
-export function PlaytestTools() {
+export function PlaytestTools({ skills = true }: { skills?: boolean }) {
   const [info, setInfo] = useState<Info | null>(null);
   useEffect(() => {
     let live = true;
@@ -78,7 +78,7 @@ export function PlaytestTools() {
         </tbody>
       </table>
       {!info && <p>Loading…</p>}
-      <SkillPicker />
+      {skills && <SkillPicker />}
       <BasketSidePicker />
       <AudioTest />
       <h2>Speed test</h2>

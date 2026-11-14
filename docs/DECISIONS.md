@@ -59,7 +59,7 @@
 | D49 | Playwright pinned to 1.63.0; WebKit in the cloud setup | Implementation only | Match the pre-installed browsers |
 | D50 | `factKey` scheme for missing-amount forms | SPEC §3.1, §4 | Persisted identifier needed a rule |
 | D51 | Coins stay in memory until M3a | SPEC §11.2, §14 | Persistence is M3a's job |
-| D52 | `?debug` picker stored under `debugSkillConfig` | Implementation only | Per-device home before the event log |
+| D52 | `?debug` picker stored under `debugSkillConfig` | Implementation only; amended by D125 (turned into events, then deleted) | Per-device home before the event log |
 | D53 | Home gear inert before M3a | Superseded by D94 | No target yet |
 | D54 | Waiting service worker activates on cold launch or 30 s Home idle | SPEC §2, §15 | "When idle" had no threshold |
 | D55 | Results tally by ones to ten, then fives, to the exact total | Superseded by D107 | End point was unspecified |
@@ -132,3 +132,4 @@
 | D122 | At S0 the number pad hides during the help offer | SPEC §5.4 | Pad and picture buttons share the band; one set of targets at a time |
 | D123 | Splash, Home, Menu and Results over the counter; one café scene for every child screen | SPEC §5.1–5.3, §5.7, §7.4; resolves the D121 two-scene note | Owner approved the mocks |
 | D124 | Play-time limit postponed indefinitely; moved from M3b to its own Tier 2 milestone M12 | SPEC §6, §12, §14 | Owner decision before M3 |
+| D125 | M3a persistence details: resume row from the start, offer once per launch, Not now clears; old picker becomes events; simple progress list | SPEC §5.8, §11.6, §12; amends D52 | SPEC left declining, re-asking and the progress list open |
