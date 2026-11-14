@@ -755,13 +755,19 @@ export class ServiceController {
     }
   }
 
-  /** Also used for a partial end (Close the café): no tip, orders served so far. */
+  /**
+   * Also used by *Close the café*. Once every order is served the service counts as finished and
+   * earns the tip (SPEC §11.2: partial = ended before all orders were served), so closing during
+   * the last monster's meal or the closing line loses nothing; before that, no tip.
+   */
   summary(): ServiceSummary {
+    const served = this.results.length;
+    const tip = served >= this.orders.length ? SERVICE_TIP : 0;
     return {
-      coins: this.coinsSoFar() + this.tip,
+      coins: this.coinsSoFar() + tip,
       monsters: this.orders.map((o) => o.monster),
-      tip: this.tip,
-      served: this.results.length,
+      tip,
+      served,
       activeMs: this.activeMs(),
     };
   }

@@ -17,7 +17,7 @@ import { configFor, type SkillConfig } from './skillConfig';
 import { getProgress, loadedProgress, useDerived } from './progress';
 import { balance, boxMap, seenSet } from '../engine/replay';
 import { serviceEndEvent } from '../engine/events';
-import { isOfferable, makeResume, restorePlan, type ResumeSnapshot } from '../engine/resume';
+import { endOfStored, isOfferable, makeResume, restorePlan, type ResumeSnapshot } from '../engine/resume';
 import { ResumeDialog } from './ResumeDialog';
 import { getStorageBoot, takeSeedOverride } from './runtime';
 import { Stage } from './Stage';
@@ -57,6 +57,20 @@ const wallNow = (): number => Date.now();
 let serviceCounter = 0;
 /** "Continue dinner service?" is offered once per launch, on the first Home (SPEC §11.6, D125). */
 let resumeChecked = false;
+
+/**
+ * A stored service that will not be played on (Not now, too old, no longer playable): it gets
+ * its `serviceEnd` if it has none yet (an app killed mid-service), so it counts as a service and
+ * a fully served one keeps its tip, and the row is cleared in the same write (D125).
+ */
+function dropStored(snap: ResumeSnapshot, clear = true): void {
+  const progress = loadedProgress();
+  if (!progress) return;
+  const a = endOfStored(snap);
+  const had = progress.derived.ends[snap.svc];
+  const events = had && had.tip >= a.tip ? [] : [serviceEndEvent(progress.ctx(), a)];
+  progress.append(events, clear ? null : undefined);
+}
 
 export function App({ allowRotate }: { allowRotate: boolean }) {
   const [screen, setScreen] = useState<AppScreen>('splash');
@@ -119,9 +133,12 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
     void getProgress()
       ?.then((p) => p.getResume())
       .then((snap) => {
-        if (!live || !snap) return;
-        if (isOfferable(snap, wallNow())) setOffer(snap);
-        else loadedProgress()?.setResume(null);
+        if (!snap) return;
+        // Home already left (a very quick tap): no offer this launch. The next service will
+        // overwrite the row, so the old one gets its serviceEnd now; the row itself stays.
+        if (!live) dropStored(snap, false);
+        else if (isOfferable(snap, wallNow())) setOffer(snap);
+        else dropStored(snap);
       })
       .catch(() => undefined);
     return () => {
@@ -215,10 +232,14 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
     loadedProgress()?.append(r.events, snapshotOf(run, r));
   };
 
-  /** `serviceEnd` (SPEC §11.2): a finished service clears the resume row; a partial one keeps it. */
-  const endService = (run: RunningService, sum: ServiceSummary, partial: boolean) => {
+  /**
+   * `serviceEnd` (SPEC §11.2): partial when orders were left (Close the café, no tip), which keeps
+   * the resume row; a finished service clears it.
+   */
+  const endService = (run: RunningService, sum: ServiceSummary) => {
     const progress = loadedProgress();
     if (!progress) return;
+    const partial = sum.served < sum.monsters.length;
     const end = serviceEndEvent(progress.ctx(), {
       svc: run.svc,
       skill: run.skill,
@@ -235,7 +256,11 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   const continueService = (snap: ResumeSnapshot) => {
     const orders = restorePlan(snap);
     setOffer(null);
-    if (!orders || !isBuilt(snap.config.skill)) return;
+    if (!orders || !isBuilt(snap.config.skill)) {
+      dropStored(snap);
+      pushGuard();
+      return;
+    }
     setService({
       svc: snap.svc,
       skill: snap.config.skill,
@@ -274,7 +299,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
           onContinue={() => continueService(offer)}
           onNew={() => {
             setOffer(null);
-            loadedProgress()?.setResume(null);
+            dropStored(offer);
             pushGuard();
           }}
         />
@@ -311,7 +336,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
           onDoor={() => setBreakOpen(true)}
           onRecord={(r) => recordProblem(service, r)}
           onDone={(summary) => {
-            endService(service, summary, false);
+            endService(service, summary);
             setResults(summary);
             go('results');
           }}
@@ -334,12 +359,13 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
             setBreakOpen(false);
             pushGuard();
           }}
-          // Mid-service only (D46): a partial serviceEnd, no tip; the resume row stays (SPEC §5.8).
+          // Mid-service only (D46): a partial serviceEnd, no tip, and the resume row stays (SPEC §5.8);
+          // with every order already served it is the finished service's end, tip included.
           onCloseCafe={
             screen === 'service'
               ? () => {
                   const ctrl = ctrlRef.current;
-                  if (service && ctrl) endService(service, ctrl.summary(), true);
+                  if (service && ctrl) endService(service, ctrl.summary());
                   hush();
                   setBreakOpen(false);
                   setService(null);

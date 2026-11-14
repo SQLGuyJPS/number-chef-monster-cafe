@@ -2,9 +2,11 @@
 // service stands, so a reload or a killed app can *offer* to continue exactly the planned orders.
 // Pure: the caller supplies the clock. Per device only; never exported.
 import { z } from 'zod';
-import { RESUME_MAX_AGE_MS } from './config';
+import { RESUME_MAX_AGE_MS, SERVICE_TIP } from './config';
+import type { EvtBase, ServiceEndEvt } from './events';
 import { FOOD_IDS } from './foods';
 import { isBuilt, pool } from './generators';
+import { GUESTS, REGULARS } from './monsters';
 import type { Order } from './session';
 import type { Ops, SkillId, Stage } from './types';
 
@@ -95,13 +97,15 @@ export function makeResume(i: ResumeInput): ResumeSnapshot {
   };
 }
 
+const MONSTER_IDS = new Set([...REGULARS, ...GUESTS].map((m) => m.id));
+
 /** The stored plan as playable orders, or null if any order no longer matches its pool. */
 export function restorePlan(s: ResumeSnapshot): Order[] | null {
   const out: Order[] = [];
   for (const r of s.plan) {
     if (!isBuilt(r.skill)) return null;
     const problem = pool(r.skill).find((p) => p.display.join(' ') === r.display);
-    if (!problem) return null;
+    if (!problem || !MONSTER_IDS.has(r.monster)) return null;
     out.push({
       problem,
       food: r.food,
@@ -128,4 +132,24 @@ export function isOfferable(s: ResumeSnapshot, now: number): boolean {
   if (s.index >= s.plan.length) return false;
   if (!isBuilt(s.config.skill)) return false;
   return now - s.savedAt < RESUME_MAX_AGE_MS && restorePlan(s) !== null;
+}
+
+/**
+ * The `serviceEnd` for a stored service that will not be played on: declined with *Not now*, too
+ * old, or no longer playable (D125). Every planned order served counts as finished and earns the
+ * tip (SPEC §11.2: partial = ended before all orders were served), e.g. an app killed during the
+ * closing line.
+ */
+export function endOfStored(s: ResumeSnapshot): Omit<ServiceEndEvt, keyof EvtBase | 'k'> {
+  const complete = s.results.length >= s.plan.length;
+  return {
+    svc: s.svc,
+    skill: s.config.skill as SkillId,
+    seed: s.seed,
+    orders: s.plan.length,
+    served: s.results.length,
+    tip: complete ? SERVICE_TIP : 0,
+    activeMs: s.activeMs,
+    partial: !complete,
+  };
 }

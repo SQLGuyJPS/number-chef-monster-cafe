@@ -119,6 +119,23 @@ test('Close the café writes a partial serviceEnd with no tip; the offer comes o
   await expect(page.getByTestId('coin-jar')).toHaveAttribute('data-count', '3');
 });
 
+test('a killed service declined with Not now still gets its partial serviceEnd and counts as a service (D125)', async ({
+  page,
+}) => {
+  test.setTimeout(90_000);
+  await openService(page, { skill: 'A1', stage: 3, seed: 3 });
+  await serveTo(page, 1);
+  await expect.poll(async () => (await stored(page)).resume?.index).toBe(1);
+  await relaunch(page);
+  await tapId(page, 'resume-no');
+  await expect.poll(async () => (await stored(page)).resume).toBeUndefined();
+  const s = await stored(page);
+  const ends = s.events.filter((e) => e.k === 'serviceEnd');
+  expect(ends).toHaveLength(1);
+  expect(ends[0]).toMatchObject({ partial: true, tip: 0, served: 1 });
+  expect(s.balance).toBe(3);
+});
+
 async function openGrownUps(page: Page): Promise<void> {
   await tap(page, page.getByTestId('gear'));
   const box = (await page.getByTestId('gear-hold').boundingBox())!;

@@ -157,4 +157,17 @@ describe('persistence hooks (SPEC §11.3, §11.6)', () => {
     expect(done[0]).toMatchObject({ coins: 11, tip: 5, served: 2 });
     expect(done[0]!.activeMs).toBeGreaterThan(5000);
   });
+
+  it('Close the café before the last order is partial (no tip); after it, the service is finished and tipped', async () => {
+    const { c, tick, serveRight } = rig();
+    c.start();
+    expect(c.summary()).toMatchObject({ served: 0, tip: 0, coins: 0 });
+    serveRight();
+    expect(c.summary()).toMatchObject({ served: 1, tip: 0, coins: 3 });
+    c.skip();
+    for (let i = 0; i < 60 && c.probe().index === 0; i++) await tick();
+    serveRight();
+    // The last monster is still eating, the closing line not yet said: closing now loses nothing.
+    expect(c.summary()).toMatchObject({ served: 2, tip: 5, coins: 11 });
+  });
 });
