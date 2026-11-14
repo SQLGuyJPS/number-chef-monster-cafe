@@ -383,6 +383,20 @@ html.debug-mode #root {
 .debug-skills select {
   font-size: 16px;
   padding: 4px;
+  min-height: 44px;
+}
+.parent-progress table {
+  border-collapse: collapse;
+}
+.parent-progress td,
+.parent-progress thead th {
+  padding: 4px 10px;
+  word-break: normal;
+  text-align: left;
+}
+.parent-note {
+  max-width: 60em;
+  opacity: 0.8;
 }
 
 /* ---- Grown-ups' screen behind the gear (D94): not rotated, scrolls inside the fixed root ---- */

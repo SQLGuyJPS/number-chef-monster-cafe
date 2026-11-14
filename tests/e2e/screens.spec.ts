@@ -251,3 +251,42 @@ test('counter layout screenshots', async ({ page }, info) => {
   await page.waitForTimeout(1200);
   await shot('line-returning-monster');
 });
+
+// M3a additions: the resume offer after a reload, and the grown-ups' screen with the Skills list,
+// progress and storage after a few problems (full page, it scrolls).
+test('M3a screenshots', async ({ page }, info) => {
+  test.skip(!SERVICE_SHOTS.includes(info.project.name), 'shots at 1194×834 and 844×390');
+  test.setTimeout(120_000);
+  const dir = `docs/screens/${milestone}`;
+  mkdirSync(dir, { recursive: true });
+  const vp = page.viewportSize()!;
+  const tag = `${vp.width}x${vp.height}`;
+
+  await openService(page, { skill: 'A2', stage: 3, ops: 'both', seed: 3 });
+  for (let i = 0; i < 2; i++) {
+    await serveCorrect(page);
+    await expect.poll(async () => (await probe(page)).index, { timeout: 20_000 }).toBe(i + 1);
+    await waitPhase(page, 'building');
+  }
+  await page.waitForTimeout(300);
+  await page.reload();
+  await page.waitForFunction(() => !!window.__ncmc);
+  await tap(page, page.getByTestId('splash'));
+  await page.getByTestId('resume-dialog').waitFor();
+  await page.addStyleTag({ content: '*{animation:none!important;transition:none!important}' });
+  await page.screenshot({ path: `${dir}/resume-offer-${tag}.png` });
+  await tapId(page, 'resume-no');
+
+  await tap(page, page.getByTestId('gear'));
+  const g = (await page.getByTestId('gear-hold').boundingBox())!;
+  await page.mouse.move(g.x + g.width / 2, g.y + g.height / 2);
+  await page.mouse.down();
+  await page.getByTestId('parent-screen').waitFor({ timeout: 5000 });
+  await page.mouse.up();
+  await expect(page.getByTestId('storage-kind')).not.toHaveText('');
+  await page.getByTestId('storage-usage').waitFor();
+  await page.screenshot({ path: `${dir}/parent-skills-progress-${tag}.png`, fullPage: true });
+  // The parent screen scrolls inside a fixed root, so also capture it scrolled to the progress list.
+  await page.getByTestId('progress-list').scrollIntoViewIfNeeded();
+  await page.screenshot({ path: `${dir}/parent-progress-${tag}.png` });
+});

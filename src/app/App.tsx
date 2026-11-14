@@ -1,13 +1,24 @@
 import { useEffect, useRef, useState } from 'react';
 import { ServiceScreen } from '../game/service/ServiceScreen';
-import type { ServiceSummary } from '../game/service/controller';
+import type {
+  ProblemRecord,
+  ServiceController,
+  ServiceResume,
+  ServiceSummary,
+} from '../game/service/controller';
 import { REGULARS } from '../engine/monsters';
-import { buildService, knownPreset, withWarmUp, type Order } from '../engine/session';
+import { buildService, withWarmUp, type Order } from '../engine/session';
+import { isBuilt } from '../engine/generators';
 import { ORDERS_PER_SERVICE } from '../engine/config';
 import { hashSeed } from '../engine/rng';
 import type { SkillId } from '../engine/types';
 import { newId } from '../storage/ids';
-import { configFor, loadSkillConfigs, type SkillConfigs } from './skillConfig';
+import { configFor, type SkillConfig } from './skillConfig';
+import { getProgress, loadedProgress, useDerived } from './progress';
+import { balance, boxMap, seenSet } from '../engine/replay';
+import { serviceEndEvent } from '../engine/events';
+import { endOfStored, isOfferable, makeResume, restorePlan, type ResumeSnapshot } from '../engine/resume';
+import { ResumeDialog } from './ResumeDialog';
 import { getStorageBoot, takeSeedOverride } from './runtime';
 import { Stage } from './Stage';
 import { CounterScene } from '../art/CounterScene';
@@ -33,11 +44,33 @@ interface RunningService {
   skill: SkillId;
   seed: number;
   orders: Order[];
+  config: SkillConfig;
+  /** Orders the service was planned with (requeues come on top). */
+  planned: number;
+  /** Set when continuing a stored service (SPEC §5.8). */
+  resume?: ServiceResume;
 }
 
+/** Epoch ms for seeds and the resume row; only ever called from event handlers. */
+const wallNow = (): number => Date.now();
+
 let serviceCounter = 0;
-/** Facts introduced earlier in this app session (stand-in for the M3a event log, D97). */
-const introducedThisSession = new Set<string>();
+/** "Continue dinner service?" is offered once per launch, on the first Home (SPEC §11.6, D125). */
+let resumeChecked = false;
+
+/**
+ * A stored service that will not be played on (Not now, too old, no longer playable): it gets
+ * its `serviceEnd` if it has none yet (an app killed mid-service), so it counts as a service and
+ * a fully served one keeps its tip, and the row is cleared in the same write (D125).
+ */
+function dropStored(snap: ResumeSnapshot, clear = true): void {
+  const progress = loadedProgress();
+  if (!progress) return;
+  const a = endOfStored(snap);
+  const had = progress.derived.ends[snap.svc];
+  const events = had && had.tip >= a.tip ? [] : [serviceEndEvent(progress.ctx(), a)];
+  progress.append(events, clear ? null : undefined);
+}
 
 export function App({ allowRotate }: { allowRotate: boolean }) {
   const [screen, setScreen] = useState<AppScreen>('splash');
@@ -45,11 +78,15 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   const [breakOpen, setBreakOpen] = useState(false);
   const [gearOpen, setGearOpen] = useState(false);
   const gearRef = useRef(gearOpen);
-  const [configs, setConfigs] = useState<SkillConfigs>({});
+  const derived = useDerived();
+  /** Stage and operations per skill: the latest `skillConfig` events (SPEC §11.2). */
+  const configs = derived.config;
   const [deviceId, setDeviceId] = useState('memory');
   const [service, setService] = useState<RunningService | null>(null);
-  /** The coin jar. In memory until M3a derives it from `coin` events (D51). */
-  const [coins, setCoins] = useState(0);
+  /** The coin jar: the balance derived from the event log (SPEC §11.2). */
+  const coins = balance(derived);
+  const ctrlRef = useRef<ServiceController | null>(null);
+  const [offer, setOffer] = useState<ResumeSnapshot | null>(null);
   const [results, setResults] = useState<ServiceSummary | null>(null);
   /** First-ever warm-up order already shown on this device (SPEC §5.4, D26); `meta` store. */
   const [warmupShown, setWarmupShown] = useState(true);
@@ -58,8 +95,8 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   /** The dish tiles wait for the per-device settings, so a quick first tap can't start with defaults. */
   const [settingsReady, setSettingsReady] = useState(() => getStorageBoot() === null);
 
-  // Stage/operations per skill from the ?debug picker (D52); read whenever the menu opens so the
-  // tile tap can start the service synchronously, inside the user gesture.
+  // Per-device settings and the event log; read whenever the menu opens so the tile tap can start
+  // the service synchronously, inside the user gesture.
   useEffect(() => {
     if (screen !== 'menu' && screen !== 'home') return;
     let live = true;
@@ -68,11 +105,10 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
     // leave the tiles dead.
     void booting
       ?.then(async (boot) => {
-        const c = await loadSkillConfigs(boot.storage);
+        await getProgress();
         const warm = (await boot.storage.getMeta('warmupShown')) === true;
         const side = await loadBasketSide(boot.storage);
         if (!live) return;
-        setConfigs(c);
         setBasket(side);
         setWarmupShown(warm);
         setDeviceId(boot.deviceId);
@@ -87,6 +123,28 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   useEffect(() => {
     gearRef.current = gearOpen;
   }, [gearOpen]);
+
+  // On launch, a service left unfinished less than 2 h ago is offered back, never resumed
+  // silently (SPEC §5.8, §11.6, D33). Checked once, on the first Home after Splash.
+  useEffect(() => {
+    if (screen !== 'home' || resumeChecked) return;
+    resumeChecked = true;
+    let live = true;
+    void getProgress()
+      ?.then((p) => p.getResume())
+      .then((snap) => {
+        if (!snap) return;
+        // Home already left (a very quick tap): no offer this launch. The next service will
+        // overwrite the row, so the old one gets its serviceEnd now; the row itself stays.
+        if (!live) dropStored(snap, false);
+        else if (isOfferable(snap, wallNow())) setOffer(snap);
+        else dropStored(snap);
+      })
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [screen]);
 
   useEffect(() => {
     screenRef.current = screen;
@@ -122,22 +180,20 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   const startService = (skill: SkillId) => {
     const cfg = configFor(configs, skill);
     // SPEC §4.1 step 1: seed from device, start time and a per-device counter (the e2e hook may pin it).
-    const seed = takeSeedOverride() ?? hashSeed(deviceId, Date.now(), ++serviceCounter);
-    // Until M3a there is no event log: boxes come from the known preset, and facts introduced
-    // earlier in this app session count as seen so later services move on (D97).
-    const boxes = knownPreset(skill);
-    const seen = new Set([...boxes.keys(), ...introducedThisSession]);
+    const seed = takeSeedOverride() ?? hashSeed(deviceId, wallNow(), ++serviceCounter);
+    // Boxes and the seen set come from the event log on top of the known preset (SPEC §4.1, §4.2).
+    const progress = loadedProgress();
+    const initial = progress?.initial ?? {};
     const plan = buildService({
       seed,
       skill,
       ops: cfg.ops,
       stage: cfg.stage,
       orders: ORDERS_PER_SERVICE,
-      boxes,
-      seen,
+      boxes: boxMap(derived, initial),
+      seen: seenSet(derived, initial),
       monsters: REGULARS,
     });
-    plan.newFacts.forEach((k) => introducedThisSession.add(k));
     // The warm-up runs once per device; the flag is set as it starts, so leaving early never
     // shows it again (SPEC §5.4).
     const orders = warmupShown ? plan.orders : withWarmUp(plan.orders, REGULARS);
@@ -145,7 +201,75 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
       setWarmupShown(true);
       void getStorageBoot()?.then((boot) => boot.storage.setMeta('warmupShown', true));
     }
-    setService({ svc: newId(), skill, seed, orders });
+    const run: RunningService = { svc: newId(), skill, seed, orders, config: cfg, planned: ORDERS_PER_SERVICE };
+    // Stored from the start, so a reload before the first serve can still offer it back (D125).
+    progress?.setResume(snapshotOf(run, { nextIndex: 0, orders, results: [], coins: 0, activeMs: 0 }));
+    setService(run);
+    go('service');
+  };
+
+  const snapshotOf = (
+    run: RunningService,
+    r: Pick<ProblemRecord, 'nextIndex' | 'orders' | 'results' | 'coins' | 'activeMs'>,
+  ): ResumeSnapshot =>
+    makeResume({
+      svc: run.svc,
+      seed: run.seed,
+      skill: run.skill,
+      stage: run.config.stage,
+      ops: run.config.ops,
+      orders: run.planned,
+      plan: r.orders,
+      index: r.nextIndex,
+      results: r.results,
+      coins: r.coins,
+      activeMs: r.activeMs,
+      savedAt: wallNow(),
+    });
+
+  /** One transaction per completed problem: its events and the resume row (SPEC §11.3). */
+  const recordProblem = (run: RunningService, r: ProblemRecord) => {
+    loadedProgress()?.append(r.events, snapshotOf(run, r));
+  };
+
+  /**
+   * `serviceEnd` (SPEC §11.2): partial when orders were left (Close the café, no tip), which keeps
+   * the resume row; a finished service clears it.
+   */
+  const endService = (run: RunningService, sum: ServiceSummary) => {
+    const progress = loadedProgress();
+    if (!progress) return;
+    const partial = sum.served < sum.monsters.length;
+    const end = serviceEndEvent(progress.ctx(), {
+      svc: run.svc,
+      skill: run.skill,
+      seed: run.seed,
+      orders: sum.monsters.length,
+      served: sum.served,
+      tip: partial ? 0 : sum.tip,
+      activeMs: sum.activeMs,
+      partial,
+    });
+    progress.append([end], partial ? undefined : null);
+  };
+
+  const continueService = (snap: ResumeSnapshot) => {
+    const orders = restorePlan(snap);
+    setOffer(null);
+    if (!orders || !isBuilt(snap.config.skill)) {
+      dropStored(snap);
+      pushGuard();
+      return;
+    }
+    setService({
+      svc: snap.svc,
+      skill: snap.config.skill,
+      seed: snap.seed,
+      orders,
+      config: { stage: snap.config.stage, ops: snap.config.ops },
+      planned: snap.config.orders,
+      resume: { index: snap.index, coins: snap.coins, results: snap.results, activeMs: snap.activeMs },
+    });
     go('service');
   };
 
@@ -169,6 +293,16 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
       )}
       {screen === 'home' && (
         <Home coins={coins} onOpen={() => go('menu')} onGear={() => setGearOpen(true)} />
+      )}
+      {screen === 'home' && offer && !gearOpen && (
+        <ResumeDialog
+          onContinue={() => continueService(offer)}
+          onNew={() => {
+            setOffer(null);
+            dropStored(offer);
+            pushGuard();
+          }}
+        />
       )}
       {screen === 'home' && gearOpen && (
         <GearDialog
@@ -197,9 +331,12 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
           dev={deviceId}
           jar={coins}
           basket={basket}
+          ctrlRef={ctrlRef}
+          {...(service.resume ? { resume: service.resume } : {})}
           onDoor={() => setBreakOpen(true)}
-          onCoins={(n) => setCoins((c) => c + n)}
+          onRecord={(r) => recordProblem(service, r)}
           onDone={(summary) => {
+            endService(service, summary);
             setResults(summary);
             go('results');
           }}
@@ -222,10 +359,13 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
             setBreakOpen(false);
             pushGuard();
           }}
-          // Mid-service only (D46). M3a writes the partial serviceEnd here.
+          // Mid-service only (D46): a partial serviceEnd, no tip, and the resume row stays (SPEC §5.8);
+          // with every order already served it is the finished service's end, tip included.
           onCloseCafe={
             screen === 'service'
               ? () => {
+                  const ctrl = ctrlRef.current;
+                  if (service && ctrl) endService(service, ctrl.summary());
                   hush();
                   setBreakOpen(false);
                   setService(null);

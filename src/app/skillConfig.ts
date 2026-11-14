@@ -1,7 +1,7 @@
-// Per-skill stage and operations for M1–M2 playtests (D44b, D52): stored per device in the
-// `settings` store under `debugSkillConfig`. M3a replaces it with `skillConfig` events.
+// Per-skill stage and operations (SPEC §3.2, §11.2). From M3a they are `skillConfig` events in the
+// log (`Derived.config`); before that the playtest picker kept them per device under
+// `debugSkillConfig` (D52), which the first M3a boot turns into events and deletes (D125).
 import type { Ops, SkillId, Stage } from '../engine/types';
-import type { Storage } from '../storage/types';
 
 export interface SkillConfig {
   stage: Stage;
@@ -26,20 +26,6 @@ export function sanitize(raw: unknown): SkillConfigs {
     if (isStage(stage) && isOps(ops)) out[k as SkillId] = { stage, ops };
   }
   return out;
-}
-
-export async function loadSkillConfigs(storage: Storage): Promise<SkillConfigs> {
-  try {
-    return sanitize(await storage.getSetting(DEBUG_SKILL_CONFIG_KEY));
-  } catch {
-    return {};
-  }
-}
-
-export async function saveSkillConfig(storage: Storage, skill: SkillId, cfg: SkillConfig): Promise<void> {
-  const all = await loadSkillConfigs(storage);
-  all[skill] = cfg;
-  await storage.setSetting(DEBUG_SKILL_CONFIG_KEY, all);
 }
 
 export const configFor = (all: SkillConfigs, skill: SkillId): SkillConfig => all[skill] ?? DEFAULT_SKILL_CONFIG;

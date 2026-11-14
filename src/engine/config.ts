@@ -44,3 +44,9 @@ export const WARMUP_GHOST_IDLE_MS = 4000;
 
 /** Service tip on completion (SPEC §9): a 6-monster service pays 6 × 3 + 5 = 23. */
 export const SERVICE_TIP = 5;
+
+/** Highest fact box (SPEC §4.2). */
+export const MAX_BOX = 4;
+
+/** A stored service is offered back ("Continue dinner service?") for this long (SPEC §5.8, §11.6). */
+export const RESUME_MAX_AGE_MS = 2 * 60 * 60 * 1000;

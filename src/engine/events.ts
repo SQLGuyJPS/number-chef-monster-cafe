@@ -2,7 +2,7 @@
 // them. Changing a field here needs a schema migration (CLAUDE.md). The shape test in
 // tests/unit/events.test.ts pins the exact keys.
 import type { Outcome } from './attempt';
-import type { SkillId, Stage } from './types';
+import type { Ops, SkillId, Stage } from './types';
 
 /** Event format version (`v`). */
 export const EVENT_VERSION = 1;
@@ -61,4 +61,61 @@ export function attemptEvent(
 
 export function coinEvent(ctx: EventContext, a: { svc: string; n: number }): CoinEvt {
   return { id: ctx.id(), t: ctx.now(), dev: ctx.dev, v: EVENT_VERSION, k: 'coin', ...a };
+}
+
+/**
+ * End of a service (SPEC §11.2, D39): `tip` is 0 or 5; `partial` = ended before all orders were
+ * served (Close the café). A resumed service can end twice; coins take the largest tip per `svc`.
+ */
+export interface ServiceEndEvt extends EvtBase {
+  k: 'serviceEnd';
+  svc: string;
+  skill: SkillId;
+  seed: number;
+  orders: number;
+  served: number;
+  tip: number;
+  activeMs: number;
+  partial: boolean;
+}
+
+/** Per-skill parent settings (D23, D24); latest `t` wins per skill. */
+export interface SkillConfigEvt extends EvtBase {
+  k: 'skillConfig';
+  skill: SkillId;
+  stage: Stage;
+  ops: Ops;
+}
+
+/** Shop purchase (M4); counted here only so the balance formula is whole from the start (§11.2). */
+export interface BuyEvt extends EvtBase {
+  k: 'buy';
+  item: string;
+  price: number;
+}
+
+/** Every event M3a reads or writes. `equip`, `known` and `focus` join with M4 and M7. */
+export type Evt = FrozenEvt | ServiceEndEvt | SkillConfigEvt | BuyEvt;
+export type EvtKind = Evt['k'];
+
+export function serviceEndEvent(
+  ctx: EventContext,
+  a: Omit<ServiceEndEvt, keyof EvtBase | 'k'>,
+): ServiceEndEvt {
+  return {
+    id: ctx.id(),
+    t: ctx.now(),
+    dev: ctx.dev,
+    v: EVENT_VERSION,
+    k: 'serviceEnd',
+    ...a,
+    activeMs: Math.max(0, Math.round(a.activeMs)),
+  };
+}
+
+export function skillConfigEvent(
+  ctx: EventContext,
+  a: { skill: SkillId; stage: Stage; ops: Ops },
+): SkillConfigEvt {
+  return { id: ctx.id(), t: ctx.now(), dev: ctx.dev, v: EVENT_VERSION, k: 'skillConfig', ...a };
 }

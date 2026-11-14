@@ -1,6 +1,6 @@
 # Build plan — Number Chef: Monster Café
 
-Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**; M1 playtest rounds 1–7 and the gear popup recorded in PLAYTEST.md (last 2026-11-09). **M2 done 2026-11-10** (started 2026-11-09); waiting for the M2 playtest. **M2b (device speed test, D112) added by the owner and done 2026-11-12**; the iPad result set the SVG budget (D113, 2026-11-12). Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
+Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**; M1 playtest rounds 1–7 and the gear popup recorded in PLAYTEST.md (last 2026-11-09). **M2 done 2026-11-10** (started 2026-11-09); waiting for the M2 playtest. **M2b (device speed test, D112) added by the owner and done 2026-11-12**; the iPad result set the SVG budget (D113, 2026-11-12). **Play-time limit moved from M3b to Tier 2 milestone M12, postponed indefinitely (D124, 2026-11-14).** **M3a done 2026-11-14** (D125); waiting for the M3a playtest. Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
 
 ---
 
@@ -13,12 +13,12 @@ Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 r
 | M2 Café service | 3.25 | **5.0** | Six monsters × five expressions is the single biggest art job (~1.5 h); session builder with requeue rules is test-heavy; full e2e device matrix + CDP drag. |
 | M2b Device speed test | — | **1.5** | Added by the owner (D112): `?speedtest` screen, two ramps, smooth rule, report and share, unit + quick e2e. |
 | M3a Persistence + fact boxes | — | **2.0** | Event log, replay ≡ applyEvent property test, IDB stores, resume, minimal Skills list. |
-| M3b Hand-off ready | — | **3.0** | §6.5 alone is ~20 test cases with fake monotonic and wall clocks; plus gate, parent area, export/replace import/reset. |
-| **Tier 1 total** | ≈ 10 (guide) | **≈ 19.0** | |
+| M3b Hand-off ready | — | **1.5** | Gate, minimal parent area, export/replace import/reset. The play-time limit (was ≈ 1.5 h of the old 3.0) moved to M12 (D124). |
+| **Tier 1 total** | ≈ 10 (guide) | **≈ 17.5** | |
 
 The 10 h guide is exceeded (allowed by D44). The figure excludes fixes from each playtest (SPEC §14 says each milestone starts with them); budget ~0.5 h per round. The estimate is driven by what the spec requires, not by optional polish; I have not cut scope to fit. If you want it shorter, the cheapest levers are yours to choose (e.g. fewer monsters in M2, deferring the 4× CPU throttle report), and each would need a DECISIONS entry.
 
-Tier 2 (rough, re-estimated when you pick one): M4 2.0 · M5 3.5 · M7 3.0 · M8 2.5 (incl. layout mock) · M9 1.5 · M10 2.0 · M11 2.0.
+Tier 2 (rough, re-estimated when you pick one): M4 2.0 · M5 3.5 · M7 3.0 · M8 2.5 (incl. layout mock) · M9 1.5 · M10 2.0 · M11 2.0 · M12 1.75 (play-time limit, postponed indefinitely, D124).
 
 ---
 
@@ -30,7 +30,7 @@ None of these re-open a decided item. On approval I record each accepted one as 
 2. **WebKit in the cloud environment — DECIDED 2026-11-05.** Only Playwright's Chromium is pre-installed in the cloud container. WebKit was installed and verified there (iPad gen 7 landscape touch tap passed), and the owner added `npx -y playwright@1.63.0 install --with-deps webkit` to the environment's setup script, so every new session has it next to Chromium in `/opt/pw-browsers`. The project therefore **pins `@playwright/test` to exactly 1.63.0** so it finds both pre-installed browsers (bumping it means changing the setup script line too). All Chromium and WebKit projects run in every session that has the browsers: the cloud environment (via the setup script) and the owner's Windows machine (D80). If WebKit is missing in a session (setup script failed), report that rather than skipping silently. Playwright WebKit is close to iPad Safari but not the same; real-device checks stay in PLAYTEST.
 3. **`factKey` scheme for missing-amount forms.** §3.1 gives examples but no rule. *Proposal:* `skill:form:operands`; addition keys sort operands (`A2:+:3,5`); `a+?=c` and `?+a=c` share one key `A4:?add:a,c` (they are commuted partners, so they share a box per §4.1 step 4); `10−a=?` (`A3:-:10,a`) and `10−?=a` (`A3:?sub:10,a`) are separate keys. Consequence: A3's canonical add/sub share is 9 : 18, so with `ops = both` the ±1 balance target for A3 is about one third addition (D43b).
 4. **Coins before M3a.** M2 shows coins in the jar but persistence is M3a. *Proposal:* M2 keeps the jar in memory (a reload resets it); M3a starts writing the frozen `coin` events. PLAYTEST.md for M2 says so. The M2 warm-up "shown once" flag already uses the `meta` store (D47i), so the warm-up does not repeat after a reload.
-5. **Where the `?debug` stage/operations picker stores its values (M1–M2).** *Proposal:* in the per-device `settings` store skeleton under a `debugSkillConfig` key, so they survive reloads during playtests; M3a ignores and deletes the key once `skillConfig` events exist.
+5. **Where the `?debug` stage/operations picker stores its values (M1–M2).** *Proposal:* in the per-device `settings` store skeleton under a `debugSkillConfig` key, so they survive reloads during playtests; M3a ignores and deletes the key once `skillConfig` events exist. *Amended by D125:* the first M3a boot turns it into `skillConfig` events, then deletes it.
 6. **Home gear before M3a.** §5.2 says the gear opens the Skills list from M3a. *Proposal:* the gear renders but does nothing in M2 (long-press has no target yet); stage changes go through `?debug`. *Superseded by D94:* before M3a the gear's 2 s long-press opens the playtest tools (same content as `?debug`).
 7. **"Activate the waiting service worker on Home when idle" has no threshold.** *Proposal:* activate on cold launch, or after Home has had no input for 30 s. Never on any other screen (e2e: waiting worker mid-service does not reload).
 8. **Results tally "by ones, then by fives for > 10" — where it ends.** *Proposal:* ones to ten, then fives, and the last number is always the exact total ("…fifteen, twenty, twenty-three!").
@@ -208,36 +208,34 @@ Ticket fix found on the way (real game, not only the mock): the blank's dashed C
 
 New per-device setting "Basket side: right (default) / left" goes in the gear tools when the layout is built. Decisions recorded: D114 layout, D115 basket side, D116 two-frame tray, D117 taken-away row in the basket's place, D118 waiting line, D119 ticket blank.
 
-### M3a — Persistence and fact boxes (2.0 h)
-1. Engine: `replay` / `applyEvent`, coin totals (§11.2), fact boxes (D29 rules), `skillConfig` last-writer-wins; property test applyEvent ≡ replay.
-2. Storage: `IdbStorage` events/state/settings/resume/snapshots; one transaction per completed problem (`attempt` + `coin` + `resume`); derived-state cache rebuild; snapshot write.
-3. Wire the service to write events; `serviceEnd` (partial on Close the café); coins now persist.
-4. Resume: snapshot stores the planned order list; boot offers "Continue dinner service?" if < 2 h old.
-5. Minimal Skills list (stage + operations for A1–A3) opened by the gear without a gate; simple progress list; persisted flag + estimate (feature-detected).
-6. E2E: reload mid-service offers resume and continues the plan; settings change the next service. Screenshots, PLAYTEST, commit, stop.
+### M3a — Persistence and fact boxes (2.0 h) — built 2026-11-14, awaiting the owner's playtest
+1. *(done 2026-11-14)* Engine: `replay` / `applyEvent` (`engine/replay.ts`), coin totals (§11.2), fact boxes (`nextBox`, D29 rules, preset at box 3), `skillConfig` last-writer-wins; property test applyEvent ≡ replay; `serviceEnd`/`skillConfig`/`buy` event shapes.
+2. *(done)* Storage: events (read in (t, id) order), resume, state cache, settings, one snapshot; `commit` = one transaction per completed problem (`attempt` + `coin` + `resume` + cache); cache rebuilt when its count disagrees; `migrateStored` snapshots first. `Progress` (`app/progress.ts`) keeps the derived state in memory and writes in order.
+3. *(done)* The service writes events through `onRecord`; the tip is `serviceEnd.tip` (not a coin event); `serviceEnd` partial on Close the café; coins persist.
+4. *(done)* Resume: `engine/resume.ts` (zod-validated, plan by reference); row written at start and after each problem; offered once per launch on the first Home if < 2 h old; *Not now* clears it (D125).
+5. *(done)* Grown-ups' screen: Skills list (stage + operations for A1–A3, events), simple progress list, storage status with `persist()` on open; the old `debugSkillConfig` becomes events once (D125).
+6. *(done)* E2E `m3a.spec.ts`; screenshots `docs/screens/M3a/`; PLAYTEST; commit, stop.
 
 **Accept (SPEC §14 M3a)**
-- [ ] `applyEvent` incremental equals full replay (property test)
-- [ ] box transitions per outcome and stage; box-weight tests
-- [ ] coins survive a resume and a killed app
-- [ ] reload mid-service offers resume; resume continues the stored order plan
-- [ ] per-skill stage and operations settings change the next service (e2e)
-- [ ] migration harness test
-- [ ] storage persisted flag and estimate shown when available
+- [x] `applyEvent` incremental equals full replay (property test, 300 random logs; shuffled and duplicated input too: `tests/unit/replay.test.ts`)
+- [x] box transitions per outcome and stage (`nextBox`, preset 3 → 4 at S1); box weights already tested in `session.test.ts`
+- [x] coins survive a resume and a killed app (`progress.test.ts`; e2e reload mid-service keeps the jar at 6 and finishes at 23)
+- [x] reload mid-service offers resume; resume continues the stored order plan (same fact, monster and line; `m3a.spec.ts`)
+- [x] per-skill stage and operations settings change the next service (e2e via the gear's Skills list)
+- [x] migration harness test (`migrations.test.ts`; `migrateStored` with a fake migration in `progress.test.ts`)
+- [x] storage persisted flag and estimate shown when available (e2e; "not available on this device" otherwise)
 
-### M3b — Hand-off ready (3.0 h)
-1. Engine: allowance model with injected monotonic and wall clocks (idle pause, grace cap in wall time, last-customer, shorter service, tip rule, lock clears resume, boot check, refill modes, 60 s cue); all §6.5 tests.
-2. UI: locked Home, wind-down silhouettes, last-customer line, lights dim + Pip yawn.
-3. Parent gate (long-press 2 s, 6–9 × 7–9 on a number pad, 3 wrong → 30 s lockout, 5 min auto-lock); unrotated parent area.
-4. Parent area: play-time limit (Off default) + Start new session / Add time / refill mode; voice/speed/test; volumes; reduced motion; orders per service.
-5. Data: Export (SHA-256, share fallbacks), Replace-only import (snapshot first, zod, checksum, second multiplication prompt), Reset (snapshot first, keeps `snapshots`), install help text.
-6. E2E: limit-off-never-locks, allowance run-out flow (wind-down → locked → reload → unlock → no resume offer), gate lockout, export → reset → import round trip. Screenshots, PLAYTEST (10-minute walk-away test), commit, stop.
+### M3b — Hand-off ready (1.5 h)
+The play-time limit moved to M12 (D124).
+1. Parent gate (long-press 2 s, 6–9 × 7–9 on a number pad, 3 wrong → 30 s lockout, 5 min auto-lock); unrotated parent area.
+2. Parent area: Skills list from M3a behind the gate; voice/speed/test; volumes; reduced motion; orders per service; basket side moves here from the playtest tools.
+3. Data: Export (SHA-256, share fallbacks), Replace-only import (snapshot first, zod, checksum, second multiplication prompt), Reset (snapshot first, keeps `snapshots`, `ncmc*` only), install help text.
+4. E2E: gate lockout, export → reset → import round trip. Screenshots, PLAYTEST, commit, stop.
 
 **Accept (SPEC §14 M3b)**
-- [ ] limit off by default (a fresh install never locks)
-- [ ] §6.5 behaviour when enabled: lock after reload, boot check, lock outside a service, 90 s grace cap (no coins), tip rule, no resume offer after a lock
-- [ ] parent gate lockout
+- [ ] parent gate lockout and 5-minute auto-lock; not reachable during a service
 - [ ] export → reset → import round trip; checksum verified
+- [ ] Reset touches only `ncmc*` data and keeps `snapshots`
 
 ---
 
@@ -248,6 +246,7 @@ New per-device setting "Basket side: right (default) / left" goes in the gear to
 - **M7 Full parent area + merge** (3.0 h): Merge import with dry-run summary, device label, Focus list, Starting-point editor, hide/show, heatmap, trouble spots, history, median S0 time, snapshots restore, two-context e2e.
 - **M8 Big Menu** (2.5 h): static layout mock first (stop for OK), then tens shelf + ones frame, auto-bundle, two bins, B1–B2 generators/orderings/demos, two-digit pad.
 - **M9 B3** (1.5 h). **M10 Polish** (2.0 h): accessibility, big-text captions, bundle report, Lighthouse, audio manifest + `audio-todo.ts`. **M11 Profiles** (2.0 h): `profileId` migration (first real migration), picker, per-profile preset.
+- **M12 Play-time limit** (1.75 h; postponed indefinitely by the owner, D124): allowance model with injected monotonic and wall clocks (idle pause, grace cap in wall time, last customer, shorter service, tip rule, lock clears resume, boot check, refill modes, 60 s cue) and all §6.5 tests; locked Home, wind-down, lights dim + Pip yawn; limit setting with Start new session / Add time behind M3b's gate; e2e limit-off-never-locks and run-out → locked → reload → unlock → no resume offer. The `clock` IDB store already exists, so no IDB upgrade is needed.
 
 ---
 

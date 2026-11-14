@@ -7,7 +7,8 @@ import {
   setSeedOverride,
   setTimeScale,
 } from './runtime';
-import { saveSkillConfig } from './skillConfig';
+import { getProgress } from './progress';
+import { balance } from '../engine/replay';
 import { saveBasketSide } from './basketSide';
 import type { BasketSide } from './metrics';
 import type { Ops, SkillId, Stage } from '../engine/types';
@@ -32,8 +33,24 @@ export function installE2eHooks(): void {
       moving: countMovingSvgElements(document),
     }),
     async setSkillConfig(skill: SkillId, stage: Stage, ops: Ops) {
-      const boot = await getStorageBoot();
-      if (boot) await saveSkillConfig(boot.storage, skill, { stage, ops });
+      const p = await getProgress();
+      p?.setSkillConfig(skill, stage, ops);
+      await p?.flush();
+    },
+    /** The event log as stored, the derived coins and the resume row (SPEC §11). */
+    async progress() {
+      const p = await getProgress();
+      if (!p) return null;
+      await p.flush();
+      const events = await p.storage.loadEvents();
+      return {
+        balance: balance(p.derived),
+        count: p.derived.count,
+        config: p.derived.config,
+        kinds: events.map((e) => e.k),
+        events,
+        resume: await p.storage.getResume(),
+      };
     },
     /** Basket side for the next service (D115). */
     async setBasketSide(side: BasketSide) {
