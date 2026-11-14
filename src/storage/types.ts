@@ -13,7 +13,7 @@ export type MetaKey = keyof MetaRecord;
 
 /**
  * All storage access goes through this interface (CLAUDE.md). M0 ships the skeleton: meta,
- * per-device settings and store counts. Events, resume, clock and snapshots arrive in M3a/M3b.
+ * per-device settings and store counts. Events, resume and snapshots arrive in M3a/M3b; clock is used only from M12 (D124).
  */
 export interface Storage {
   readonly kind: 'idb' | 'memory';

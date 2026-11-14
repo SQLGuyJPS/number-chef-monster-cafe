@@ -131,3 +131,4 @@
 | D121 | Coin jar and leave sign move to the right of the status bar | SPEC §5.4, §7.4; amends D120 (bar order) | Jar and sign sat at the end the line walks toward |
 | D122 | At S0 the number pad hides during the help offer | SPEC §5.4 | Pad and picture buttons share the band; one set of targets at a time |
 | D123 | Splash, Home, Menu and Results over the counter; one café scene for every child screen | SPEC §5.1–5.3, §5.7, §7.4; resolves the D121 two-scene note | Owner approved the mocks |
+| D124 | Play-time limit postponed indefinitely; moved from M3b to its own Tier 2 milestone M12 | SPEC §6, §12, §14 | Owner decision before M3 |

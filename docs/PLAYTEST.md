@@ -183,7 +183,7 @@ The D94 list above is covered by this round (the hold now goes through the popup
 - [ ] Each monster says hello the first time it comes in a service ("Hee hee. Hello!"). Charming, or does it slow the orders down?
 - [ ] Sounds: a "boing" when a monster arrives, crunching while it chews, a "ting" for each coin, Chompers' burp. Any too loud or annoying?
 - [ ] A finished service now ends with a 5-coin tip: a 6-monster service shows 23 coins on the closing sign.
-- [ ] **Service length:** time a few whole services (6 monsters) from the first order to the CLOSED sign. This sets the play-time limit's "last customer" timing in M3b.
+- [ ] **Service length:** time a few whole services (6 monsters) from the first order to the CLOSED sign. This sets the play-time limit's "last customer" timing in M12 (D124).
 - [ ] Smoothness on the real iPad: food and coin flights, monster reactions, the café background. (A 4× slowed desktop CPU showed no dropped frames, `docs/perf/M2-throttle.md`, but only the device can tell.)
 - [ ] Not yet in M2, so not a bug: progress and coins reset on reload (M3a saves them); no shop yet (M4).
 ### M2 feedback round 1 (D102, D103)

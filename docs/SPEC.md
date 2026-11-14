@@ -14,7 +14,7 @@ Audience: one young child (first-year primary school level), who reads easy chap
 
 Targets: iPad Safari (primary), iPhone Safari, Android Chrome; the child may use all three. The family's devices are an iPad 7th gen, an iPhone 17 and a Pixel 10 Pro (D111). Baseline iOS/iPadOS 18+ (the newest the iPad 7th gen runs) and a recent Chrome on Android (D111, amends D37); `navigator.audioSession` (iOS 17+) is therefore on every target iOS device but stays feature-detected. Landscape layout (portrait shows the rotated stage, D8). Progress is stored per device and merged by exported file (§11). Works offline after first load. No backend, accounts, analytics, ads, external links, or purchases. All data local.
 
-Build budget (D20, D36, D44): **Tier 1 (M0, M1, M2, M2b, M3a, M3b) is a playable game in ≈ 10 agentic hours**, a guide rather than a cap; **Tier 2 (M4–M11)** is bonus work in any order with no upper limit. `PLAN.md` holds the authoritative per-milestone estimates; the figures in §14 are indicative.
+Build budget (D20, D36, D44): **Tier 1 (M0, M1, M2, M2b, M3a, M3b) is a playable game in ≈ 10 agentic hours**, a guide rather than a cap; **Tier 2 (M4–M12)** is bonus work in any order with no upper limit. `PLAN.md` holds the authoritative per-milestone estimates; the figures in §14 are indicative.
 
 ### Non-goals (v1)
 Monster designer, rush-hour mode, regrouping (carry/borrow), multiplication, multi-child profile UI (profiles are M11, D9), recorded audio, music, localization, handwriting/tracing, word-problem story tickets (D21), automatic stage changes (the stage is a parent setting, D22, D23).
@@ -375,6 +375,8 @@ Coins earned so far are kept (each completed problem already wrote its `coin` ev
 ---
 
 ## 6. Play allowance and lock
+**Built in M12 (Tier 2), postponed indefinitely by the owner (D124).** Until then no play-time code ships: the café never locks, the parent area has no limit setting, and every rule below that starts "while a limit is enabled" simply never applies.
+
 Goal (owner, D7): a parent who wants to hand the child the device and walk away can turn on a play-time limit, so the child plays for a defined period, not endlessly, until a parent intervenes. **The limit is optional and off by default (D27):** a fresh install has no clock, no lock and no cue, and nothing in this section runs until a parent enables it.
 
 ### 6.1 Model
@@ -569,7 +571,7 @@ Safari tabs can have script-writable storage evicted after 7 days of non-use; **
 ## 12. Parent area
 **Gate:** tap the Home gear, hold the popup's circle 2 s (D95), then a multiplication question with factors 6–9 × 7–9 (answer by number pad, never spoken). 3 wrong → 30 s lockout. Auto-locks after 5 minutes idle or on leaving. Not reachable during a service.
 
-Tier 1 builds it in steps (D36, D44): before M3a the gear (tap, then a 2 s hold on the popup's circle, no gate) and `?debug` both open the playtest tools with the stage/operations picker, sound test and, from the counter-layout build, the basket side (D94, D95, D115); **M3a** adds a minimal Skills list (stage and operations per skill, opened by the gear without a gate) and a simple progress list; **M3b** adds the gate and the rest of the minimal area: play-time limit (off by default) with Start new session / Add time, voice/speed/volume, reduced motion, Export, Replace-only import, Reset. The full tab set lands in M7.
+Tier 1 builds it in steps (D36, D44): before M3a the gear (tap, then a 2 s hold on the popup's circle, no gate) and `?debug` both open the playtest tools with the stage/operations picker, sound test and, from the counter-layout build, the basket side (D94, D95, D115); **M3a** adds a minimal Skills list (stage and operations per skill, opened by the gear without a gate) and a simple progress list; **M3b** adds the gate and the rest of the minimal area: orders per service, basket side, voice/speed/volume, reduced motion, Export, Replace-only import, Reset. The play-time limit with Start new session / Add time arrives with M12 (D124). The full tab set lands in M7.
 
 Tabs (normal scrolling layout; works in portrait):
 1. **Progress** — per-skill stage and services played; fact heatmap (addition/subtraction grids 0–10 colored by box for A1–A4; A5 and up show a per-skill fact list colored by box, D47); "trouble spots" (box 0 after ≥ 3 sightings); **median S0 response time per skill** (from `attempt.ms`; the best sign that a fact moved from counting to recall); last 20 services (date, skill, first-try %, assisted count, minutes); active minutes per day (last 14).
@@ -627,7 +629,7 @@ Every engine rule in §3, §4, §6, §9 and §11 has a unit test; these MUST exi
 Each milestone starts by fixing what the previous playtest found and ends: `npm run check` green, e2e green, screenshots saved, `PLAYTEST.md` updated, **STOP and wait for the owner's playtest feedback**. Hours are indicative; `PLAN.md` holds the authoritative estimate (D36).
 
 ### Tier 1 — Playable (guide ≈ 10 h, not a cap, D20, D44): M0, M1, M2, M2b, M3a, M3b
-Playtest builds reach the devices when the owner pushes to `main` (the real app, §15). Before the child's real use begins, the parent resets playtest progress once (D44). At the end of M3b the child plays A1–A3 with monsters and sound, progress is saved, and if a parent turns on the optional limit the café locks when time is up until a parent unlocks it.
+Playtest builds reach the devices when the owner pushes to `main` (the real app, §15). Before the child's real use begins, the parent resets playtest progress once (D44). At the end of M3b the child plays A1–A3 with monsters and sound, progress is saved, and a parent can back it up, restore it and reset it behind the gate. The optional play-time limit is no longer part of Tier 1; it is M12 (D124).
 
 #### M0 — Foundations (≈ 2 h)
 Vite/TS/React scaffold, strict TS, ESLint/Prettier, Vitest, Playwright projects, PWA manifest + service worker (`prompt`, `cacheId: 'ncmc'`), Andika, stage scaling, **rotated-stage portrait with `toStageCoords`**, touch hardening incl. back guard, `Storage` interface + memory + IDB skeleton (incl. `meta`), GitHub Actions Pages workflow, test-hook build flag, namespacing lint, production-only CSP with `assetsInlineLimit: 0`. The Git repo already exists.
@@ -656,9 +658,9 @@ Event log (§11: `attempt`, `coin`, `serviceEnd`, `replay`, stores, migration ha
 **Owner playtest:** progress and coins persist; are the stage/operations knobs right.
 
 #### M3b — Hand-off ready (estimate in PLAN.md)
-Optional play-time limit and lock (§6) with wind-down and 60 s cue, parent gate, minimal parent area (§12), Export (checksum, share fallbacks), Replace-only import, Reset (§11.6).
-**Accept:** limit off by default; §6.5 when enabled; gate lockout; export → reset → import round trip; checksum verified.
-**Owner playtest:** limit on (10 min), hand over the iPad, walk away: does it lock, is the ending gentle, is unlocking easy.
+Parent gate, minimal parent area (§12), Export (checksum, share fallbacks), Replace-only import, Reset (§11.6). The play-time limit moved to M12 (D124).
+**Accept:** gate lockout and auto-lock; parent area not reachable during a service; export → reset → import round trip; checksum verified; Reset touches only `ncmc*` data and keeps `snapshots`.
+**Owner playtest:** is the gate easy for a grown-up and out of the child's reach; export on each device (share sheet or download), reset, import it back.
 
 ### Tier 2 — Bonus features (no cap; any order)
 
@@ -689,6 +691,11 @@ Accessibility pass (labels, parent-area tab order, contrast), big-text captions 
 
 #### M11 — Profiles (≈ 1.5–2 h)
 Profile picker on Splash/Home, `profileId` on events (migration, D47), per-profile wallet, café and known-facts preset (e.g. a younger sibling limited to A0 with 1–5, D9), export/import per profile.
+
+#### M12 — Play-time limit and lock (≈ 1.75 h; postponed indefinitely by the owner, D124)
+Optional play-time limit and lock (§6): the allowance clock (idle pause, flushes), wind-down / last customer, shorter service, grace cap, tip rule, lock clears resume, boot check, locked Home, 60 s cue, refill modes, and in the parent area the limit setting with Start new session / Add time. Needs M3b's gate.
+**Accept:** limit off by default (a fresh install never accumulates time, locks or cues); §6.5 when enabled.
+**Owner playtest:** limit on (10 min), hand over the iPad, walk away: does it lock, is the ending gentle, is unlocking easy.
 
 Later ideas, unscheduled: B4 compare (needs a response mechanic), rush-hour mode, monster designer, zero-answer lesson, Mystery Orders (`? − 3 = 5`), regrouping; **garnish choice** after each correct serve (nothing to do with correctness; revisit after the M2 playtest); **monster album** (portraits fill in as monsters are served; after M4).
 

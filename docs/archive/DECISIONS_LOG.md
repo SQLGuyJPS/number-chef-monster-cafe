@@ -672,3 +672,7 @@ How to revisit: if the repeating ghost is distracting, show each hint once; `war
 **Why:** Owner approved the mocks: the café should look the same before, during and after a service.
 **How to revisit:** At M5 (more tiles) and M4 (Decorate beside Open the Café).
 
+## D124 — Play-time limit postponed to its own Tier 2 milestone, M12 (2026-11-14)
+**What:** The optional play-time limit and lock (SPEC §6: allowance clock, wind-down, shorter service, grace cap, tip-on-closing, lock, boot check, 60 s cue, refill modes, and the parent-area limit setting with Start new session / Add time) leaves M3b and Tier 1. It becomes M12, a Tier 2 milestone the owner has postponed indefinitely. M3b keeps the parent gate, the minimal parent area, Export, Replace-only import and Reset. Until M12 no allowance code ships; §6's rules all start "while a limit is enabled", so they simply never apply, and D7/D27/D33/D40 stay as the design for M12. The `clock` IDB store already exists, so M12 needs no IDB upgrade. Estimates: M3b 3.0 → 1.5 h, M12 ≈ 1.75 h.
+**Why:** Owner decision at the start of M3.
+**How to revisit:** The owner picks M12 like any Tier 2 milestone; it depends only on M3b's gate.

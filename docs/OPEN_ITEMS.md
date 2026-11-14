@@ -58,7 +58,7 @@ Claude Code will use the noted default until you answer. Answer in DECISIONS.md 
 Target list is produced by `scripts/audio-todo.ts` (≈ 21 numbers 0–20, 8 tens 30–100, ~35 prompt/operator phrases, ~50 monster lines ≈ 115 clips). Decide who records (a parent voice is usually best for a young child), format (m4a/mp3, mono, normalized), and when (once phrases are final).
 
 ## Needed during playtests
-- A real iPad session with the child at M1 (about 5 min), M2, M3a and M3b (about 15 min each). Builds reach the devices when you push to `main`; reset playtest progress once before the child's real use (D44). PLAYTEST.md lists what to watch. At M3b, turn on a 10-minute play-time limit (Parent → Settings), hand the child the device and walk away. Repeat key checks on the iPhone and Android phone at M2 and M3b.
+- A real iPad session with the child at M1 (about 5 min), M2, M3a and M3b (about 15 min each). Builds reach the devices when you push to `main`; reset playtest progress once before the child's real use (D44). PLAYTEST.md lists what to watch. The 10-minute walk-away test with the play-time limit waits for M12 (postponed, D124). Repeat key checks on the iPhone and Android phone at M2 and M3b.
 - At M0: install to the Home Screen on each device and confirm it launches standalone (an owner check; the agent cannot verify it). Install **before** first play, because Safari-tab and Home-Screen storage are separate on iOS.
 - At M1: approve the static layout mock before interaction is built.
 - When M7 lands: a two-device merge test (iPad → iPhone → back).

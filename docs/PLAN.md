@@ -1,6 +1,6 @@
 # Build plan — Number Chef: Monster Café
 
-Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**; M1 playtest rounds 1–7 and the gear popup recorded in PLAYTEST.md (last 2026-11-09). **M2 done 2026-11-10** (started 2026-11-09); waiting for the M2 playtest. **M2b (device speed test, D112) added by the owner and done 2026-11-12**; the iPad result set the SVG budget (D113, 2026-11-12). Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
+Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**; M1 playtest rounds 1–7 and the gear popup recorded in PLAYTEST.md (last 2026-11-09). **M2 done 2026-11-10** (started 2026-11-09); waiting for the M2 playtest. **M2b (device speed test, D112) added by the owner and done 2026-11-12**; the iPad result set the SVG budget (D113, 2026-11-12). **Play-time limit moved from M3b to Tier 2 milestone M12, postponed indefinitely (D124, 2026-11-14).** Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
 
 ---
 
@@ -13,12 +13,12 @@ Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 r
 | M2 Café service | 3.25 | **5.0** | Six monsters × five expressions is the single biggest art job (~1.5 h); session builder with requeue rules is test-heavy; full e2e device matrix + CDP drag. |
 | M2b Device speed test | — | **1.5** | Added by the owner (D112): `?speedtest` screen, two ramps, smooth rule, report and share, unit + quick e2e. |
 | M3a Persistence + fact boxes | — | **2.0** | Event log, replay ≡ applyEvent property test, IDB stores, resume, minimal Skills list. |
-| M3b Hand-off ready | — | **3.0** | §6.5 alone is ~20 test cases with fake monotonic and wall clocks; plus gate, parent area, export/replace import/reset. |
-| **Tier 1 total** | ≈ 10 (guide) | **≈ 19.0** | |
+| M3b Hand-off ready | — | **1.5** | Gate, minimal parent area, export/replace import/reset. The play-time limit (was ≈ 1.5 h of the old 3.0) moved to M12 (D124). |
+| **Tier 1 total** | ≈ 10 (guide) | **≈ 17.5** | |
 
 The 10 h guide is exceeded (allowed by D44). The figure excludes fixes from each playtest (SPEC §14 says each milestone starts with them); budget ~0.5 h per round. The estimate is driven by what the spec requires, not by optional polish; I have not cut scope to fit. If you want it shorter, the cheapest levers are yours to choose (e.g. fewer monsters in M2, deferring the 4× CPU throttle report), and each would need a DECISIONS entry.
 
-Tier 2 (rough, re-estimated when you pick one): M4 2.0 · M5 3.5 · M7 3.0 · M8 2.5 (incl. layout mock) · M9 1.5 · M10 2.0 · M11 2.0.
+Tier 2 (rough, re-estimated when you pick one): M4 2.0 · M5 3.5 · M7 3.0 · M8 2.5 (incl. layout mock) · M9 1.5 · M10 2.0 · M11 2.0 · M12 1.75 (play-time limit, postponed indefinitely, D124).
 
 ---
 
@@ -225,19 +225,17 @@ New per-device setting "Basket side: right (default) / left" goes in the gear to
 - [ ] migration harness test
 - [ ] storage persisted flag and estimate shown when available
 
-### M3b — Hand-off ready (3.0 h)
-1. Engine: allowance model with injected monotonic and wall clocks (idle pause, grace cap in wall time, last-customer, shorter service, tip rule, lock clears resume, boot check, refill modes, 60 s cue); all §6.5 tests.
-2. UI: locked Home, wind-down silhouettes, last-customer line, lights dim + Pip yawn.
-3. Parent gate (long-press 2 s, 6–9 × 7–9 on a number pad, 3 wrong → 30 s lockout, 5 min auto-lock); unrotated parent area.
-4. Parent area: play-time limit (Off default) + Start new session / Add time / refill mode; voice/speed/test; volumes; reduced motion; orders per service.
-5. Data: Export (SHA-256, share fallbacks), Replace-only import (snapshot first, zod, checksum, second multiplication prompt), Reset (snapshot first, keeps `snapshots`), install help text.
-6. E2E: limit-off-never-locks, allowance run-out flow (wind-down → locked → reload → unlock → no resume offer), gate lockout, export → reset → import round trip. Screenshots, PLAYTEST (10-minute walk-away test), commit, stop.
+### M3b — Hand-off ready (1.5 h)
+The play-time limit moved to M12 (D124).
+1. Parent gate (long-press 2 s, 6–9 × 7–9 on a number pad, 3 wrong → 30 s lockout, 5 min auto-lock); unrotated parent area.
+2. Parent area: Skills list from M3a behind the gate; voice/speed/test; volumes; reduced motion; orders per service; basket side moves here from the playtest tools.
+3. Data: Export (SHA-256, share fallbacks), Replace-only import (snapshot first, zod, checksum, second multiplication prompt), Reset (snapshot first, keeps `snapshots`, `ncmc*` only), install help text.
+4. E2E: gate lockout, export → reset → import round trip. Screenshots, PLAYTEST, commit, stop.
 
 **Accept (SPEC §14 M3b)**
-- [ ] limit off by default (a fresh install never locks)
-- [ ] §6.5 behaviour when enabled: lock after reload, boot check, lock outside a service, 90 s grace cap (no coins), tip rule, no resume offer after a lock
-- [ ] parent gate lockout
+- [ ] parent gate lockout and 5-minute auto-lock; not reachable during a service
 - [ ] export → reset → import round trip; checksum verified
+- [ ] Reset touches only `ncmc*` data and keeps `snapshots`
 
 ---
 
@@ -248,6 +246,7 @@ New per-device setting "Basket side: right (default) / left" goes in the gear to
 - **M7 Full parent area + merge** (3.0 h): Merge import with dry-run summary, device label, Focus list, Starting-point editor, hide/show, heatmap, trouble spots, history, median S0 time, snapshots restore, two-context e2e.
 - **M8 Big Menu** (2.5 h): static layout mock first (stop for OK), then tens shelf + ones frame, auto-bundle, two bins, B1–B2 generators/orderings/demos, two-digit pad.
 - **M9 B3** (1.5 h). **M10 Polish** (2.0 h): accessibility, big-text captions, bundle report, Lighthouse, audio manifest + `audio-todo.ts`. **M11 Profiles** (2.0 h): `profileId` migration (first real migration), picker, per-profile preset.
+- **M12 Play-time limit** (1.75 h; postponed indefinitely by the owner, D124): allowance model with injected monotonic and wall clocks (idle pause, grace cap in wall time, last customer, shorter service, tip rule, lock clears resume, boot check, refill modes, 60 s cue) and all §6.5 tests; locked Home, wind-down, lights dim + Pip yawn; limit setting with Start new session / Add time behind M3b's gate; e2e limit-off-never-locks and run-out → locked → reload → unlock → no resume offer. The `clock` IDB store already exists, so no IDB upgrade is needed.
 
 ---
 
