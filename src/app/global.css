@@ -60,6 +60,10 @@ button {
   /* Wallpaper stripes; the floor and decorations are the CafeScene SVG in the safe box (SPEC §7.4). */
   background: repeating-linear-gradient(90deg, var(--c-wall) 0 36px, #fdd99a 36px 72px);
 }
+/* Service (D114): cream status-bar colour above, counter wood below, for the iPad letterbox. */
+.cafe-backdrop.counter-backdrop {
+  background: linear-gradient(to bottom, #f7e6c4 0 50%, #d9a066 50% 100%);
+}
 .cafe-scene {
   position: absolute;
   left: 0;
@@ -96,28 +100,44 @@ button {
   color: var(--c-secondary-ink);
 }
 
-/* ---- Splash ---- */
+/* ---- Splash, Home, Menu, Results over the counter (SPEC §5.1–5.3, §5.7, D123) ---- */
+/* Positions come from FRONT in metrics.ts; these only style. */
 .splash {
   position: absolute;
   inset: 0;
+}
+.front-sign {
+  position: absolute;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 24px;
+  color: var(--c-ink);
+  pointer-events: none;
 }
-.splash-title {
-  font-size: 96px;
+.front-title {
+  font-size: 72px;
   font-weight: 700;
   line-height: 1;
 }
-.splash-sub {
-  font-size: 56px;
-  color: var(--c-ink-soft);
-}
-.splash-tap {
-  margin-top: 32px;
+.front-sub {
   font-size: 48px;
+  color: var(--c-ink-soft);
+  line-height: 1;
+}
+.front-monster {
+  position: absolute;
+}
+.front-tap {
+  position: absolute;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  background: var(--c-paper);
+  border-radius: 28px;
+  border: 5px solid #e2d8c3;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
+  font-size: 56px;
   font-weight: 700;
   color: var(--c-primary);
   animation: pulse 1.6s ease-in-out infinite;
@@ -127,35 +147,16 @@ button {
     transform: scale(1.08);
   }
 }
-
-/* ---- Home (SPEC §5.2) ---- */
-.cafe-sign {
+.front-btn {
   position: absolute;
-  left: 340px;
-  top: 40px;
-  width: 600px;
+  box-sizing: border-box;
+  padding: 0;
+  display: grid;
+  place-items: center;
   text-align: center;
-  font-size: 72px;
-  font-weight: 700;
-  background: var(--c-paper);
-  border-radius: var(--radius);
-  padding: 8px 0;
-  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
 }
-.coin-jar {
-  position: absolute;
-  left: 40px;
-  top: 40px;
-  height: 112px;
-  min-width: 200px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 0 28px;
-  border-radius: var(--radius);
-  background: var(--c-paper);
-  font-size: 56px;
-  font-weight: 700;
+.open-cafe {
+  font-size: 60px;
 }
 .coin-icon {
   width: 56px;
@@ -164,23 +165,8 @@ button {
   background: var(--c-coin);
   box-shadow: inset 0 -6px 0 rgba(0, 0, 0, 0.15);
 }
-.home-monster {
-  position: absolute;
-  left: 530px;
-  top: 190px;
-}
-.open-cafe {
-  position: absolute;
-  left: 390px;
-  top: 470px;
-  width: 500px;
-  height: 180px;
-  font-size: 60px;
-}
 .gear {
   position: absolute;
-  right: 0;
-  top: 0;
   opacity: 0.3;
   display: grid;
   place-items: center;
@@ -190,19 +176,17 @@ button {
   opacity: 0.7;
 }
 
-/* ---- Results (SPEC §5.7) ---- */
+/* Results: the café's sign flips to CLOSED. */
 .closed-sign {
   position: absolute;
-  left: 440px;
-  top: 32px;
-  width: 400px;
-  text-align: center;
-  font-size: 80px;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  font-size: 76px;
   font-weight: 700;
   color: var(--c-chalk-ink);
   background: var(--c-chalk);
   border-radius: var(--radius);
-  padding: 8px 0;
   animation: sign-flip 0.6s ease-out;
 }
 @keyframes sign-flip {
@@ -211,10 +195,6 @@ button {
 }
 .results-tally {
   position: absolute;
-  left: 490px;
-  top: 190px;
-  width: 300px;
-  height: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -228,35 +208,17 @@ button {
   width: 80px;
   height: 80px;
 }
-.results-faces {
+.results-face {
   position: absolute;
-  left: 140px;
-  top: 360px;
-  width: 1000px;
-  display: flex;
-  justify-content: center;
-  gap: 16px;
 }
-.results-another,
 .results-change,
+.results-another,
 .results-home {
-  position: absolute;
-  top: 520px;
-  height: 160px;
   font-size: 44px;
 }
 .results-another {
-  left: 470px;
-  width: 340px;
+  font-size: 40px;
   box-shadow: 0 0 0 8px var(--c-coin);
-}
-.results-change {
-  left: 120px;
-  width: 300px;
-}
-.results-home {
-  left: 860px;
-  width: 300px;
 }
 
 /* ---- Gear popup: hold the circle to open the grown-ups' screen (D95) ---- */
@@ -294,42 +256,25 @@ button {
   min-width: 280px;
 }
 
-/* ---- Menu (SPEC §5.3) ---- */
-.chalkboard {
-  position: absolute;
-  left: 140px;
-  top: 30px;
-  width: 1000px;
-  height: 480px;
-  border-radius: 28px;
-  background: var(--c-chalk);
-  color: var(--c-chalk-ink);
-  border: 16px solid #8a5a35;
-  box-sizing: border-box;
-  padding: 24px 40px;
-}
-.chalk-title {
-  font-size: 56px;
-  font-weight: 700;
-  text-align: center;
-}
-.tiles {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  margin-top: 24px;
-}
+/* ---- Menu (SPEC §5.3): the dishes are little chalkboards standing on the counter (D123) ---- */
 .tile {
-  height: 260px;
-  /* Solid = playable; dashed is kept for tiles that cannot be tapped yet (D78). */
-  border: 4px solid rgba(244, 241, 232, 0.6);
-  border-radius: 20px;
+  position: absolute;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  opacity: 0.7;
+  gap: 14px;
+  border-radius: 22px;
+  background: var(--c-chalk);
+  color: var(--c-chalk-ink);
+  /* Solid frame = playable; a dashed, faded frame is kept for tiles that cannot be tapped yet (D78). */
+  border: 10px solid #8a5a35;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.15);
+}
+.tile-soon {
+  border-style: dashed;
+  opacity: 0.6;
 }
 .tile-name {
   font-size: 40px;
@@ -337,13 +282,6 @@ button {
 }
 .tile-sample {
   font-size: 48px;
-}
-.menu-home {
-  position: absolute;
-  left: 40px;
-  bottom: 40px;
-  width: 240px;
-  height: 140px;
 }
 
 /* ---- Dialog (SPEC §5.4) ---- */
@@ -430,14 +368,6 @@ html.debug-mode #root {
   word-break: break-all;
 }
 
-/* ---- Menu tiles (M1: A1/A2 playable) ---- */
-.tile {
-  color: var(--c-chalk-ink);
-}
-.tile.tile-soon {
-  border-style: dashed;
-  opacity: 0.45;
-}
 .audio-test button,
 .audio-test select {
   font-size: 16px;

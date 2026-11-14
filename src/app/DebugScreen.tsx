@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getStorageBoot } from './runtime';
 import { getSwStatus } from './pwa';
 import { APP_NAME } from './identity';
+import { BasketSidePicker } from './BasketSidePicker';
 import { SkillPicker } from './SkillPicker';
 import { AudioTest } from './AudioTest';
 
@@ -78,6 +79,7 @@ export function PlaytestTools() {
       </table>
       {!info && <p>Loading…</p>}
       <SkillPicker />
+      <BasketSidePicker />
       <AudioTest />
       <h2>Speed test</h2>
       <p>How many drawing pieces this device can show smoothly (D112). About 2 minutes.</p>
@@ -98,6 +100,12 @@ export function DebugScreen() {
   return (
     <div className="debug" data-scroll-ok data-testid="debug-screen">
       <h1>Debug</h1>
+      <h2>Counter layout mock</h2>
+      <p>
+        <button type="button" data-testid="mock-open" onClick={() => (location.search = '?mock')}>
+          Open the mock
+        </button>
+      </p>
       <PlaytestTools />
     </div>
   );

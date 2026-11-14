@@ -9,6 +9,8 @@ import { DebugScreen } from './app/DebugScreen';
 import { MonsterGallery } from './app/MonsterGallery';
 import { SpeedTest } from './app/speedtest/SpeedTest';
 import { parseFlags } from './app/flags';
+import { CounterMock, MockToolbar, parseMockOptions } from './app/CounterMock';
+import { Stage } from './app/Stage';
 import { installTouchHardening } from './game/input/touchHardening';
 import { installPointerGuard } from './game/input/pointerGuard';
 import { installAudioResume } from './audio/unlock';
@@ -25,7 +27,9 @@ if (import.meta.env.VITE_E2E === '1') {
 setStorageBoot(openStorage(() => Date.now()));
 initPwa(getCurrentScreen, lastInputAt);
 
-if (flags.debug || flags.gallery || flags.speedtest) {
+if (flags.mock) {
+  // Look-only layout mock: the normal stage styles, no input hardening needed.
+} else if (flags.debug || flags.gallery || flags.speedtest) {
   document.documentElement.classList.add('debug-mode');
 } else {
   installTouchHardening(document);
@@ -37,7 +41,14 @@ const root = createRoot(document.getElementById('root')!);
 
 root.render(
   <StrictMode>
-    {flags.speedtest ? (
+    {flags.mock ? (
+      <>
+        <Stage allowRotate={flags.allowRotate} background={<div className="cafe-backdrop counter-backdrop" />}>
+          <CounterMock opts={parseMockOptions(location.search)} />
+        </Stage>
+        {!parseMockOptions(location.search).clean && <MockToolbar opts={parseMockOptions(location.search)} />}
+      </>
+    ) : flags.speedtest ? (
       <SpeedTest quick={flags.speedtest === 'quick'} />
     ) : flags.gallery ? (
       <MonsterGallery />

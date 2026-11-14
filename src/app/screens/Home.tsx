@@ -1,9 +1,14 @@
 import { TapButton } from '../../game/input/TapButton';
-import { Monster } from '../../art/monsters/Monster';
 import { GEAR_PATH } from '../../art/gearIcon';
-import { GEAR_SIZE } from '../metrics';
+import { CoinJar, at } from '../../game/service/ServiceParts';
+import { COUNTER, FRONT, GEAR_SIZE } from '../metrics';
+import { FrontMonster, FrontPip, FrontSign } from './FrontRoom';
 
-/** SPEC §5.2. M0 placeholder: coin jar, Open the Café, and the grown-ups' gear (tap → popup, D95). */
+/**
+ * SPEC §5.2 over the counter (D123): the sign with the café's name, the coin jar in its service
+ * spot, the grown-ups' gear in the corner past it (tap → popup, D95), Blobbo and Pip behind the
+ * counter, and Open the Café on the counter top (room beside it for Decorate, M4).
+ */
 export function Home({
   coins,
   onOpen,
@@ -15,18 +20,13 @@ export function Home({
 }) {
   return (
     <div className="screen home" data-testid="screen-home">
-      <div className="cafe-sign">Monster Café</div>
-      <div className="coin-jar" data-testid="coin-jar" aria-label={`${coins} coins`}>
-        <span className="coin-icon" aria-hidden="true" />
-        <span className="coin-count">{coins}</span>
-      </div>
-      <Monster id="blobbo" expression="idle" size={220} className="home-monster" />
-      <TapButton className="btn btn-primary open-cafe" testId="open-cafe" onTap={onOpen}>
-        Open the Café
-      </TapButton>
+      <FrontSign>
+        <span className="front-title">Monster Café</span>
+      </FrontSign>
+      <CoinJar rect={COUNTER.bar.jar} count={coins} testId="coin-jar" />
       <TapButton
         className="gear"
-        style={{ width: GEAR_SIZE, height: GEAR_SIZE }}
+        style={at(FRONT.gear)}
         testId="gear"
         label="Grown-ups"
         onTap={onGear}
@@ -39,6 +39,17 @@ export function Home({
         >
           <path fill="currentColor" fillRule="evenodd" d={GEAR_PATH} />
         </svg>
+      </TapButton>
+      <FrontMonster />
+      <FrontPip />
+      <TapButton
+        className="btn btn-primary front-btn open-cafe"
+        style={at(FRONT.open)}
+        testId="open-cafe"
+        tapKind="button"
+        onTap={onOpen}
+      >
+        Open the Café
       </TapButton>
     </div>
   );

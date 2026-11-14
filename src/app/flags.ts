@@ -6,6 +6,8 @@ export interface BootFlags {
   gallery: boolean;
   /** `?speedtest` (D112): the device speed test; `?speedtest=quick` runs a short version. */
   speedtest: false | 'full' | 'quick';
+  /** `?mock`: the over-the-counter layout mock (look only, owner review before M3a). */
+  mock: boolean;
 }
 
 export function parseFlags(search: string): BootFlags {
@@ -16,5 +18,6 @@ export function parseFlags(search: string): BootFlags {
     allowRotate: q.get('rotate') !== 'off',
     gallery: q.has('gallery'),
     speedtest: st === null ? false : st === 'quick' ? 'quick' : 'full',
+    mock: q.has('mock'),
   };
 }

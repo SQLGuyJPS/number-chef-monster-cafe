@@ -179,6 +179,35 @@ Order inside each milestone is the order I will work in. Every milestone ends wi
 - [x] no link from the child UI; the playtest tools open it (e2e)
 - [x] owner's iPad result recorded (`docs/perf/M2b-ipad7-speedtest.txt`); budget set by D113 and checked by `budget.spec.ts`
 
+### Counter layout change (owner request before M3a) — mock approved 2026-11-13 (D114–D119); built, awaiting the owner's playtest
+**Build (done):** the service runs on `COUNTER` (`counterLayout.ts` picks the rects per order and mirrors them for a left-handed child); the room and counter are `CounterScene` (every child screen since D123); status bar with door sign, coin jar (coins fly up into it), waiting line of real minis in plan order with requeue badges at their real places (controller `line`, D118; the line slides one place as the front monster goes to the counter and a returning one hops in, D108) and the shop door; Pip pops up from behind the counter with no box on the hat; the taken-away row replaces the basket; S0 pad in two rows; the lifted cloche shifts the tray; "Basket side" in the playtest tools (D115). The old `SERVICE` table is gone. Tests: unit (`counterLayout`, line position after a requeue), e2e tap sizes on both sides, left-handed drag and taken-away row, the returning monster's badge; shots in `docs/screens/counter/`. Open for M5: the two-frame tray at S0 has no room for the lifted lid (two-frame skills are not built yet).
+
+**Owner review round (2026-11-14):** line flipped to walk left into the little café beside the jar, and the lifted cloche lid centred by eye (D120); push to the working branch after a change is now allowed (CLAUDE.md). **Splash and Home over the counter: mocked, not built** (`?mock&v=splash`, `?mock&v=home`; shots `docs/screens/counter-front/front-*`). Splash: the cream board is the café's name sign, Blobbo behind the counter, "Tap to start" on a paper card on the counter. Home: the board carries the coin jar in its service spot, the name and the gear (top-right as before, D95); Blobbo and Pip behind the counter; Open the Café on the counter top, with room beside it for Decorate (M4). Owner: Splash and Home look good overall. Second round: coin jar and leave sign moved to the right of the bar (D121); **Menu and Results mocked** (`?mock&v=menu`, `?mock&v=results`): Menu has "Little Menu" on the sign, the jar on the right, Blobbo and Pip in the room, and the three dishes as little chalkboards standing on the counter beside Home; Results flips the sign to CLOSED, keeps the jar, puts the coin tally in the room above the served monsters lined along the counter's far edge, and the three buttons on the counter top. Owner approved; **built** (D123): every child screen uses `CounterScene` (geometry `FRONT` in `metrics.ts`); the mock keeps only the service variants. Shots: `docs/screens/counter/` (`splash`, `home`, `menu`, `results`, `break-dialog`, `gear-hold`). Open for M5: nine menu tiles and the Big Menu tab need a layout on the counter.
+
+Service screen seen from behind the counter. Mock: `?mock` (or the button on `?debug`); switches `v=s3|taken|frames2|s0|cloche|offer|count`, `basket=right|left`, `line=1..10`. Geometry: `COUNTER` in `src/app/metrics.ts`. Shots: `docs/screens/counter-mock/`. Fit is tested: `tests/unit/counterLayout.test.ts` (no overlaps, inside the band, both sides) and `tests/e2e/counterMock.spec.ts` (every variant and side ≥ 44/56 CSS px at 844×390; element counts within D113).
+
+Bands: status bar y 0–120 (shop icon ← waiting line, coin jar, leave sign; D121) · room y 120–432 (door and street window, table and chairs, caption · monster · ticket) · counter y 432–720 (one row).
+
+Owner's choices so far: monsters stand full height (the waist cut was removed after the build); the street window stays beside the door (tried behind the monster in rev 2, not kept); front-view chairs; Pip's hat with no box, just a soft shadow; two-frame option A with a two-row heap.
+
+| Check | Fits? | Proposal |
+|---|---|---|
+| S3/S2/S1 one frame | yes | Pip 120 · bell 120 · tray 496 · basket 300 in one row; mirrored for left-handed |
+| Two-frame tray (A5+, M5; Big Bites/A2 is one frame) | **no** as one row: 1016 + 300 + 2 buttons > 1280 | Owner's pick (A): the frames keep 88-px cells with gaps 4 and padding 8 (956 wide), Pip's hat sits on the bell in one column, the basket is an upright 172 × 200 crate with a two-row heap |
+| Taken-away row | **no** beside the basket (1404 px) | The row takes the basket's place on missing-subtrahend forms: there the basket does exactly what the row does (D42a) |
+| S0 number pad | yes | Pip, bell, Peek, display, backspace in the upper row; digits 0–9 below, same order on both sides |
+| Cloche (Peek/Worked/FollowMe) | yes, tight | Tray shifts 64 px toward Pip; lid (112) between tray and basket |
+| Help offer | yes | Two 220 buttons over the hidden tray; basket dims |
+| Pip helper spot | yes | Pops up behind the counter under the caption (x 344–468) |
+| CountTogether | yes | Same bubble as today; Pip and the small monster step left in front of the table; the line stays (it is in the bar) |
+| 44/56 px minimums | yes | cells 47.7, Pip/bell 65, door/digits/lid 60.7 CSS px |
+
+Waiting line: **real mini monsters, idling** (rev 1 planned head-only icons for the old 300-element budget; D113 lifts it to 4,800 on screen / 650 moving). Measured worst case, nine minis during CountTogether: 489 on screen, 300 moving. A long line squeezes its spacing to stay in the bar. A requeued monster stands at its real place (D43: 3–5 orders later) with a small circling-arrow badge, and still joins as the next monster comes in (D108).
+
+Ticket fix found on the way (real game, not only the mock): the blank's dashed CSS border came out uneven at the corners in WebKit at phone scale (visible in `docs/screens/M2/service-s3-add-844x390.png`). The blank is now an SVG outline with 12 evenly spaced dashes (`BlankBox` in `ServiceParts.tsx`); M1/M2 e2e still green.
+
+New per-device setting "Basket side: right (default) / left" goes in the gear tools when the layout is built. Decisions recorded: D114 layout, D115 basket side, D116 two-frame tray, D117 taken-away row in the basket's place, D118 waiting line, D119 ticket blank.
+
 ### M3a — Persistence and fact boxes (2.0 h)
 1. Engine: `replay` / `applyEvent`, coin totals (§11.2), fact boxes (D29 rules), `skillConfig` last-writer-wins; property test applyEvent ≡ replay.
 2. Storage: `IdbStorage` events/state/settings/resume/snapshots; one transaction per completed problem (`attempt` + `coin` + `resume`); derived-state cache rebuild; snapshot write.
@@ -215,7 +244,7 @@ Order inside each milestone is the order I will work in. Every milestone ends wi
 ## 5. Tier 2 outline (order picked by the owner)
 
 - **M4 Shop** (2.0 h): `economy.ts` tables (sum 1,340), shop screen with live preview, Buy + confirm, `buy`/`equip` events, staff reactions, guest monsters, purchases visible in Service.
-- **M5 Rest of the Little Menu** (3.5 h): A0, A4–A8 generators, orderings for A4–A6, demos (teens, bridge, back-through-ten, make-ten variants), `frames2` UI, A5 whole-frame moves, FollowMe past 10.
+- **M5 Rest of the Little Menu** (3.5 h): A0, A4–A8 generators, orderings for A4–A6, demos (teens, bridge, back-through-ten, make-ten variants), `frames2` UI, A5 whole-frame moves, FollowMe past 10. Counter-layout checks carried here: the two-frame tray has only run in the mock, so M5 must exercise it in the real service (drag and tap onto the tight cells, flights, eating, both basket sides); and the two-frame tray at S0 has no room for the lifted cloche lid (open question, decide when the first two-frame S0 skill is built); and nine menu tiles do not fit one counter row (D123).
 - **M7 Full parent area + merge** (3.0 h): Merge import with dry-run summary, device label, Focus list, Starting-point editor, hide/show, heatmap, trouble spots, history, median S0 time, snapshots restore, two-context e2e.
 - **M8 Big Menu** (2.5 h): static layout mock first (stop for OK), then tens shelf + ones frame, auto-bundle, two bins, B1–B2 generators/orderings/demos, two-digit pad.
 - **M9 B3** (1.5 h). **M10 Polish** (2.0 h): accessibility, big-text captions, bundle report, Lighthouse, audio manifest + `audio-todo.ts`. **M11 Profiles** (2.0 h): `profileId` migration (first real migration), picker, per-profile preset.

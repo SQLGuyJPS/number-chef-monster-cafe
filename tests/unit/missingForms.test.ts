@@ -176,5 +176,13 @@ describe('service controller on missing-number forms', () => {
     for (let i = 0; i < 60 && c.getView().index === 0; i++) await tick();
     expect(c.getView().queueJoin).toBe(1);
     expect(c.getView().remaining).toBe(before); // one went to the counter, one joined
+    // D118: it stands at its real place in the line (3–5 orders after the original), badged.
+    const line = c.getView().line;
+    expect(line.length).toBe(before);
+    const at = line.findIndex((m) => m.back);
+    expect(at).toBeGreaterThanOrEqual(1);
+    expect(at).toBeLessThanOrEqual(3);
+    expect(line[at]!.joined).toBe(true);
+    expect(line.filter((m) => m.joined)).toHaveLength(1);
   });
 });

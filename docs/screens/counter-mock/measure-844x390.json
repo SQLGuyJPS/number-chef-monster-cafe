@@ -1,0 +1,106 @@
+{
+  "svgCounts": {
+    "v=s3": {
+      "total": 336,
+      "moving": 161
+    },
+    "v=s3&line=9": {
+      "total": 459,
+      "moving": 272
+    },
+    "v=count&line=9": {
+      "total": 487,
+      "moving": 272
+    },
+    "v=frames2&line=9": {
+      "total": 470,
+      "moving": 283
+    }
+  },
+  "targets": [
+    {
+      "id": "door",
+      "w": 60.7,
+      "h": 60.7,
+      "need": 56
+    },
+    {
+      "id": "help",
+      "w": 65,
+      "h": 65,
+      "need": 56
+    },
+    {
+      "id": "bell",
+      "w": 65,
+      "h": 65,
+      "need": 56
+    },
+    {
+      "id": "tray-cell-0",
+      "w": 47.7,
+      "h": 47.7,
+      "need": 44
+    },
+    {
+      "id": "tray-cell-1",
+      "w": 47.7,
+      "h": 47.7,
+      "need": 44
+    },
+    {
+      "id": "tray-cell-2",
+      "w": 47.7,
+      "h": 47.7,
+      "need": 44
+    },
+    {
+      "id": "tray-cell-3",
+      "w": 47.7,
+      "h": 47.7,
+      "need": 44
+    },
+    {
+      "id": "tray-cell-4",
+      "w": 47.7,
+      "h": 47.7,
+      "need": 44
+    },
+    {
+      "id": "tray-cell-5",
+      "w": 47.7,
+      "h": 47.7,
+      "need": 44
+    },
+    {
+      "id": "tray-cell-6",
+      "w": 47.7,
+      "h": 47.7,
+      "need": 44
+    },
+    {
+      "id": "tray-cell-7",
+      "w": 47.7,
+      "h": 47.7,
+      "need": 44
+    },
+    {
+      "id": "tray-cell-8",
+      "w": 47.7,
+      "h": 47.7,
+      "need": 44
+    },
+    {
+      "id": "tray-cell-9",
+      "w": 47.7,
+      "h": 47.7,
+      "need": 44
+    },
+    {
+      "id": "bin",
+      "w": 162.5,
+      "h": 70.4,
+      "need": 56
+    }
+  ]
+}

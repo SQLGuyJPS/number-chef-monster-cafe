@@ -18,7 +18,7 @@ test('splash → home → menu → home with zero external requests and no CSP v
   const net = watchNetwork(page, ORIGIN);
   await startApp(page);
   await tap(page, page.getByTestId('open-cafe'));
-  await expect(page.getByTestId('screen-menu')).toBeVisible();
+  await expect(page.getByTestId('screen-menu')).toHaveAttribute('data-ready', 'true');
   await tap(page, page.getByTestId('menu-home'));
   await expect(page.getByTestId('screen-home')).toBeVisible();
 
@@ -39,12 +39,12 @@ test('stage rotates in portrait, taps land on rotated controls, rotating back ke
   if (startsPortrait) await expect(page.getByTestId('turn-cue')).toBeVisible();
 
   await tap(page, page.getByTestId('open-cafe'));
-  await expect(page.getByTestId('screen-menu')).toBeVisible();
+  await expect(page.getByTestId('screen-menu')).toHaveAttribute('data-ready', 'true');
 
   // Turn the device: swap the viewport. Same screen, no remount, transform flips.
   await page.setViewportSize({ width: vp.height, height: vp.width });
   await expect.poll(() => isRotated(page)).toBe(!startsPortrait);
-  await expect(page.getByTestId('screen-menu')).toBeVisible();
+  await expect(page.getByTestId('screen-menu')).toHaveAttribute('data-ready', 'true');
   if (startsPortrait) await expect(page.getByTestId('turn-cue')).toHaveCount(0);
 
   await tap(page, page.getByTestId('menu-home'));
@@ -79,7 +79,7 @@ test('back gesture shows the break dialog instead of leaving (SPEC §2.3)', asyn
   await tap(page, page.getByTestId('open-cafe'));
   await page.goBack();
   await expect(page.getByTestId('break-dialog')).toBeVisible();
-  await expect(page.getByTestId('screen-menu')).toBeVisible();
+  await expect(page.getByTestId('screen-menu')).toHaveAttribute('data-ready', 'true');
   expect(page.url()).toBe(url);
 });
 

@@ -38,6 +38,8 @@ export interface Probe {
   ghost: 'bin' | 'bell' | null;
   monster: string;
   remaining: number;
+  /** Front first, space-separated monster ids; a returning one ends in `*` (D118). */
+  line: string;
   coins: number;
   events: { k: string; outcome?: string; stage?: number; fact?: string }[];
 }
@@ -47,6 +49,7 @@ interface Hooks {
   setSeed(s: number | null): void;
   setSkillConfig(skill: string, stage: number, ops: string): Promise<void>;
   setWarmupShown(shown: boolean): Promise<void>;
+  setBasketSide(side: 'left' | 'right'): Promise<void>;
   service(): Probe | undefined;
   screen(): string;
   svgCounts(): { total: number; moving: number };
@@ -101,6 +104,8 @@ export interface OpenOptions {
   timeScale?: number;
   /** Keep the first-ever warm-up order (SPEC §5.4); off by default so tests start on the skill. */
   warmUp?: boolean;
+  /** Per-device basket side (D115); right by default. */
+  basket?: 'left' | 'right';
 }
 
 /** Splash → Home → Menu → tile, with stage/ops set through the e2e hook (same store as ?debug). */
@@ -109,8 +114,9 @@ export async function openService(page: Page, o: OpenOptions = {}): Promise<void
   await page.goto('./');
   await page.waitForFunction(() => !!window.__ncmc);
   await page.evaluate(
-    async ({ skill, stage, ops, seed, timeScale, warmUp }) => {
+    async ({ skill, stage, ops, seed, timeScale, warmUp, basket }) => {
       await window.__ncmc.setSkillConfig(skill, stage, ops);
+      await window.__ncmc.setBasketSide(basket);
       await window.__ncmc.setWarmupShown(!warmUp);
       window.__ncmc.setTimeScale(timeScale);
       window.__ncmc.setSeed(seed);
@@ -128,11 +134,12 @@ export async function openService(page: Page, o: OpenOptions = {}): Promise<void
       seed: o.seed ?? 1,
       timeScale: o.timeScale ?? 0.1,
       warmUp: o.warmUp ?? false,
+      basket: o.basket ?? 'right',
     },
   );
   await tap(page, page.getByTestId('splash'));
   await tap(page, page.getByTestId('open-cafe'));
-  await expect(page.getByTestId('screen-menu')).toBeVisible();
+  await expect(page.getByTestId('screen-menu')).toHaveAttribute('data-ready', 'true');
   // The menu reads the stored config on open; give it a beat before the tile tap.
   await page.waitForTimeout(150);
   await tap(page, page.getByTestId(`tile-${o.skill ?? 'A1'}`));

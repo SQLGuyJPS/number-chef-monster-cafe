@@ -11,7 +11,7 @@ A math game for a young child. `docs/SPEC.md` is the single, current statement o
 - Record every assumption you make that the spec doesn't cover as a decision, numbered one higher than the highest `D<n>` in the index: append the full entry (What, Why, How to revisit) to `docs/archive/DECISIONS_LOG.md`, add its line to `docs/DECISIONS.md`, **and update SPEC.md in the same commit** (citing `(Dn)`; implementation-only decisions skip SPEC). If it replaces an earlier decision, update that one's index status too.
 - The owner is technical but is the playtester, not the reviewer of every line. Keep explanations short; flag only what needs a decision.
 - Windows 11 host. Scripts must be cross-platform Node (no `rm -rf`, no bash-only syntax in package.json). Use `cross-env` if env vars are needed.
-- The Git repo already exists (no `git init`). Playtest builds reach the devices when the owner pushes to `main` (D44). Commit at the end of each milestone (and sensible checkpoints). Never push unless asked.
+- The Git repo already exists (no `git init`). Playtest builds reach the devices when the owner pushes to `main` (D44). Commit at the end of each milestone (and sensible checkpoints). After a change, push to the working branch without asking; never push to `main` unless asked.
 
 ## Commands
 ```

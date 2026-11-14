@@ -8,6 +8,7 @@ describe('parseFlags', () => {
       allowRotate: true,
       gallery: false,
       speedtest: false,
+      mock: false,
     });
   });
   it('?debug', () => {
@@ -16,6 +17,7 @@ describe('parseFlags', () => {
       allowRotate: true,
       gallery: false,
       speedtest: false,
+      mock: false,
     });
   });
   it('?rotate=off', () => {
@@ -24,6 +26,7 @@ describe('parseFlags', () => {
       allowRotate: false,
       gallery: false,
       speedtest: false,
+      mock: false,
     });
   });
   it('?debug&rotate=off', () => {
@@ -32,6 +35,7 @@ describe('parseFlags', () => {
       allowRotate: false,
       gallery: false,
       speedtest: false,
+      mock: false,
     });
   });
   it('other rotate values keep rotation on', () => {
@@ -40,6 +44,7 @@ describe('parseFlags', () => {
       allowRotate: true,
       gallery: false,
       speedtest: false,
+      mock: false,
     });
   });
 });
@@ -59,5 +64,11 @@ describe('parseFlags ?speedtest (D112)', () => {
   });
   it('?speedtest=quick runs the short one', () => {
     expect(parseFlags('?speedtest=quick').speedtest).toBe('quick');
+  });
+});
+
+describe('parseFlags ?mock', () => {
+  it('opens the counter layout mock', () => {
+    expect(parseFlags('?mock&v=s0').mock).toBe(true);
   });
 });

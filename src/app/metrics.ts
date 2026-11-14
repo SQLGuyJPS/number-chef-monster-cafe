@@ -26,13 +26,8 @@ export const GEAR_LONG_PRESS_MS = 2000;
  */
 export const GEAR_HOLD = { svg: 264, circle: 216, ringR: 120, ringW: 18 } as const;
 
-/**
- * Pip's hand-off back to the monster (D91). Pip's exit and the monster's walk back match the
- * `.pip-slot.leaving` and `.monster-slot` durations in service.css; the waiting line returns only
- * once the monster is back in its spot, so it never appears under the moving monster.
- */
+/** Pip sinks back behind the counter (D91); matches `.pip-slot.leaving` in service.css. */
 export const PIP_EXIT_MS = 500;
-export const MONSTER_MOVE_MS = 550;
 
 /** A rectangle in logical stage px. */
 export interface Rect {
@@ -64,81 +59,164 @@ export const TAKEN_GAP = 6;
 export const TAKEN_PAD = 10;
 export const TAKEN_FRAME = frameSize(TAKEN_CELL, TAKEN_GAP, TAKEN_PAD); // 324 × 138
 
-const TRAY_TOP = 311;
 const centeredX = (w: number) => Math.round((STAGE_W - w) / 2);
-
-const BIN: Rect = { x: centeredX(300), y: 570, w: 300, h: 130 };
-const MONSTER: Rect = { x: centeredX(240), y: 52, w: 240, h: 240 };
 const TICKET_W = 360;
 const TICKET_COUNTING_X = STAGE_W - 16 - TICKET_W;
-/**
- * CountTogether (D84): the monster steps left onto the counter and the bubble fills the space from
- * its right side to the ticket, from the top of the screen down to the counter.
- */
-const ASIDE: Rect = { x: 262, y: 172, w: 120, h: 120 };
-/**
- * Pip (D90) stands on the counter left of the monster while help is offered or given, under the
- * caption bubble. During CountTogether Pip takes the spot the shrunken monster used, so the model
- * bubble's tail points at Pip, and the monster steps further left (the queue hides while Pip is out).
- */
-const PIP: Rect = { x: 262, y: 150, w: 124, h: 155 };
-const ASIDE_FOR_PIP: Rect = { x: 120, y: 172, w: 120, h: 120 };
-const BUBBLE_X = ASIDE.x + ASIDE.w + 22;
-const BUBBLE: Rect = { x: BUBBLE_X, y: 8, w: TICKET_COUNTING_X - 16 - BUBBLE_X, h: 282 };
 
+// ---------------------------------------------------------------------------------------------
+// Service screen layout (SPEC §5.4, D114–D118), seen from behind the counter; `?mock` shows every
+// variant without playing. The child stands behind the counter: a status bar on top, the café room with the monster behind
+// the counter in the middle, and the counter top as the bottom band holding tray, basket, Pip's
+// hat and the bell in one row. Basket on the dominant-hand side; Pip and the bell on the other.
+// All counter-band rects below are for a right-handed child; `mirrorX` gives the left-handed ones.
+// ---------------------------------------------------------------------------------------------
+
+export type BasketSide = 'right' | 'left';
+
+/** Status bar bottom and the counter's far edge (stage y). */
+export const BAR_H = 120;
+export const COUNTER_Y = 432;
+/** Pip's hat and the bell in the counter row (≈ 65 CSS px at 844×390; ≥ BUTTON_MIN). */
+const ROW_BTN = 120;
+/** Vertical centre of the counter band (y 448–712). */
+const ROW_MID = 580;
+const rowY = (h: number) => ROW_MID - h / 2;
+
+export const mirrorX = (r: Rect): Rect => ({ ...r, x: STAGE_W - r.x - r.w });
+
+const C_TRAY1: Rect = { x: 364, y: rowY(FRAME.h), w: FRAME.w, h: FRAME.h };
+/** Two-frame tray: the same 88-px cells with tighter gaps and padding. */
+export const TIGHT = { cell: CELL, gap: 4, pad: 8, framesGap: 12 } as const;
+const TIGHT_FRAME = frameSize(TIGHT.cell, TIGHT.gap, TIGHT.pad); // 472 × 196
+
+/** The cloche's plate shows this far past the tray on each side (service.css .cloche-plate). */
+export const PLATE_BLEED = 20;
+/** The crate is drawn this far inside the basket's tap box (service.css .bin-crate). */
+export const CRATE_INSET = 10;
+const CLOCHE_TRAY: Rect = { x: 304, y: rowY(FRAME.h), w: FRAME.w, h: FRAME.h };
+const CLOCHE_BIN: Rect = { x: 960, y: rowY(130), w: 300, h: 130 };
 /**
- * Service screen layout (SPEC §5.4 as amended by D63–D65; S0 band per D48/D62). Fixed by the M1
- * layout mock. Bands: monster (centre) with the ticket right beside it, y 40–300 · tray y 311–519 ·
- * bottom y 570–700 (Pip's hat, bin, bell). The monster is in the middle so the child
- * feels they are serving it; the ticket sits beside it so order and customer read as one (D65).
+ * The lid's drawing (the tilted dome plus its "123" badge) reaches further toward the basket than
+ * toward the tray, so what the eye sees is centred this far toward the basket from its tap box.
  */
-export const SERVICE = {
-  door: { x: 16, y: 16, w: 112, h: 112 },
+export const LID_ART_SHIFT = 16;
+const CLOCHE_LID_X = Math.round(
+  (CLOCHE_TRAY.x + CLOCHE_TRAY.w + PLATE_BLEED + CLOCHE_BIN.x + CRATE_INSET) / 2 - BUTTON_MIN / 2 - LID_ART_SHIFT,
+);
+
+/** One layout per mock variant; every rect a tap target or a band the child must see. */
+export const COUNTER = {
   /**
-   * Caption bubble just left of the monster, its tail pointing at it (D70 as amended by D76). It
-   * hides while the CountTogether bubble is up, which replaces it.
+   * Status bar (y 0–120): the little café at the left with the waiting line walking left into it
+   * (D120), the way monsters come in at the room's door on the left; the coin jar and the leave
+   * sign on the right, clear of the line's path (D121). The jar keeps one spot on every screen
+   * that shows it, and the leave sign takes the corner the gear has on Home.
    */
-  caption: { x: 250, y: 16, w: 270, h: 124 },
-  /** Waiting monsters line up by the door, left of the monster at the counter. */
-  queue: { x: 0, y: 150, w: 340, h: 150 },
-  monsterZone: MONSTER,
-  /** Right beside the centred monster (D65). */
-  ticket: { x: MONSTER.x + MONSTER.w + 24, y: 50, w: TICKET_W, h: 220 },
-  /** During CountTogether the ticket slides right to make room for the bubble (D65). */
-  ticketCounting: { x: TICKET_COUNTING_X, y: 50, w: TICKET_W, h: 220 },
-  trayFrames1: { x: centeredX(FRAME.w), y: TRAY_TOP, w: FRAME.w, h: FRAME.h },
-  trayFrames2: {
-    x: centeredX(2 * FRAME.w + FRAMES_GAP),
-    y: TRAY_TOP,
-    w: 2 * FRAME.w + FRAMES_GAP,
-    h: FRAME.h,
+  bar: {
+    shop: { x: 8, y: 8, w: 112, h: 108 },
+    line: { x: 128, y: 8, w: 824, h: 108 },
+    jar: { x: 968, y: 14, w: 176, h: 92 },
+    door: { x: STAGE_W - 8 - BUTTON_MIN, y: 4, w: BUTTON_MIN, h: BUTTON_MIN },
+    /** Mini monsters in the line (real monsters, small), front of the line at the café, on the left. */
+    mini: 76,
+    miniStep: 84,
   },
-  /** Left of a centred frames1 tray; missing-subtrahend forms only (D63). */
-  takenAway: {
-    x: centeredX(FRAME.w) - 28 - TAKEN_FRAME.w,
-    y: TRAY_TOP + Math.round((FRAME.h - TAKEN_FRAME.h) / 2),
-    w: TAKEN_FRAME.w,
-    h: TAKEN_FRAME.h,
+  /** Room (y 120–432): monster behind the counter, caption left of it, ticket right of it. */
+  scene: {
+    caption: { x: 226, y: 140, w: 270, h: 124 },
+    ticket: { x: 808, y: 140, w: TICKET_W, h: 220 },
+    ticketCounting: { x: TICKET_COUNTING_X, y: 140, w: TICKET_W, h: 220 },
+    /** Full height: whole body, standing on the counter's far edge. */
+    monsterFull: { x: 520, y: COUNTER_Y - 240, w: 240, h: 240 },
+    /** Pip pops up behind the counter, under the caption, clear of the monster. */
+    pip: { x: 344, y: COUNTER_Y - 150, w: 124, h: 155 },
+    /** CountTogether: Pip and the shrunken monster step left, the bubble fills to the ticket. */
+    pipCounting: { x: 262, y: COUNTER_Y - 150, w: 124, h: 155 },
+    monsterAside: { x: 120, y: COUNTER_Y - 120, w: 120, h: 120 },
+    bubble: { x: 404, y: 140, w: TICKET_COUNTING_X - 16 - 404, h: 282 },
   },
-  help: { x: 40, y: 576, w: 140, h: 124 },
-  /** Bin centred under the tray. */
-  bin: BIN,
-  /** Bell right of the bin at every stage and in every mode (D64; "take one back" removed, D82). */
-  bell: { x: BIN.x + BIN.w + 20, y: 562, w: 144, h: 144 },
-  /** S0 (D48, D62): Peek · display · backspace in one row above the digit row. */
-  s0Peek: { x: 360, y: 292, w: 128, h: 112 },
-  s0Display: { x: 520, y: 292, w: 240, h: 112 },
-  s0Backspace: { x: 776, y: 292, w: 128, h: 112 },
-  s0Digits: { x: centeredX(10 * BUTTON_MIN + 9 * 8), y: 414, w: 10 * BUTTON_MIN + 9 * 8, h: BUTTON_MIN },
-  s0DigitGap: 8,
-  /** Lifted cloche lid left of the S3 tray; tapping it closes the cloche and brings the digits back (D62). */
-  clocheLid: { x: 200, y: 330, w: 150, h: 150 },
-  /** Help offer after the second miss (D89): two big picture buttons over the tray band. */
-  offerYes: { x: centeredX(2 * 220 + 80), y: 300, w: 220, h: 220 },
-  offerNo: { x: centeredX(2 * 220 + 80) + 220 + 80, y: 300, w: 220, h: 220 },
-  /** CountTogether bubble right of the shrunken monster, its tail pointing left at it (D84). */
-  bubble: BUBBLE,
-  monsterAside: ASIDE,
-  pip: PIP,
-  monsterAsideForPip: ASIDE_FOR_PIP,
-} as const satisfies Record<string, Rect | number>;
+  /** Counter band (y 448–712), right-handed. */
+  s3: {
+    help: { x: 24, y: rowY(ROW_BTN), w: ROW_BTN, h: ROW_BTN },
+    bell: { x: 160, y: rowY(ROW_BTN), w: ROW_BTN, h: ROW_BTN },
+    tray: C_TRAY1,
+    bin: { x: 924, y: rowY(130), w: 300, h: 130 },
+  },
+  /**
+   * Missing-subtrahend forms: the taken-away row takes the basket's place. On these forms the
+   * basket has no job of its own (tapping it does exactly what tapping the row does, D42a), and
+   * removed items fly to the row.
+   */
+  taken: {
+    takenAway: { x: 908, y: rowY(TAKEN_FRAME.h), w: TAKEN_FRAME.w, h: TAKEN_FRAME.h },
+  },
+  /**
+   * Two-frame tray (A5+, owner's pick of three, "A"): two full frames plus a 300-px basket and two
+   * buttons need more than 1280 px. The frames keep 88-px cells with tighter gaps and padding, Pip's
+   * hat sits on the bell in one column, and the basket is an upright crate with a two-row heap
+   * (a third row perched on top looked precarious).
+   */
+  frames2: {
+    help: { x: 8, y: 460, w: BUTTON_MIN, h: BUTTON_MIN },
+    bell: { x: 8, y: 588, w: BUTTON_MIN, h: BUTTON_MIN },
+    tray: { x: 132, y: rowY(TIGHT_FRAME.h), w: 2 * TIGHT_FRAME.w + TIGHT.framesGap, h: TIGHT_FRAME.h },
+    bin: { x: 1100, y: rowY(200), w: 172, h: 200 },
+  },
+  /** S0 pad: Pip, bell, Peek, display, backspace in the upper row; ten digits below. */
+  s0: {
+    help: { x: 24, y: 456, w: ROW_BTN, h: ROW_BTN },
+    bell: { x: 160, y: 456, w: ROW_BTN, h: ROW_BTN },
+    peek: { x: 400, y: 460, w: 128, h: BUTTON_MIN },
+    display: { x: 544, y: 460, w: 240, h: BUTTON_MIN },
+    backspace: { x: 800, y: 460, w: 128, h: BUTTON_MIN },
+    digits: { x: centeredX(10 * BUTTON_MIN + 9 * 8), y: 592, w: 10 * BUTTON_MIN + 9 * 8, h: BUTTON_MIN },
+    digitGap: 8,
+  },
+  /**
+   * S0 cloche lifted: the tray shifts toward Pip and the basket toward the edge, and the lid sits
+   * centred between what the eye sees (D120): the plate's rim and the crate's side.
+   */
+  cloche: {
+    tray: CLOCHE_TRAY,
+    lid: { x: CLOCHE_LID_X, y: rowY(BUTTON_MIN), w: BUTTON_MIN, h: BUTTON_MIN },
+    bin: CLOCHE_BIN,
+  },
+  /** Help offer: two 220-px picture buttons over the (hidden) tray. */
+  offer: {
+    yes: { x: 362, y: rowY(220), w: 220, h: 220 },
+    no: { x: 642, y: rowY(220), w: 220, h: 220 },
+  },
+} as const;
+
+/** A counter-band rect for the child's basket side. */
+export const forSide = (r: Rect, side: BasketSide): Rect => (side === 'left' ? mirrorX(r) : r);
+
+// ---------------------------------------------------------------------------------------------
+// Splash, Home, Menu and Results over the same counter (SPEC §5.1–5.3, §5.7, D123). The cream bar
+// is the café's sign (its name, "Little Menu", or CLOSED); the jar and the corner past it keep
+// their service spots; the counter top holds what the child taps.
+// ---------------------------------------------------------------------------------------------
+const FRONT_BTN_Y = 500;
+export const FRONT = {
+  sign: { x: 400, y: 0, w: 480, h: 110 },
+  signWide: { x: 0, y: 0, w: STAGE_W, h: 110 },
+  closed: { x: 440, y: 6, w: 400, h: 104 },
+  /** The grown-ups' gear in the leave sign's corner (D95, D121). */
+  gear: {
+    x: COUNTER.bar.door.x + (BUTTON_MIN - GEAR_SIZE) / 2,
+    y: COUNTER.bar.door.y + (BUTTON_MIN - GEAR_SIZE) / 2,
+    w: GEAR_SIZE,
+    h: GEAR_SIZE,
+  },
+  tapCard: { x: 400, y: FRONT_BTN_Y, w: 480, h: 160 },
+  open: { x: 390, y: 490, w: 500, h: 180 },
+  menuHome: { x: 24, y: 510, w: 220, h: 140 },
+  /** Dish tiles: little chalkboards standing on the counter, left to right. */
+  tiles: { x: 280, y: 470, w: 300, h: 220, step: 324 },
+  tally: { x: 490, y: 150, w: 300, h: 130 },
+  /** Served monsters stand along the counter's far edge; a long service squeezes the spacing. */
+  faces: { size: 96, gap: 16, y: COUNTER_Y + 4 - 96, maxW: 1200 },
+  change: { x: 120, y: FRONT_BTN_Y, w: 300, h: BIG_BUTTON },
+  another: { x: 470, y: FRONT_BTN_Y, w: 340, h: BIG_BUTTON },
+  home: { x: 860, y: FRONT_BTN_Y, w: 300, h: BIG_BUTTON },
+} as const;

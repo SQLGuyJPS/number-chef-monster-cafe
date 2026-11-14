@@ -396,7 +396,7 @@ test('Results: Change dish goes to the menu board, Home goes home', async ({ pag
   }
   await expect(page.getByTestId('screen-results')).toBeVisible({ timeout: 10_000 });
   await tapId(page, 'results-change');
-  await expect(page.getByTestId('screen-menu')).toBeVisible();
+  await expect(page.getByTestId('screen-menu')).toHaveAttribute('data-ready', 'true');
   await tapId(page, 'tile-A2');
   for (let i = 0; i < 6; i++) {
     await expect.poll(async () => (await probe(page))?.index).toBe(i);
@@ -418,39 +418,40 @@ test('the door opens "Take a break?" with Close the café, which goes Home', asy
   await expect(page.getByTestId('screen-home')).toBeVisible();
 });
 
-test('drag from the bin onto the tray places an item (CDP touch, Chromium only)', async ({
-  page,
-  browserName,
-}) => {
-  test.skip(
-    browserName !== 'chromium',
-    'Playwright has no touch drag; CDP is Chromium-only (SPEC §13.5)',
-  );
-  await openService(page, { skill: 'A2', stage: 3, ops: 'add', seed: 3 });
-  const before = (await probe(page)).filled;
-  const bin = (await page.getByTestId('bin').boundingBox())!;
-  const cell = (await page.getByTestId('tray-cell-9').boundingBox())!;
-  const cdp = await page.context().newCDPSession(page);
-  const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd', x: number, y: number) =>
-    cdp.send('Input.dispatchTouchEvent', {
-      type,
-      touchPoints: type === 'touchEnd' ? [] : [{ x, y }],
-    });
-  const from = { x: bin.x + bin.width / 2, y: bin.y + bin.height / 2 };
-  const to = { x: cell.x + cell.width / 2, y: cell.y + cell.height / 2 };
-  await touch('touchStart', from.x, from.y);
-  for (let i = 1; i <= 10; i++)
-    await touch(
-      'touchMove',
-      from.x + ((to.x - from.x) * i) / 10,
-      from.y + ((to.y - from.y) * i) / 10,
+for (const basket of ['right', 'left'] as const)
+  test(`drag from the bin onto the tray places an item, basket ${basket} (CDP touch, Chromium only)`, async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(
+      browserName !== 'chromium',
+      'Playwright has no touch drag; CDP is Chromium-only (SPEC §13.5)',
     );
-  await expect(page.locator('.drag-ghost')).toBeVisible();
-  await touch('touchEnd', to.x, to.y);
-  // Dropped on the last cell, but it lands in the first empty one (SPEC §3.3).
-  await expect.poll(async () => (await probe(page)).filled).toBe(before + 1);
-  await expect(page.getByTestId(`tray-cell-${before}`)).toHaveAttribute('data-filled', 'true');
-});
+    await openService(page, { skill: 'A2', stage: 3, ops: 'add', seed: 3, basket });
+    const before = (await probe(page)).filled;
+    const bin = (await page.getByTestId('bin').boundingBox())!;
+    const cell = (await page.getByTestId('tray-cell-9').boundingBox())!;
+    const cdp = await page.context().newCDPSession(page);
+    const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd', x: number, y: number) =>
+      cdp.send('Input.dispatchTouchEvent', {
+        type,
+        touchPoints: type === 'touchEnd' ? [] : [{ x, y }],
+      });
+    const from = { x: bin.x + bin.width / 2, y: bin.y + bin.height / 2 };
+    const to = { x: cell.x + cell.width / 2, y: cell.y + cell.height / 2 };
+    await touch('touchStart', from.x, from.y);
+    for (let i = 1; i <= 10; i++)
+      await touch(
+        'touchMove',
+        from.x + ((to.x - from.x) * i) / 10,
+        from.y + ((to.y - from.y) * i) / 10,
+      );
+    await expect(page.locator('.drag-ghost')).toBeVisible();
+    await touch('touchEnd', to.x, to.y);
+    // Dropped on the last cell, but it lands in the first empty one (SPEC §3.3).
+    await expect.poll(async () => (await probe(page)).filled).toBe(before + 1);
+    await expect(page.getByTestId(`tray-cell-${before}`)).toHaveAttribute('data-filled', 'true');
+  });
 
 test('a correct serve replaces the dashed blank with the answer in green; a wrong one does not (D96)', async ({
   page,

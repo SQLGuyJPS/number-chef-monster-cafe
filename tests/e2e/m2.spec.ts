@@ -13,10 +13,15 @@ import {
 // M2 flows (SPEC §14 M2). Same projects as the M1 flows until the full M2 matrix lands.
 const FLOW_PROJECTS = ['chromium-ipad-pro-11', 'webkit-ipad-gen7'];
 test.beforeEach(({ browserName: _browser }, info) => {
-  test.skip(!FLOW_PROJECTS.includes(info.project.name), 'flows run on the two landscape iPad projects');
+  test.skip(
+    !FLOW_PROJECTS.includes(info.project.name),
+    'flows run on the two landscape iPad projects',
+  );
 });
 
-test('A3 Perfect Ten: subtraction orders, with the taken-away row for 10 − ? = a (D30)', async ({ page }) => {
+test('A3 Perfect Ten: subtraction orders, with the taken-away row for 10 − ? = a (D30)', async ({
+  page,
+}) => {
   test.setTimeout(90_000);
   await openService(page, { skill: 'A3', stage: 3, ops: 'sub', seed: 11 });
   let sawMissing = false;
@@ -30,6 +35,11 @@ test('A3 Perfect Ten: subtraction orders, with the taken-away row for 10 − ? =
     if (s.form === 'missingSub') {
       sawMissing = true;
       await expect(page.getByTestId('taken-away')).toBeVisible();
+      // The row stands in the basket's place on the dominant side; the basket is not shown (D117).
+      await expect(page.getByTestId('bin')).toHaveCount(0);
+      const row = (await page.getByTestId('taken-away').boundingBox())!;
+      const cell = (await page.getByTestId('tray-cell-0').boundingBox())!;
+      expect(row.x).toBeGreaterThan(cell.x);
       await tapId(page, 'tray-cell-9');
       await tapId(page, 'tray-cell-8');
       // The two removed items sit in the taken-away row; tapping it puts one back.
@@ -45,7 +55,34 @@ test('A3 Perfect Ten: subtraction orders, with the taken-away row for 10 − ? =
   expect(sawMissing).toBe(true);
 });
 
-test('A3 make-ten help: wrong, wrong, yes → Pip flashes the gap to ten, then FollowMe (D98)', async ({ page }) => {
+test('left-handed: the taken-away row stands left of the tray, where the basket would be (D115, D117)', async ({
+  page,
+}) => {
+  test.setTimeout(60_000);
+  await openService(page, { skill: 'A3', stage: 3, ops: 'sub', seed: 11, basket: 'left' });
+  for (let i = 0; i < 6; i++) {
+    await expect.poll(async () => (await probe(page)).index).toBe(i);
+    await waitPhase(page, 'building');
+    if ((await probe(page)).form !== 'missingSub') {
+      const bin = (await page.getByTestId('bin').boundingBox())!;
+      const cell = (await page.getByTestId('tray-cell-0').boundingBox())!;
+      expect(bin.x).toBeLessThan(cell.x);
+      await serveCorrect(page);
+      await waitPhase(page, 'eating');
+      continue;
+    }
+    const row = (await page.getByTestId('taken-away').boundingBox())!;
+    const cell = (await page.getByTestId('tray-cell-0').boundingBox())!;
+    expect(row.x).toBeLessThan(cell.x);
+    await expect(page.getByTestId('bin')).toHaveCount(0);
+    return;
+  }
+  throw new Error('no missing-subtrahend order in this service');
+});
+
+test('A3 make-ten help: wrong, wrong, yes → Pip flashes the gap to ten, then FollowMe (D98)', async ({
+  page,
+}) => {
   test.setTimeout(90_000);
   await openService(page, { skill: 'A3', stage: 3, ops: 'add', seed: 4 });
   const s = await probe(page);
@@ -70,7 +107,9 @@ test('A3 make-ten help: wrong, wrong, yes → Pip flashes the gap to ten, then F
   await expect(page.getByTestId('ticket-answer')).toHaveAttribute('data-role', 'child');
 });
 
-test('A3 at S1: Pip shows the make-ten story in the bubble; the child builds only the answer (D105)', async ({ page }) => {
+test('A3 at S1: Pip shows the make-ten story in the bubble; the child builds only the answer (D105)', async ({
+  page,
+}) => {
   test.setTimeout(90_000);
   await openService(page, { skill: 'A3', stage: 1, ops: 'add', seed: 4 });
   const s = await probe(page);
@@ -112,6 +151,12 @@ test('an assisted order brings the same monster back later with more support; co
   await expect.poll(async () => (await probe(page)).index).toBe(1);
   await expect(page.getByTestId('queue-newcomer')).toHaveCount(1);
   expect((await probe(page)).remaining).toBe(5);
+  // D118: it stands at its real place in the line (not at the back), wearing the badge.
+  const line = (await probe(page)).line.split(' ');
+  const back = line.findIndex((m) => m.endsWith('*'));
+  expect(back).toBeGreaterThanOrEqual(1);
+  expect(back).toBeLessThan(line.length);
+  await expect(page.locator('[data-testid="queue-newcomer"] .back-badge')).toHaveCount(1);
 
   // Play on until the monster comes back.
   for (let i = 1; i < 7; i++) {
@@ -123,7 +168,9 @@ test('an assisted order brings the same monster back later with more support; co
       expect(s.factKey).toBe(first.factKey);
       expect(s.stage).toBe(3); // S2 → S3
       expect(i).toBeGreaterThanOrEqual(3); // 3–5 orders after the original at index 0
-      await expect.poll(() => page.evaluate(() => window.__spoken.includes("I'm back! Still hungry!"))).toBe(true);
+      await expect
+        .poll(() => page.evaluate(() => window.__spoken.includes("I'm back! Still hungry!")))
+        .toBe(true);
       await serveCorrect(page);
       await expect.poll(async () => (await probe(page)).coins).toBe(3 * (i + 1));
       return;
@@ -145,15 +192,21 @@ test('first-ever service: the warm-up order, ghost hand on the bin then the bell
   expect(s.orders).toBe(7);
 
   // No touch for 4 s: the ghost taps the bin. It only points; nothing is placed.
-  await expect(page.getByTestId('ghost-hand')).toHaveAttribute('data-target', 'bin', { timeout: 8000 });
+  await expect(page.getByTestId('ghost-hand')).toHaveAttribute('data-target', 'bin', {
+    timeout: 8000,
+  });
   expect((await probe(page)).filled).toBe(2);
   await tapId(page, 'bin');
   await expect(page.getByTestId('ghost-hand')).toHaveCount(0);
 
   // Item on the tray and 4 more idle seconds: the ghost hovers over the bell and Pip says what to do.
-  await expect(page.getByTestId('ghost-hand')).toHaveAttribute('data-target', 'bell', { timeout: 8000 });
+  await expect(page.getByTestId('ghost-hand')).toHaveAttribute('data-target', 'bell', {
+    timeout: 8000,
+  });
   await expect(page.getByTestId('pip')).toBeVisible();
-  expect(await page.evaluate(() => window.__pipSpoken.includes('Ring the bell to serve!'))).toBe(true);
+  expect(await page.evaluate(() => window.__pipSpoken.includes('Ring the bell to serve!'))).toBe(
+    true,
+  );
   // Nothing serves itself.
   await page.waitForTimeout(1500);
   expect((await probe(page)).phase).toBe('building');
@@ -188,8 +241,12 @@ test('every monster draws all five expressions and its reaction; reduced motion 
       const row = page.getByTestId(`gallery-${id}`);
       const shown = await row
         .locator('.monster-art')
-        .evaluateAll((els) => els.map((e) => `${e.getAttribute('data-monster')}:${e.getAttribute('data-expression')}`));
-      expect(shown).toEqual(['idle', 'delight', 'eat', 'puzzled', 'sleepy', 'delight'].map((x) => `${id}:${x}`));
+        .evaluateAll((els) =>
+          els.map((e) => `${e.getAttribute('data-monster')}:${e.getAttribute('data-expression')}`),
+        );
+      expect(shown).toEqual(
+        ['idle', 'delight', 'eat', 'puzzled', 'sleepy', 'delight'].map((x) => `${id}:${x}`),
+      );
       // Something is actually drawn: the figure has a real size.
       const box = await row.locator('.monster-art .m-figure').first().boundingBox();
       expect(box!.width).toBeGreaterThan(60);
@@ -221,8 +278,12 @@ test('eat sequence: fly, chew, react within 4 s, then 3 coins land in the jar; a
   });
   const t0 = await page.evaluate(() => performance.now());
   await serveCorrect(page);
-  await expect(page.getByTestId('service-jar')).toHaveAttribute('data-count', '3', { timeout: 10_000 });
-  const steps = await page.evaluate(() => (window as unknown as { __eat: [string, number][] }).__eat);
+  await expect(page.getByTestId('service-jar')).toHaveAttribute('data-count', '3', {
+    timeout: 10_000,
+  });
+  const steps = await page.evaluate(
+    () => (window as unknown as { __eat: [string, number][] }).__eat,
+  );
   expect(steps.map((s) => s[0])).toEqual(['fly', 'chew', 'react', 'coins']);
   const coinsAt = steps.find((s) => s[0] === 'coins')![1];
   // Bell lead (0.5 s) + eat and react ≤ 4 s, but the crunch and the coins now wait for the answer
@@ -240,6 +301,10 @@ test('eat sequence: fly, chew, react within 4 s, then 3 coins land in the jar; a
   await serveCorrect(page);
   await expect.poll(async () => (await probe(page)).eat?.step).toBe('fly');
   await tapId(page, 'skip');
-  await expect.poll(async () => (await probe(page)).eat?.step ?? 'gone', { timeout: 1500 }).toMatch(/coins|gone/);
-  await expect(page.getByTestId('service-jar')).toHaveAttribute('data-count', '6', { timeout: 3000 });
+  await expect
+    .poll(async () => (await probe(page)).eat?.step ?? 'gone', { timeout: 1500 })
+    .toMatch(/coins|gone/);
+  await expect(page.getByTestId('service-jar')).toHaveAttribute('data-count', '6', {
+    timeout: 3000,
+  });
 });

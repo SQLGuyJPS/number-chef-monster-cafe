@@ -1,0 +1,28 @@
+/* Over-the-counter layout mock (`?mock`). Look only; geometry lives in metrics.ts (COUNTER). */
+.counter-mock .mock-monster {
+  position: absolute;
+}
+.counter-mock .mock-monster > .monster-art {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.counter-mock .mock-pip {
+  overflow: hidden;
+}
+/* ---- owner's switches, outside the stage ---- */
+.mock-toolbar {
+  position: fixed;
+  right: 8px;
+  bottom: 8px;
+  z-index: 100;
+  display: flex;
+  gap: 6px;
+  font: 14px var(--font-ui);
+  opacity: 0.85;
+}
+.mock-toolbar select,
+.mock-toolbar button {
+  font: inherit;
+  padding: 6px 10px;
+}

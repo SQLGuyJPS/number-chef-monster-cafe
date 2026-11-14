@@ -13,7 +13,7 @@ test('first run reaches the first order in ≤ 2 taps after Splash: Open the Caf
   let taps = 0;
   await tap(page, page.getByTestId('open-cafe'));
   taps++;
-  await expect(page.getByTestId('screen-menu')).toBeVisible();
+  await expect(page.getByTestId('screen-menu')).toHaveAttribute('data-ready', 'true');
   await page.waitForTimeout(150); // the menu reads the device's settings on open
   await tap(page, page.getByTestId('tile-A1'));
   taps++;
@@ -78,5 +78,5 @@ test('Results after a short service: Another service and Change dish are tappabl
   }
   await expect(page.getByTestId('screen-results')).toBeVisible({ timeout: 10_000 });
   await tapId(page, 'results-change');
-  await expect(page.getByTestId('screen-menu')).toBeVisible();
+  await expect(page.getByTestId('screen-menu')).toHaveAttribute('data-ready', 'true');
 });

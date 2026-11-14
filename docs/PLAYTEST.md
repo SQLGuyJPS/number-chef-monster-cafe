@@ -205,6 +205,18 @@ Notes (owner, 2026-11-10, rounds 0–1): green answer on the ticket: keep. Subtr
 - [ ] **Art (D110):** Blobbo's new reaction (blushes, giggle-hops, tiny hearts and bubbles) vs. Wobbleton's puddle; the new door on the left wall and the hanging wooden sign (leave button); no string lights (they return as a shop item); the full-body Pip on the Help button; Mimsy's shorter hello ("Hello, dear chef!").
 - [ ] At the end of a service the eaten food no longer comes back on the tray during "All done!".
 
+## Counter layout (D114–D123; before M3a)
+Screens: `docs/screens/counter/`. Play one service on the iPad and one on a phone.
+- [ ] Does it feel like standing behind the counter? Is the monster easy to see full height, and does the ticket still read as its order?
+- [ ] Waiting line in the top bar: can the child tell how many are left? After a Pip-helped order, does the returning monster (blue arrow badge) hop in at its place as the next monster comes in, and does it come back when expected?
+- [ ] Coins fly up into the jar at the top right: easy to follow? The line walks left into the little café, away from the jar and the leave sign (D120, D121): does that read right?
+- [ ] Pip pops up from behind the counter (no box on the hat button) and sinks back; the line stays put.
+- [ ] Basket side: set it to Left in the playtest tools (gear), start a service: basket left, Pip and the bell right, digits still 0–9 left to right. Is dragging from the basket comfortable for each hand?
+- [ ] A3 subtraction `10 − ? = n`: the taken-away row sits where the basket was; is it clear where the removed food went?
+- [ ] S0: Pip and the bell above the digits; Peek lifts the cloche with the lid between tray and basket. After two misses at S0, only the two picture choices show (the pad hides, D122).
+- [ ] Frame rate on the real iPad with the idling minis (speed test budget D113).
+- [ ] Splash, Home, Menu and Results over the counter (D123; shots `docs/screens/counter/splash|home|menu|results-*`): does going Home → Menu → service → Results feel like one café? Are the chalkboard dish tiles easy to read and tap? Is the gear still easy for a grown-up to find, and hard for the child to hit by accident?
+
 ## M2b — Device speed test (D112; no child needed, about 2 minutes per device)
 How to run: open the app from the **Home Screen icon**, tap the gear, hold the circle for 2 s, scroll to **Speed test**, tap *Open the speed test*, then *Start*. Before starting: Low Power Mode off, Reduce Motion off (Settings → Accessibility → Motion), landscape, don't touch the screen until the results show. When done, tap *Share results* and send me the text (or paste it here).
 - [x] **iPad 7th gen** (this one sets the budget): results text sent 2026-11-12 → budget 4,800 on screen, 650 moving (D113). It also showed iPadOS 18.7, so the D111 baseline check is done.

@@ -8,6 +8,8 @@ import {
   setTimeScale,
 } from './runtime';
 import { saveSkillConfig } from './skillConfig';
+import { saveBasketSide } from './basketSide';
+import type { BasketSide } from './metrics';
 import type { Ops, SkillId, Stage } from '../engine/types';
 import { getStageLayout } from './Stage';
 import { getSwStatus } from './pwa';
@@ -32,6 +34,11 @@ export function installE2eHooks(): void {
     async setSkillConfig(skill: SkillId, stage: Stage, ops: Ops) {
       const boot = await getStorageBoot();
       if (boot) await saveSkillConfig(boot.storage, skill, { stage, ops });
+    },
+    /** Basket side for the next service (D115). */
+    async setBasketSide(side: BasketSide) {
+      const boot = await getStorageBoot();
+      if (boot) await saveBasketSide(boot.storage, side);
     },
     /** Marks the first-ever warm-up order as shown (or not) on this device (SPEC §5.4). */
     async setWarmupShown(shown: boolean) {

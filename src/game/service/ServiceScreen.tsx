@@ -1,18 +1,16 @@
 import { EAT_STAGGER_MS } from '../../engine/eat';
 import { useMemo, useState, type CSSProperties } from 'react';
 import {
-  BUTTON_MIN,
   CELL,
-  CELL_GAP,
-  FRAME,
-  FRAME_PADDING,
-  FRAMES_GAP,
-  MONSTER_MOVE_MS,
+  COUNTER,
+  COUNTER_Y,
   PIP_EXIT_MS,
-  SERVICE as L,
+  PLATE_BLEED,
   TAKEN_CELL,
   TAKEN_GAP,
   TAKEN_PAD,
+  frameSize,
+  type BasketSide,
   type Rect,
 } from '../../app/metrics';
 import { getStageLayout } from '../../app/Stage';
@@ -33,6 +31,7 @@ import {
   Bin,
   Caption,
   ClocheLid,
+  CoinJar,
   DigitButton,
   DoorSign,
   GhostHand,
@@ -40,13 +39,15 @@ import {
   ModelBubble,
   PeekButton,
   PipHat,
-  Queue,
+  ShopDoor,
   Ticket,
+  WaitingLine,
   at,
   type TicketToken,
 } from './ServiceParts';
 import { useService } from './useService';
-import type { ServiceSummary } from './controller';
+import { cellRect, counterLayout, type CounterRects } from './counterLayout';
+import type { ServiceSummary, ServiceView } from './controller';
 import './service.css';
 
 interface Props {
@@ -60,38 +61,34 @@ interface Props {
   onDoor: () => void;
   /** Coins in the jar when the service started; landed coins add to it (SPEC §9). */
   jar?: number;
+  /** Per-device: the basket on the child's dominant side, Pip and the bell on the other (D115). */
+  basket?: BasketSide;
 }
 
-/** Tray rect for the layout (SPEC §3.3, §5.4). */
-const trayRect = (frames2: boolean): Rect => (frames2 ? L.trayFrames2 : L.trayFrames1);
-
-/** Logical rect of tray cell `i` (reading order, frame 1 first). */
-function cellRect(i: number, frames2: boolean): Rect {
-  const t = trayRect(frames2);
-  const frame = Math.floor(i / 10);
-  const j = i % 10;
-  return {
-    x: t.x + frame * (FRAME.w + FRAMES_GAP) + FRAME_PADDING + (j % 5) * (CELL + CELL_GAP),
-    y: t.y + FRAME_PADDING + Math.floor(j / 5) * (CELL + CELL_GAP),
-    w: CELL,
-    h: CELL,
-  };
-}
+const { bar: BAR, scene: SCENE } = COUNTER;
 
 /** Which cell a stage point is over (gaps count toward the nearer cell), or null. */
-function cellAt(p: StagePoint, frames2: boolean): number | null {
-  const n = frames2 ? 20 : 10;
-  for (let i = 0; i < n; i++) if (inRect(p, cellRect(i, frames2), CELL_GAP / 2)) return i;
+function cellAt(p: StagePoint, L: CounterRects, n: number): number | null {
+  for (let i = 0; i < n; i++) if (inRect(p, cellRect(i, L.tray, L.frame), L.frame.gap / 2)) return i;
   return null;
 }
+
+const layoutOf = (v: ServiceView, side: BasketSide): CounterRects =>
+  counterLayout({
+    side,
+    frames2: v.task.layout === 'frames2',
+    takenAwayRow: v.tray.takenAwayRow,
+    stage0: v.order.stage === 0,
+    padMode: v.padMode,
+  });
 
 const center = (r: Rect) => ({ x: r.x + r.w / 2, y: r.y + r.h / 2 });
 
 /** Logical rect of slot `k` in the taken-away row (2 × 5, SPEC §3.3). */
-function takenRect(k: number): Rect {
+function takenRect(k: number, row: Rect): Rect {
   return {
-    x: L.takenAway.x + TAKEN_PAD + (k % 5) * (TAKEN_CELL + TAKEN_GAP),
-    y: L.takenAway.y + TAKEN_PAD + Math.floor(k / 5) * (TAKEN_CELL + TAKEN_GAP),
+    x: row.x + TAKEN_PAD + (k % 5) * (TAKEN_CELL + TAKEN_GAP),
+    y: row.y + TAKEN_PAD + Math.floor(k / 5) * (TAKEN_CELL + TAKEN_GAP),
     w: TAKEN_CELL,
     h: TAKEN_CELL,
   };
@@ -106,62 +103,68 @@ function bubbleFrames(cells: ModelCell[], food: CellView['food']): CellView[][] 
 }
 
 /** Where food and coins leave from / fly to (stage px). */
-const MOUTH = { x: L.monsterZone.x + L.monsterZone.w / 2, y: L.monsterZone.y + L.monsterZone.h * 0.6 };
-const JAR = { x: 1096, y: 590, w: 160, h: 96 };
+const MONSTER = SCENE.monsterFull;
+const MOUTH = { x: MONSTER.x + MONSTER.w / 2, y: MONSTER.y + MONSTER.h * 0.6 };
+const JAR = BAR.jar;
 /** The tray slides up toward the monster while it eats (SPEC §5.6). */
 const EAT_SLIDE = 30;
 
-export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor, jar = 0 }: Props) {
+export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor, jar = 0, basket = 'right' }: Props) {
   const [jarStart] = useState(jar);
   const { view: v, ctrl } = useService({ orders, seed, svc, dev, onDone, onCoins });
   const { order, task } = v;
   const food = order.food;
   const glyph = FOODS[food].glyph;
   const frames2 = task.layout === 'frames2';
-  const tray = trayRect(frames2);
+  const L = layoutOf(v, basket);
+  const tray = L.tray;
+  const cellOf = (i: number) => cellRect(i, tray, L.frame);
 
   // Created once: the gesture state inside must survive the re-renders a drag causes. They read
   // the controller's latest snapshot when they fire, never during render.
-  const binHandlers = useMemo(
-    () =>
-      dragTapHandlers({
-        layout: getStageLayout,
-        inside: (p) => inRect(p, L.bin, 4),
-        onTap: () => ctrl.tapBin(),
-        onDragMove: (p) => ctrl.setDrag(p),
-        // Dropping anywhere on the tray places into the next empty cell (SPEC §1.3).
-        onDrop: (p) => {
-          const f2 = ctrl.getView().task.layout === 'frames2';
-          if (inRect(p, trayRect(f2), 24)) ctrl.tapBin();
-          else ctrl.touch(); // dropped elsewhere: the item goes back
-        },
-      }),
-    [ctrl],
-  );
-  const trayHandlers = useMemo(() => {
-    const f2 = () => ctrl.getView().task.layout === 'frames2';
+  const binHandlers = useMemo(() => {
+    const now = () => layoutOf(ctrl.getView(), basket);
     return dragTapHandlers({
       layout: getStageLayout,
-      inside: (p) => inRect(p, trayRect(f2()), 4),
+      inside: (p) => {
+        const b = now().bin;
+        return !!b && inRect(p, b, 4);
+      },
+      onTap: () => ctrl.tapBin(),
+      onDragMove: (p) => ctrl.setDrag(p),
+      // Dropping anywhere on the tray places into the next empty cell (SPEC §1.3).
+      onDrop: (p) => {
+        if (inRect(p, now().tray, 24)) ctrl.tapBin();
+        else ctrl.touch(); // dropped elsewhere: the item goes back
+      },
+    });
+  }, [ctrl, basket]);
+  const trayHandlers = useMemo(() => {
+    const now = () => layoutOf(ctrl.getView(), basket);
+    const cap = () => ctrl.getView().tray.capacity;
+    return dragTapHandlers({
+      layout: getStageLayout,
+      inside: (p) => inRect(p, now().tray, 4),
       onTap: (_p, start) => {
-        const i = cellAt(start, f2());
+        const i = cellAt(start, now(), cap());
         if (i === null) return ctrl.touch();
         if (i < ctrl.getView().tray.filled) ctrl.tapItem(i);
         else ctrl.tapEmpty(i);
       },
       canDrag: (start) => {
-        const i = cellAt(start, f2());
+        const i = cellAt(start, now(), cap());
         return i !== null && i < ctrl.getView().tray.filled;
       },
       onDragMove: (p) => ctrl.setDrag(p),
       onDrop: (p) => {
         // Add mode: drag an item to the bin. Remove mode: drag it off the tray (SPEC §3.3).
         const add = ctrl.getView().tray.mode === 'add';
-        if (add ? inRect(p, L.bin, 24) : !inRect(p, trayRect(f2()), 0)) ctrl.dragAway();
+        const { bin, tray: t } = now();
+        if (add ? !!bin && inRect(p, bin, 24) : !inRect(p, t, 0)) ctrl.dragAway();
         else ctrl.touch();
       },
     });
-  }, [ctrl]);
+  }, [ctrl, basket]);
 
   const roles = ticketRoles(order.problem);
   const tokens: TicketToken[] = order.problem.display.map((t, i) => ({
@@ -205,33 +208,39 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor,
 
   const showTray = !v.padMode;
   const bubbleUp = v.bubble !== null;
-  // Pip steps back instead of vanishing; the line stays away until the monster is home (D91).
+  // Pip steps back down behind the counter instead of vanishing (D91). The line is up in the
+  // status bar now, clear of Pip and the monster, so it never steps away (D118).
   const pipShown = useHold(v.pipOut, PIP_EXIT_MS);
-  const lineAway = useHold(v.pipOut || bubbleUp, MONSTER_MOVE_MS);
+  const pipRect = bubbleUp ? SCENE.pipCounting : SCENE.pip;
   // The returning monster's walk-in plays once, as the next monster comes in (D108).
   const joining = useBlip(v.queueJoin, 1000);
   const removed = v.removed;
   const phase = v.attempt.phase;
   const lockedPhase = phase === 'plateCount' || phase === 'worked' || phase === 'eating';
 
+  const frameW = frameSize(L.frame.cell, L.frame.gap, L.frame.pad).w;
+  const frameProps = { cell: L.frame.cell, gap: L.frame.gap, pad: L.frame.pad, y: tray.y, tapTargets: true, testId: 'tray' };
+
   return (
     <div
-      className={`screen service phase-${v.attempt.phase}`}
+      className={`screen service phase-${v.attempt.phase} basket-${basket}`}
       data-testid="screen-service"
       data-phase={v.attempt.phase}
       data-stage={order.stage}
+      data-basket={basket}
     >
-      <div className="counter" aria-hidden="true" />
-      <DoorSign rect={L.door} onTap={onDoor} />
-      {/* The waiting line steps away while Pip is out or the bubble is up, so Pip stands on a clear
-          counter (D90) and the monster never walks back over it (D91). */}
-      {!lineAway && <Queue rect={L.queue} count={Math.max(0, v.remaining)} join={v.queueJoin} joining={joining} />}
-      {/* The CountTogether bubble is Pip's speech while it shows (D76, D90). */}
-      <Caption rect={L.caption} text={bubbleUp ? '' : v.caption} speaker={v.speaker} />
+      {/* ---- status bar (SPEC §5.4) ---- */}
+      <DoorSign rect={BAR.door} onTap={onDoor} />
+      <CoinJar rect={JAR} count={jarStart + v.landed} />
+      <WaitingLine rect={BAR.line} line={v.line} mini={BAR.mini} maxStep={BAR.miniStep} joining={joining} />
+      <ShopDoor rect={BAR.shop} />
 
+      {/* ---- room: the monster behind the counter, caption left of it, ticket right ---- */}
+      {/* The CountTogether bubble is Pip's speech while it shows (D76, D90). */}
+      <Caption rect={SCENE.caption} text={bubbleUp ? '' : v.caption} speaker={v.speaker} />
       <div
         className={`monster-slot mood-${v.mood}`}
-        style={at(bubbleUp ? (v.pipOut ? L.monsterAsideForPip : L.monsterAside) : L.monsterZone)}
+        style={at(bubbleUp ? SCENE.monsterAside : MONSTER)}
         data-testid="monster"
         data-mood={v.mood}
       >
@@ -241,73 +250,54 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor,
           react={v.eat?.step === 'react'}
           // A first-try serve gets a bigger reaction (visual only, D45).
           className={v.eat?.firstTry && v.eat.step === 'react' ? 'big' : undefined}
-          size={bubbleUp ? L.monsterAside.w : L.monsterZone.w}
+          size={bubbleUp ? SCENE.monsterAside.w : MONSTER.w}
         />
       </div>
       {pipShown && (
-        <div
-          className={`pip-slot ${!v.pipOut ? 'leaving' : v.speaker === 'pip' ? 'talking' : ''}`}
-          style={at(L.pip)}
-          data-testid={v.pipOut ? 'pip' : 'pip-leaving'}
-        >
-          <Pip />
+        // Pip pops up from behind the counter: the well clips him at its far edge (D114).
+        <div className="pip-well" style={{ ...at(pipRect), top: pipRect.y - 40, height: COUNTER_Y + 4 - pipRect.y + 40 }}>
+          <div
+            className={`pip-slot ${!v.pipOut ? 'leaving' : v.speaker === 'pip' ? 'talking' : ''}`}
+            style={{ left: 0, top: 40, width: pipRect.w, height: pipRect.h }}
+            data-testid={v.pipOut ? 'pip' : 'pip-leaving'}
+          >
+            <Pip />
+          </div>
         </div>
       )}
-      {bubbleUp && (
-        <ModelBubble
-          rect={L.bubble}
-          frames={bubbleFrames(v.bubble!, food)}
-          caption={v.bubbleCount}
-        />
-      )}
+      {bubbleUp && <ModelBubble rect={SCENE.bubble} frames={bubbleFrames(v.bubble!, food)} caption={v.bubbleCount} />}
       <Ticket
         key={v.index}
-        rect={bubbleUp ? L.ticketCounting : L.ticket}
+        rect={bubbleUp ? SCENE.ticketCounting : SCENE.ticket}
         tokens={tokens}
         food={food}
         solved={phase === 'eating' || phase === 'done' ? order.problem.answer : undefined}
         onTap={ctrl.replayTicket}
       />
 
+      {/* ---- counter row: Pip and the bell on one side, tray, basket on the dominant side ---- */}
       {showTray && (
         <>
           {order.stage === 0 && (
-            <div
-              className="cloche-plate"
-              style={at({ x: tray.x - 20, y: tray.y + tray.h - 14, w: tray.w + 40, h: 28 })}
-            />
+            <div className="cloche-plate" style={at({ x: tray.x - PLATE_BLEED, y: tray.y + tray.h - 14, w: tray.w + 2 * PLATE_BLEED, h: 28 })} />
           )}
           <div
             className={`tray ${v.editable ? '' : 'locked'}`}
             style={v.eat ? { transform: `translateY(-${EAT_SLIDE}px)`, transition: 'transform 0.3s ease' } : undefined}
           >
-            <TenFrame
-              cells={cells.slice(0, 10)}
-              cell={CELL}
-              gap={CELL_GAP}
-              pad={FRAME_PADDING}
-              x={tray.x}
-              y={tray.y}
-              tapTargets
-              testId="tray"
-              handlers={trayHandlers}
-            />
+            <TenFrame cells={cells.slice(0, 10)} {...frameProps} x={tray.x} handlers={trayHandlers} />
             {frames2 && (
               <TenFrame
                 cells={cells.slice(10)}
-                cell={CELL}
-                gap={CELL_GAP}
-                pad={FRAME_PADDING}
-                x={tray.x + FRAME.w + FRAMES_GAP}
-                y={tray.y}
-                tapTargets
-                testId="tray"
+                {...frameProps}
+                x={tray.x + frameW + L.frame.framesGap}
                 firstIndex={10}
                 handlers={trayHandlers}
               />
             )}
           </div>
           {v.tray.takenAwayRow && (
+            // In the basket's place (D117): on these forms tapping the basket does just what this does.
             <TapButton
               className={`taken-away ${cue === 'putBack' ? 'pulse' : ''}`}
               style={at(L.takenAway)}
@@ -332,25 +322,27 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor,
               />
             </TapButton>
           )}
-          <Bin
-            rect={L.bin}
-            food={food}
-            handlers={binHandlers}
-            pulsing={cue === 'place' || (cue === 'putBack' && !v.tray.takenAwayRow)}
-            wobble={v.binWobble}
-          />
-          {order.stage === 0 && (
-            <ClocheLid rect={L.clocheLid} onTap={ctrl.lowerCloche} dim={v.cloche !== 'peek'} />
+          {L.bin && (
+            <Bin
+              rect={L.bin}
+              food={food}
+              tall={L.tallBin}
+              handlers={binHandlers}
+              pulsing={cue === 'place' || cue === 'putBack'}
+              wobble={v.binWobble}
+            />
           )}
+          {/* After the basket, so the lid is drawn over the heap's edge, not under it. */}
+          {order.stage === 0 && <ClocheLid rect={L.lid} onTap={ctrl.lowerCloche} dim={v.cloche !== 'peek'} />}
         </>
       )}
 
       {v.padMode && (
-        <>
-          <PeekButton rect={L.s0Peek} onTap={ctrl.peek} dim={v.attempt.phase !== 'building'} />
-          <AnswerDisplay rect={L.s0Display} value={v.typed} />
+        <div className="s0-pad">
+          <PeekButton rect={L.peek} onTap={ctrl.peek} dim={v.attempt.phase !== 'building'} />
+          <AnswerDisplay rect={L.display} value={v.typed} />
           <Backspace
-            rect={L.s0Backspace}
+            rect={L.backspace}
             onTap={ctrl.backspace}
             pulsing={v.correctTyped !== null && !v.correctTyped.startsWith(v.typed)}
           />
@@ -358,12 +350,7 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor,
             <DigitButton
               key={d}
               digit={d}
-              rect={{
-                x: L.s0Digits.x + d * (BUTTON_MIN + L.s0DigitGap),
-                y: L.s0Digits.y,
-                w: BUTTON_MIN,
-                h: BUTTON_MIN,
-              }}
+              rect={L.digit(d)}
               onTap={() => ctrl.digit(d)}
               pulsing={
                 v.correctTyped !== null &&
@@ -372,19 +359,12 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor,
               }
             />
           ))}
-        </>
+        </div>
       )}
 
-      {v.ghost && <GhostHand target={v.ghost === 'bin' ? L.bin : L.bell} name={v.ghost} />}
-      {phase === 'offerHelp' && (
-        <HelpChoice yes={L.offerYes} no={L.offerNo} onYes={ctrl.help} onNo={ctrl.declineHelp} />
-      )}
-      <PipHat
-        rect={L.help}
-        onTap={ctrl.help}
-        pulsing={v.hatPulse || v.helpOffer || phase === 'offerHelp'}
-        dim={lockedPhase}
-      />
+      {v.ghost && <GhostHand target={v.ghost === 'bin' && L.bin ? L.bin : L.bell} name={v.ghost} />}
+      {phase === 'offerHelp' && <HelpChoice yes={L.offerYes} no={L.offerNo} onYes={ctrl.help} onNo={ctrl.declineHelp} />}
+      <PipHat rect={L.help} onTap={ctrl.help} pulsing={v.hatPulse || v.helpOffer || phase === 'offerHelp'} dim={lockedPhase} />
       <Bell
         rect={L.bell}
         onTap={ctrl.serve}
@@ -394,8 +374,8 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor,
       />
 
       {v.flights.map((f) => {
-        const from = center(cellRect(f.from, frames2));
-        const to = center(f.to === 'bin' ? L.bin : L.takenAway);
+        const from = center(cellOf(f.from));
+        const to = center(f.to === 'bin' && L.bin ? L.bin : L.takenAway);
         const style = {
           left: from.x - CELL / 2,
           top: from.y - CELL / 2,
@@ -409,18 +389,14 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor,
         );
       })}
       {v.drag && (
-        <div
-          className="drag-ghost"
-          style={{ left: v.drag.x - CELL / 2, top: v.drag.y - CELL / 2 }}
-          aria-hidden="true"
-        >
+        <div className="drag-ghost" style={{ left: v.drag.x - CELL / 2, top: v.drag.y - CELL / 2 }} aria-hidden="true">
           {glyph}
         </div>
       )}
       {v.eat?.flown &&
         Array.from({ length: v.eat.plate.count }, (_, k) => {
           const p = v.eat!.plate;
-          const r = p.source === 'pad' ? L.s0Display : p.source === 'taken' ? takenRect(k) : cellRect(p.from + k, frames2);
+          const r = p.source === 'pad' ? L.display : p.source === 'taken' ? takenRect(k, L.takenAway) : cellOf(p.from + k);
           const from = { x: r.x + r.w / 2, y: r.y + r.h / 2 - (p.source === 'tray' ? EAT_SLIDE : 0) };
           const style = {
             left: from.x - CELL / 2,
@@ -437,6 +413,7 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor,
         })}
       {v.eat &&
         Array.from({ length: v.eat.coinsOut }, (_, k) => (
+          // Coins rise from the monster up into the jar in the status bar (SPEC §9).
           <div
             key={`c${k}`}
             className="coin-flight"
@@ -444,17 +421,13 @@ export function ServiceScreen({ orders, seed, svc, dev, onDone, onCoins, onDoor,
               {
                 left: MOUTH.x - 22,
                 top: MOUTH.y - 60,
-                '--dx': `${JAR.x + 40 - MOUTH.x}px`,
+                '--dx': `${JAR.x + 35 - MOUTH.x}px`,
                 '--dy': `${JAR.y + JAR.h / 2 - MOUTH.y + 60}px`,
               } as CSSProperties
             }
             aria-hidden="true"
           />
         ))}
-      <div className="service-jar" style={at(JAR)} data-testid="service-jar" data-count={jarStart + v.landed}>
-        <span className="coin-icon" aria-hidden="true" />
-        <span className="coin-count">{jarStart + v.landed}</span>
-      </div>
       {v.attempt.phase === 'eating' && (
         // Any tap skips the eat/react time (SPEC §5.6, D56).
         <TapButton className="skip-layer" testId="skip" label="Skip" onTap={ctrl.skip}>

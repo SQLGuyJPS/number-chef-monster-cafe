@@ -10,7 +10,9 @@ import { newId } from '../storage/ids';
 import { configFor, loadSkillConfigs, type SkillConfigs } from './skillConfig';
 import { getStorageBoot, takeSeedOverride } from './runtime';
 import { Stage } from './Stage';
-import { CafeScene } from '../art/CafeScene';
+import { CounterScene } from '../art/CounterScene';
+import { loadBasketSide } from './basketSide';
+import type { BasketSide } from './metrics';
 import { Splash } from './screens/Splash';
 import { Home } from './screens/Home';
 import { Results } from './screens/Results';
@@ -51,20 +53,32 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   const [results, setResults] = useState<ServiceSummary | null>(null);
   /** First-ever warm-up order already shown on this device (SPEC §5.4, D26); `meta` store. */
   const [warmupShown, setWarmupShown] = useState(true);
+  /** Per-device basket side (D115), read with the skill configs so a service starts with it. */
+  const [basket, setBasket] = useState<BasketSide>('right');
+  /** The dish tiles wait for the per-device settings, so a quick first tap can't start with defaults. */
+  const [settingsReady, setSettingsReady] = useState(() => getStorageBoot() === null);
 
   // Stage/operations per skill from the ?debug picker (D52); read whenever the menu opens so the
   // tile tap can start the service synchronously, inside the user gesture.
   useEffect(() => {
     if (screen !== 'menu' && screen !== 'home') return;
     let live = true;
-    void getStorageBoot()?.then(async (boot) => {
-      const c = await loadSkillConfigs(boot.storage);
-      const warm = (await boot.storage.getMeta('warmupShown')) === true;
-      if (!live) return;
-      setConfigs(c);
-      setWarmupShown(warm);
-      setDeviceId(boot.deviceId);
-    });
+    const booting = getStorageBoot();
+    // No storage (ready from the start), or reading it fails: play with the defaults rather than
+    // leave the tiles dead.
+    void booting
+      ?.then(async (boot) => {
+        const c = await loadSkillConfigs(boot.storage);
+        const warm = (await boot.storage.getMeta('warmupShown')) === true;
+        const side = await loadBasketSide(boot.storage);
+        if (!live) return;
+        setConfigs(c);
+        setBasket(side);
+        setWarmupShown(warm);
+        setDeviceId(boot.deviceId);
+        setSettingsReady(true);
+      })
+      .catch(() => setSettingsReady(true));
     return () => {
       live = false;
     };
@@ -139,8 +153,12 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   if (screen === 'parent') return <ParentScreen onBack={() => go('home')} />;
 
   return (
-    <Stage allowRotate={allowRotate} background={<div className="cafe-backdrop" />}>
-      <CafeScene />
+    <Stage
+      allowRotate={allowRotate}
+      background={<div className="cafe-backdrop counter-backdrop" />}
+    >
+      {/* Every child screen is seen from behind the same counter (D114, D123). */}
+      <CounterScene />
       {screen === 'splash' && (
         <Splash
           onStart={() => {
@@ -162,7 +180,13 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
         />
       )}
       {screen === 'menu' && (
-        <Menu onHome={() => go('home')} onPick={startService} configs={configs} />
+        <Menu
+          onHome={() => go('home')}
+          onPick={startService}
+          configs={configs}
+          coins={coins}
+          ready={settingsReady}
+        />
       )}
       {screen === 'service' && service && (
         <ServiceScreen
@@ -172,6 +196,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
           svc={service.svc}
           dev={deviceId}
           jar={coins}
+          basket={basket}
           onDoor={() => setBreakOpen(true)}
           onCoins={(n) => setCoins((c) => c + n)}
           onDone={(summary) => {
@@ -183,6 +208,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
       {screen === 'results' && service && results && (
         <Results
           coins={results.coins}
+          jar={coins}
           monsters={results.monsters}
           // SPEC §5.7: Another service repeats the skill; Change dish goes back to the menu board.
           onAnother={() => startService(service.skill)}
