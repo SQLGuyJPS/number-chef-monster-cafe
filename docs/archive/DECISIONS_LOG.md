@@ -657,3 +657,13 @@ How to revisit: if the repeating ghost is distracting, show each hint once; `war
 **Why:** Owner review. Monsters come in at the room's door on the left and leave that way, so a line walking right read backwards. The lid looked off centre: it overlapped the plate's rim on one side and left a wide gap on the other.
 **How to revisit:** If the line reads better walking toward the monster, or the lid's art changes (then re-measure `LID_ART_SHIFT`).
 
+## D121 — Coin jar and leave sign move to the right of the status bar (2026-11-14)
+**What:** Status bar order, left to right: little café (x 8–120) · waiting line (x 128–952, walking left into the café) · coin jar (x 968–1144) · door sign (x 1160–1272). Amends D120's order (door sign and jar were at the left, before the café). The jar keeps this spot on every screen that shows it, and the leave sign's corner is the one the grown-ups' gear has on Home. While the service uses `CounterScene` and Home, Menu and Results still use `CafeScene`, a shop decoration (D37) must be drawn in both scenes.
+**Why:** Owner review. With the line walking left, the jar and the leave sign sat at the end the monsters walk toward, so they read as part of the line's path.
+**How to revisit:** If the owner approves the counter versions of Home, Menu and Results (mocked under `?mock`), the D37 note goes away because every screen shares one scene.
+
+## D122 — At S0 the number pad hides during the help offer (2026-11-14)
+**What:** While OfferHelp's two picture buttons are up at S0, the whole pad (Peek, display, backspace, digits) hides along with the tray; Pip's hat stays. It comes back when the child picks.
+**Why:** In the counter layout the pad shares the band with the picture buttons. Leaving the digits under them put two sets of targets in one place, and a digit tapped by mistake would have been ignored anyway (the offer locks input, D89).
+**How to revisit:** If the child should see the typed number while choosing, show the display alone, greyed.
+

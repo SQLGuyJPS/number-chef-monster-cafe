@@ -139,7 +139,7 @@ export async function openService(page: Page, o: OpenOptions = {}): Promise<void
   );
   await tap(page, page.getByTestId('splash'));
   await tap(page, page.getByTestId('open-cafe'));
-  await expect(page.getByTestId('screen-menu')).toBeVisible();
+  await expect(page.getByTestId('screen-menu')).toHaveAttribute('data-ready', 'true');
   // The menu reads the stored config on open; give it a beat before the tile tap.
   await page.waitForTimeout(150);
   await tap(page, page.getByTestId(`tile-${o.skill ?? 'A1'}`));

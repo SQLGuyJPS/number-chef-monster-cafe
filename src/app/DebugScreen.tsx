@@ -102,11 +102,9 @@ export function DebugScreen() {
       <h1>Debug</h1>
       <h2>Counter layout mock</h2>
       <p>
-        {(['full', 'waist'] as const).map((m) => (
-          <button key={m} type="button" data-testid={`mock-${m}`} onClick={() => (location.search = `?mock&monster=${m}`)}>
-            Monster {m === 'full' ? 'full height' : 'to the waist'}
-          </button>
-        ))}
+        <button type="button" data-testid="mock-open" onClick={() => (location.search = '?mock')}>
+          Open the mock
+        </button>
       </p>
       <PlaytestTools />
     </div>

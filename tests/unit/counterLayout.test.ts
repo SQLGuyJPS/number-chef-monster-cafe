@@ -86,8 +86,7 @@ describe('counter layout table', () => {
       expect(r.y + r.h).toBeLessThanOrEqual(COUNTER_Y);
     }
     expect(overlaps(scene.ticket, scene.monsterFull)).toBe(false);
-    expect(overlaps(scene.ticket, scene.monsterWaist)).toBe(false);
-    expect(overlaps(scene.pip, scene.monsterWaist)).toBe(false);
+    expect(overlaps(scene.pip, scene.monsterFull)).toBe(false);
     expect(overlaps(scene.bubble, scene.pipCounting)).toBe(false);
     expect(overlaps(scene.bubble, scene.ticketCounting)).toBe(false);
     expect(overlaps(scene.pipCounting, scene.monsterAside)).toBe(false);
@@ -146,11 +145,13 @@ describe('service counter layout (counterLayout)', () => {
     }
   });
 
-  it('the waiting line walks left into the little café, right after the coin jar (D120)', () => {
+  it('the waiting line walks left into the little café; jar and leave sign stay clear on the right (D120, D121)', () => {
     const { bar } = COUNTER;
-    expect(bar.shop.x).toBeGreaterThan(bar.jar.x + bar.jar.w);
+    expect(bar.shop.x).toBeLessThan(bar.line.x);
     expect(bar.line.x).toBeGreaterThanOrEqual(bar.shop.x + bar.shop.w);
-    expect(bar.line.x + bar.line.w).toBeLessThanOrEqual(STAGE_W);
+    expect(bar.jar.x).toBeGreaterThanOrEqual(bar.line.x + bar.line.w);
+    expect(bar.door.x).toBeGreaterThanOrEqual(bar.jar.x + bar.jar.w);
+    expect(bar.door.x + bar.door.w).toBeLessThanOrEqual(STAGE_W);
   });
 
   it('S0 uses the pad row for Pip and the bell; the lifted cloche uses the shifted tray', () => {

@@ -328,6 +328,7 @@ export class ServiceController {
   private derive(): ServiceView {
     const s = this.s;
     const followTyping = this.stage === 0 && s.attempt.phase === 'followMe' && s.s0Typing;
+    const line = this.lineOf(s.index);
     return {
       ...s,
       // Pip also steps out to tell a first-time chef to ring the bell (SPEC §5.4).
@@ -342,8 +343,8 @@ export class ServiceController {
       removed: removedCount(s.tray),
       // A requeue joins the line only when the next monster comes in, so the line never grows
       // while the child watches the meal (D108).
-      remaining: this.lineOf(s.index).length,
-      line: this.lineOf(s.index),
+      remaining: line.length,
+      line,
       coins: this.events.filter((e) => e.k === 'coin').reduce((n, e) => n + (e as { n: number }).n, 0),
       landed: this.landed,
     };

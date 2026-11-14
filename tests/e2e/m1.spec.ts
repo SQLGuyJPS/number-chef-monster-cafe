@@ -364,9 +364,7 @@ test('Results: buttons wait for the count; a tap skips to the total with no spee
   await expect(page.getByTestId('screen-results')).toBeVisible({ timeout: 30_000 });
   const count = page.getByTestId('results-count');
   // Mid-count: a number between 1 and 22 shows, and no button exists yet.
-  await expect
-    .poll(async () => Number(await count.textContent()), { timeout: 5_000 })
-    .toBeGreaterThan(0);
+  await expect.poll(async () => Number(await count.textContent()), { timeout: 5_000 }).toBeGreaterThan(0);
   expect(Number(await count.textContent())).toBeLessThan(23);
   await expect(page.getByTestId('results-tally')).toHaveAttribute('data-done', 'false');
   for (const id of ['results-another', 'results-change', 'results-home'])
@@ -381,9 +379,7 @@ test('Results: buttons wait for the count; a tap skips to the total with no spee
   await expect(page.getByTestId('screen-results')).toBeVisible();
   // Longer than the rest of the count plus the beat before the total would have been said.
   await page.waitForTimeout(5_000);
-  expect(
-    await page.evaluate(() => window.__spoken.filter((t) => t.startsWith('You earned'))),
-  ).toEqual([]);
+  expect(await page.evaluate(() => window.__spoken.filter((t) => t.startsWith('You earned')))).toEqual([]);
   await expect(count).toHaveText('23');
 
   await tapId(page, 'results-home');
@@ -400,7 +396,7 @@ test('Results: Change dish goes to the menu board, Home goes home', async ({ pag
   }
   await expect(page.getByTestId('screen-results')).toBeVisible({ timeout: 10_000 });
   await tapId(page, 'results-change');
-  await expect(page.getByTestId('screen-menu')).toBeVisible();
+  await expect(page.getByTestId('screen-menu')).toHaveAttribute('data-ready', 'true');
   await tapId(page, 'tile-A2');
   for (let i = 0; i < 6; i++) {
     await expect.poll(async () => (await probe(page))?.index).toBe(i);

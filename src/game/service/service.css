@@ -166,7 +166,7 @@
 .choice.pulse {
   animation: pulse 1.2s ease-in-out infinite;
 }
-/* The tray hides behind the question so the two pictures are the only things to look at. */
+/* The tray (and at S0 the whole pad, D122) hides behind the question so the two pictures are the only things to look at. */
 .phase-offerHelp .tray,
 .phase-offerHelp .taken-away,
 .phase-offerHelp .s0-pad {

@@ -1,7 +1,6 @@
 /* Over-the-counter layout mock (`?mock`). Look only; geometry lives in metrics.ts (COUNTER). */
 .counter-mock .mock-monster {
   position: absolute;
-  overflow: hidden; /* waist mode: the counter's far edge hides the lower body */
 }
 .counter-mock .mock-monster > .monster-art {
   position: absolute;
@@ -89,4 +88,53 @@
   left: auto;
   right: 8px;
   top: 16px;
+}
+/* Menu: the dishes are little chalkboards standing on the counter. */
+.front-tile {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  border-radius: 22px;
+  background: var(--c-chalk);
+  color: var(--c-chalk-ink);
+  border: 10px solid #8a5a35;
+  box-sizing: border-box;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.15);
+}
+/* Results: the café's sign flips to CLOSED; the tally sits in the room above the served monsters. */
+.front-closed {
+  position: absolute;
+  left: 440px;
+  top: 6px;
+  width: 400px;
+  height: 104px;
+  display: grid;
+  place-items: center;
+  font-size: 76px;
+  font-weight: 700;
+  color: var(--c-chalk-ink);
+  background: var(--c-chalk);
+  border-radius: var(--radius);
+  animation: sign-flip 0.6s ease-out;
+}
+.results-tally.front-tally {
+  left: 490px;
+  top: 150px;
+  height: 130px;
+}
+.front-results-btn {
+  position: absolute;
+  box-sizing: border-box;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-size: 44px;
+}
+.front-glow {
+  font-size: 40px;
+  box-shadow: 0 0 0 8px var(--c-coin);
 }

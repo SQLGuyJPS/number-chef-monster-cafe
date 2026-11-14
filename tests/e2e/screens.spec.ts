@@ -1,5 +1,5 @@
 import { mkdirSync } from 'node:fs';
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { startApp, tap } from './helpers';
 import { followMe, openService, probe, ringBell, serveCorrect, serveWrong, tapId, waitPhase } from './service';
 
@@ -9,6 +9,14 @@ const milestone = process.env.NCMC_SCREENS;
 
 test.skip(!milestone, 'set NCMC_SCREENS=M<n> to capture milestone screenshots');
 
+
+/**
+ * Freezing animations mid-flight leaves the flying copies where they started (two burgers both on
+ * the tray and in the taken-away row), so a frozen shot waits for item flights to land first.
+ */
+async function landFlights(page: Page) {
+  await expect(page.locator('.flight')).toHaveCount(0, { timeout: 5_000 });
+}
 test('milestone screenshots', async ({ page }, info) => {
   const dir = `docs/screens/${milestone}`;
   mkdirSync(dir, { recursive: true });
@@ -55,6 +63,7 @@ test('service screenshots', async ({ page }, info) => {
   const vp = page.viewportSize()!;
   const tag = `${vp.width}x${vp.height}`;
   const shot = async (name: string) => {
+    await landFlights(page);
     await page.addStyleTag({ content: '*{animation:none!important;transition:none!important}' }).catch(() => undefined);
     await page.screenshot({ path: `${dir}/${name}-${tag}.png` });
   };
@@ -123,7 +132,10 @@ test('M2 screenshots', async ({ page }, info) => {
   const still = () =>
     page.addStyleTag({ content: '*{animation:none!important;transition:none!important}' }).catch(() => undefined);
   const shot = async (name: string, freeze = true) => {
-    if (freeze) await still();
+    if (freeze) {
+      await landFlights(page);
+      await still();
+    }
     await page.screenshot({ path: `${dir}/${name}-${tag}.png` });
   };
 
@@ -195,6 +207,7 @@ test('counter layout screenshots', async ({ page }, info) => {
   const vp = page.viewportSize()!;
   const tag = `${vp.width}x${vp.height}`;
   const shot = async (name: string) => {
+    await landFlights(page);
     await page.addStyleTag({ content: '*{animation:none!important;transition:none!important}' }).catch(() => undefined);
     await page.screenshot({ path: `${dir}/${name}-${tag}.png` });
   };

@@ -72,7 +72,6 @@ const TICKET_COUNTING_X = STAGE_W - 16 - TICKET_W;
 // ---------------------------------------------------------------------------------------------
 
 export type BasketSide = 'right' | 'left';
-export type MonsterCut = 'full' | 'waist';
 
 /** Status bar bottom and the counter's far edge (stage y). */
 export const BAR_H = 120;
@@ -108,15 +107,16 @@ const CLOCHE_LID_X = Math.round(
 /** One layout per mock variant; every rect a tap target or a band the child must see. */
 export const COUNTER = {
   /**
-   * Status bar (y 0–120): leave sign, coin jar, the little café, and the waiting line walking left
-   * into it (D120), the way monsters come in at the room's door on the left. The jar keeps one spot
-   * on every screen that shows it.
+   * Status bar (y 0–120): the little café at the left with the waiting line walking left into it
+   * (D120), the way monsters come in at the room's door on the left; the coin jar and the leave
+   * sign on the right, clear of the line's path (D121). The jar keeps one spot on every screen
+   * that shows it, and the leave sign takes the corner the gear has on Home.
    */
   bar: {
-    door: { x: 8, y: 4, w: BUTTON_MIN, h: BUTTON_MIN },
-    jar: { x: 136, y: 14, w: 176, h: 92 },
-    shop: { x: 328, y: 8, w: 112, h: 108 },
-    line: { x: 448, y: 8, w: 824, h: 108 },
+    shop: { x: 8, y: 8, w: 112, h: 108 },
+    line: { x: 128, y: 8, w: 824, h: 108 },
+    jar: { x: 968, y: 14, w: 176, h: 92 },
+    door: { x: STAGE_W - 8 - BUTTON_MIN, y: 4, w: BUTTON_MIN, h: BUTTON_MIN },
     /** Mini monsters in the line (real monsters, small), front of the line at the café, on the left. */
     mini: 76,
     miniStep: 84,
@@ -128,9 +128,7 @@ export const COUNTER = {
     ticketCounting: { x: TICKET_COUNTING_X, y: 140, w: TICKET_W, h: 220 },
     /** Full height: whole body, standing on the counter's far edge. */
     monsterFull: { x: 520, y: COUNTER_Y - 240, w: 240, h: 240 },
-    /** Waist: bigger, the lower 30 % (feet and lower belly) hidden behind the counter. */
-    monsterWaist: { x: 490, y: COUNTER_Y - 210, w: 300, h: 300 },
-    /** Pip pops up behind the counter, under the caption, clear of the waist-size monster. */
+    /** Pip pops up behind the counter, under the caption, clear of the monster. */
     pip: { x: 344, y: COUNTER_Y - 150, w: 124, h: 155 },
     /** CountTogether: Pip and the shrunken monster step left, the bubble fills to the ticket. */
     pipCounting: { x: 262, y: COUNTER_Y - 150, w: 124, h: 155 },

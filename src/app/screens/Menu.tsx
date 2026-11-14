@@ -22,13 +22,16 @@ export function Menu({
   onHome,
   onPick,
   configs,
+  ready,
 }: {
   onHome: () => void;
   onPick: (skill: SkillId) => void;
   configs: SkillConfigs;
+  /** Skill settings and basket side loaded (they are read when Home or the menu opens). */
+  ready: boolean;
 }) {
   return (
-    <div className="screen menu" data-testid="screen-menu">
+    <div className="screen menu" data-testid="screen-menu" data-ready={ready}>
       <div className="chalkboard">
         <div className="chalk-title">Little Menu</div>
         <div className="tiles">
@@ -42,7 +45,7 @@ export function Menu({
                 className={`tile ${built ? '' : 'tile-soon'}`}
                 testId={`tile-${t.id}`}
                 tapKind="button"
-                inert={!built}
+                inert={!built || !ready}
                 onTap={() => onPick(t.id)}
               >
                 <span className="tile-name">{t.name}</span>

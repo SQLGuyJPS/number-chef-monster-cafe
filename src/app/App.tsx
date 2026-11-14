@@ -56,22 +56,30 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   const [warmupShown, setWarmupShown] = useState(true);
   /** Per-device basket side (D115), read with the skill configs so a service starts with it. */
   const [basket, setBasket] = useState<BasketSide>('right');
+  /** The dish tiles wait for the per-device settings, so a quick first tap can't start with defaults. */
+  const [settingsReady, setSettingsReady] = useState(() => getStorageBoot() === null);
 
   // Stage/operations per skill from the ?debug picker (D52); read whenever the menu opens so the
   // tile tap can start the service synchronously, inside the user gesture.
   useEffect(() => {
     if (screen !== 'menu' && screen !== 'home') return;
     let live = true;
-    void getStorageBoot()?.then(async (boot) => {
-      const c = await loadSkillConfigs(boot.storage);
-      const warm = (await boot.storage.getMeta('warmupShown')) === true;
-      const side = await loadBasketSide(boot.storage);
-      if (!live) return;
-      setConfigs(c);
-      setBasket(side);
-      setWarmupShown(warm);
-      setDeviceId(boot.deviceId);
-    });
+    const booting = getStorageBoot();
+    // No storage (ready from the start), or reading it fails: play with the defaults rather than
+    // leave the tiles dead.
+    void booting
+      ?.then(async (boot) => {
+        const c = await loadSkillConfigs(boot.storage);
+        const warm = (await boot.storage.getMeta('warmupShown')) === true;
+        const side = await loadBasketSide(boot.storage);
+        if (!live) return;
+        setConfigs(c);
+        setBasket(side);
+        setWarmupShown(warm);
+        setDeviceId(boot.deviceId);
+        setSettingsReady(true);
+      })
+      .catch(() => setSettingsReady(true));
     return () => {
       live = false;
     };
@@ -148,7 +156,9 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   return (
     <Stage
       allowRotate={allowRotate}
-      background={<div className={`cafe-backdrop ${screen === 'service' ? 'counter-backdrop' : ''}`} />}
+      background={
+        <div className={`cafe-backdrop ${screen === 'service' ? 'counter-backdrop' : ''}`} />
+      }
     >
       {/* The service is seen from behind the counter (D114); the other screens keep the room. */}
       {screen === 'service' ? <CounterScene /> : <CafeScene />}
@@ -173,7 +183,12 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
         />
       )}
       {screen === 'menu' && (
-        <Menu onHome={() => go('home')} onPick={startService} configs={configs} />
+        <Menu
+          onHome={() => go('home')}
+          onPick={startService}
+          configs={configs}
+          ready={settingsReady}
+        />
       )}
       {screen === 'service' && service && (
         <ServiceScreen
