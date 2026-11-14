@@ -667,3 +667,8 @@ How to revisit: if the repeating ghost is distracting, show each hint once; `war
 **Why:** In the counter layout the pad shares the band with the picture buttons. Leaving the digits under them put two sets of targets in one place, and a digit tapped by mistake would have been ignored anyway (the offer locks input, D89).
 **How to revisit:** If the child should see the typed number while choosing, show the display alone, greyed.
 
+## D123 — Splash, Home, Menu and Results over the counter (2026-11-14)
+**What:** Every child screen uses `CounterScene`. The cream bar is the café's sign: "Number Chef · Monster Café" across it on Splash, "Monster Café" on Home, "Little Menu" on Menu, a chalk CLOSED sign on Results. The coin jar keeps its service spot (x 968–1144) on Home, Menu and Results; the gear on Home takes the corner the leave sign has during a service. Blobbo (and Pip on Home and Menu) stand behind the counter at their service spots. The counter top holds the targets: Splash's "Tap to start" card (the whole screen stays the tap target), Open the Café, Menu's dish tiles as little chalkboards beside Home, and Results' three buttons. Results puts the tally card in the room and the served monsters along the counter's far edge, squeezing their spacing for a long service. Geometry in `FRONT` (`metrics.ts`). The menu waits for the device's settings before its tiles take a tap. Resolves the D121 note: shop items are drawn once, in `CounterScene` (D37 holds). Open for M5: nine Little Menu tiles and the Big Menu tab do not fit one counter row.
+**Why:** Owner approved the mocks: the café should look the same before, during and after a service.
+**How to revisit:** At M5 (more tiles) and M4 (Decorate beside Open the Café).
+

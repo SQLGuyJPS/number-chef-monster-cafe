@@ -6,8 +6,6 @@ import { MIN_BUTTON_CSS_PX, MIN_CELL_CSS_PX } from '../../src/app/metrics';
 // 844×390 for every variant on both basket sides; screenshots only when NCMC_SCREENS is set:
 //   npx cross-env NCMC_SCREENS=counter-mock playwright test counterMock --project=chromium-ipad-pro-11 --project=webkit-iphone-13
 const VARIANTS = ['s3', 'taken', 'frames2', 's0', 'cloche', 'offer', 'count'] as const;
-/** Splash, Home, Menu and Results redrawn over the counter. */
-const FRONT = ['splash', 'home', 'menu', 'results'] as const;
 const SIDES = ['right', 'left'] as const;
 
 async function open(page: Page, q: string) {
@@ -38,12 +36,6 @@ test('every mock variant keeps the 844×390 tap minimums on both basket sides', 
       const small = found.filter((f) => Math.min(f.w, f.h) < f.need - 0.01);
       expect(small, `${v}/${side}: below the minimum`).toEqual([]);
     }
-  // The grown-ups' gear is not a child target (D95), so it carries no data-tap.
-  for (const v of FRONT) {
-    await open(page, `v=${v}`);
-    const small = (await measure(page)).filter((f) => Math.min(f.w, f.h) < f.need - 0.01);
-    expect(small, `${v}: below the minimum`).toEqual([]);
-  }
 });
 
 test('the two-frame crate holds its whole heap, tilt included, on both sides', async ({ page }, info) => {
@@ -86,7 +78,6 @@ test('counter mock screenshots', async ({ page }, info) => {
   // The other fit checks, and the longest line (8 orders, two requeues).
   for (const v of ['taken', 's0', 'cloche', 'offer', 'count']) await shot(`v=${v}`, `fit-${v}`);
   await shot('v=s3&line=9', 'line-of-nine');
-  for (const v of FRONT) await shot(`v=${v}`, `front-${v}`);
   for (const side of SIDES) await shot(`v=cloche&basket=${side}`, `cloche-basket-${side}`);
 
   // Measurements for the proposal against the D113 budget (4,800 on screen, 650 moving), with

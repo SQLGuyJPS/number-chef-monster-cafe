@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { MIN_BUTTON_CSS_PX, MIN_CELL_CSS_PX } from '../../src/app/metrics';
-import { openService, serveWrong, tapId, waitPhase } from './service';
+import { startApp } from './helpers';
+import { openService, probe, serveCorrect, serveWrong, tapId, waitPhase } from './service';
 
 // CLAUDE.md: primary tap targets ≥ 44 CSS px (cells) and ≥ 56 (buttons) at 844×390, measured on
 // the live service screen in every layout the child can reach in M1.
@@ -27,9 +28,9 @@ async function measure(page: Page): Promise<{ id: string; w: number; h: number; 
   );
 }
 
-async function expectAllBigEnough(page: Page, scene: string) {
+async function expectAllBigEnough(page: Page, scene: string, atLeast = 4) {
   const found = await measure(page);
-  expect(found.length, `${scene}: tap targets found`).toBeGreaterThan(3);
+  expect(found.length, `${scene}: tap targets found`).toBeGreaterThanOrEqual(atLeast);
   const small = found.filter((f) => Math.min(f.w, f.h) < f.need - 0.01);
   expect(small, `${scene}: targets below the minimum`).toEqual([]);
 }
@@ -95,3 +96,25 @@ for (const basket of ['right', 'left'] as const) {
     });
   });
 }
+
+// Splash, Home, Menu and Results over the counter (D123). The grown-ups' gear is not a child
+// target (D95) and is checked on its own in m0.
+test('front screens: Splash, Home, Menu and Results', async ({ page }) => {
+  test.setTimeout(60_000);
+  await page.goto('./');
+  await page.getByTestId('splash').waitFor();
+  await expectAllBigEnough(page, 'Splash', 1);
+  await startApp(page);
+  await expectAllBigEnough(page, 'Home', 1);
+  await tapId(page, 'open-cafe');
+  await expect(page.getByTestId('screen-menu')).toHaveAttribute('data-ready', 'true');
+  await expectAllBigEnough(page, 'Menu', 4);
+  await openService(page, { skill: 'A1', stage: 3, ops: 'add', seed: 6 });
+  for (let i = 0; i < 6; i++) {
+    await expect.poll(async () => (await probe(page))?.index, { timeout: 10_000 }).toBe(i);
+    await waitPhase(page, 'building');
+    await serveCorrect(page);
+  }
+  await expect(page.getByTestId('results-another')).toBeVisible({ timeout: 15_000 });
+  await expectAllBigEnough(page, 'Results', 3);
+});

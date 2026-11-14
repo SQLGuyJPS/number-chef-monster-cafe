@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { TapButton } from '../../game/input/TapButton';
 import { Monster } from '../../art/monsters/Monster';
+import { CoinJar, at } from '../../game/service/ServiceParts';
+import { COUNTER, FRONT } from '../metrics';
 import { hush, speakText } from '../../audio/speech';
 import { sfx } from '../../audio/sfx';
 import { phrase } from '../../engine/phrases';
@@ -22,15 +24,21 @@ const SKIP_REVEAL_MS = 300;
  * with a coin ting per step (slow, then faster up to a readable cap: engine/tally.ts), then the
  * total is said once and the buttons appear. A tap anywhere during the count skips to the total,
  * silently. The monsters served show as happy faces. No scores, streaks or nags.
+ * Over the counter (D123): the café's sign flips to CLOSED, the jar keeps its spot, the tally sits
+ * in the room above the served monsters standing along the counter's far edge, and the three
+ * buttons are on the counter top.
  */
 export function Results({
   coins,
+  jar,
   monsters,
   onAnother,
   onChangeDish,
   onHome,
 }: {
   coins: number;
+  /** The coin jar's total, this service's coins included. */
+  jar: number;
   monsters: string[];
   onAnother: () => void;
   onChangeDish: () => void;
@@ -101,31 +109,69 @@ export function Results({
       onPointerUp={onPointerEnd}
       onPointerCancel={onPointerEnd}
     >
-      <div className="closed-sign" aria-label="Closed">
+      <div className="closed-sign" style={at(FRONT.closed)} aria-label="Closed">
         CLOSED
       </div>
-      <div className="results-tally" data-testid="results-tally" data-total={coins} data-done={done}>
+      <CoinJar rect={COUNTER.bar.jar} count={jar} testId="coin-jar" />
+      <div
+        className="results-tally"
+        style={at(FRONT.tally)}
+        data-testid="results-tally"
+        data-total={coins}
+        data-done={done}
+      >
         <span className="coin-icon" aria-hidden="true" />
         <span className="coin-count" data-testid="results-count">
           {shown}
         </span>
       </div>
       <div className="results-faces" data-testid="results-faces">
-        {monsters.map((m, i) => (
-          <div key={i} className="results-face" data-monster={m}>
-            <Monster id={m} expression="delight" size={88} />
-          </div>
-        ))}
+        {monsters.map((m, i) => {
+          const f = FRONT.faces;
+          const step = Math.min(
+            f.size + f.gap,
+            (f.maxW - f.size) / Math.max(1, monsters.length - 1),
+          );
+          const x = Math.round((1280 - (f.size + step * (monsters.length - 1))) / 2 + i * step);
+          return (
+            <div
+              key={i}
+              className="results-face"
+              data-monster={m}
+              style={at({ x, y: f.y, w: f.size, h: f.size })}
+            >
+              <Monster id={m} expression="delight" size={f.size} />
+            </div>
+          );
+        })}
       </div>
       {done && (
         <>
-          <TapButton className="btn btn-primary results-another" testId="results-another" onTap={onAnother}>
+          <TapButton
+            className="btn btn-primary front-btn results-another"
+            style={at(FRONT.another)}
+            testId="results-another"
+            tapKind="button"
+            onTap={onAnother}
+          >
             Another service
           </TapButton>
-          <TapButton className="btn btn-secondary results-change" testId="results-change" onTap={onChangeDish}>
+          <TapButton
+            className="btn btn-secondary front-btn results-change"
+            style={at(FRONT.change)}
+            testId="results-change"
+            tapKind="button"
+            onTap={onChangeDish}
+          >
             Change dish
           </TapButton>
-          <TapButton className="btn btn-secondary results-home" testId="results-home" onTap={onHome}>
+          <TapButton
+            className="btn btn-secondary front-btn results-home"
+            style={at(FRONT.home)}
+            testId="results-home"
+            tapKind="button"
+            onTap={onHome}
+          >
             Home
           </TapButton>
         </>

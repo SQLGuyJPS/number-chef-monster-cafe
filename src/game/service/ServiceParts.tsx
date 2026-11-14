@@ -384,9 +384,9 @@ export function WaitingLine({
 }
 
 /** Coin jar in the status bar (SPEC §5.4, §9); the coins fly into it. */
-export function CoinJar({ rect, count }: { rect: Rect; count: number }) {
+export function CoinJar({ rect, count, testId = 'service-jar' }: { rect: Rect; count: number; testId?: string }) {
   return (
-    <div className="service-jar" style={at(rect)} data-testid="service-jar" data-count={count}>
+    <div className="service-jar" style={at(rect)} data-testid={testId} data-count={count} aria-label={`${count} coins`}>
       <div className="jar-icon">
         <CoinJarIcon />
       </div>

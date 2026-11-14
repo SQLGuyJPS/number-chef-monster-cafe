@@ -1,14 +1,30 @@
 import { TapButton } from '../../game/input/TapButton';
-import { Monster } from '../../art/monsters/Monster';
+import { at } from '../../game/service/ServiceParts';
+import { FRONT } from '../metrics';
+import { FrontMonster, FrontSign } from './FrontRoom';
 
-/** SPEC §5.1: the whole screen is the tap target; the tap unlocks audio and arms the back guard. */
+/**
+ * SPEC §5.1: the whole screen is the tap target; the tap unlocks audio and arms the back guard.
+ * Over the counter (D123): the bar is the café's name sign, Blobbo waits behind the counter, and
+ * "Tap to start" sits on a paper card on the counter top.
+ */
 export function Splash({ onStart }: { onStart: () => void }) {
   return (
-    <TapButton className="splash" testId="splash" label="Tap to start" onTap={onStart}>
-      <Monster id="blobbo" expression="idle" size={260} className="splash-monster" />
-      <span className="splash-title">Number Chef</span>
-      <span className="splash-sub">Monster Café</span>
-      <span className="splash-tap">Tap to start</span>
+    <TapButton
+      className="splash"
+      testId="splash"
+      tapKind="button"
+      label="Tap to start"
+      onTap={onStart}
+    >
+      <FrontSign rect={FRONT.signWide}>
+        <span className="front-title">Number Chef</span>
+        <span className="front-sub">Monster Café</span>
+      </FrontSign>
+      <FrontMonster />
+      <span className="front-tap" style={at(FRONT.tapCard)}>
+        Tap to start
+      </span>
     </TapButton>
   );
 }

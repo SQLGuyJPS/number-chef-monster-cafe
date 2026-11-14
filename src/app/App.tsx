@@ -10,7 +10,6 @@ import { newId } from '../storage/ids';
 import { configFor, loadSkillConfigs, type SkillConfigs } from './skillConfig';
 import { getStorageBoot, takeSeedOverride } from './runtime';
 import { Stage } from './Stage';
-import { CafeScene } from '../art/CafeScene';
 import { CounterScene } from '../art/CounterScene';
 import { loadBasketSide } from './basketSide';
 import type { BasketSide } from './metrics';
@@ -156,12 +155,10 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   return (
     <Stage
       allowRotate={allowRotate}
-      background={
-        <div className={`cafe-backdrop ${screen === 'service' ? 'counter-backdrop' : ''}`} />
-      }
+      background={<div className="cafe-backdrop counter-backdrop" />}
     >
-      {/* The service is seen from behind the counter (D114); the other screens keep the room. */}
-      {screen === 'service' ? <CounterScene /> : <CafeScene />}
+      {/* Every child screen is seen from behind the same counter (D114, D123). */}
+      <CounterScene />
       {screen === 'splash' && (
         <Splash
           onStart={() => {
@@ -187,6 +184,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
           onHome={() => go('home')}
           onPick={startService}
           configs={configs}
+          coins={coins}
           ready={settingsReady}
         />
       )}
@@ -210,6 +208,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
       {screen === 'results' && service && results && (
         <Results
           coins={results.coins}
+          jar={coins}
           monsters={results.monsters}
           // SPEC §5.7: Another service repeats the skill; Change dish goes back to the menu board.
           onAnother={() => startService(service.skill)}

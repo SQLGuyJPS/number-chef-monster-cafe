@@ -190,3 +190,33 @@ export const COUNTER = {
 
 /** A counter-band rect for the child's basket side. */
 export const forSide = (r: Rect, side: BasketSide): Rect => (side === 'left' ? mirrorX(r) : r);
+
+// ---------------------------------------------------------------------------------------------
+// Splash, Home, Menu and Results over the same counter (SPEC §5.1–5.3, §5.7, D123). The cream bar
+// is the café's sign (its name, "Little Menu", or CLOSED); the jar and the corner past it keep
+// their service spots; the counter top holds what the child taps.
+// ---------------------------------------------------------------------------------------------
+const FRONT_BTN_Y = 500;
+export const FRONT = {
+  sign: { x: 400, y: 0, w: 480, h: 110 },
+  signWide: { x: 0, y: 0, w: STAGE_W, h: 110 },
+  closed: { x: 440, y: 6, w: 400, h: 104 },
+  /** The grown-ups' gear in the leave sign's corner (D95, D121). */
+  gear: {
+    x: COUNTER.bar.door.x + (BUTTON_MIN - GEAR_SIZE) / 2,
+    y: COUNTER.bar.door.y + (BUTTON_MIN - GEAR_SIZE) / 2,
+    w: GEAR_SIZE,
+    h: GEAR_SIZE,
+  },
+  tapCard: { x: 400, y: FRONT_BTN_Y, w: 480, h: 160 },
+  open: { x: 390, y: 490, w: 500, h: 180 },
+  menuHome: { x: 24, y: 510, w: 220, h: 140 },
+  /** Dish tiles: little chalkboards standing on the counter, left to right. */
+  tiles: { x: 280, y: 470, w: 300, h: 220, step: 324 },
+  tally: { x: 490, y: 150, w: 300, h: 130 },
+  /** Served monsters stand along the counter's far edge; a long service squeezes the spacing. */
+  faces: { size: 96, gap: 16, y: COUNTER_Y + 4 - 96, maxW: 1200 },
+  change: { x: 120, y: FRONT_BTN_Y, w: 300, h: BIG_BUTTON },
+  another: { x: 470, y: FRONT_BTN_Y, w: 340, h: BIG_BUTTON },
+  home: { x: 860, y: FRONT_BTN_Y, w: 300, h: BIG_BUTTON },
+} as const;
