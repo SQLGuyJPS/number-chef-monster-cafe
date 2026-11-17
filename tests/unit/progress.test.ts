@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { Progress } from '../../src/app/progress';
 import { DEBUG_SKILL_CONFIG_KEY } from '../../src/app/skillConfig';
 import { attemptEvent, coinEvent, serviceEndEvent } from '../../src/engine/events';
-import { balance, replay } from '../../src/engine/replay';
+import { balance, replay, type Derived } from '../../src/engine/replay';
 import { IdbStorage } from '../../src/storage/idb';
 import { MemoryStorage } from '../../src/storage/memory';
 import { migrateStored } from '../../src/storage/open';
@@ -95,6 +95,16 @@ describe('Progress (derived state in memory, log on disk)', () => {
     const again = await Progress.load(s, 'dev', deps);
     expect(balance(again.derived)).toBe(6);
     expect(await s.getState()).toEqual({ throughEventCount: 2, derived: again.derived });
+  });
+
+  it('a cache from before the two box sets (D127) is rebuilt from the log', async () => {
+    const s = new MemoryStorage();
+    const e = attemptEvent(ctx, { svc: 's', fact: 'A1:+:2,3', skill: 'A1', stage: 1, outcome: 'first', ms: 1 });
+    const { shape: _shape, ...current } = replay([e]);
+    const old: unknown = { ...current, facts: { 'A1:+:2,3': { box: 1, seen: 1, first: 1 } } };
+    await s.commit({ events: [e], state: { throughEventCount: 1, derived: old as Derived } });
+    const p = await Progress.load(s, 'dev', deps);
+    expect(p.derived.facts['A1:+:2,3']).toEqual({ tray: 1, num: 0, seen: 1, first: 1 });
   });
 
   it('an event that sorts before the last (clock set back) leaves the cache to rebuild on the next boot', async () => {

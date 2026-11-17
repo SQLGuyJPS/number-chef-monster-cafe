@@ -140,33 +140,35 @@ export function Mouth({
       <g>
         <path d={`M${cx - half} ${cy} Q${cx} ${cy + depth * 1.4} ${cx + half} ${cy} Z`} fill={INK} stroke={INK} strokeWidth={sw * 0.6} strokeLinejoin="round" />
         <ellipse cx={cx} cy={cy + depth * 0.5} rx={half * 0.45} ry={depth * 0.22} fill={TONGUE} />
-        {toothy && <Teeth cx={cx} cy={cy} half={half} style={teeth} />}
+        {/* Teeth hang from the top lip, so they ride up with it when the mouth opens. */}
+        {toothy && <Teeth cx={cx} top={cy} half={half} style={teeth} />}
       </g>
     );
   }
   return (
     <g>
       <path d={`M${cx - half} ${cy} Q${cx} ${cy + half * 0.8} ${cx + half} ${cy}`} {...stroke(sw)} />
-      {toothy && <Teeth cx={cx} cy={cy + half * 0.12} half={half} style={teeth} />}
+      {toothy && <Teeth cx={cx} top={cy + half * 0.3} half={half} style={teeth} />}
     </g>
   );
 }
 
-function Teeth({ cx, cy, half, style }: { cx: number; cy: number; half: number; style: 'fangs' | 'square' }) {
+/** `top`: the y the teeth hang from (the top lip). */
+function Teeth({ cx, top, half, style }: { cx: number; top: number; half: number; style: 'fangs' | 'square' }) {
   if (style === 'square') {
     const tw = half * 0.34;
     return (
       <g fill="#fff" stroke={INK} strokeWidth={2}>
-        <rect x={cx - tw - 1} y={cy + half * 0.18} width={tw} height={tw * 1.05} rx={3} />
-        <rect x={cx + 1} y={cy + half * 0.18} width={tw} height={tw * 1.05} rx={3} />
+        <rect x={cx - tw - 1} y={top} width={tw} height={tw * 1.05} rx={3} />
+        <rect x={cx + 1} y={top} width={tw} height={tw * 1.05} rx={3} />
       </g>
     );
   }
   const t = half * 0.22;
   return (
     <g fill="#fff" stroke={INK} strokeWidth={1.5} strokeLinejoin="round">
-      <path d={`M${cx - half * 0.55} ${cy + half * 0.2} l${t} 0 l-${t / 2} ${t * 1.2} Z`} />
-      <path d={`M${cx + half * 0.55 - t} ${cy + half * 0.2} l${t} 0 l-${t / 2} ${t * 1.2} Z`} />
+      <path d={`M${cx - half * 0.55} ${top} l${t} 0 l-${t / 2} ${t * 1.2} Z`} />
+      <path d={`M${cx + half * 0.55 - t} ${top} l${t} 0 l-${t / 2} ${t * 1.2} Z`} />
     </g>
   );
 }

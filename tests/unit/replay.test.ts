@@ -21,7 +21,6 @@ import {
   replay,
   seenSet,
   servicesOf,
-  startingBoxes,
   type Derived,
 } from '../../src/engine/replay';
 import { mulberry32, type Rng } from '../../src/engine/rng';
@@ -58,32 +57,38 @@ describe('nextBox (SPEC §4.2, D29)', () => {
   });
 });
 
-describe('starting preset (SPEC §4.2, §11.2)', () => {
-  it('known +1 and doubles at box 3, never as events', () => {
-    const init = startingBoxes();
-    expect(init['A1:+:1,1']).toBe(3);
-    expect(init['A2:+:1,7']).toBe(3);
-    expect(init['A2:+:4,4']).toBe(3);
-    expect(init['A2:+:3,4']).toBeUndefined();
-    expect(init['A3:?add:1,10']).toBeUndefined();
-    const d = replay([], init);
-    expect(d.count).toBe(0);
-    expect(boxOf(d, 'A2:+:4,4', init)).toBe(3);
-    expect(seenSet(d, init).has('A2:+:4,4')).toBe(true);
+describe('two box sets, no preset (SPEC §4.2, D127)', () => {
+  const at = (id: string, t: number, stage: Stage, outcome: Outcome, fact = 'A2:+:4,4') =>
+    attemptEvent(ctxAt(t, id), { svc: 's', fact, skill: 'A2', stage, outcome, ms: 1 });
+
+  it('no fact starts seen or above box 0: +1 and doubles are new like any other fact', () => {
+    const d = replay([]);
+    expect(boxOf(d, 'A2:+:4,4', 'tray')).toBe(0);
+    expect(boxOf(d, 'A2:+:1,7', 'num')).toBe(0);
+    expect(seenSet(d).size).toBe(0);
+    expect(boxMap(d, 'tray').size).toBe(0);
   });
-  it('a known fact answered first at S1 goes 3 → 4; a miss drops it to 0', () => {
-    const init = startingBoxes();
-    const up = replay(
-      [attemptEvent(ctxAt(1, 'a'), { svc: 's', fact: 'A2:+:4,4', skill: 'A2', stage: 1, outcome: 'first', ms: 1 })],
-      init,
-    );
-    expect(boxOf(up, 'A2:+:4,4', init)).toBe(4);
-    const down = replay(
-      [attemptEvent(ctxAt(1, 'a'), { svc: 's', fact: 'A2:+:4,4', skill: 'A2', stage: 3, outcome: 'fixed', ms: 1 })],
-      init,
-    );
-    expect(boxOf(down, 'A2:+:4,4', init)).toBe(0);
-    expect(boxMap(down, init).get('A2:+:4,4')).toBe(0);
+
+  it('a first try at S1 raises only the tray box; at S0 only the number box', () => {
+    const s1 = replay([at('a', 1, 1, 'first'), at('b', 2, 1, 'first')]);
+    expect(boxOf(s1, 'A2:+:4,4', 'tray')).toBe(2);
+    expect(boxOf(s1, 'A2:+:4,4', 'num')).toBe(0);
+    const s0 = replay([at('a', 1, 0, 'first')]);
+    expect(boxOf(s0, 'A2:+:4,4', 'tray')).toBe(0);
+    expect(boxOf(s0, 'A2:+:4,4', 'num')).toBe(1);
+    expect(seenSet(s0).has('A2:+:4,4')).toBe(true);
+  });
+
+  it('a miss resets the box of its own set: S3/S2/S1 the tray box, S0 the number box', () => {
+    const base = [at('a', 1, 1, 'first'), at('b', 2, 0, 'first'), at('c', 3, 0, 'first')];
+    const trayMiss = replay([...base, at('d', 4, 3, 'fixed')]);
+    expect(boxOf(trayMiss, 'A2:+:4,4', 'tray')).toBe(0);
+    expect(boxOf(trayMiss, 'A2:+:4,4', 'num')).toBe(2);
+    const numMiss = replay([...base, at('d', 4, 0, 'assisted')]);
+    expect(boxOf(numMiss, 'A2:+:4,4', 'tray')).toBe(1);
+    expect(boxOf(numMiss, 'A2:+:4,4', 'num')).toBe(0);
+    expect(boxMap(numMiss, 'tray').get('A2:+:4,4')).toBe(1);
+    expect(boxMap(numMiss, 'num').get('A2:+:4,4')).toBe(0);
   });
 });
 
@@ -138,16 +143,15 @@ const sorted = (es: Evt[]) => [...es].sort((a, b) => a.t - b.t || (a.id < b.id ?
 
 describe('replay ≡ incremental applyEvent (SPEC §11.2 property test)', () => {
   it('for 300 random logs, folding applyEvent in (t, id) order equals a full replay', () => {
-    const init = startingBoxes();
     for (let seed = 1; seed <= 300; seed++) {
       const rng = mulberry32(seed);
       const log = sorted(randomLog(rng, rng.int(0, 80)));
       let d: Derived = emptyDerived();
       for (const e of log) {
         expect(inOrder(d, e)).toBe(true);
-        d = applyEvent(d, e, init);
+        d = applyEvent(d, e);
       }
-      expect(d).toEqual(replay(log, init));
+      expect(d).toEqual(replay(log));
     }
   });
 
@@ -171,7 +175,7 @@ describe('replay ≡ incremental applyEvent (SPEC §11.2 property test)', () => 
   });
 
   it('survives a JSON round trip (the `state` cache)', () => {
-    const d = replay(randomLog(mulberry32(5), 50), startingBoxes());
+    const d = replay(randomLog(mulberry32(5), 50));
     expect(JSON.parse(JSON.stringify(d))).toEqual(d);
   });
 });
@@ -230,6 +234,6 @@ describe('stats for the progress list', () => {
       attemptEvent(ctxAt(t, id), { svc: 's', fact: 'A1:+:2,3', skill: 'A1', stage: 1, outcome, ms: 1 });
     const d = replay([a('1', 1, 'first'), a('2', 2, 'first'), a('3', 3, 'assisted'), a('4', 4, 'first')]);
     expect(d.skills.A1).toEqual({ problems: 4, first: 3, assisted: 1 });
-    expect(d.facts['A1:+:2,3']).toEqual({ box: 1, seen: 4, first: 3 });
+    expect(d.facts['A1:+:2,3']).toEqual({ tray: 1, num: 0, seen: 4, first: 3 });
   });
 });

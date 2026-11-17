@@ -28,9 +28,14 @@ export function BasketSidePicker() {
   if (!side) return null;
   return (
     <section data-testid="basket-side-picker">
-      <h2>Basket side (this device, from the next service)</h2>
+      <h2>Basket side</h2>
+      <p>
+        Puts the food basket on the side of the hand your child drags with, so their arm does not cross the tray.
+        Pip and the bell move to the other side.
+      </p>
       <p>
         <select
+          className="parent-select"
           data-testid="basket-side"
           value={side}
           onChange={(e) => void change(e.target.value === 'left' ? 'left' : 'right')}

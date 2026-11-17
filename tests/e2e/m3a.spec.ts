@@ -90,9 +90,7 @@ test('coins and the plan survive a reload: the service is offered back and conti
   await expect(page.getByTestId('coin-jar')).toHaveAttribute('data-count', '23');
 });
 
-test('Close the café writes a partial serviceEnd with no tip; the offer comes on the next launch; Not now clears it', async ({
-  page,
-}) => {
+test('Close the café writes a partial serviceEnd with no tip and is never offered back (D126)', async ({ page }) => {
   test.setTimeout(90_000);
   await openService(page, { skill: 'A2', stage: 3, seed: 9 });
   await serveTo(page, 1);
@@ -100,14 +98,25 @@ test('Close the café writes a partial serviceEnd with no tip; the offer comes o
   await tapId(page, 'close-cafe');
   await expect(page.getByTestId('screen-home')).toBeVisible();
   await expect(page.getByTestId('coin-jar')).toHaveAttribute('data-count', '3');
-  // Not offered in the same launch, right after the child chose to close.
   await page.waitForTimeout(500);
   await expect(page.getByTestId('resume-dialog')).toHaveCount(0);
   await expect.poll(async () => (await stored(page)).kinds.at(-1)).toBe('serviceEnd');
   const s = await stored(page);
   expect(s.events.at(-1)).toMatchObject({ k: 'serviceEnd', partial: true, tip: 0, served: 1 });
-  expect(s.resume?.index).toBe(1);
+  expect(s.resume).toBeUndefined();
 
+  // The child chose to close: the next launch does not ask.
+  await relaunch(page);
+  await page.waitForTimeout(800);
+  await expect(page.getByTestId('resume-dialog')).toHaveCount(0);
+  await expect(page.getByTestId('coin-jar')).toHaveAttribute('data-count', '3');
+});
+
+test('Not now clears a killed service; the next launch does not ask again', async ({ page }) => {
+  test.setTimeout(90_000);
+  await openService(page, { skill: 'A2', stage: 3, seed: 9 });
+  await serveTo(page, 1);
+  await expect.poll(async () => (await stored(page)).resume?.index).toBe(1);
   await relaunch(page);
   await expect(page.getByTestId('resume-dialog')).toBeVisible();
   await tapId(page, 'resume-no');
@@ -159,6 +168,13 @@ test('the Skills list behind the gear changes the next service; progress and sto
   await tap(page, page.getByTestId('splash'));
   await openGrownUps(page);
   await expect(page.getByTestId('stage-A2')).toHaveValue('3');
+  // Owner wording (D126): levels by name with a description; ops spelled out; basket side after Progress.
+  await expect(page.getByTestId('stage-A2').locator('option:checked')).toHaveText('Full tray with counting');
+  await expect(page.getByTestId('stage-help')).toContainText('Number pad');
+  await expect(page.getByTestId('ops-A2').locator('option:checked')).toHaveText('addition and subtraction');
+  await expect(page.getByTestId('basket-side-picker').locator('h2')).toHaveText('Basket side');
+  await expect(page.locator('[data-testid=progress-list] ~ [data-testid=basket-side-picker]')).toHaveCount(1);
+  await expect(page.getByTestId('basket-side-picker')).toHaveCount(1);
   await page.getByTestId('stage-A2').selectOption('0');
   await page.getByTestId('ops-A2').selectOption('sub');
   await expect.poll(async () => (await stored(page)).kinds.filter((k) => k === 'skillConfig').length).toBe(2);
@@ -184,7 +200,6 @@ test('the Skills list behind the gear changes the next service; progress and sto
 
   // The settings are events, so they survive a relaunch; the progress list counts the service.
   await relaunch(page);
-  await tapId(page, 'resume-no');
   await openGrownUps(page);
   await expect(page.getByTestId('stage-A2')).toHaveValue('0');
   await expect(page.getByTestId('ops-A2')).toHaveValue('sub');

@@ -15,7 +15,7 @@ import type { SkillId } from '../engine/types';
 import { newId } from '../storage/ids';
 import { configFor, type SkillConfig } from './skillConfig';
 import { getProgress, loadedProgress, useDerived } from './progress';
-import { balance, boxMap, seenSet } from '../engine/replay';
+import { balance, boxMap, boxSetOf, seenSet } from '../engine/replay';
 import { serviceEndEvent } from '../engine/events';
 import { endOfStored, isOfferable, makeResume, restorePlan, type ResumeSnapshot } from '../engine/resume';
 import { ResumeDialog } from './ResumeDialog';
@@ -181,17 +181,15 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
     const cfg = configFor(configs, skill);
     // SPEC §4.1 step 1: seed from device, start time and a per-device counter (the e2e hook may pin it).
     const seed = takeSeedOverride() ?? hashSeed(deviceId, wallNow(), ++serviceCounter);
-    // Boxes and the seen set come from the event log on top of the known preset (SPEC §4.1, §4.2).
-    const progress = loadedProgress();
-    const initial = progress?.initial ?? {};
+    // Boxes (the set for this stage, D127) and the seen set come from the event log (SPEC §4.1, §4.2).
     const plan = buildService({
       seed,
       skill,
       ops: cfg.ops,
       stage: cfg.stage,
       orders: ORDERS_PER_SERVICE,
-      boxes: boxMap(derived, initial),
-      seen: seenSet(derived, initial),
+      boxes: boxMap(derived, boxSetOf(cfg.stage)),
+      seen: seenSet(derived),
       monsters: REGULARS,
     });
     // The warm-up runs once per device; the flag is set as it starts, so leaving early never
@@ -203,7 +201,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
     }
     const run: RunningService = { svc: newId(), skill, seed, orders, config: cfg, planned: ORDERS_PER_SERVICE };
     // Stored from the start, so a reload before the first serve can still offer it back (D125).
-    progress?.setResume(snapshotOf(run, { nextIndex: 0, orders, results: [], coins: 0, activeMs: 0 }));
+    loadedProgress()?.setResume(snapshotOf(run, { nextIndex: 0, orders, results: [], coins: 0, activeMs: 0 }));
     setService(run);
     go('service');
   };
@@ -233,8 +231,9 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   };
 
   /**
-   * `serviceEnd` (SPEC §11.2): partial when orders were left (Close the café, no tip), which keeps
-   * the resume row; a finished service clears it.
+   * `serviceEnd` (SPEC §11.2): partial when orders were left (Close the café, no tip). Either way
+   * the resume row is cleared: only a service the app lost (killed, reloaded) is offered back,
+   * never one the child chose to close (D126).
    */
   const endService = (run: RunningService, sum: ServiceSummary) => {
     const progress = loadedProgress();
@@ -250,7 +249,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
       activeMs: sum.activeMs,
       partial,
     });
-    progress.append([end], partial ? undefined : null);
+    progress.append([end], null);
   };
 
   const continueService = (snap: ResumeSnapshot) => {
@@ -359,7 +358,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
             setBreakOpen(false);
             pushGuard();
           }}
-          // Mid-service only (D46): a partial serviceEnd, no tip, and the resume row stays (SPEC §5.8);
+          // Mid-service only (D46): a partial serviceEnd, no tip, and the resume row goes (SPEC §5.8, D126);
           // with every order already served it is the finished service's end, tip included.
           onCloseCafe={
             screen === 'service'
