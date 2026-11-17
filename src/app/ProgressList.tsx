@@ -98,9 +98,9 @@ export function ProgressList() {
         </tbody>
       </table>
       <p className="parent-note">
-        Each fact has two boxes. Tray boxes move up only on a right first answer at Empty tray; Number boxes
-        only on a right first answer at Number pad. On a full tray the boxes stay put. A miss or Pip&apos;s full
-        help puts the box for that level back to 0 (the full trays and Empty tray share the Tray box). The
+        Each fact has two boxes. Tray boxes move up only on a right first answer at Level 3; Number boxes only
+        on a right first answer at Level 4. At Levels 1 and 2 the boxes stay put. A miss or Pip&apos;s full help
+        puts the box for that level back to 0 (Levels 1–3 share the Tray box). The
         game picks facts using the boxes for the dish&apos;s current level: lower boxes come up more often.
       </p>
     </section>

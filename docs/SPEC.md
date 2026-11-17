@@ -181,7 +181,7 @@ interface TrayTask {         // derived from Problem + Stage, pure function
 
 The stage is a per-skill parent setting (default S3, D3, D23), stored as a `skillConfig` event and applied from the next service.
 
-Parents see the stages by name, with a one-line description each, in Parent → Skills (D126): S3 *Full tray with counting*, S2 *Full tray, no counting*, S1 *Empty tray*, S0 *Number pad*. The S-codes are internal.
+Parents see the stages by name, with a one-line description each, in Parent → Skills (D126, D128): S3 *Level 1: Most help* (the tray starts partially filled; Pip counts each tap aloud), S2 *Level 2: Some help* (prefilled tray, no spoken counts; a tone per tap), S1 *Level 3: Little help* (fill an empty tray), S0 *Level 4: No help* (type the answer on a number pad). The S-codes are internal.
 
 | Stage | Name | What the child sees/does | Tray starts | Sound per tap |
 |---|---|---|---|---|

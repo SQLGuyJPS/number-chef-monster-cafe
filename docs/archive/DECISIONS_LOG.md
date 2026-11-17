@@ -705,3 +705,8 @@ How to revisit: if the repeating ghost is distracting, show each hint once; `war
 - (c) The progress list shows both sets per dish ("Tray boxes", "Number boxes", and the never-seen facts apart).
 **Why:** Owner playtest. At *Empty tray* the child reliably solves any fact by counting out (taps for each addend; for subtraction, lay out the minuend and take away the subtrahend, as her workbook teaches). A first-try success there says little about recall at the number pad, which is closer to the flash cards the box method was built for, so S1 successes must not lower how often a fact comes up at S0.
 **How to revisit:** If S1 boxes prove meaningless, stop raising them at S1 (boxes only at S0). If a parent wants known facts seeded, M7's starting-point toggles write a `known` event.
+
+## D128 — Support levels renamed Level 1–4 by amount of help (2026-11-17)
+**What:** Parent-facing names and descriptions replace D126 (b): S3 *Level 1: Most help* — the tray starts partially filled; Pip counts each tap aloud. S2 *Level 2: Some help* — prefilled tray, no spoken counts; a tone per tap. S1 *Level 3: Little help* — fill an empty tray. S0 *Level 4: No help* — type the answer on a number pad. The progress list's note refers to the levels by number. S-codes stay internal.
+**Why:** Owner feedback after seeing the D126 names.
+**How to revisit:** Names live in `STAGE_NAMES` / `STAGE_HELP` (`src/app/SkillPicker.tsx`).

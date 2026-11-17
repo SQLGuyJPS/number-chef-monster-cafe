@@ -169,8 +169,8 @@ test('the Skills list behind the gear changes the next service; progress and sto
   await openGrownUps(page);
   await expect(page.getByTestId('stage-A2')).toHaveValue('3');
   // Owner wording (D126): levels by name with a description; ops spelled out; basket side after Progress.
-  await expect(page.getByTestId('stage-A2').locator('option:checked')).toHaveText('Full tray with counting');
-  await expect(page.getByTestId('stage-help')).toContainText('Number pad');
+  await expect(page.getByTestId('stage-A2').locator('option:checked')).toHaveText('Level 1: Most help');
+  await expect(page.getByTestId('stage-help')).toContainText('Level 4: No help');
   await expect(page.getByTestId('ops-A2').locator('option:checked')).toHaveText('addition and subtraction');
   await expect(page.getByTestId('basket-side-picker').locator('h2')).toHaveText('Basket side');
   await expect(page.locator('[data-testid=progress-list] ~ [data-testid=basket-side-picker]')).toHaveCount(1);

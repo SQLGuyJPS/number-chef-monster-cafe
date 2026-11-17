@@ -241,7 +241,7 @@ Owner notes (2026-11-17): coins persist after a kill; the question is clear and 
 ### M3a feedback round 1 (D126, D127)
 Progress from earlier builds keeps its events; the boxes are recomputed from them into the two sets on first open (a fact attempted at S1 before now counts in the Tray boxes).
 - [ ] **Close the café is not offered back.** Play an order, door sign → *Close the café*, kill the app and reopen: no question. Kill the app mid-service instead (no Close): the question still comes. Notes:
-- [ ] **Support level names.** Gear → hold → *Skills*: the four levels read *Full tray with counting · Full tray, no counting · Empty tray · Number pad*, each described above the list; operations read *addition and subtraction*. Clear? Notes:
+- [ ] **Support level names.** Gear → hold → *Skills*: the four levels read *Level 1: Most help · Level 2: Some help · Level 3: Little help · Level 4: No help*, each described above the list (D128); operations read *addition and subtraction*. Clear? Notes:
 - [ ] **Basket side** sits after Progress with a short description; the dropdown text is the same size as the body text and fits. Notes:
-- [ ] **Two box sets.** Progress shows *Tray boxes* and *Number boxes*. A few services at *Empty tray* move only the Tray boxes; a few at *Number pad* move only the Number boxes. +1 and doubles now start as new facts like any other (expect them to come up more often at first). Notes:
+- [ ] **Two box sets.** Progress shows *Tray boxes* and *Number boxes*. A few services at *Level 3* move only the Tray boxes; a few at *Level 4* move only the Number boxes. +1 and doubles now start as new facts like any other (expect them to come up more often at first). Notes:
 - [ ] **Chompers' teeth** stay attached to the top lip when he grins after eating (and Gruffles' fangs). Notes:

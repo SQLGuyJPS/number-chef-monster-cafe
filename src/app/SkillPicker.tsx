@@ -3,18 +3,18 @@ import { STAGES, type Ops, type SkillId, type Stage } from '../engine/types';
 import { loadedProgress, useDerived } from './progress';
 import { configFor } from './skillConfig';
 
-/** Support-level names for grown-ups (owner's wording, D126); the S-codes stay internal. */
+/** Support-level names for grown-ups (owner's wording, D128); the S-codes stay internal. */
 export const STAGE_NAMES: Record<Stage, string> = {
-  3: 'Full tray with counting',
-  2: 'Full tray, no counting',
-  1: 'Empty tray',
-  0: 'Number pad',
+  3: 'Level 1: Most help',
+  2: 'Level 2: Some help',
+  1: 'Level 3: Little help',
+  0: 'Level 4: No help',
 };
 export const STAGE_HELP: Record<Stage, string> = {
-  3: 'The tray starts filled; Pip counts each tap aloud.',
+  3: 'The tray starts partially filled; Pip counts each tap aloud.',
   2: 'Prefilled tray, no spoken counts; a tone per tap.',
-  1: 'Build the answer starting from an empty tray.',
-  0: 'No tray; the player types the answer. Peek shows the picture.',
+  1: 'Fill an empty tray.',
+  0: 'Type the answer on a number pad.',
 };
 const OPS: Ops[] = ['both', 'add', 'sub'];
 const OPS_NAMES: Record<Ops, string> = {
