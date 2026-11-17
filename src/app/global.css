@@ -380,10 +380,26 @@ html.debug-mode #root {
 .audio-test button:active {
   opacity: 0.6;
 }
-.debug-skills select {
+.debug-skills select,
+.parent-select {
   font-size: 16px;
   padding: 4px;
   min-height: 44px;
+}
+/* Wide enough that the basket-side choices read at the body size (owner playtest, D126). */
+.parent-select {
+  min-width: 18em;
+}
+.parent-levels {
+  max-width: 60em;
+  margin: 0 0 12px;
+}
+.parent-levels dt {
+  font-weight: bold;
+  margin-top: 6px;
+}
+.parent-levels dd {
+  margin: 0 0 0 1em;
 }
 .parent-progress table {
   border-collapse: collapse;

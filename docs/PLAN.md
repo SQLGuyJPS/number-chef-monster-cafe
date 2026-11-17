@@ -1,6 +1,6 @@
 # Build plan — Number Chef: Monster Café
 
-Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**; M1 playtest rounds 1–7 and the gear popup recorded in PLAYTEST.md (last 2026-11-09). **M2 done 2026-11-10** (started 2026-11-09); waiting for the M2 playtest. **M2b (device speed test, D112) added by the owner and done 2026-11-12**; the iPad result set the SVG budget (D113, 2026-11-12). **Play-time limit moved from M3b to Tier 2 milestone M12, postponed indefinitely (D124, 2026-11-14).** **M3a done 2026-11-14** (D125); waiting for the M3a playtest. Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
+Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**; M1 playtest rounds 1–7 and the gear popup recorded in PLAYTEST.md (last 2026-11-09). **M2 done 2026-11-10** (started 2026-11-09); waiting for the M2 playtest. **M2b (device speed test, D112) added by the owner and done 2026-11-12**; the iPad result set the SVG budget (D113, 2026-11-12). **Play-time limit moved from M3b to Tier 2 milestone M12, postponed indefinitely (D124, 2026-11-14).** **M3a done 2026-11-14** (D125); M3a playtest round 1 applied 2026-11-17 (D126, D127), waiting for the owner's re-check. Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
 
 ---
 
@@ -225,10 +225,16 @@ New per-device setting "Basket side: right (default) / left" goes in the gear to
 - [x] migration harness test (`migrations.test.ts`; `migrateStored` with a fake migration in `progress.test.ts`)
 - [x] storage persisted flag and estimate shown when available (e2e; "not available on this device" otherwise)
 
+**M3a playtest round 1 (2026-11-17, D126, D127)**
+- [x] Close the café clears the resume row; never offered back (e2e)
+- [x] Support levels named and described; ops "addition and subtraction"; basket side after Progress, described, wider dropdown (e2e)
+- [x] No known preset; tray (S3–S1) and number (S0) box sets; first-service new facts shared between operations; old state cache rebuilt (unit)
+- [x] Chompers' teeth hang from the top lip (gallery screenshot)
+
 ### M3b — Hand-off ready (1.5 h)
 The play-time limit moved to M12 (D124).
 1. Parent gate (long-press 2 s, 6–9 × 7–9 on a number pad, 3 wrong → 30 s lockout, 5 min auto-lock); unrotated parent area.
-2. Parent area: Skills list from M3a behind the gate; voice/speed/test; volumes; reduced motion; orders per service; basket side moves here from the playtest tools.
+2. Parent area: Skills list from M3a behind the gate; voice/speed/test; volumes; reduced motion; orders per service; basket side (already on the grown-ups' screen since D126).
 3. Data: Export (SHA-256, share fallbacks), Replace-only import (snapshot first, zod, checksum, second multiplication prompt), Reset (snapshot first, keeps `snapshots`, `ncmc*` only), install help text.
 4. E2E: gate lockout, export → reset → import round trip. Screenshots, PLAYTEST, commit, stop.
 

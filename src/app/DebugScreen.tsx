@@ -56,7 +56,7 @@ async function collect(): Promise<Info> {
  * Build/storage info, the stage/operations picker, the sound test and the speed-test link. Shown by
  * the `?debug` screen and, below the Skills and progress lists, by the grown-ups' screen (D94).
  */
-export function PlaytestTools({ skills = true }: { skills?: boolean }) {
+export function PlaytestTools({ skills = true, basket = true }: { skills?: boolean; basket?: boolean }) {
   const [info, setInfo] = useState<Info | null>(null);
   useEffect(() => {
     let live = true;
@@ -79,7 +79,7 @@ export function PlaytestTools({ skills = true }: { skills?: boolean }) {
       </table>
       {!info && <p>Loading…</p>}
       {skills && <SkillPicker />}
-      <BasketSidePicker />
+      {basket && <BasketSidePicker />}
       <AudioTest />
       <h2>Speed test</h2>
       <p>How many drawing pieces this device can show smoothly (D112). About 2 minutes.</p>

@@ -228,10 +228,20 @@ How to run: open the app from the **Home Screen icon**, tap the gear, hold the c
 
 ## M3a — Progress is kept; stage and operations per dish
 Use the **Home Screen app** on each device (a Safari tab keeps separate progress on iOS). The first time this build opens, the stage/operations you set in the old playtest picker carry over (D125).
-- [ ] **Coins stay.** Play two or three orders, then swipe the app away (kill it) and reopen. The jar shows the coins the child saw fly in. Notes:
-- [ ] **Continue dinner service?** After that reopen, the question appears on Home (Pip asks it aloud). *Keep cooking* picks up at the next monster in the same line-up; *Not now* gives a normal Home, and it does not ask again. Is the question clear to the child, and should she answer it or you? Notes:
-- [ ] **Close the café** (door sign → Close the café) keeps the coins and goes Home without asking at once; the next launch asks. Is that the right moment, or should it ask every time Home opens? Notes:
-- [ ] **Stage and operations knobs.** Gear → hold the circle → *Skills*: change a dish's stage (S3 Guided … S0 Numeral) and operations (both / addition only / subtraction only). The next service of that dish uses it; a running service does not change. Are these the right knobs, named so you understand them? Notes:
-- [ ] **Progress list** (same screen): after a few services, do the numbers match what you saw (services, problems, first try, Pip helped)? Boxes move only for a right first answer at S1/S0 (so at S3 they stay put). Is anything missing that you would check every week? Notes:
-- [ ] **Storage** (same screen): "Kept safe by the browser" should say *yes* for the Home Screen app on the iPad and iPhone (it may say *no* in a Safari tab), and "Space used" shows a size. Notes per device:
-- [ ] **Two devices stay separate.** Progress on the iPad does not appear on the phone (syncing is Export/Import, M3b and M7).
+- [x] **Coins stay.** Play two or three orders, then swipe the app away (kill it) and reopen. The jar shows the coins the child saw fly in. Notes:
+- [x] **Continue dinner service?** After that reopen, the question appears on Home (Pip asks it aloud). *Keep cooking* picks up at the next monster in the same line-up; *Not now* gives a normal Home, and it does not ask again. Is the question clear to the child, and should she answer it or you? Notes:
+- [x] **Close the café** (door sign → Close the café) keeps the coins and goes Home without asking at once; the next launch asks. Is that the right moment, or should it ask every time Home opens? Notes:
+- [x] **Stage and operations knobs.** Gear → hold the circle → *Skills*: change a dish's stage (S3 Guided … S0 Numeral) and operations (both / addition only / subtraction only). The next service of that dish uses it; a running service does not change. Are these the right knobs, named so you understand them? Notes:
+- [x] **Progress list** (same screen): after a few services, do the numbers match what you saw (services, problems, first try, Pip helped)? Boxes move only for a right first answer at S1/S0 (so at S3 they stay put). Is anything missing that you would check every week? Notes:
+- [x] **Storage** (same screen): "Kept safe by the browser" should say *yes* for the Home Screen app on the iPad and iPhone (it may say *no* in a Safari tab), and "Space used" shows a size. Notes per device:
+- [x] **Two devices stay separate.** Progress on the iPad does not appear on the phone (syncing is Export/Import, M3b and M7).
+
+Owner notes (2026-11-17): coins persist after a kill; the question is clear and fine for the child to answer; Close the café should never be offered back; S-names unclear; drop the +1/doubles preset; S1 is solved by counting out, so its boxes should not steer S0; storage says *yes* on both Home Screen apps; devices stay separate; Chompers' teeth float in the open mouth.
+
+### M3a feedback round 1 (D126, D127)
+Progress from earlier builds keeps its events; the boxes are recomputed from them into the two sets on first open (a fact attempted at S1 before now counts in the Tray boxes).
+- [ ] **Close the café is not offered back.** Play an order, door sign → *Close the café*, kill the app and reopen: no question. Kill the app mid-service instead (no Close): the question still comes. Notes:
+- [ ] **Support level names.** Gear → hold → *Skills*: the four levels read *Level 1: Most help · Level 2: Some help · Level 3: Little help · Level 4: No help*, each described above the list (D128); operations read *addition and subtraction*. Clear? Notes:
+- [ ] **Basket side** sits after Progress with a short description; the dropdown text is the same size as the body text and fits. Notes:
+- [ ] **Two box sets.** Progress shows *Tray boxes* and *Number boxes*. A few services at *Level 3* move only the Tray boxes; a few at *Level 4* move only the Number boxes. +1 and doubles now start as new facts like any other (expect them to come up more often at first). Notes:
+- [ ] **Chompers' teeth** stay attached to the top lip when he grins after eating (and Gruffles' fangs). Notes:

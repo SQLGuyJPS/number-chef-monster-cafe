@@ -34,9 +34,9 @@ export interface ServiceInput {
   ops: Ops;
   stage: Stage;
   orders: number;
-  /** Box per canonical factKey (SPEC §4.2); facts missing here start at box 0. */
+  /** Box per canonical factKey in the service's box set (SPEC §4.2, D127); missing = box 0. */
   boxes: ReadonlyMap<string, number>;
-  /** Facts already attempted or in the `known` preset; everything else is new (D29). */
+  /** Facts already attempted; everything else is new (D29, D127). */
   seen: ReadonlySet<string>;
   monsters: readonly MonsterRef[];
 }
@@ -114,13 +114,24 @@ export function buildService(input: ServiceInput): ServicePlan {
   if (input.ops === 'both') {
     const seenOf = (add: boolean) =>
       facts.filter((f) => f.add === add && input.seen.has(f.key)).length;
-    for (const [add, need] of [
-      [true, lo],
-      [false, input.orders - hi],
-    ] as const) {
-      const short = Math.min(MAX_NEW_FACTS - fresh.length, Math.max(0, need - seenOf(add)));
-      fresh.push(...ordered.filter((f) => f.add === add).slice(0, short));
+    const newOf = (add: boolean) => ordered.filter((f) => f.add === add);
+    const short = {
+      add: Math.min(newOf(true).length, Math.max(0, lo - seenOf(true))),
+      sub: Math.min(newOf(false).length, Math.max(0, input.orders - hi - seenOf(false))),
+    };
+    // When both operations are short (a first service: there is no preset since D127) the slots
+    // are shared: one each first, then to whichever still needs more, so neither is squeezed out.
+    const take = { add: 0, sub: 0 };
+    for (let slot = 0; slot < MAX_NEW_FACTS; slot++) {
+      const wantAdd = short.add - take.add;
+      const wantSub = short.sub - take.sub;
+      if (wantAdd <= 0 && wantSub <= 0) break;
+      if (wantAdd > 0 && take.add === 0) take.add++;
+      else if (wantSub > 0 && take.sub === 0) take.sub++;
+      else if (wantAdd >= wantSub) take.add++;
+      else take.sub++;
     }
+    fresh.push(...newOf(true).slice(0, take.add), ...newOf(false).slice(0, take.sub));
   }
   // The rest: with both operations, new addition and subtraction facts alternate (SPEC §4),
   // starting with whichever operation has fewer new facts so far; otherwise difficulty order.
@@ -239,23 +250,6 @@ export function withRequeue(
     requeue: true,
   };
   return [...plan.slice(0, p), order, ...plan.slice(p)];
-}
-
-/**
- * Default `known` preset (SPEC §4.2, D16): +1 in both orders and doubles, result forms only, in
- * A1, A2 and A7, at box 3.
- */
-export const KNOWN_BOX = 3;
-export function knownPreset(skill: SkillId): Map<string, number> {
-  const out = new Map<string, number>();
-  // A7 is not built yet (M5); its preset arrives with its pool.
-  if (skill !== 'A1' && skill !== 'A2') return out;
-  for (const p of pool(skill)) {
-    if (p.form !== 'add') continue;
-    const [a, b] = p.operands as [number, number];
-    if (a === 1 || b === 1 || a === b) out.set(p.factKey, KNOWN_BOX);
-  }
-  return out;
 }
 
 /**

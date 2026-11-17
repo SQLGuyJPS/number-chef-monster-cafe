@@ -3,14 +3,25 @@ import { STAGES, type Ops, type SkillId, type Stage } from '../engine/types';
 import { loadedProgress, useDerived } from './progress';
 import { configFor } from './skillConfig';
 
-const STAGE_NAMES: Record<Stage, string> = {
-  3: 'S3 Guided',
-  2: 'S2 Build',
-  1: 'S1 Build the answer',
-  0: 'S0 Numeral',
+/** Support-level names for grown-ups (owner's wording, D128); the S-codes stay internal. */
+export const STAGE_NAMES: Record<Stage, string> = {
+  3: 'Level 1: Most help',
+  2: 'Level 2: Some help',
+  1: 'Level 3: Little help',
+  0: 'Level 4: No help',
+};
+export const STAGE_HELP: Record<Stage, string> = {
+  3: 'The tray starts partially filled; Pip counts each tap aloud.',
+  2: 'Prefilled tray, no spoken counts; a tone per tap.',
+  1: 'Fill an empty tray.',
+  0: 'Type the answer on a number pad.',
 };
 const OPS: Ops[] = ['both', 'add', 'sub'];
-const OPS_NAMES: Record<Ops, string> = { both: 'both', add: 'addition only', sub: 'subtraction only' };
+const OPS_NAMES: Record<Ops, string> = {
+  both: 'addition and subtraction',
+  add: 'addition only',
+  sub: 'subtraction only',
+};
 /** What each built dish asks (SPEC §1.2), so the list reads without the skill codes. */
 export const SKILL_NAMES: Partial<Record<SkillId, string>> = {
   A1: 'A1 Little Bites (within 5)',
@@ -34,7 +45,15 @@ export function SkillPicker() {
   return (
     <section className="debug-skills" data-testid="skill-picker">
       <h2>Skills</h2>
-      <p>Stage and operations per dish. Changes apply from the next service.</p>
+      <p>Support level and operations per dish. Changes apply from the next service.</p>
+      <dl className="parent-levels" data-testid="stage-help">
+        {STAGES.map((st) => (
+          <div key={st}>
+            <dt>{STAGE_NAMES[st]}</dt>
+            <dd>{STAGE_HELP[st]}</dd>
+          </div>
+        ))}
+      </dl>
       <table>
         <tbody>
           {BUILT_SKILLS.map((skill) => {
@@ -45,7 +64,7 @@ export function SkillPicker() {
                 <td>
                   <select
                     data-testid={`stage-${skill}`}
-                    aria-label={`${skill} stage`}
+                    aria-label={`${skill} support level`}
                     value={c.stage}
                     onChange={(e) => change(skill, { stage: Number(e.target.value) as Stage })}
                   >

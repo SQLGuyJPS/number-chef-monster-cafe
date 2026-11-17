@@ -4,13 +4,20 @@
 import type { Outcome } from './attempt';
 import { MAX_BOX } from './config';
 import type { Evt } from './events';
-import { BUILT_SKILLS } from './generators';
-import { knownPreset } from './session';
 import type { Ops, SkillId, Stage } from './types';
 
 /**
- * Fact box rules (SPEC §4.2, D29): `first` at S1 or S0 moves a fact up one box (max 4); `first` at
- * S3/S2 and `afterHint` leave it; `fixed` and `assisted` reset it to 0 at every stage.
+ * Two box sets per fact (D127): the tray set for S3–S1, where the child builds the answer and
+ * can count it out, and the number set for S0, closer to recall. Success at one says little
+ * about the other, so they never mix.
+ */
+export type BoxSet = 'tray' | 'num';
+export const boxSetOf = (stage: Stage): BoxSet => (stage === 0 ? 'num' : 'tray');
+
+/**
+ * Fact box rules (SPEC §4.2, D29, D127), applied to the attempt's own box set: `first` at S1 or S0
+ * moves a fact up one box (max 4); `first` at S3/S2 and `afterHint` leave it; `fixed` and
+ * `assisted` reset it to 0 at every stage.
  */
 export function nextBox(box: number, outcome: Outcome, stage: Stage): number {
   switch (outcome) {
@@ -25,18 +32,15 @@ export function nextBox(box: number, outcome: Outcome, stage: Stage): number {
 }
 
 /**
- * The starting-state preset (SPEC §4.2, §11.2): applied implicitly, never as events, so two fresh
- * devices do not double-seed. Facts not in it start at box 0.
+ * Bumped when the shape of `Derived` changes, so an older `state` cache is rebuilt from the log
+ * (the events themselves do not change, so no migration, SPEC §11.3).
  */
-export type Initial = Readonly<Record<string, number>>;
-export function startingBoxes(skills: readonly SkillId[] = BUILT_SKILLS): Initial {
-  const out: Record<string, number> = {};
-  for (const s of skills) for (const [k, b] of knownPreset(s)) out[k] = b;
-  return out;
-}
+export const DERIVED_SHAPE = 2;
 
 export interface FactStat {
-  box: number;
+  /** Box in the tray set (S3–S1) and in the number set (S0), D127. */
+  tray: number;
+  num: number;
   /** `attempt` events for this fact. */
   seen: number;
   /** Of those, first-try correct (no Help, no miss). */
@@ -57,11 +61,13 @@ export interface SkillConfigState {
 
 /** Plain data only (records and arrays), so it serializes to the `state` cache as is. */
 export interface Derived {
+  /** `DERIVED_SHAPE` when written. */
+  shape: number;
   /** Events folded in. */
   count: number;
   /** The greatest (t, id) folded in; an event that sorts before it needs a full replay. */
   last: { t: number; id: string } | null;
-  /** Facts with at least one `attempt`; the preset is read through `boxOf`. */
+  /** Facts with at least one `attempt`; every other fact is new, in box 0 of both sets. */
   facts: Record<string, FactStat>;
   skills: Partial<Record<SkillId, SkillStat>>;
   /** Σ coin.n (SPEC §11.2). */
@@ -75,6 +81,7 @@ export interface Derived {
 }
 
 export const emptyDerived = (): Derived => ({
+  shape: DERIVED_SHAPE,
   count: 0,
   last: null,
   facts: {},
@@ -98,7 +105,7 @@ export const inOrder = (d: Derived, e: Evt): boolean => d.last === null || compa
  * Folds one event in. Exact (≡ `replay`) when `inOrder(d, e)` holds and `e.id` is new; returns a
  * new object and never mutates `d`. Unknown kinds are counted and otherwise ignored.
  */
-export function applyEvent(d: Derived, e: Evt, initial: Initial = {}): Derived {
+export function applyEvent(d: Derived, e: Evt): Derived {
   const next: Derived = {
     ...d,
     count: d.count + 1,
@@ -106,12 +113,14 @@ export function applyEvent(d: Derived, e: Evt, initial: Initial = {}): Derived {
   };
   switch (e.k) {
     case 'attempt': {
-      const prev = d.facts[e.fact] ?? { box: initial[e.fact] ?? 0, seen: 0, first: 0 };
+      const prev = d.facts[e.fact] ?? { tray: 0, num: 0, seen: 0, first: 0 };
       const isFirst = e.outcome === 'first';
+      const set = boxSetOf(e.stage);
       next.facts = {
         ...d.facts,
         [e.fact]: {
-          box: nextBox(prev.box, e.outcome, e.stage),
+          ...prev,
+          [set]: nextBox(prev[set], e.outcome, e.stage),
           seen: prev.seen + 1,
           first: prev.first + (isFirst ? 1 : 0),
         },
@@ -149,27 +158,24 @@ export function applyEvent(d: Derived, e: Evt, initial: Initial = {}): Derived {
 }
 
 /** Full replay: distinct ids, sorted by (t, id), folded from empty (SPEC §11.2). */
-export function replay(events: readonly Evt[], initial: Initial = {}): Derived {
+export function replay(events: readonly Evt[]): Derived {
   const byId = new Map<string, Evt>();
   for (const e of events) if (!byId.has(e.id)) byId.set(e.id, e);
-  return [...byId.values()].sort(compareEvt).reduce((d, e) => applyEvent(d, e, initial), emptyDerived());
+  return [...byId.values()].sort(compareEvt).reduce((d, e) => applyEvent(d, e), emptyDerived());
 }
 
 // ---------- reads ----------
 
-export const boxOf = (d: Derived, fact: string, initial: Initial = {}): number =>
-  d.facts[fact]?.box ?? initial[fact] ?? 0;
+export const boxOf = (d: Derived, fact: string, set: BoxSet): number => d.facts[fact]?.[set] ?? 0;
 
-/** Every fact with a box: the preset plus every fact attempted (session builder input, §4.1). */
-export function boxMap(d: Derived, initial: Initial = {}): Map<string, number> {
-  const m = new Map(Object.entries(initial));
-  for (const [k, f] of Object.entries(d.facts)) m.set(k, f.box);
-  return m;
+/** Every attempted fact's box in one set (session builder input, §4.1); others are new, box 0. */
+export function boxMap(d: Derived, set: BoxSet): Map<string, number> {
+  return new Map(Object.entries(d.facts).map(([k, f]) => [k, f[set]]));
 }
 
-/** Facts already seen (any `attempt`, or in the preset): everything else is new (D29). */
-export function seenSet(d: Derived, initial: Initial = {}): Set<string> {
-  return new Set([...Object.keys(initial), ...Object.keys(d.facts)]);
+/** Facts already seen (any `attempt`): everything else is new (D29). No preset (D127). */
+export function seenSet(d: Derived): Set<string> {
+  return new Set(Object.keys(d.facts));
 }
 
 /** SPEC §11.2: earned = Σ coin.n + Σ over distinct svc of the largest tip. */

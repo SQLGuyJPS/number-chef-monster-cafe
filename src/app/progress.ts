@@ -7,10 +7,9 @@ import {
   applyEvent,
   emptyDerived,
   inOrder,
+  DERIVED_SHAPE,
   replay,
-  startingBoxes,
   type Derived,
-  type Initial,
 } from '../engine/replay';
 import { parseResume, type ResumeSnapshot } from '../engine/resume';
 import type { Ops, SkillId, Stage } from '../engine/types';
@@ -29,7 +28,7 @@ const browserDeps: ProgressDeps = { now: () => Date.now(), newId: () => newId() 
 function isDerived(v: unknown): v is Derived {
   if (!v || typeof v !== 'object') return false;
   const d = v as Record<string, unknown>;
-  return typeof d['count'] === 'number' && typeof d['facts'] === 'object' && typeof d['ends'] === 'object';
+  return d['shape'] === DERIVED_SHAPE && typeof d['count'] === 'number' && typeof d['facts'] === 'object' && typeof d['ends'] === 'object';
 }
 
 export class Progress {
@@ -40,7 +39,6 @@ export class Progress {
   private listeners = new Set<() => void>();
   /** The last write that failed, for the grown-ups' screen; play goes on from memory. */
   writeError: string | null = null;
-  readonly initial: Initial = startingBoxes();
 
   private constructor(
     readonly storage: Storage,
@@ -59,7 +57,7 @@ export class Progress {
     if (c && c.throughEventCount === count && isDerived(c.derived) && c.derived.count === count) {
       p.d = c.derived;
     } else {
-      p.d = replay(await storage.loadEvents(), p.initial);
+      p.d = replay(await storage.loadEvents());
       await storage.commit({ state: { throughEventCount: p.d.count, derived: p.d } });
     }
     await p.adoptDebugConfig();
@@ -106,7 +104,7 @@ export class Progress {
     let d = this.d;
     for (const e of events) {
       if (!inOrder(d, e)) this.stale = true;
-      d = applyEvent(d, e, this.initial);
+      d = applyEvent(d, e);
     }
     this.d = d;
     if (events.length > 0) this.listeners.forEach((f) => f());

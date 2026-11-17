@@ -1,4 +1,5 @@
 import { TapButton } from '../game/input/TapButton';
+import { BasketSidePicker } from './BasketSidePicker';
 import { PlaytestTools } from './DebugScreen';
 import { ProgressList, StorageStatus } from './ProgressList';
 import { SkillPicker } from './SkillPicker';
@@ -18,9 +19,10 @@ export function ParentScreen({ onBack }: { onBack: () => void }) {
       <h1>Grown-ups</h1>
       <SkillPicker />
       <ProgressList />
+      <BasketSidePicker />
       <StorageStatus />
       <h2>Playtest tools</h2>
-      <PlaytestTools skills={false} />
+      <PlaytestTools skills={false} basket={false} />
     </div>
   );
 }

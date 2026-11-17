@@ -1,37 +1,38 @@
 import { useEffect, useState } from 'react';
 import { MAX_BOX } from '../engine/config';
 import { BUILT_SKILLS, pool } from '../engine/generators';
-import { balance, boxOf, earned, servicesOf, type Derived, type Initial } from '../engine/replay';
-import type { SkillId } from '../engine/types';
+import { balance, boxOf, earned, servicesOf, type BoxSet, type Derived } from '../engine/replay';
+import type { SkillId, Stage } from '../engine/types';
 import { loadedProgress, useDerived } from './progress';
 import { getStorageBoot } from './runtime';
 import { configFor } from './skillConfig';
-import { SKILL_NAMES } from './SkillPicker';
+import { SKILL_NAMES, STAGE_NAMES } from './SkillPicker';
 
 interface SkillRow {
   skill: SkillId;
-  stage: number;
+  stage: Stage;
   services: number;
   problems: number;
   firstPct: string;
   assisted: number;
   facts: number;
   seen: number;
-  /** Facts per box 0–4, the never-seen ones apart (SPEC §4.2). */
-  boxes: number[];
+  /** Facts per box 0–4 in each box set, the never-seen ones apart (SPEC §4.2, D127). */
+  tray: number[];
+  num: number[];
   fresh: number;
 }
 
 /** Per-skill numbers for the simple progress list (SPEC §12 Progress, the M3a subset). */
-export function progressRows(d: Derived, initial: Initial): SkillRow[] {
+export function progressRows(d: Derived): SkillRow[] {
   return BUILT_SKILLS.map((skill) => {
     const keys = [...new Set(pool(skill).map((p) => p.factKey))];
-    const boxes = Array.from({ length: MAX_BOX + 1 }, () => 0);
-    let fresh = 0;
-    for (const k of keys) {
-      if (d.facts[k] === undefined && initial[k] === undefined) fresh++;
-      else boxes[boxOf(d, k, initial)]!++;
-    }
+    const seen = keys.filter((k) => d.facts[k] !== undefined);
+    const count = (set: BoxSet) => {
+      const out = Array.from({ length: MAX_BOX + 1 }, () => 0);
+      for (const k of seen) out[boxOf(d, k, set)]!++;
+      return out;
+    };
     const st = d.skills[skill] ?? { problems: 0, first: 0, assisted: 0 };
     return {
       skill,
@@ -41,9 +42,10 @@ export function progressRows(d: Derived, initial: Initial): SkillRow[] {
       firstPct: st.problems ? `${Math.round((100 * st.first) / st.problems)}%` : '–',
       assisted: st.assisted,
       facts: keys.length,
-      seen: keys.filter((k) => d.facts[k] !== undefined).length,
-      boxes,
-      fresh,
+      seen: seen.length,
+      tray: count('tray'),
+      num: count('num'),
+      fresh: keys.length - seen.length,
     };
   });
 }
@@ -54,8 +56,7 @@ export function progressRows(d: Derived, initial: Initial): SkillRow[] {
  */
 export function ProgressList() {
   const d = useDerived();
-  const initial = loadedProgress()?.initial ?? {};
-  const rows = progressRows(d, initial);
+  const rows = progressRows(d);
   return (
     <section className="parent-progress" data-testid="progress-list">
       <h2>Progress</h2>
@@ -66,20 +67,22 @@ export function ProgressList() {
         <thead>
           <tr>
             <th>Dish</th>
-            <th>Stage</th>
+            <th>Support level</th>
             <th>Services</th>
             <th>Problems</th>
             <th>First try</th>
             <th>Pip helped</th>
             <th>Facts tried</th>
-            <th>Boxes 0 · 1 · 2 · 3 · 4 (new)</th>
+            <th>Tray boxes 0 · 1 · 2 · 3 · 4</th>
+            <th>Number boxes 0 · 1 · 2 · 3 · 4</th>
+            <th>New</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r) => (
             <tr key={r.skill} data-testid={`progress-${r.skill}`}>
               <th>{SKILL_NAMES[r.skill] ?? r.skill}</th>
-              <td>S{r.stage}</td>
+              <td>{STAGE_NAMES[r.stage]}</td>
               <td data-testid={`progress-${r.skill}-services`}>{r.services}</td>
               <td data-testid={`progress-${r.skill}-problems`}>{r.problems}</td>
               <td>{r.firstPct}</td>
@@ -87,17 +90,18 @@ export function ProgressList() {
               <td>
                 {r.seen} of {r.facts}
               </td>
-              <td>
-                {r.boxes.join(' · ')} ({r.fresh})
-              </td>
+              <td data-testid={`progress-${r.skill}-tray`}>{r.tray.join(' · ')}</td>
+              <td data-testid={`progress-${r.skill}-num`}>{r.num.join(' · ')}</td>
+              <td>{r.fresh}</td>
             </tr>
           ))}
         </tbody>
       </table>
       <p className="parent-note">
-        A fact moves up a box only when it is answered right first time at S1 or S0, so at S3 and S2 the boxes
-        stay put. A miss or Pip's full help puts it back in box 0. Facts the child already knew (+1 and doubles)
-        start in box 3.
+        Each fact has two boxes. Tray boxes move up only on a right first answer at Level 3; Number boxes only
+        on a right first answer at Level 4. At Levels 1 and 2 the boxes stay put. A miss or Pip&apos;s full help
+        puts the box for that level back to 0 (Levels 1–3 share the Tray box). The
+        game picks facts using the boxes for the dish&apos;s current level: lower boxes come up more often.
       </p>
     </section>
   );

@@ -6,7 +6,6 @@ import { mulberry32 } from '../../src/engine/rng';
 import {
   addShareOf,
   buildService,
-  knownPreset,
   moreSupport,
   withRequeue,
   withWarmUp,
@@ -21,15 +20,15 @@ function input(
   seed: number,
   extra: Partial<ServiceInput> = {},
 ): ServiceInput {
-  const boxes = knownPreset(skill);
+  void skill;
   return {
     seed,
     skill,
     ops,
     stage: 3,
     orders: 6,
-    boxes,
-    seen: new Set(boxes.keys()),
+    boxes: new Map(),
+    seen: new Set(),
     monsters: REGULARS,
     ...extra,
   };
@@ -93,7 +92,7 @@ describe('session builder (SPEC §4.1)', () => {
   });
 
   it('new facts come in difficulty order within each operation, alternating add and sub', () => {
-    for (const skill of ['A2', 'A3'] as const) {
+    for (const skill of ['A1', 'A2', 'A3'] as const) {
       const items = pool(skill);
       const facts = new Map(items.map((p) => [p.factKey, p.difficulty]));
       const add = new Map(items.map((p) => [p.factKey, isAddition(p)]));
@@ -108,9 +107,8 @@ describe('session builder (SPEC §4.1)', () => {
             .map(([, v]) => v);
           if (d.length) expect(d[0]).toBe(Math.min(...unseen));
         }
-        // A3 starts with nothing seen, so both operations get new facts. (A2's preset is all
-        // addition, so its balance reserve makes the first new facts all subtraction, D97.)
-        if (skill === 'A3') expect(new Set(newFacts.map((k) => add.get(k))).size).toBe(2);
+        // Nothing seen yet (no preset, D127): both operations get new facts, so the balance holds.
+        expect(new Set(newFacts.map((k) => add.get(k))).size).toBe(2);
       }
     }
   });
@@ -154,15 +152,6 @@ describe('session builder (SPEC §4.1)', () => {
         .slice(1)
         .forEach((o, i) => expect(o.problem.factKey).not.toBe(orders[i]!.problem.factKey));
     }
-  });
-
-  it('known preset: +1 and doubles at box 3, result forms only', () => {
-    const k = knownPreset('A2');
-    expect(k.get('A2:+:1,5')).toBe(3);
-    expect(k.get('A2:+:4,4')).toBe(3);
-    expect(k.has('A2:+:2,4')).toBe(false);
-    expect([...k.keys()].every((key) => key.includes(':+:'))).toBe(true);
-    expect(knownPreset('A3').size).toBe(0);
   });
 });
 

@@ -23,7 +23,7 @@
 | D13 | Chef hat criteria | Removed (D28) | Hats no longer exist |
 | D14 | Hosting on GitHub Pages | SPEC §15, §11.4 | Owner choice; installed PWA avoids iOS eviction |
 | D15 | Progress is a mergeable event log | SPEC §11.1 | Several devices, no backend |
-| D16 | Starting state from the owner's report | SPEC §4.2; amended by D43, D83 | Known +1/doubles come up less often |
+| D16 | Starting state from the owner's report | Partly superseded by D127 (no preset; stage default and subtraction-as-new stay in SPEC §4.2); amended by D43, D83 | Known +1/doubles come up less often |
 | D17 | Near-doubles and 9+x are the first strategies | SPEC §1.1, §4 | Build on known doubles and +1 |
 | D18 | `ncmc` namespacing on the shared Pages origin | SPEC §11.5 | Never touch the owner's other apps' storage |
 | D19 | Back guard opens "Take a break?" | SPEC §2.3; amended by D37, D46 | Back gestures would exit mid-service |
@@ -104,7 +104,7 @@
 | D94 | Home gear opens playtest tools before M3a (long-press 2 s, no gate) | SPEC §2.2, §5.2, §12, §14; amended by D95 | Installed app can't open `?debug`; iOS storage is per app |
 | D95 | Gear tap opens a hold-to-open popup with a filling ring; gear 88 px with real gear art | SPEC §2.2, §5.2, §12, §14 | Hold on the small gear gave no feedback and failed on devices |
 | D96 | Correct serve fills the ticket blank with the answer in green | SPEC §5.4, §14 (M2); colour amended by D106 | Show the finished true sentence at the moment of success |
-| D97 | Session builder gaps: balance-aware new facts, requeue fallback, in-memory seen until M3a | SPEC §4.1 | New-fact cap and add/sub balance conflict on the first service |
+| D97 | Session builder gaps: balance-aware new facts, requeue fallback, in-memory seen until M3a | SPEC §4.1; new-fact reserve amended by D127 | New-fact cap and add/sub balance conflict on the first service |
 | D98 | A3: make-ten demo lines, subtraction counts back, missing-subtrahend demo ends on what went away | SPEC §4, §5.5; demo counts amended by D104 | Make-ten demo and A3 subtraction strategy were open |
 | D99 | Warm-up: ghost keeps pointing until touched, flag set at start, its monster and food | SPEC §5.4 | "Taps the bin once" left the idle child and the flag timing open |
 | D100 | Monster art: shared face parts, still puzzled tilt, named ~1.4 s reactions, reduced motion = still poses, `?gallery`, café scene | SPEC §7.2, §7.4 | Look and motion of the five expressions were open |
@@ -132,4 +132,7 @@
 | D122 | At S0 the number pad hides during the help offer | SPEC §5.4 | Pad and picture buttons share the band; one set of targets at a time |
 | D123 | Splash, Home, Menu and Results over the counter; one café scene for every child screen | SPEC §5.1–5.3, §5.7, §7.4; resolves the D121 two-scene note | Owner approved the mocks |
 | D124 | Play-time limit postponed indefinitely; moved from M3b to its own Tier 2 milestone M12 | SPEC §6, §12, §14 | Owner decision before M3 |
-| D125 | M3a persistence details: resume row from the start, offer once per launch, Not now clears (writing a missing serviceEnd); all orders served = finished, tipped; old picker becomes events; simple progress list | SPEC §5.8, §11.6, §12; amends D52 | SPEC left declining, re-asking and the progress list open |
+| D125 | M3a persistence details: resume row from the start, offer once per launch, Not now clears (writing a missing serviceEnd); all orders served = finished, tipped; old picker becomes events; simple progress list | SPEC §5.8, §11.6, §12; amends D52; Close the café keeping the row superseded by D126 | SPEC left declining, re-asking and the progress list open |
+| D126 | M3a playtest: Close the café is never offered back; support levels named for the screen; ops and basket side wording; Chompers' teeth | SPEC §3.2, §5.8, §7.2, §11.6, §12; amends D125; level names superseded by D128 | A deliberate close was offered back; S-names unclear to a parent |
+| D127 | No starting preset; separate tray (S3–S1) and number-pad (S0) fact boxes | SPEC §4.1, §4.2, §11.2, §12; amends D16, D97 | Counting out at S1 says little about recall at S0; owner wants unbiased boxes |
+| D128 | Support levels renamed Level 1–4: Most help · Some help · Little help · No help | SPEC §3.2; amends D126 (b) | Owner's second naming pass |
