@@ -18,8 +18,8 @@ export function ParentScreen({ onBack }: { onBack: () => void }) {
       </TapButton>
       <h1>Grown-ups</h1>
       <SkillPicker />
-      <ProgressList />
       <BasketSidePicker />
+      <ProgressList />
       <StorageStatus />
       <h2>Playtest tools</h2>
       <PlaytestTools skills={false} basket={false} />

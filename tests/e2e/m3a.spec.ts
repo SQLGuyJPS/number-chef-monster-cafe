@@ -168,12 +168,16 @@ test('the Skills list behind the gear changes the next service; progress and sto
   await tap(page, page.getByTestId('splash'));
   await openGrownUps(page);
   await expect(page.getByTestId('stage-A2')).toHaveValue('3');
-  // Owner wording (D126): levels by name with a description; ops spelled out; basket side after Progress.
-  await expect(page.getByTestId('stage-A2').locator('option:checked')).toHaveText('Level 1: Most help');
-  await expect(page.getByTestId('stage-help')).toContainText('Level 4: No help');
+  // Owner wording (D126, D129, D130): levels by name with a description; ops spelled out; basket side
+  // before Progress; parents read "confidence", never "box".
+  await expect(page.getByTestId('stage-A2').locator('option:checked')).toHaveText('Most help');
+  await expect(page.getByTestId('stage-help')).toContainText('Least help');
   await expect(page.getByTestId('ops-A2').locator('option:checked')).toHaveText('addition and subtraction');
   await expect(page.getByTestId('basket-side-picker').locator('h2')).toHaveText('Basket side');
-  await expect(page.locator('[data-testid=progress-list] ~ [data-testid=basket-side-picker]')).toHaveCount(1);
+  await expect(page.locator('[data-testid=basket-side-picker] ~ [data-testid=progress-list]')).toHaveCount(1);
+  await expect(page.getByTestId('progress-list').locator('th').filter({ hasText: 'Number pad confidence' })).toHaveCount(1);
+  await expect(page.getByTestId('confidence-note')).toContainText('confidence score from 0');
+  await expect(page.getByTestId('progress-list')).not.toContainText(/box/i);
   await expect(page.getByTestId('basket-side-picker')).toHaveCount(1);
   await page.getByTestId('stage-A2').selectOption('0');
   await page.getByTestId('ops-A2').selectOption('sub');
@@ -206,4 +210,33 @@ test('the Skills list behind the gear changes the next service; progress and sto
   await expect(page.getByTestId('progress-A2-services')).toHaveText('1');
   await expect(page.getByTestId('progress-A2-problems')).toHaveText('1');
   await expect(page.getByTestId('progress-coins')).toContainText('3 in the jar');
+});
+
+test('Progress shows cards on a portrait phone and the table in landscape, swapping on rotation; Skills fits (D131)', async ({
+  page,
+}) => {
+  await stubSpeechNeverEnds(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('./');
+  await page.waitForFunction(() => !!window.__ncmc);
+  await page.evaluate(async () => {
+    await window.__ncmc.setWarmupShown(true);
+  });
+  await tap(page, page.getByTestId('splash'));
+  await openGrownUps(page);
+  await expect(page.getByTestId('progress-card-A1')).toBeVisible();
+  await expect(page.locator('.progress-table')).toBeHidden();
+  // Nothing on the grown-ups' screen runs past the right edge (the Skills dropdowns stack).
+  const widths = await page.getByTestId('parent-screen').evaluate((s) => [s.scrollWidth, s.clientWidth]);
+  expect(widths[0]).toBeLessThanOrEqual(widths[1]!);
+  // Landscape with the notch insets: the table must fit without sideways overflow.
+  await page.setViewportSize({ width: 844, height: 390 });
+  await page.getByTestId('parent-screen').evaluate((s) => {
+    s.style.paddingLeft = '47px';
+    s.style.paddingRight = '47px';
+  });
+  await expect(page.locator('.progress-table')).toBeVisible();
+  await expect(page.getByTestId('progress-card-A1')).toBeHidden();
+  const table = (await page.locator('.progress-table').boundingBox())!;
+  expect(table.x + table.width).toBeLessThanOrEqual(844 - 47 + 1);
 });

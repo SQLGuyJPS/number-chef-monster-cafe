@@ -405,11 +405,79 @@ html.debug-mode #root {
   border-collapse: collapse;
 }
 .parent-progress td,
-.parent-progress thead th {
-  padding: 4px 10px;
+.parent-progress th {
+  padding: 4px 7px;
   word-break: normal;
   text-align: left;
 }
+/* On a portrait phone each dish's row stacks: name, then its two dropdowns one under the other,
+   so the operations dropdown never runs past the screen edge (D131). */
+@media (max-width: 600px) {
+  .skills-table,
+  .skills-table tbody,
+  .skills-table tr,
+  .skills-table th,
+  .skills-table td {
+    display: block;
+  }
+  .skills-table tr {
+    margin-bottom: 12px;
+  }
+  .skills-table th {
+    text-align: left;
+  }
+  .skills-table select {
+    max-width: 100%;
+  }
+}
+/* Dish name over what it asks, so the first column stays narrow (D131). */
+.progress-dish {
+  display: block;
+}
+.progress-dish small {
+  display: block;
+  font-weight: normal;
+  font-size: 0.85em;
+  opacity: 0.75;
+}
+/* Cards only on a narrow (portrait phone) screen; the table everywhere else. Pure CSS, so rotating
+   the phone swaps the views at once (D131). */
+.progress-cards {
+  display: none;
+}
+@media (max-width: 600px) {
+  .parent-progress .progress-table {
+    display: none;
+  }
+  .progress-cards {
+    display: grid;
+    gap: 12px;
+  }
+}
+.progress-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 16px;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.04);
+}
+.progress-card .progress-dish {
+  grid-column: 1 / -1;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+.progress-card dt {
+  opacity: 0.8;
+}
+.progress-card dd {
+  margin: 0;
+}
+.parent-progress .nowrap {
+  white-space: nowrap;
+}
+/* Five counts read as one row of numbers; wrapped, the last count looks like a separate value. */
 .parent-note {
   max-width: 60em;
   opacity: 0.8;
