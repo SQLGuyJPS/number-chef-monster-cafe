@@ -710,3 +710,8 @@ How to revisit: if the repeating ghost is distracting, show each hint once; `war
 **What:** Parent-facing names and descriptions replace D126 (b): S3 *Level 1: Most help* — the tray starts partially filled; Pip counts each tap aloud. S2 *Level 2: Some help* — prefilled tray, no spoken counts; a tone per tap. S1 *Level 3: Little help* — fill an empty tray. S0 *Level 4: No help* — type the answer on a number pad. The progress list's note refers to the levels by number. S-codes stay internal.
 **Why:** Owner feedback after seeing the D126 names.
 **How to revisit:** Names live in `STAGE_NAMES` / `STAGE_HELP` (`src/app/SkillPicker.tsx`).
+
+## D129 — Support levels lose their numbers; Least help; basket side above Progress (2026-11-18)
+**What:** Parent-facing level names drop the "Level n:" prefix and S0 becomes *Least help*: S3 *Most help* — the tray starts partially filled; Pip counts each tap aloud. S2 *Some help* — the tray starts partially filled; no spoken counts, a tone per tap. S1 *Little help* — the tray begins empty. S0 *Least help* — the player types the answer on a number pad; the tray appears only when the player asks for a hint or enters a wrong answer twice for the same order. The progress note names levels instead of numbering them. The Basket side section moves above Progress (after Skills). Amends D128 and D126 (basket side placement).
+**Why:** Owner's playtest feedback on round 1 of M3a.
+**How to revisit:** `STAGE_NAMES` / `STAGE_HELP` in `src/app/SkillPicker.tsx`; section order in `src/app/ParentScreen.tsx`.
