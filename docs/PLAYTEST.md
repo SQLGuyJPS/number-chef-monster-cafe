@@ -249,7 +249,13 @@ Progress from earlier builds keeps its events; the boxes are recomputed from the
 Owner notes (2026-11-18): Close the café and the teeth work; drop "Level n:" from the names, reword Some/Little help, rename No help to Least help; basket side above Progress; "boxes" means nothing to a parent who doesn't know Leitner, so rename and explain it (owner chose *confidence*, D130).
 
 ### M3a feedback round 2 (D129, D130)
-- [ ] **Support level names.** Gear → hold → *Skills*: *Most help · Some help · Little help · Least help*, with the new descriptions above the list. Notes:
-- [ ] **Basket side** now sits between Skills and Progress. Notes:
-- [ ] **Confidence.** Progress shows *Tray confidence* and *Number pad confidence* (facts at 0–4) with a note under the table. Would a parent who has never heard of flash-card boxes understand it? Notes:
-- [ ] **Progress on the iPhone.** Portrait shows one card per dish; rotate to landscape and the table appears with nothing cut off at the notch side. Readable both ways? Notes:
+- [x] **Support level names.** Gear → hold → *Skills*: *Most help · Some help · Little help · Least help*, with the new descriptions above the list. Notes:
+- [x] **Basket side** now sits between Skills and Progress. Notes:
+- [x] **Confidence.** Progress shows *Tray confidence* and *Number pad confidence* (facts at 0–4) with a note under the table. Would a parent who has never heard of flash-card boxes understand it? Notes:
+- [x] **Progress on the iPhone.** Portrait shows one card per dish; rotate to landscape and the table appears with nothing cut off at the notch side. Readable both ways? Notes:
+
+Owner notes (2026-11-18): level names and basket side are right; note wording: "correct first answer", "Little help (tray starts empty)", period instead of semicolon; portrait cards good, but the landscape table's counts run together (D132).
+
+### M3a feedback round 3 (D132)
+- [ ] **Progress on the iPhone in landscape** now shows the dish cards two per row (portrait still one per row; the iPad keeps the table). Readable, and nothing cut off at the notch side? Notes:
+- [ ] **Confidence note** reads "A correct first answer …" and "Only Little help (tray starts empty) and Least help (number pad) change these. At Most help …". Notes:

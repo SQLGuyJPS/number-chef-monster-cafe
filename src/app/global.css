@@ -440,18 +440,24 @@ html.debug-mode #root {
   font-size: 0.85em;
   opacity: 0.75;
 }
-/* Cards only on a narrow (portrait phone) screen; the table everywhere else. Pure CSS, so rotating
-   the phone swaps the views at once (D131). */
+/* Cards on a phone, the table on a tablet or wider. Pure CSS, so rotating the phone swaps the
+   layout at once: one card per row in portrait (D131), two per row in landscape, where eight table
+   columns left the counts crowded together (D132). */
 .progress-cards {
   display: none;
 }
-@media (max-width: 600px) {
+@media (max-width: 600px), (orientation: landscape) and (max-height: 500px) {
   .parent-progress .progress-table {
     display: none;
   }
   .progress-cards {
     display: grid;
     gap: 12px;
+  }
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  .progress-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 .progress-card {

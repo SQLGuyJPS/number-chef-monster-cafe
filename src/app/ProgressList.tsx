@@ -63,8 +63,8 @@ export function ProgressList() {
         Coins: {balance(d)} in the jar ({earned(d)} earned in all).
       </p>
       <p className="parent-note">Confidence: how many facts sit at 0 · 1 · 2 · 3 · 4.</p>
-      {/* Two views of the same rows, swapped by width in CSS so rotating the phone swaps them live:
-          a portrait phone has ~390 px, too narrow for any table of eight columns (D131). */}
+      {/* Two views of the same rows, swapped in CSS so rotating the phone swaps them live: a phone is
+          too small for a readable table of eight columns in either orientation (D131, D132). */}
       <table className="progress-table">
         <thead>
           <tr>
@@ -130,11 +130,11 @@ export function ProgressList() {
         ))}
       </div>
       <p className="parent-note" data-testid="confidence-note">
-        Each fact has a confidence score from 0 (new or still learning) to 4 (confident). A right first answer
+        Each fact has a confidence score from 0 (new or still learning) to 4 (confident). A correct first answer
         raises it one step. A miss or Pip&apos;s full help sets it back to 0, so the fact comes back for more
         practice. Facts with lower confidence come up more often. The tray and the number pad are tracked
-        separately, so counting on the tray doesn&apos;t count as knowing it by heart. Only Little help (tray)
-        and Least help (number pad) change these; at Most help and Some help they stay put.
+        separately, so counting on the tray doesn&apos;t count as knowing it by heart. Only Little help (tray starts
+        empty) and Least help (number pad) change these. At Most help and Some help they stay put.
       </p>
     </section>
   );
