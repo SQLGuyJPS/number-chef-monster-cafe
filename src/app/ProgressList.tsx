@@ -52,7 +52,8 @@ export function progressRows(d: Derived): SkillRow[] {
 
 /**
  * The simple progress list (SPEC §12, M3a): per skill, services played, problems, first-try share,
- * Pip's full help, and how the facts sit in boxes. Never shown to the child (SPEC §4.2).
+ * Pip's full help, and how the facts sit in boxes, shown to parents as confidence 0–4 (D130).
+ * Never shown to the child (SPEC §4.2).
  */
 export function ProgressList() {
   const d = useDerived();
@@ -73,8 +74,8 @@ export function ProgressList() {
             <th>First try</th>
             <th>Pip helped</th>
             <th>Facts tried</th>
-            <th>Tray boxes 0 · 1 · 2 · 3 · 4</th>
-            <th>Number boxes 0 · 1 · 2 · 3 · 4</th>
+            <th>Tray confidence: facts at 0 · 1 · 2 · 3 · 4</th>
+            <th>Number pad confidence: facts at 0 · 1 · 2 · 3 · 4</th>
             <th>New</th>
           </tr>
         </thead>
@@ -90,18 +91,19 @@ export function ProgressList() {
               <td>
                 {r.seen} of {r.facts}
               </td>
-              <td data-testid={`progress-${r.skill}-tray`}>{r.tray.join(' · ')}</td>
-              <td data-testid={`progress-${r.skill}-num`}>{r.num.join(' · ')}</td>
+              <td className="nowrap" data-testid={`progress-${r.skill}-tray`}>{r.tray.join(' · ')}</td>
+              <td className="nowrap" data-testid={`progress-${r.skill}-num`}>{r.num.join(' · ')}</td>
               <td>{r.fresh}</td>
             </tr>
           ))}
         </tbody>
       </table>
-      <p className="parent-note">
-        Each fact has two boxes. Tray boxes move up only on a right first answer at Little help; Number boxes
-        only on a right first answer at Least help. At Most help and Some help the boxes stay put. A miss or
-        Pip&apos;s full help puts the box for that level back to 0 (the three tray levels share the Tray box). The
-        game picks facts using the boxes for the dish&apos;s current level: lower boxes come up more often.
+      <p className="parent-note" data-testid="confidence-note">
+        Each fact has a confidence score from 0 (new or still learning) to 4 (confident). A right first answer
+        raises it one step. A miss or Pip&apos;s full help sets it back to 0, so the fact comes back for more
+        practice. Facts with lower confidence come up more often. The tray and the number pad are tracked
+        separately, so counting on the tray doesn&apos;t count as knowing it by heart. Only Little help (tray)
+        and Least help (number pad) change these; at Most help and Some help they stay put.
       </p>
     </section>
   );

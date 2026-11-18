@@ -246,8 +246,9 @@ Progress from earlier builds keeps its events; the boxes are recomputed from the
 - [x] **Two box sets.** Progress shows *Tray boxes* and *Number boxes*. A few services at *Level 3* move only the Tray boxes; a few at *Level 4* move only the Number boxes. +1 and doubles now start as new facts like any other (expect them to come up more often at first). Notes:
 - [x] **Chompers' teeth** stay attached to the top lip when he grins after eating (and Gruffles' fangs). Notes:
 
-Owner notes (2026-11-18): Close the café and the teeth work; drop "Level n:" from the names, reword Some/Little help, rename No help to Least help; basket side above Progress; "boxes" means nothing to a parent who doesn't know Leitner, so rename and explain it (pending the owner's choice).
+Owner notes (2026-11-18): Close the café and the teeth work; drop "Level n:" from the names, reword Some/Little help, rename No help to Least help; basket side above Progress; "boxes" means nothing to a parent who doesn't know Leitner, so rename and explain it (owner chose *confidence*, D130).
 
-### M3a feedback round 2 (D129)
+### M3a feedback round 2 (D129, D130)
 - [ ] **Support level names.** Gear → hold → *Skills*: *Most help · Some help · Little help · Least help*, with the new descriptions above the list. Notes:
 - [ ] **Basket side** now sits between Skills and Progress. Notes:
+- [ ] **Confidence.** Progress shows *Tray confidence* and *Number pad confidence* (facts at 0–4) with a note under the table. Would a parent who has never heard of flash-card boxes understand it? Notes:

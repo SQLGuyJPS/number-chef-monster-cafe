@@ -137,3 +137,4 @@
 | D127 | No starting preset; separate tray (S3–S1) and number-pad (S0) fact boxes | SPEC §4.1, §4.2, §11.2, §12; amends D16, D97 | Counting out at S1 says little about recall at S0; owner wants unbiased boxes |
 | D128 | Support levels renamed Level 1–4: Most help · Some help · Little help · No help | SPEC §3.2; amends D126 (b); names superseded by D129 | Owner's second naming pass |
 | D129 | Level names lose their numbers (Most · Some · Little · Least help) with new descriptions; basket side above Progress | SPEC §3.2, §12; amends D128, D126 | Owner's playtest feedback, M3a round 1 |
+| D130 | Parents see fact boxes as *confidence* 0–4 (Tray / Number pad confidence), explained under the Progress table | SPEC §4.2, §12 | Parents don't know Leitner boxes; owner chose "confidence" |

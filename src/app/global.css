@@ -410,6 +410,10 @@ html.debug-mode #root {
   word-break: normal;
   text-align: left;
 }
+/* Five counts read as one row of numbers; wrapped, the last count looks like a separate value. */
+.parent-progress td.nowrap {
+  white-space: nowrap;
+}
 .parent-note {
   max-width: 60em;
   opacity: 0.8;

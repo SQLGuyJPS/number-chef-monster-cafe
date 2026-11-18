@@ -168,12 +168,16 @@ test('the Skills list behind the gear changes the next service; progress and sto
   await tap(page, page.getByTestId('splash'));
   await openGrownUps(page);
   await expect(page.getByTestId('stage-A2')).toHaveValue('3');
-  // Owner wording (D126): levels by name with a description; ops spelled out; basket side after Progress.
+  // Owner wording (D126, D129, D130): levels by name with a description; ops spelled out; basket side
+  // before Progress; parents read "confidence", never "box".
   await expect(page.getByTestId('stage-A2').locator('option:checked')).toHaveText('Most help');
   await expect(page.getByTestId('stage-help')).toContainText('Least help');
   await expect(page.getByTestId('ops-A2').locator('option:checked')).toHaveText('addition and subtraction');
   await expect(page.getByTestId('basket-side-picker').locator('h2')).toHaveText('Basket side');
   await expect(page.locator('[data-testid=basket-side-picker] ~ [data-testid=progress-list]')).toHaveCount(1);
+  await expect(page.getByTestId('progress-list').locator('th').filter({ hasText: 'Number pad confidence' })).toHaveCount(1);
+  await expect(page.getByTestId('confidence-note')).toContainText('confidence score from 0');
+  await expect(page.getByTestId('progress-list')).not.toContainText(/box/i);
   await expect(page.getByTestId('basket-side-picker')).toHaveCount(1);
   await page.getByTestId('stage-A2').selectOption('0');
   await page.getByTestId('ops-A2').selectOption('sub');
