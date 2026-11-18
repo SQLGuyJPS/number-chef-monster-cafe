@@ -61,7 +61,7 @@ test('Stop ends the run early and still reports', async ({ page }, info) => {
   });
 });
 
-test('the grown-ups tools open the speed test; the child UI does not link to it', async ({
+test('the ?debug screen opens the speed test; the child UI does not link to it', async ({
   page,
 }, info) => {
   test.skip(info.project.name !== 'chromium-ipad-pro-11', 'one project is enough');

@@ -22,7 +22,7 @@ export function ParentScreen({ onBack }: { onBack: () => void }) {
       <ProgressList />
       <StorageStatus />
       <h2>Playtest tools</h2>
-      <PlaytestTools skills={false} basket={false} />
+      <PlaytestTools skills={false} basket={false} deviceTests={false} />
     </div>
   );
 }

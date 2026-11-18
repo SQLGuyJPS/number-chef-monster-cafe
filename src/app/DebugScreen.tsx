@@ -55,8 +55,18 @@ async function collect(): Promise<Info> {
 /**
  * Build/storage info, the stage/operations picker, the sound test and the speed-test link. Shown by
  * the `?debug` screen and, below the Skills and progress lists, by the grown-ups' screen (D94).
+ * The grown-ups' screen leaves out the sound and speed tests (D133); `?debug` and `?speedtest`
+ * still reach them, kept for device checks.
  */
-export function PlaytestTools({ skills = true, basket = true }: { skills?: boolean; basket?: boolean }) {
+export function PlaytestTools({
+  skills = true,
+  basket = true,
+  deviceTests = true,
+}: {
+  skills?: boolean;
+  basket?: boolean;
+  deviceTests?: boolean;
+}) {
   const [info, setInfo] = useState<Info | null>(null);
   useEffect(() => {
     let live = true;
@@ -80,17 +90,21 @@ export function PlaytestTools({ skills = true, basket = true }: { skills?: boole
       {!info && <p>Loading…</p>}
       {skills && <SkillPicker />}
       {basket && <BasketSidePicker />}
-      <AudioTest />
-      <h2>Speed test</h2>
-      <p>How many drawing pieces this device can show smoothly (D112). About 2 minutes.</p>
-      <button
-        type="button"
-        className="st-open"
-        data-testid="open-speedtest"
-        onClick={() => (location.href = `${location.pathname}?speedtest`)}
-      >
-        Open the speed test
-      </button>
+      {deviceTests && (
+        <>
+          <AudioTest />
+          <h2>Speed test</h2>
+          <p>How many drawing pieces this device can show smoothly (D112). About 2 minutes.</p>
+          <button
+            type="button"
+            className="st-open"
+            data-testid="open-speedtest"
+            onClick={() => (location.href = `${location.pathname}?speedtest`)}
+          >
+            Open the speed test
+          </button>
+        </>
+      )}
     </>
   );
 }

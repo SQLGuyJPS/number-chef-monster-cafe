@@ -50,7 +50,9 @@ test('holding the circle until the ring closes opens the playtest tools', async 
   await expect(page.getByTestId('gear-dialog')).toHaveCount(0);
   await expect(page.getByTestId('debug-version')).toHaveText(/^\d+\.\d+\.\d+\+\w+$/);
   await expect(page.getByTestId('skill-picker')).toBeVisible();
-  await expect(page.getByTestId('audio-test')).toBeVisible();
+  // Sound and speed tests are hidden from the grown-ups' screen; `?debug` keeps them (D133).
+  await expect(page.getByTestId('audio-test')).toHaveCount(0);
+  await expect(page.getByTestId('open-speedtest')).toHaveCount(0);
 });
 
 test('Close, a tap outside and the back gesture all close the popup without the break dialog', async ({
@@ -116,9 +118,9 @@ test('a stage picker whose lift is lost does not freeze later taps', async ({ pa
   await expect(page.getByTestId('open-cafe')).toHaveCount(0);
 });
 
-test('the playtest tools behind the gear open the speed test (D112)', async ({ page }) => {
-  await startApp(page);
-  await openTools(page);
+test('the ?debug screen keeps the sound test and opens the speed test (D112, D133)', async ({ page }) => {
+  await page.goto('./?debug');
+  await expect(page.getByTestId('audio-test')).toBeVisible();
   await page.getByTestId('open-speedtest').scrollIntoViewIfNeeded();
   await tap(page, page.getByTestId('open-speedtest'));
   await expect(page.getByTestId('st-start')).toBeVisible();

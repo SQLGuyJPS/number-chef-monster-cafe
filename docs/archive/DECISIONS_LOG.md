@@ -731,3 +731,8 @@ How to revisit: if the repeating ghost is distracting, show each hint once; `war
 **Why:** Owner's M3a round-2 playtest: in iPhone landscape the eight-column table fit only with ~7 px cell padding, so the *Facts tried*, *Tray confidence* and *Number pad confidence* values ran together. Nothing could shrink further without hurting the other columns; two ~360 px cards fit the ~750 px between the notch insets, the same width as a portrait card. Note wording is the owner's.
 **How to revisit:** the `.progress-cards` media queries in `src/app/global.css`; the note in `src/app/ProgressList.tsx`; shots in `docs/screens/M3a/progress-mock/`.
 **Amendment (2026-11-18, owner):** the Least help description says the tray appears when the player "enters a wrong answer three times for the same order" (it was "twice"; the tray comes on the third miss, or on yes to the offer after the second). The confidence note says "An incorrect answer or using Pip's full help …" and puts the level names in double quotes ("Little help", "Least help", "Most help", "Some help") so they read as names.
+
+## D133 — Sound and speed tests hidden from the grown-ups' screen (2026-11-18)
+**What:** The grown-ups' screen (gear → hold) no longer shows the Sound test or the Speed test link; its Playtest tools keep only the build and storage info. The code stays: the hidden `?debug` screen still shows both, and `?speedtest` still opens the speed test directly (`PlaytestTools` takes `deviceTests`, false on the grown-ups' screen).
+**Why:** Owner: they are not needed now, but may be again (e.g. a new device or an audio problem).
+**How to revisit:** pass `deviceTests` (or drop the prop) in `src/app/ParentScreen.tsx`.

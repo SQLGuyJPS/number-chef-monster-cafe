@@ -140,3 +140,4 @@
 | D130 | Parents see fact boxes as *confidence* 0–4 (Tray / Number pad confidence), explained under the Progress table | SPEC §4.2, §12 | Parents don't know Leitner boxes; owner chose "confidence" |
 | D131 | Progress list: one card per dish on a portrait phone, a tighter table elsewhere (fits landscape iPhone with the notch); rotation swaps them; Skills rows stack in portrait | SPEC §12; phone-landscape table superseded by D132 | Table was cut off on the iPhone |
 | D132 | Progress on a phone in landscape: two cards per row instead of the table; confidence note and Least help wording | SPEC §3.2, §12; amends D131, D130, D129 | Owner: landscape table counts ran together |
+| D133 | Sound and speed tests hidden from the grown-ups' screen; still on `?debug` and `?speedtest` | SPEC §2.2, §12 | Owner: not needed now, keep the code |
