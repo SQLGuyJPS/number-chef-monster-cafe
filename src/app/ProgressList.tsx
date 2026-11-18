@@ -6,7 +6,7 @@ import type { SkillId, Stage } from '../engine/types';
 import { loadedProgress, useDerived } from './progress';
 import { getStorageBoot } from './runtime';
 import { configFor } from './skillConfig';
-import { SKILL_NAMES, STAGE_NAMES } from './SkillPicker';
+import { SKILL_TITLES, STAGE_NAMES } from './SkillPicker';
 
 interface SkillRow {
   skill: SkillId;
@@ -20,7 +20,6 @@ interface SkillRow {
   /** Facts per box 0–4 in each box set, the never-seen ones apart (SPEC §4.2, D127). */
   tray: number[];
   num: number[];
-  fresh: number;
 }
 
 /** Per-skill numbers for the simple progress list (SPEC §12 Progress, the M3a subset). */
@@ -45,7 +44,6 @@ export function progressRows(d: Derived): SkillRow[] {
       seen: seen.length,
       tray: count('tray'),
       num: count('num'),
-      fresh: keys.length - seen.length,
     };
   });
 }
@@ -64,40 +62,73 @@ export function ProgressList() {
       <p data-testid="progress-coins">
         Coins: {balance(d)} in the jar ({earned(d)} earned in all).
       </p>
-      <table>
+      <p className="parent-note">Confidence: how many facts sit at 0 · 1 · 2 · 3 · 4.</p>
+      {/* Two views of the same rows, swapped by width in CSS so rotating the phone swaps them live:
+          a portrait phone has ~390 px, too narrow for any table of eight columns (D131). */}
+      <table className="progress-table">
         <thead>
           <tr>
             <th>Dish</th>
             <th>Support level</th>
-            <th>Services</th>
-            <th>Problems</th>
+            <th>Services · Problems</th>
             <th>First try</th>
             <th>Pip helped</th>
             <th>Facts tried</th>
-            <th>Tray confidence: facts at 0 · 1 · 2 · 3 · 4</th>
-            <th>Number pad confidence: facts at 0 · 1 · 2 · 3 · 4</th>
-            <th>New</th>
+            <th>Tray confidence</th>
+            <th>Number pad confidence</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r) => (
             <tr key={r.skill} data-testid={`progress-${r.skill}`}>
-              <th>{SKILL_NAMES[r.skill] ?? r.skill}</th>
+              <th>
+                <DishTitle skill={r.skill} />
+              </th>
               <td>{STAGE_NAMES[r.stage]}</td>
-              <td data-testid={`progress-${r.skill}-services`}>{r.services}</td>
-              <td data-testid={`progress-${r.skill}-problems`}>{r.problems}</td>
+              <td className="nowrap">
+                <span data-testid={`progress-${r.skill}-services`}>{r.services}</span> ·{' '}
+                <span data-testid={`progress-${r.skill}-problems`}>{r.problems}</span>
+              </td>
               <td>{r.firstPct}</td>
               <td>{r.assisted}</td>
-              <td>
+              <td className="nowrap">
                 {r.seen} of {r.facts}
               </td>
-              <td className="nowrap" data-testid={`progress-${r.skill}-tray`}>{r.tray.join(' · ')}</td>
-              <td className="nowrap" data-testid={`progress-${r.skill}-num`}>{r.num.join(' · ')}</td>
-              <td>{r.fresh}</td>
+              <td className="nowrap" data-testid={`progress-${r.skill}-tray`}>
+                {r.tray.join(' · ')}
+              </td>
+              <td className="nowrap" data-testid={`progress-${r.skill}-num`}>
+                {r.num.join(' · ')}
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+      <div className="progress-cards">
+        {rows.map((r) => (
+          <dl key={r.skill} className="progress-card" data-testid={`progress-card-${r.skill}`}>
+            <DishTitle skill={r.skill} />
+            <dt>Support level</dt>
+            <dd>{STAGE_NAMES[r.stage]}</dd>
+            <dt>Services · Problems</dt>
+            <dd>
+              {r.services} · {r.problems}
+            </dd>
+            <dt>First try</dt>
+            <dd>{r.firstPct}</dd>
+            <dt>Pip helped</dt>
+            <dd>{r.assisted}</dd>
+            <dt>Facts tried</dt>
+            <dd>
+              {r.seen} of {r.facts}
+            </dd>
+            <dt>Tray confidence</dt>
+            <dd className="nowrap">{r.tray.join(' · ')}</dd>
+            <dt>Number pad confidence</dt>
+            <dd className="nowrap">{r.num.join(' · ')}</dd>
+          </dl>
+        ))}
+      </div>
       <p className="parent-note" data-testid="confidence-note">
         Each fact has a confidence score from 0 (new or still learning) to 4 (confident). A right first answer
         raises it one step. A miss or Pip&apos;s full help sets it back to 0, so the fact comes back for more
@@ -190,5 +221,15 @@ export function StorageStatus() {
         Screen app keep separate progress, and Safari may clear a tab&apos;s data after 7 days without a visit.
       </p>
     </section>
+  );
+}
+
+function DishTitle({ skill }: { skill: SkillId }) {
+  const t = SKILL_TITLES[skill];
+  return (
+    <span className="progress-dish">
+      {t?.name ?? skill}
+      {t && <small>{t.asks}</small>}
+    </span>
   );
 }

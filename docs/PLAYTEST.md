@@ -252,3 +252,4 @@ Owner notes (2026-11-18): Close the café and the teeth work; drop "Level n:" fr
 - [ ] **Support level names.** Gear → hold → *Skills*: *Most help · Some help · Little help · Least help*, with the new descriptions above the list. Notes:
 - [ ] **Basket side** now sits between Skills and Progress. Notes:
 - [ ] **Confidence.** Progress shows *Tray confidence* and *Number pad confidence* (facts at 0–4) with a note under the table. Would a parent who has never heard of flash-card boxes understand it? Notes:
+- [ ] **Progress on the iPhone.** Portrait shows one card per dish; rotate to landscape and the table appears with nothing cut off at the notch side. Readable both ways? Notes:

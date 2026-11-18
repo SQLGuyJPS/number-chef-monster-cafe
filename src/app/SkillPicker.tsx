@@ -22,12 +22,15 @@ const OPS_NAMES: Record<Ops, string> = {
   add: 'addition only',
   sub: 'subtraction only',
 };
-/** What each built dish asks (SPEC §1.2), so the list reads without the skill codes. */
-export const SKILL_NAMES: Partial<Record<SkillId, string>> = {
-  A1: 'A1 Little Bites (within 5)',
-  A2: 'A2 Big Bites (within 10)',
-  A3: 'A3 Perfect Ten (pairs to 10)',
+/** Each built dish's name and what it asks (SPEC §1.2), so the lists read without the skill codes. */
+export const SKILL_TITLES: Partial<Record<SkillId, { name: string; asks: string }>> = {
+  A1: { name: 'A1 Little Bites', asks: 'within 5' },
+  A2: { name: 'A2 Big Bites', asks: 'within 10' },
+  A3: { name: 'A3 Perfect Ten', asks: 'pairs to 10' },
 };
+export const SKILL_NAMES: Partial<Record<SkillId, string>> = Object.fromEntries(
+  Object.entries(SKILL_TITLES).map(([k, t]) => [k, `${t.name} (${t.asks})`]),
+);
 
 /**
  * The minimal Skills list (SPEC §12, M3a): stage and operations per skill, each change a

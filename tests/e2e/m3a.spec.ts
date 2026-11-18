@@ -211,3 +211,29 @@ test('the Skills list behind the gear changes the next service; progress and sto
   await expect(page.getByTestId('progress-A2-problems')).toHaveText('1');
   await expect(page.getByTestId('progress-coins')).toContainText('3 in the jar');
 });
+
+test('Progress shows cards on a portrait phone and the table in landscape, swapping on rotation (D131)', async ({
+  page,
+}) => {
+  await stubSpeechNeverEnds(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('./');
+  await page.waitForFunction(() => !!window.__ncmc);
+  await page.evaluate(async () => {
+    await window.__ncmc.setWarmupShown(true);
+  });
+  await tap(page, page.getByTestId('splash'));
+  await openGrownUps(page);
+  await expect(page.getByTestId('progress-card-A1')).toBeVisible();
+  await expect(page.locator('.progress-table')).toBeHidden();
+  // Landscape with the notch insets: the table must fit without sideways overflow.
+  await page.setViewportSize({ width: 844, height: 390 });
+  await page.getByTestId('parent-screen').evaluate((s) => {
+    s.style.paddingLeft = '47px';
+    s.style.paddingRight = '47px';
+  });
+  await expect(page.locator('.progress-table')).toBeVisible();
+  await expect(page.getByTestId('progress-card-A1')).toBeHidden();
+  const table = (await page.locator('.progress-table').boundingBox())!;
+  expect(table.x + table.width).toBeLessThanOrEqual(844 - 47 + 1);
+});
