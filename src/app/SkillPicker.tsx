@@ -57,7 +57,7 @@ export function SkillPicker() {
           </div>
         ))}
       </dl>
-      <table>
+      <table className="skills-table">
         <tbody>
           {BUILT_SKILLS.map((skill) => {
             const c = configFor(d.config, skill);

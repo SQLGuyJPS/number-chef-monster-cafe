@@ -212,7 +212,7 @@ test('the Skills list behind the gear changes the next service; progress and sto
   await expect(page.getByTestId('progress-coins')).toContainText('3 in the jar');
 });
 
-test('Progress shows cards on a portrait phone and the table in landscape, swapping on rotation (D131)', async ({
+test('Progress shows cards on a portrait phone and the table in landscape, swapping on rotation; Skills fits (D131)', async ({
   page,
 }) => {
   await stubSpeechNeverEnds(page);
@@ -226,6 +226,9 @@ test('Progress shows cards on a portrait phone and the table in landscape, swapp
   await openGrownUps(page);
   await expect(page.getByTestId('progress-card-A1')).toBeVisible();
   await expect(page.locator('.progress-table')).toBeHidden();
+  // Nothing on the grown-ups' screen runs past the right edge (the Skills dropdowns stack).
+  const widths = await page.getByTestId('parent-screen').evaluate((s) => [s.scrollWidth, s.clientWidth]);
+  expect(widths[0]).toBeLessThanOrEqual(widths[1]!);
   // Landscape with the notch insets: the table must fit without sideways overflow.
   await page.setViewportSize({ width: 844, height: 390 });
   await page.getByTestId('parent-screen').evaluate((s) => {

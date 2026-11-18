@@ -410,6 +410,26 @@ html.debug-mode #root {
   word-break: normal;
   text-align: left;
 }
+/* On a portrait phone each dish's row stacks: name, then its two dropdowns one under the other,
+   so the operations dropdown never runs past the screen edge (D131). */
+@media (max-width: 600px) {
+  .skills-table,
+  .skills-table tbody,
+  .skills-table tr,
+  .skills-table th,
+  .skills-table td {
+    display: block;
+  }
+  .skills-table tr {
+    margin-bottom: 12px;
+  }
+  .skills-table th {
+    text-align: left;
+  }
+  .skills-table select {
+    max-width: 100%;
+  }
+}
 /* Dish name over what it asks, so the first column stays narrow (D131). */
 .progress-dish {
   display: block;

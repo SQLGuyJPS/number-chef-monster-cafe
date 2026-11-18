@@ -138,4 +138,4 @@
 | D128 | Support levels renamed Level 1–4: Most help · Some help · Little help · No help | SPEC §3.2; amends D126 (b); names superseded by D129 | Owner's second naming pass |
 | D129 | Level names lose their numbers (Most · Some · Little · Least help) with new descriptions; basket side above Progress | SPEC §3.2, §12; amends D128, D126 | Owner's playtest feedback, M3a round 1 |
 | D130 | Parents see fact boxes as *confidence* 0–4 (Tray / Number pad confidence), explained under the Progress table | SPEC §4.2, §12 | Parents don't know Leitner boxes; owner chose "confidence" |
-| D131 | Progress list: one card per dish on a portrait phone, a tighter table elsewhere (fits landscape iPhone with the notch); rotation swaps them | SPEC §12 | Table was cut off on the iPhone |
+| D131 | Progress list: one card per dish on a portrait phone, a tighter table elsewhere (fits landscape iPhone with the notch); rotation swaps them; Skills rows stack in portrait | SPEC §12 | Table was cut off on the iPhone |
