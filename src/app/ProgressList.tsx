@@ -131,7 +131,7 @@ export function ProgressList() {
       </div>
       <p className="parent-note" data-testid="confidence-note">
         Each fact has a confidence score from 0 (new or still learning) to 4 (confident). A correct first answer
-        raises it one step. An incorrect answer or Pip&apos;s full help sets it back to 0, so the fact comes back
+        raises it one step. An incorrect answer or using Pip&apos;s full help sets it back to 0, so the fact comes back
         for more practice. Facts with lower confidence come up more often. The tray and the number pad are
         tracked separately, so counting on the tray doesn&apos;t count as knowing it by heart. Only &quot;Little
         help&quot; (tray starts empty) and &quot;Least help&quot; (number pad) change these. At &quot;Most
