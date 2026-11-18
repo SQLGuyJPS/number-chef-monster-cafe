@@ -259,3 +259,4 @@ Owner notes (2026-11-18): level names and basket side are right; note wording: "
 ### M3a feedback round 3 (D132)
 - [ ] **Progress on the iPhone in landscape** now shows the dish cards two per row (portrait still one per row; the iPad keeps the table). Readable, and nothing cut off at the notch side? Notes:
 - [ ] **Confidence note** reads "A correct first answer …" and "Only Little help (tray starts empty) and Least help (number pad) change these. At Most help …". Notes:
+- [ ] **Wording.** *Least help* now says "enters a wrong answer three times"; the confidence note says "An incorrect answer or Pip's full help" and quotes the level names. Notes:

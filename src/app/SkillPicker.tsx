@@ -14,7 +14,7 @@ export const STAGE_HELP: Record<Stage, string> = {
   3: 'The tray starts partially filled; Pip counts each tap aloud.',
   2: 'The tray starts partially filled; no spoken counts, a tone per tap.',
   1: 'The tray begins empty.',
-  0: 'The player types the answer on a number pad. The tray appears only when the player asks for a hint or enters a wrong answer twice for the same order.',
+  0: 'The player types the answer on a number pad. The tray appears only when the player asks for a hint or enters a wrong answer three times for the same order.',
 };
 const OPS: Ops[] = ['both', 'add', 'sub'];
 const OPS_NAMES: Record<Ops, string> = {
