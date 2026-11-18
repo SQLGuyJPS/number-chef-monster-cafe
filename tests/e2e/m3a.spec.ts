@@ -212,7 +212,7 @@ test('the Skills list behind the gear changes the next service; progress and sto
   await expect(page.getByTestId('progress-coins')).toContainText('3 in the jar');
 });
 
-test('Progress shows cards on a portrait phone and the table in landscape, swapping on rotation; Skills fits (D131)', async ({
+test('Progress: one card per row on a portrait phone, two in landscape, the table on a tablet; Skills fits (D131, D132)', async ({
   page,
 }) => {
   await stubSpeechNeverEnds(page);
@@ -229,14 +229,22 @@ test('Progress shows cards on a portrait phone and the table in landscape, swapp
   // Nothing on the grown-ups' screen runs past the right edge (the Skills dropdowns stack).
   const widths = await page.getByTestId('parent-screen').evaluate((s) => [s.scrollWidth, s.clientWidth]);
   expect(widths[0]).toBeLessThanOrEqual(widths[1]!);
-  // Landscape with the notch insets: the table must fit without sideways overflow.
+  // Landscape with the notch insets: two cards per row, side by side, inside the insets (D132).
   await page.setViewportSize({ width: 844, height: 390 });
   await page.getByTestId('parent-screen').evaluate((s) => {
     s.style.paddingLeft = '47px';
     s.style.paddingRight = '47px';
   });
+  await expect(page.locator('.progress-table')).toBeHidden();
+  const a1 = (await page.getByTestId('progress-card-A1').boundingBox())!;
+  const a2 = (await page.getByTestId('progress-card-A2').boundingBox())!;
+  expect(Math.abs(a1.y - a2.y)).toBeLessThan(1);
+  expect(a2.x).toBeGreaterThan(a1.x + a1.width);
+  expect(a2.x + a2.width).toBeLessThanOrEqual(844 - 47 + 1);
+  const lw = await page.getByTestId('parent-screen').evaluate((s) => [s.scrollWidth, s.clientWidth]);
+  expect(lw[0]).toBeLessThanOrEqual(lw[1]!);
+  // A tablet in portrait keeps the table.
+  await page.setViewportSize({ width: 834, height: 1194 });
   await expect(page.locator('.progress-table')).toBeVisible();
   await expect(page.getByTestId('progress-card-A1')).toBeHidden();
-  const table = (await page.locator('.progress-table').boundingBox())!;
-  expect(table.x + table.width).toBeLessThanOrEqual(844 - 47 + 1);
 });
