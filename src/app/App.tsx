@@ -9,7 +9,6 @@ import type {
 import { REGULARS } from '../engine/monsters';
 import { buildService, withWarmUp, type Order } from '../engine/session';
 import { isBuilt } from '../engine/generators';
-import { ORDERS_PER_SERVICE } from '../engine/config';
 import { hashSeed } from '../engine/rng';
 import type { SkillId } from '../engine/types';
 import { newId } from '../storage/ids';
@@ -31,13 +30,15 @@ import { Menu } from './screens/Menu';
 import { BreakDialog } from './BreakDialog';
 import { ParentScreen } from './ParentScreen';
 import { GearDialog } from './GearDialog';
+import { ParentGate } from './ParentGate';
+import { getSettings, settingsLoaded } from './deviceSettings';
 import { onBack, pushGuard } from './backGuard';
 import { unlockFromGesture } from '../audio/unlock';
 import { setCurrentScreen } from './runtime';
 import { hush } from '../audio/speech';
 import type { ScreenId } from './pwaPolicy';
 
-type AppScreen = Extract<ScreenId, 'splash' | 'home' | 'menu' | 'service' | 'results' | 'parent'>;
+type AppScreen = Extract<ScreenId, 'splash' | 'home' | 'menu' | 'service' | 'results' | 'gate' | 'parent'>;
 
 interface RunningService {
   svc: string;
@@ -105,7 +106,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
     // leave the tiles dead.
     void booting
       ?.then(async (boot) => {
-        await getProgress();
+        await Promise.all([getProgress(), settingsLoaded()]);
         const warm = (await boot.storage.getMeta('warmupShown')) === true;
         const side = await loadBasketSide(boot.storage);
         if (!live) return;
@@ -156,7 +157,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
       onBack(() => {
         // Never trap anyone in the grown-ups' screen (SPEC §2.3): back returns to Home. No new
         // guard entry can be pushed here (no gesture); the next navigation tap pushes one.
-        if (screenRef.current === 'parent') {
+        if (screenRef.current === 'parent' || screenRef.current === 'gate') {
           setScreen('home');
           return;
         }
@@ -179,6 +180,8 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
 
   const startService = (skill: SkillId) => {
     const cfg = configFor(configs, skill);
+    // Orders per service is a per-device parent setting, 4/6/8 (SPEC §12, D135).
+    const planned = getSettings().ordersPerService;
     // SPEC §4.1 step 1: seed from device, start time and a per-device counter (the e2e hook may pin it).
     const seed = takeSeedOverride() ?? hashSeed(deviceId, wallNow(), ++serviceCounter);
     // Boxes (the set for this stage, D127) and the seen set come from the event log (SPEC §4.1, §4.2).
@@ -187,7 +190,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
       skill,
       ops: cfg.ops,
       stage: cfg.stage,
-      orders: ORDERS_PER_SERVICE,
+      orders: planned,
       boxes: boxMap(derived, boxSetOf(cfg.stage)),
       seen: seenSet(derived),
       monsters: REGULARS,
@@ -199,7 +202,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
       setWarmupShown(true);
       void getStorageBoot()?.then((boot) => boot.storage.setMeta('warmupShown', true));
     }
-    const run: RunningService = { svc: newId(), skill, seed, orders, config: cfg, planned: ORDERS_PER_SERVICE };
+    const run: RunningService = { svc: newId(), skill, seed, orders, config: cfg, planned };
     // Stored from the start, so a reload before the first serve can still offer it back (D125).
     loadedProgress()?.setResume(snapshotOf(run, { nextIndex: 0, orders, results: [], coins: 0, activeMs: 0 }));
     setService(run);
@@ -272,8 +275,18 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
     go('service');
   };
 
-  // Parent area: full-screen, not rotated, scrollable (SPEC §2.2); outside the stage on purpose.
-  if (screen === 'parent') return <ParentScreen onBack={() => go('home')} />;
+  // Gate and parent area: full-screen, not rotated (SPEC §2.2); outside the stage on purpose.
+  // Leaving the area, or 5 minutes without input, locks it: the next visit asks again (D134).
+  if (screen === 'gate')
+    return (
+      <ParentGate
+        title="For grown-ups"
+        text="Answer the question to open the settings."
+        onPass={() => go('parent')}
+        onCancel={() => go('home')}
+      />
+    );
+  if (screen === 'parent') return <ParentScreen onBack={() => go('home')} onLock={() => setScreen('home')} />;
 
   return (
     <Stage
@@ -308,7 +321,8 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
           onClose={() => setGearOpen(false)}
           onOpen={() => {
             setGearOpen(false);
-            go('parent');
+            // Only ever from Home: the gear is not on any service screen (SPEC §12).
+            if (screenRef.current === 'home') go('gate');
           }}
         />
       )}

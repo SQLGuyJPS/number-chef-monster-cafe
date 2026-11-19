@@ -53,6 +53,10 @@ interface Hooks {
   service(): Probe | undefined;
   screen(): string;
   svgCounts(): { total: number; moving: number };
+  gateAnswer(): number | null;
+  skewParentClock(ms: number): void;
+  stores(): Promise<{ counts: Record<string, number>; snapshot?: { reason: string; events: unknown[] }; deviceId: string } | null>;
+  progress(): Promise<{ balance: number; count: number; kinds: string[]; events: { id: string; k: string }[] } | null>;
 }
 declare global {
   interface Window {

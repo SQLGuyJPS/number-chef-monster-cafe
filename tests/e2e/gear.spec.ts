@@ -1,8 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
-import { startApp, tap } from './helpers';
+import { openGrownUps, startApp, tap } from './helpers';
 
 // D94, D95: a tap on the Home gear opens the "For grown-ups" popup; a 2 s hold on its circle
-// (a ring fills clockwise from the top) opens the playtest tools. Playwright can't hold a touch,
+// (a ring fills clockwise from the top) opens the parent gate (M3b), then the parent area. Playwright can't hold a touch,
 // so the hold is a mouse press, which takes the same pointer path.
 async function pressCircle(page: Page): Promise<void> {
   const box = (await page.getByTestId('gear-hold').boundingBox())!;
@@ -15,12 +15,6 @@ const ringOffset = (page: Page) =>
     .getByTestId('gear-hold-ring')
     .evaluate((el) => parseFloat(getComputedStyle(el).strokeDashoffset));
 
-async function openTools(page: Page): Promise<void> {
-  await tap(page, page.getByTestId('gear'));
-  await pressCircle(page);
-  await expect(page.getByTestId('parent-screen')).toBeVisible({ timeout: 5000 });
-  await page.mouse.up();
-}
 
 test('a gear tap opens the popup at once; letting go early empties the ring and opens nothing', async ({
   page,
@@ -44,10 +38,11 @@ test('a gear tap opens the popup at once; letting go early empties the ring and 
   await expect(page.getByTestId('gear-dialog')).toBeVisible();
 });
 
-test('holding the circle until the ring closes opens the playtest tools', async ({ page }) => {
+test('holding the circle until the ring closes opens the gate, then the parent area', async ({ page }) => {
   await startApp(page);
-  await openTools(page);
+  await openGrownUps(page);
   await expect(page.getByTestId('gear-dialog')).toHaveCount(0);
+  await expect(page.getByTestId('parent-gate')).toHaveCount(0);
   await expect(page.getByTestId('debug-version')).toHaveText(/^\d+\.\d+\.\d+\+\w+$/);
   await expect(page.getByTestId('skill-picker')).toBeVisible();
   // Sound and speed tests are hidden from the grown-ups' screen; `?debug` keeps them (D133).
@@ -79,13 +74,13 @@ test('a stage picked there persists; Back to the café and the back gesture retu
   page,
 }) => {
   await startApp(page);
-  await openTools(page);
+  await openGrownUps(page);
   await page.getByTestId('stage-A1').selectOption('0');
   await page.getByTestId('ops-A1').selectOption('sub');
   await tap(page, page.getByTestId('parent-back'));
   await expect(page.getByTestId('screen-home')).toBeVisible();
 
-  await openTools(page);
+  await openGrownUps(page);
   await expect(page.getByTestId('stage-A1')).toHaveValue('0');
   await expect(page.getByTestId('ops-A1')).toHaveValue('sub');
 
@@ -104,7 +99,7 @@ test('a stage picked there persists; Back to the café and the back gesture retu
 // lift is reproduced with a lone pointerdown on the select.
 test('a stage picker whose lift is lost does not freeze later taps', async ({ page }) => {
   await startApp(page);
-  await openTools(page);
+  await openGrownUps(page);
   const stage = page.getByTestId('stage-A3');
   await stage.dispatchEvent('pointerdown', {
     pointerId: 77,

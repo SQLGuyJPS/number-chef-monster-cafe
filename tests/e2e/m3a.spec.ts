@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { tap } from './helpers';
+import { openGrownUps, tap } from './helpers';
 import { openService, probe, serveCorrect, stubSpeechNeverEnds, tapId, waitPhase } from './service';
 
 // M3a (SPEC §14): the event log on disk, resume, per-skill settings. Long flows on the two iPads.
@@ -145,14 +145,6 @@ test('a killed service declined with Not now still gets its partial serviceEnd a
   expect(s.balance).toBe(3);
 });
 
-async function openGrownUps(page: Page): Promise<void> {
-  await tap(page, page.getByTestId('gear'));
-  const box = (await page.getByTestId('gear-hold').boundingBox())!;
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  await page.mouse.down();
-  await expect(page.getByTestId('parent-screen')).toBeVisible({ timeout: 5000 });
-  await page.mouse.up();
-}
 
 test('the Skills list behind the gear changes the next service; progress and storage are shown (SPEC §12 M3a)', async ({
   page,

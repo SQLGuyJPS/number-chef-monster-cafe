@@ -263,3 +263,19 @@ Owner notes (2026-11-18): level names and basket side are right; note wording: "
 - [x] **Sound and speed tests** are gone from the grown-ups' screen (Playtest tools shows only the build and storage info). They still open from the hidden `?debug` address if ever needed. Notes:
 
 Owner notes (2026-11-19): landscape cards, confidence note and wording look good; sound and speed tests are hidden. One last change: drop "using" ("An incorrect answer or Pip's full help").
+
+## M3b — Hand-off ready: gate, settings, backup, restore, reset
+Use the **Home Screen app** on each device. Nothing here changes how the child plays.
+- [ ] **The gate.** Gear → hold the circle → a multiplication question (6–9 × 7–9) on a number pad. Easy for you, out of reach for the child? Three wrong answers lock it for 30 seconds ("Please wait a little", no countdown). Notes:
+- [ ] **Locks again.** *Back to the café*, the back gesture, or 5 minutes without touching it all return to Home, and the next visit asks again. Leave the device on the parent area for 5 minutes once to see it close by itself. Notes:
+- [ ] **Not during a service.** The gear is only on Home; there is no way into the settings mid-service. Notes:
+- [ ] **Settings** (new section): orders per service (4 / 6 / 8; try 4 once and count the monsters), voice, speed, *Test the voice*, the three volume sliders, *Test the sounds*, Reduce motion. Notes:
+- [ ] **Voice picker on each device.** Which voices are listed on the iPad, the iPhone and the Pixel, and which one do you prefer for the monsters? A voice marked "needs internet" falls back to the automatic one when offline. iPhone/iPad ignore the *Voice* volume slider (Apple limitation); does *Overall* still change the voice? Notes per device:
+- [ ] **Back up on each device.** *Data → Back up now*: on the iPad and iPhone the share sheet should open with a `number-chef-backup-<date>.json` file (save it to Files); on the Pixel the share sheet or a download. Does the file arrive, and does "Last backup" say *today*? Notes per device:
+- [ ] **Reset, then restore it.** *Reset this device…* → *Yes, reset* → a second question → the game restarts at "Tap to start" with 0 coins. Then gear → gate → *Choose a backup file…* → pick the file you just saved: the summary shows its coins; *Restore this backup* → a second question → the game restarts with the coins, progress and settings back. Does the iOS Files picker let you pick the file (not greyed out)? Notes per device:
+- [ ] **Restore on another device** (optional): a backup from the iPad restored on the phone replaces the phone's progress with the iPad's. Notes:
+- [ ] **Install help** at the bottom of the parent area: are the iOS and Android steps right for your devices? Notes:
+- [ ] **Coins with nothing to buy yet** (OPEN_ITEMS #8): after a week of play, does the jar still motivate her, or should a small shop come forward (M4)? Notes:
+- [ ] **Before her real use starts: reset the playtest progress once** on every device (*Data → Reset this device…*, D44). Back up first if you want to keep it.
+
+Not verifiable in the cloud build, so only you can judge: the real share sheets (iOS, Android), the iOS Files picker, the installed voices, whether *Voice* volume has any effect, and storage after a reset and restore on each device.

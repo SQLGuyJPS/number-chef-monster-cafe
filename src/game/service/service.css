@@ -727,3 +727,13 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* The parent's Reduce motion toggle (SPEC §2.3, §12) forces the same rules as the device setting. */
+html.reduce-motion .service *,
+html.reduce-motion .service *::before,
+html.reduce-motion .service *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+

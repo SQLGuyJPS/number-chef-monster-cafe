@@ -18,6 +18,9 @@ import { openStorage } from './storage/open';
 import { getCurrentScreen, lastInputAt, setPointerGuard, setStorageBoot } from './app/runtime';
 import { initPwa } from './app/pwa';
 import { startProgress } from './app/progress';
+import { onSettings, startSettings } from './app/deviceSettings';
+import { configureSpeech } from './audio/speech';
+import { setSfxVolume } from './audio/sfx';
 
 const flags = parseFlags(location.search);
 
@@ -29,6 +32,13 @@ const storageBoot = openStorage(() => Date.now());
 setStorageBoot(storageBoot);
 // The event log loads beside the Splash, so Home's coin jar is ready by the first tap (SPEC §11.3).
 void startProgress(storageBoot);
+// Per-device parent settings (D135): audio levels, voice and the motion class follow every change.
+void startSettings(storageBoot.then((b) => b.storage));
+onSettings((s) => {
+  configureSpeech({ voiceURI: s.voiceURI, rate: s.speechRate, volume: s.masterVolume * s.voiceVolume });
+  setSfxVolume(s.masterVolume * s.sfxVolume);
+  document.documentElement.classList.toggle('reduce-motion', s.reducedMotion);
+});
 initPwa(getCurrentScreen, lastInputAt);
 
 if (flags.mock) {

@@ -2,6 +2,8 @@
 // of the hook name. Grows in later milestones (seed override, fast-forward, fake clock).
 import {
   getCurrentScreen,
+  getGateAnswer,
+  skewParentClock,
   getStorageBoot,
   probeService,
   setSeedOverride,
@@ -61,6 +63,16 @@ export function installE2eHooks(): void {
     async setWarmupShown(shown: boolean) {
       const boot = await getStorageBoot();
       if (boot) await boot.storage.setMeta('warmupShown', shown);
+    },
+    /** The answer to the parent gate question on screen (it is never spoken; D134). */
+    gateAnswer: getGateAnswer,
+    /** Moves the gate's lockout and the parent area's idle clock forward. */
+    skewParentClock,
+    /** Rows per store and the snapshot, for the Reset and import checks (SPEC §11.6). */
+    async stores() {
+      const boot = await getStorageBoot();
+      if (!boot) return null;
+      return { counts: await boot.storage.counts(), snapshot: await boot.storage.getSnapshot(), deviceId: boot.deviceId };
     },
     async storage() {
       const boot = await getStorageBoot();

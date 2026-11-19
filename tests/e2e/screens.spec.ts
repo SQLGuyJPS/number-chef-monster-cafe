@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
-import { startApp, tap } from './helpers';
+import { gateAnswer, startApp, tap, typeGate } from './helpers';
 import { followMe, openService, probe, ringBell, serveCorrect, serveWrong, tapId, waitPhase } from './service';
 
 // Milestone screenshots (SPEC §13.5) into docs/screens/<milestone>/. Runs only when asked:
@@ -46,8 +46,10 @@ test('milestone screenshots', async ({ page }, info) => {
   await page.mouse.down();
   await page.waitForTimeout(1200);
   await shot('gear-hold');
-  await page.getByTestId('parent-screen').waitFor({ timeout: 5000 });
+  await page.getByTestId('parent-gate').waitFor({ timeout: 5000 });
   await page.mouse.up();
+  await shot('parent-gate');
+  await typeGate(page, await gateAnswer(page));
   await page.getByTestId('debug-version').waitFor();
   await shot('parent-tools');
 });
@@ -281,12 +283,92 @@ test('M3a screenshots', async ({ page }, info) => {
   const g = (await page.getByTestId('gear-hold').boundingBox())!;
   await page.mouse.move(g.x + g.width / 2, g.y + g.height / 2);
   await page.mouse.down();
-  await page.getByTestId('parent-screen').waitFor({ timeout: 5000 });
+  await page.getByTestId('parent-gate').waitFor({ timeout: 5000 });
   await page.mouse.up();
+  await typeGate(page, await gateAnswer(page));
   await expect(page.getByTestId('storage-kind')).not.toHaveText('');
   await page.getByTestId('storage-usage').waitFor();
   await page.screenshot({ path: `${dir}/parent-skills-progress-${tag}.png`, fullPage: true });
   // The parent screen scrolls inside a fixed root, so also capture it scrolled to the progress list.
   await page.getByTestId('progress-list').scrollIntoViewIfNeeded();
   await page.screenshot({ path: `${dir}/parent-progress-${tag}.png` });
+});
+
+// M3b (SPEC §13.5, §12): the gate, its lockout, the parent area's sections and the data dialogs,
+// on an iPad in landscape and a phone in landscape and portrait (the area is never rotated).
+const M3B_SHOTS = ['chromium-ipad-pro-11', 'webkit-iphone-13', 'webkit-iphone-portrait'];
+
+test('M3b screenshots', async ({ page }, info) => {
+  test.skip(milestone !== 'M3b' || !M3B_SHOTS.includes(info.project.name), 'M3b shots: iPad, phone landscape and portrait');
+  test.setTimeout(120_000);
+  const dir = `docs/screens/${milestone}`;
+  mkdirSync(dir, { recursive: true });
+  const vp = page.viewportSize()!;
+  const tag = `${vp.width}x${vp.height}`;
+  const shot = (name: string) => page.screenshot({ path: `${dir}/${name}-${tag}.png` });
+  const section = async (id: string, name: string, block: 'start' | 'center' = 'start') => {
+    await page.getByTestId(id).evaluate((el, b) => el.scrollIntoView({ block: b }), block);
+    await shot(name);
+  };
+  const hold = async () => {
+    await tap(page, page.getByTestId('gear'));
+    const g = (await page.getByTestId('gear-hold').boundingBox())!;
+    await page.mouse.move(g.x + g.width / 2, g.y + g.height / 2);
+    await page.mouse.down();
+    await page.getByTestId('parent-gate').waitFor({ timeout: 5000 });
+    await page.mouse.up();
+  };
+
+  await openService(page, { skill: 'A1', stage: 3 });
+  await serveCorrect(page);
+  await expect.poll(async () => (await probe(page)).index, { timeout: 20_000 }).toBe(1);
+  await tapId(page, 'door');
+  await tapId(page, 'close-cafe');
+  await page.addStyleTag({ content: '*{animation:none!important;transition:none!important}' });
+
+  await hold();
+  await typeGate(page, 1);
+  await shot('gate');
+  for (let i = 0; i < 2; i++) await typeGate(page, 1);
+  await page.getByTestId('gate-locked').waitFor();
+  await shot('gate-lockout');
+  await page.evaluate(() => window.__ncmc.skewParentClock(30_000));
+  await page.getByTestId('gate-question').waitFor();
+  await typeGate(page, await gateAnswer(page));
+  await page.getByTestId('storage-usage').waitFor();
+  await shot('parent-top');
+  await section('progress-list', 'parent-progress');
+  await section('parent-settings', 'parent-settings');
+  await section('parent-data', 'parent-data');
+  await section('install-help', 'parent-help');
+
+  await page.getByTestId('reset').click();
+  await section('reset-confirm', 'reset-confirm', 'center');
+  await page.getByTestId('reset-yes').click();
+  await page.getByTestId('confirm-gate').waitFor();
+  await shot('reset-gate');
+  await tapId(page, 'gate-cancel');
+
+  // An export, changed by hand, read back: the checksum warning, then the summary.
+  const file = await page.evaluate(async () => {
+    const shared: string[] = [];
+    const nav = navigator as unknown as Record<string, unknown>;
+    nav['canShare'] = () => true;
+    nav['share'] = async (d: { files: File[] }) => void shared.push(await d.files[0]!.text());
+    (document.querySelector('[data-testid=export]') as HTMLButtonElement).click();
+    await new Promise((r) => setTimeout(r, 500));
+    return shared[0]!;
+  });
+  await section('export-result', 'export-done', 'center');
+  const changed = JSON.parse(file) as { settings: Record<string, unknown> };
+  changed.settings['ordersPerService'] = 4;
+  await page.getByTestId('import-file').setInputFiles({ name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(changed)) });
+  await page.getByTestId('checksum-warning').waitFor();
+  await section('checksum-warning', 'import-checksum', 'center');
+  await page.getByTestId('import-file').setInputFiles({ name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(file) });
+  await page.getByTestId('import-summary').waitFor();
+  await section('import-summary', 'import-summary', 'center');
+  await page.getByTestId('import-confirm').click();
+  await page.getByTestId('confirm-gate').waitFor();
+  await shot('import-gate');
 });

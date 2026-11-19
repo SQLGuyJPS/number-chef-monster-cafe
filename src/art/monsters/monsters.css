@@ -157,3 +157,10 @@
     animation: none !important;
   }
 }
+
+/* The parent's Reduce motion toggle (SPEC §2.3, §12) forces the same rules as the device setting. */
+html.reduce-motion .monster-art *,
+html.reduce-motion .monster-art {
+  animation: none !important;
+}
+

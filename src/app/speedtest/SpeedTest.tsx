@@ -104,7 +104,8 @@ export function SpeedTest({ quick }: { quick: boolean }) {
   const [aborted, setAborted] = useState<string | undefined>();
   const stopReason = useRef<string | null>(null);
   const rendered = useRef<(() => void) | null>(null);
-  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reducedMotion =
+    matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.classList.contains('reduce-motion');
 
   // Resolves the runner's wait once React has committed the new load.
   useLayoutEffect(() => {

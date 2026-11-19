@@ -1,6 +1,6 @@
 # Build plan — Number Chef: Monster Café
 
-Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**; M1 playtest rounds 1–7 and the gear popup recorded in PLAYTEST.md (last 2026-11-09). **M2 done 2026-11-10** (started 2026-11-09); waiting for the M2 playtest. **M2b (device speed test, D112) added by the owner and done 2026-11-12**; the iPad result set the SVG budget (D113, 2026-11-12). **Play-time limit moved from M3b to Tier 2 milestone M12, postponed indefinitely (D124, 2026-11-14).** **M3a done 2026-11-14** (D125); M3a playtest round 1 applied 2026-11-17 (D126, D127), waiting for the owner's re-check. Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
+Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**; M1 playtest rounds 1–7 and the gear popup recorded in PLAYTEST.md (last 2026-11-09). **M2 done 2026-11-10** (started 2026-11-09); waiting for the M2 playtest. **M2b (device speed test, D112) added by the owner and done 2026-11-12**; the iPad result set the SVG budget (D113, 2026-11-12). **Play-time limit moved from M3b to Tier 2 milestone M12, postponed indefinitely (D124, 2026-11-14).** **M3a done 2026-11-14** (D125); M3a playtest rounds 1–3 applied and merged 2026-11-19 (D126–D133). **M3b done 2026-11-19** (D134–D136); waiting for the M3b playtest. Tier 1 is complete. Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
 
 ---
 
@@ -239,9 +239,10 @@ The play-time limit moved to M12 (D124).
 4. E2E: gate lockout, export → reset → import round trip. Screenshots, PLAYTEST, commit, stop.
 
 **Accept (SPEC §14 M3b)**
-- [ ] parent gate lockout and 5-minute auto-lock; not reachable during a service
-- [ ] export → reset → import round trip; checksum verified
-- [ ] Reset touches only `ncmc*` data and keeps `snapshots`
+- [x] parent gate lockout and 5-minute auto-lock; not reachable during a service (`m3b.spec.ts`, `parentGate.test.ts`)
+- [x] export → reset → import round trip; checksum verified (`m3b.spec.ts`: share sheet, text/plain and download paths; `backup.test.ts`)
+- [x] Reset touches only `ncmc*` data and keeps `snapshots` (`m3b.spec.ts` with another app's IndexedDB and localStorage on the origin; `backup.test.ts`)
+- [x] settings (orders 4/6/8, voice, speed, volumes, reduced motion) per device; install help text; screenshots in `docs/screens/M3b/`
 
 ---
 
