@@ -306,8 +306,8 @@ test('M3b screenshots', async ({ page }, info) => {
   const vp = page.viewportSize()!;
   const tag = `${vp.width}x${vp.height}`;
   const shot = (name: string) => page.screenshot({ path: `${dir}/${name}-${tag}.png` });
-  const section = async (id: string, name: string) => {
-    await page.getByTestId(id).evaluate((el) => el.scrollIntoView({ block: 'start' }));
+  const section = async (id: string, name: string, block: 'start' | 'center' = 'start') => {
+    await page.getByTestId(id).evaluate((el, b) => el.scrollIntoView({ block: b }), block);
     await shot(name);
   };
   const hold = async () => {
@@ -343,7 +343,7 @@ test('M3b screenshots', async ({ page }, info) => {
   await section('install-help', 'parent-help');
 
   await page.getByTestId('reset').click();
-  await section('parent-data', 'reset-confirm');
+  await section('reset-confirm', 'reset-confirm', 'center');
   await page.getByTestId('reset-yes').click();
   await page.getByTestId('confirm-gate').waitFor();
   await shot('reset-gate');
@@ -359,15 +359,15 @@ test('M3b screenshots', async ({ page }, info) => {
     await new Promise((r) => setTimeout(r, 500));
     return shared[0]!;
   });
-  await section('parent-data', 'export-done');
+  await section('export-result', 'export-done', 'center');
   const changed = JSON.parse(file) as { settings: Record<string, unknown> };
   changed.settings['ordersPerService'] = 4;
   await page.getByTestId('import-file').setInputFiles({ name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(changed)) });
   await page.getByTestId('checksum-warning').waitFor();
-  await section('parent-data', 'import-checksum');
+  await section('checksum-warning', 'import-checksum', 'center');
   await page.getByTestId('import-file').setInputFiles({ name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(file) });
   await page.getByTestId('import-summary').waitFor();
-  await section('parent-data', 'import-summary');
+  await section('import-summary', 'import-summary', 'center');
   await page.getByTestId('import-confirm').click();
   await page.getByTestId('confirm-gate').waitFor();
   await shot('import-gate');
