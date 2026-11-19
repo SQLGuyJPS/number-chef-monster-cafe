@@ -257,7 +257,9 @@ Owner notes (2026-11-18): Close the café and the teeth work; drop "Level n:" fr
 Owner notes (2026-11-18): level names and basket side are right; note wording: "correct first answer", "Little help (tray starts empty)", period instead of semicolon; portrait cards good, but the landscape table's counts run together (D132).
 
 ### M3a feedback round 3 (D132)
-- [ ] **Progress on the iPhone in landscape** now shows the dish cards two per row (portrait still one per row; the iPad keeps the table). Readable, and nothing cut off at the notch side? Notes:
-- [ ] **Confidence note** reads "A correct first answer …" and "Only Little help (tray starts empty) and Least help (number pad) change these. At Most help …". Notes:
-- [ ] **Wording.** *Least help* now says "enters a wrong answer three times"; the confidence note says "An incorrect answer or using Pip's full help" and quotes the level names. Notes:
-- [ ] **Sound and speed tests** are gone from the grown-ups' screen (Playtest tools shows only the build and storage info). They still open from the hidden `?debug` address if ever needed. Notes:
+- [x] **Progress on the iPhone in landscape** now shows the dish cards two per row (portrait still one per row; the iPad keeps the table). Readable, and nothing cut off at the notch side? Notes:
+- [x] **Confidence note** reads "A correct first answer …" and "Only Little help (tray starts empty) and Least help (number pad) change these. At Most help …". Notes:
+- [x] **Wording.** *Least help* now says "enters a wrong answer three times"; the confidence note says "An incorrect answer or using Pip's full help" and quotes the level names. Notes:
+- [x] **Sound and speed tests** are gone from the grown-ups' screen (Playtest tools shows only the build and storage info). They still open from the hidden `?debug` address if ever needed. Notes:
+
+Owner notes (2026-11-19): landscape cards, confidence note and wording look good; sound and speed tests are hidden. One last change: drop "using" ("An incorrect answer or Pip's full help").

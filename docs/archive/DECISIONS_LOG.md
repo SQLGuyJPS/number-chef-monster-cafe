@@ -736,3 +736,4 @@ How to revisit: if the repeating ghost is distracting, show each hint once; `war
 **What:** The grown-ups' screen (gear → hold) no longer shows the Sound test or the Speed test link; its Playtest tools keep only the build and storage info. The code stays: the hidden `?debug` screen still shows both, and `?speedtest` still opens the speed test directly (`PlaytestTools` takes `deviceTests`, false on the grown-ups' screen).
 **Why:** Owner: they are not needed now, but may be again (e.g. a new device or an audio problem).
 **How to revisit:** pass `deviceTests` (or drop the prop) in `src/app/ParentScreen.tsx`.
+**Amendment to D132 (2026-11-19, owner):** the confidence note reads "An incorrect answer or Pip's full help sets it back to 0" (no "using").
