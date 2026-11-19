@@ -5,8 +5,8 @@ import type { Rng } from './rng';
 
 export const GATE_MAX_WRONG = 3;
 export const GATE_LOCKOUT_MS = 30_000;
-/** The parent area locks after this long without input (SPEC §12). */
-export const PARENT_IDLE_MS = 5 * 60_000;
+/** The parent area locks after this long without input (SPEC §12, D137: phones sleep at 5 minutes). */
+export const PARENT_IDLE_MS = 60_000;
 /** Longest answer the pad accepts (9 × 9 = 81; a third digit is room for a slip). */
 export const GATE_MAX_DIGITS = 3;
 
@@ -55,6 +55,6 @@ export function submitGate(
   return { state: { wrong, lockedUntil: null }, result: 'wrong' };
 }
 
-/** True once the parent area has been left alone for `PARENT_IDLE_MS` (wall clock, D134). */
+/** True once the parent area has been left alone for `PARENT_IDLE_MS` (wall clock, D134, D137). */
 export const idleExpired = (lastInput: number, now: number): boolean =>
   now - lastInput >= PARENT_IDLE_MS;

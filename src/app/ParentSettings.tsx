@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { englishVoices, speakText } from '../audio/speech';
+import { englishVoices, speakText, uniqueVoices } from '../audio/speech';
 import { sfx } from '../audio/sfx';
 import { getStorageBoot } from './runtime';
 import {
@@ -63,7 +63,7 @@ function Volume({ id, label, value, onChange }: { id: string; label: string; val
  */
 export function ParentSettings() {
   const s = useSettings();
-  const voices = useVoices();
+  const voices = uniqueVoices(useVoices(), s.voiceURI);
   const chosenMissing = s.voiceURI !== null && !voices.some((v) => v.voiceURI === s.voiceURI);
   return (
     <section className="parent-settings" data-testid="parent-settings">

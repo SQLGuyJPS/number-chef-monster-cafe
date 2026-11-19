@@ -14,7 +14,7 @@ const INPUT_EVENTS = ['pointerdown', 'keydown', 'input', 'change', 'scroll', 'wh
 /**
  * The parent area behind the gate (SPEC §12, M3b): Skills, basket side, Progress, Settings, Data,
  * storage and install help. Full screen, not rotated, scrollable (SPEC §2.2). It locks (back to
- * Home, so the gate asks again) after 5 minutes without input or when left (D134).
+ * Home, so the gate asks again) after 1 minute without input or when left (D134).
  */
 export function ParentScreen({ onBack, onLock }: { onBack: () => void; onLock: () => void }) {
   const lockRef = useRef(onLock);

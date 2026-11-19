@@ -767,3 +767,11 @@ How to revisit: if the repeating ghost is distracting, show each hint once; `war
 - (e) After a Replace or Reset the app reloads to the Splash, so nothing in memory (derived state, resume check, settings) is stale. Restore is off (with a note) while storage runs in memory (IndexedDB failed), since that reload would lose it; Reset still works. Restoring the snapshot is M7 (snapshots list), so the screen doesn't promise it: it says to back up first. *Back up now* is off while a share sheet is open (a second `share()` would be refused and fall through to a download).
 **Why:** SPEC §11.6 fixes the shape and the fallbacks but not the hash input, the file name, how `share()` keeps its user activation with an async hash, or what Replace and Reset keep.
 **How to revisit:** `src/storage/backup.ts`, `src/app/shareFile.ts`, `src/app/ParentData.tsx`.
+
+## D137 — M3b playtest fixes: 1-minute idle lock, inactive pad during lockout, one entry per voice (2026-11-19)
+**What:**
+- (a) The parent area returns to Home after **1 minute** without input (was 5 minutes, D134 (c)); everything else in D134 (c) stands: wall clock, any input counts, checked every second and on return to the foreground.
+- (b) During the gate's lockout the number pad takes no touches at all (`pointer-events: none` on the dimmed pad) and the keys have no pressed colour, so nothing lights up when tapped.
+- (c) The voice picker lists each voice name and language once. iOS reports Samantha, Daniel, Moira and others twice under different voice URIs; the picker keeps the parent's chosen one if it is one of a pair, else an on-device one, else the first listed. The automatic pick (SPEC §8.2) is unchanged.
+**Why:** Owner playtest of M3b: the phone sleeps at 5 minutes so the lock was never seen, and 5 minutes is too long anyway; the keys lit up blue while greyed out; voices appeared twice on iPhone and iPad.
+**How to revisit:** `PARENT_IDLE_MS` in `src/engine/parentGate.ts`; `.gate-pad-off` in `src/app/global.css`; `uniqueVoices` in `src/audio/speech.ts`.
