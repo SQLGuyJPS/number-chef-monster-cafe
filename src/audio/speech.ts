@@ -48,6 +48,29 @@ export function englishVoices(): SpeechSynthesisVoice[] {
   }
 }
 
+/** The parts of a voice the picker shows and compares. */
+type VoiceInfo = Pick<SpeechSynthesisVoice, 'name' | 'lang' | 'localService' | 'voiceURI'>;
+
+/**
+ * One entry per name and language (D137). iOS lists Samantha, Daniel, Moira and others twice
+ * (two voiceURIs, same name and lang), which reads as a repeat in the picker. Keeps the voice the
+ * parent chose if it is one of the pair, else an on-device one, else the first listed.
+ */
+export function uniqueVoices<V extends VoiceInfo>(voices: readonly V[], keepURI: string | null = null): V[] {
+  const byKey = new Map<string, V>();
+  const key = (v: V) => `${v.name.trim().toLowerCase()}|${v.lang.replace('_', '-').toLowerCase()}`;
+  for (const v of voices) {
+    const k = key(v);
+    const held = byKey.get(k);
+    if (!held) byKey.set(k, v);
+    else if (held.voiceURI !== keepURI && (v.voiceURI === keepURI || (v.localService && !held.localService))) {
+      byKey.set(k, v);
+    }
+  }
+  // Map keeps first-insertion order, so the list stays in the device's order.
+  return [...byKey.values()];
+}
+
 function loadVoices(): void {
   const s = synth();
   if (!s) return;

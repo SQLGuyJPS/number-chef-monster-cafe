@@ -77,6 +77,8 @@ test('the gate: wrong answers, a 30 s lockout with no countdown, then the right 
   await expect(page.getByTestId('gate-locked')).toBeVisible();
   await expect(page.getByTestId('gate-locked')).not.toContainText(/\d/);
   await expect(page.getByTestId('gate-question')).toHaveCount(0);
+  // The locked pad takes no touches, so no key can show a pressed colour (D137).
+  await expect(page.getByTestId('gate-pad')).toHaveCSS('pointer-events', 'none');
   // Keys do nothing while locked; leaving and coming back does not clear the lockout.
   await tap(page, page.getByTestId('gate-key-5'));
   await tapId(page, 'gate-cancel');
@@ -92,19 +94,19 @@ test('the gate: wrong answers, a 30 s lockout with no countdown, then the right 
   await expect(page.getByTestId('parent-screen')).toBeVisible();
 });
 
-test('the parent area locks after 5 minutes idle and on leaving; every visit asks again', async ({ page }, info) => {
+test('the parent area locks after 1 minute idle and on leaving; every visit asks again', async ({ page }, info) => {
   onIpads(info.project.name);
   await startApp(page);
   await openGrownUps(page);
-  // Four minutes is not enough; input restarts the count.
-  await page.evaluate(() => window.__ncmc.skewParentClock(4 * 60_000));
+  // 45 seconds is not enough; input restarts the count (D137).
+  await page.evaluate(() => window.__ncmc.skewParentClock(45_000));
   await page.waitForTimeout(1500);
   await expect(page.getByTestId('parent-screen')).toBeVisible();
   await page.getByTestId('setting-orders').selectOption('4');
-  await page.evaluate(() => window.__ncmc.skewParentClock(4 * 60_000));
+  await page.evaluate(() => window.__ncmc.skewParentClock(45_000));
   await page.waitForTimeout(1500);
   await expect(page.getByTestId('parent-screen')).toBeVisible();
-  await page.evaluate(() => window.__ncmc.skewParentClock(60_000 + 1000));
+  await page.evaluate(() => window.__ncmc.skewParentClock(15_000 + 1000));
   await expect(page.getByTestId('screen-home')).toBeVisible({ timeout: 3000 });
   await expect(page.getByTestId('parent-screen')).toHaveCount(0);
   // Back in: the gate again. Leave by the button, then by the back gesture: both lock.

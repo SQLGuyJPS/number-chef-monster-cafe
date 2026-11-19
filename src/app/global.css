@@ -588,6 +588,8 @@ html.debug-mode #root {
 }
 .gate-pad-off {
   opacity: 0.35;
+  /* No pressed look while locked (D137): the keys must read as switched off, not as taps that failed. */
+  pointer-events: none;
 }
 .gate-key {
   font: inherit;
@@ -598,7 +600,7 @@ html.debug-mode #root {
   color: var(--c-ink);
   touch-action: manipulation;
 }
-.gate-key:active {
+.gate-key:not([aria-disabled]):active {
   background: var(--c-hold-fill-down);
 }
 .gate-ok {

@@ -10,7 +10,7 @@ import {
 } from '../../src/engine/parentGate';
 import { mulberry32 } from '../../src/engine/rng';
 
-// SPEC §12, D134: 6–9 × 7–9; three wrong in a row → 30 s lockout; 5 minutes idle locks the area.
+// SPEC §12, D134: 6–9 × 7–9; three wrong in a row → 30 s lockout; 1 minute idle locks the area (D137).
 describe('parent gate', () => {
   it('asks 6–9 × 7–9 and covers every pair', () => {
     const rng = mulberry32(5);
@@ -58,9 +58,9 @@ describe('parent gate', () => {
     expect(submitGate(s, q, 42, 20 + GATE_LOCKOUT_MS).result).toBe('open');
   });
 
-  it('idle lock after 5 minutes without input', () => {
+  it('idle lock after 1 minute without input', () => {
     expect(idleExpired(1000, 1000 + PARENT_IDLE_MS - 1)).toBe(false);
     expect(idleExpired(1000, 1000 + PARENT_IDLE_MS)).toBe(true);
-    expect(PARENT_IDLE_MS).toBe(300_000);
+    expect(PARENT_IDLE_MS).toBe(60_000);
   });
 });

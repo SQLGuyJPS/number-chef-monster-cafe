@@ -276,7 +276,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   };
 
   // Gate and parent area: full-screen, not rotated (SPEC §2.2); outside the stage on purpose.
-  // Leaving the area, or 5 minutes without input, locks it: the next visit asks again (D134).
+  // Leaving the area, or 1 minute without input, locks it: the next visit asks again (D134, D137).
   if (screen === 'gate')
     return (
       <ParentGate
