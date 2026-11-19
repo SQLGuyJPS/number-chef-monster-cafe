@@ -55,9 +55,16 @@ export async function typeGate(page: Page, answer: number | string, gate = 'pare
 
 /** The question is never spoken; e2e reads its answer from the `__ncmc` hook (D134). */
 export async function gateAnswer(page: Page): Promise<number> {
-  const n = await page.evaluate(() => (window as unknown as { __ncmc: { gateAnswer(): number | null } }).__ncmc.gateAnswer());
-  if (n === null) throw new Error('no gate question on screen');
-  return n;
+  // The hook follows the question from an effect: wait until it matches the one on screen.
+  const read = () =>
+    page.evaluate(() => {
+      const shown = document.querySelector('[data-testid="gate-question"]')?.textContent ?? '';
+      const m = /(\d+)\s*×\s*(\d+)/.exec(shown);
+      const n = (window as unknown as { __ncmc: { gateAnswer(): number | null } }).__ncmc.gateAnswer();
+      return m && n === Number(m[1]) * Number(m[2]) ? n : null;
+    });
+  await expect.poll(read, { message: 'a gate question on screen' }).not.toBeNull();
+  return (await read())!;
 }
 
 /** Gear → hold → the right answer → the parent area. */

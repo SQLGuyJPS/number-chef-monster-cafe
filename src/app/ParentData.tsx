@@ -38,6 +38,9 @@ export function ParentData() {
   const settings = useSettings();
   const [built, setBuilt] = useState<{ json: string; name: string; for: unknown[] } | null>(null);
   const [shareResult, setShareResult] = useState<ShareOutcome | null>(null);
+  // While a share sheet is open a second share() is refused, which would fall through to a download.
+  const [sharing, setSharing] = useState(false);
+  const [degraded, setDegraded] = useState(false);
   const [lastBackup, setLastBackup] = useState<number | undefined>(undefined);
   const [step, setStep] = useState<Step>({ k: 'idle' });
   const fileInput = useRef<HTMLInputElement>(null);
@@ -51,6 +54,7 @@ export function ParentData() {
     void (async () => {
       const boot = await getStorageBoot();
       if (!boot) return;
+      if (live) setDegraded(boot.degraded);
       await (await getProgress())?.flush();
       const out = await buildExport(boot.storage, boot.deviceId, Date.now());
       const last = await boot.storage.getMeta('lastBackupAt');
@@ -67,9 +71,11 @@ export function ParentData() {
   const prepared = built && built.for[0] === derived && built.for[1] === settings ? built : null;
 
   const onExport = () => {
-    if (!prepared) return;
+    if (!prepared || sharing) return;
     setShareResult(null);
+    setSharing(true);
     void shareOrDownload(prepared.json, prepared.name).then(async (r) => {
+      setSharing(false);
       setShareResult(r);
       if (r.kind === 'cancelled') return;
       const at = Date.now();
@@ -135,7 +141,7 @@ export function ParentData() {
           type="button"
           className="parent-button"
           data-testid="export"
-          disabled={!prepared}
+          disabled={!prepared || sharing}
           // A real click (not pointerup) so every browser counts it as the user activation share() needs.
           onClick={onExport}
         >
@@ -155,15 +161,21 @@ export function ParentData() {
 
       <h3>Restore from a backup</h3>
       <p>
-        Replaces everything on this device (progress, coins and settings) with the backup. A copy of what is here now
-        is kept first. Merging two devices comes in a later version.
+        Replaces everything on this device (progress, coins and settings) with the backup. Back up this device first
+        if you might want its progress again. Merging two devices comes in a later version.
       </p>
+      {degraded && (
+        <p className="parent-warn" data-testid="import-unavailable">
+          This device isn&apos;t saving progress right now (see Storage below), so a restore would be lost when the game
+          restarts.
+        </p>
+      )}
       <p>
         <button
           type="button"
           className="parent-button"
           data-testid="import"
-          disabled={step.k === 'working'}
+          disabled={step.k === 'working' || degraded}
           onClick={() => {
             setStep({ k: 'idle' });
             fileInput.current?.click();

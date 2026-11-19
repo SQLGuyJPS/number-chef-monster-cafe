@@ -249,6 +249,21 @@ test('with no Web Share the backup downloads as a .json file', async ({ page }, 
   await expect(page.getByTestId('export-link')).toBeVisible();
 });
 
+test('without IndexedDB, Back up still works but Restore is off (the restart would lose it)', async ({ page }, info) => {
+  onIpads(info.project.name);
+  await page.addInitScript(() => {
+    IDBFactory.prototype.open = () => {
+      throw new Error('blocked for the test');
+    };
+  });
+  await startApp(page);
+  await openGrownUps(page);
+  await expect(page.getByTestId('import-unavailable')).toBeVisible();
+  await expect(page.getByTestId('import')).toBeDisabled();
+  await expect(page.getByTestId('export')).toBeEnabled();
+  await expect(page.getByTestId('reset')).toBeEnabled();
+});
+
 test('Reset keeps the snapshot and touches only ncmc* data (SPEC §11.5)', async ({ page }, info) => {
   onIpads(info.project.name);
   await startApp(page);

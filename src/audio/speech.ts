@@ -76,6 +76,9 @@ export function initSpeech(): void {
     /* old engines */
   }
   for (const ms of [0, 250, 1000, 3000]) window.setTimeout(loadVoices, ms);
+  // A chosen network voice is swapped for a local one while offline, and back when online (D135).
+  window.addEventListener('online', loadVoices);
+  window.addEventListener('offline', loadVoices);
 }
 
 /** clamp(1200, 400 + 90 ms × chars / rate, 8000) (SPEC §8.1, D37). */

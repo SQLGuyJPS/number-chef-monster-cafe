@@ -19,11 +19,7 @@ import { parentClock, setGateAnswer } from './runtime';
 let gate: GateState = freshGate();
 let asked = 0;
 
-function newQuestion(): GateQuestion {
-  const q = gateQuestion(mulberry32(hashSeed(Date.now(), ++asked)));
-  setGateAnswer(q.answer);
-  return q;
-}
+const newQuestion = (): GateQuestion => gateQuestion(mulberry32(hashSeed(Date.now(), ++asked)));
 
 const DIGITS = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
@@ -56,7 +52,11 @@ export function ParentGate({
   useEffect(() => {
     passRef.current = onPass;
   }, [onPass]);
-  useEffect(() => () => setGateAnswer(null), []);
+  // The e2e hook follows the question on screen (an effect, so StrictMode's double render can't desync it).
+  useEffect(() => {
+    setGateAnswer(q.answer);
+    return () => setGateAnswer(null);
+  }, [q]);
 
   // The pad comes back by itself when the lockout ends.
   useEffect(() => {
@@ -84,7 +84,6 @@ export function ParentGate({
         gate = r.state;
         setTyped('');
         if (r.result === 'open') {
-          setGateAnswer(null);
           passRef.current();
           return;
         }
