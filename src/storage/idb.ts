@@ -103,6 +103,21 @@ export class IdbStorage implements Storage {
   async putSnapshot(s: Snapshot): Promise<void> {
     await this.db.put('snapshots', { id: SNAPSHOT_ID, ...s, profileId: DEFAULT_PROFILE });
   }
+  async replaceData(events: readonly Evt[], settings: Record<string, unknown>): Promise<void> {
+    const tx = this.db.transaction(['events', 'state', 'resume', 'settings'], 'readwrite');
+    for (const n of ['events', 'state', 'resume', 'settings'] as const) void tx.objectStore(n).clear();
+    const ev = tx.objectStore('events');
+    for (const e of events) void ev.put({ ...e, profileId: DEFAULT_PROFILE });
+    const st = tx.objectStore('settings');
+    for (const [key, value] of Object.entries(settings)) void st.put({ key, value, profileId: DEFAULT_PROFILE });
+    await tx.done;
+  }
+  async wipeExceptSnapshots(): Promise<void> {
+    const names = STORE_NAMES.filter((n) => n !== 'snapshots');
+    const tx = this.db.transaction(names, 'readwrite');
+    for (const n of names) void tx.objectStore(n).clear();
+    await tx.done;
+  }
   async getSnapshot(): Promise<Snapshot | undefined> {
     const row = (await this.db.get('snapshots', SNAPSHOT_ID)) as (Snapshot & { id?: string; profileId?: string }) | undefined;
     if (!row) return undefined;

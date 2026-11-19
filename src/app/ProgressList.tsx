@@ -217,10 +217,6 @@ export function StorageStatus() {
           </tbody>
         </table>
       )}
-      <p className="parent-note">
-        Install the game to the Home Screen before the first play: on an iPad or iPhone a Safari tab and the Home
-        Screen app keep separate progress, and Safari may clear a tab&apos;s data after 7 days without a visit.
-      </p>
     </section>
   );
 }

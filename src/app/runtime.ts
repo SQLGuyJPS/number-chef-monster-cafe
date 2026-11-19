@@ -48,3 +48,20 @@ export const setServiceProbe = (p: (() => unknown) | null): void => {
   serviceProbe = p;
 };
 export const probeService = (): unknown => serviceProbe?.();
+
+/**
+ * Wall clock for the parent gate's lockout and the parent area's idle lock (D134). e2e skews it
+ * forward through the `__ncmc` hook instead of waiting 30 s or 5 minutes.
+ */
+let parentSkew = 0;
+export const parentClock = (): number => Date.now() + parentSkew;
+export const skewParentClock = (ms: number): void => {
+  parentSkew += ms;
+};
+
+/** The answer to the gate question on screen, for e2e only (the question is never spoken). */
+let gateAnswer: number | null = null;
+export const setGateAnswer = (n: number | null): void => {
+  gateAnswer = n;
+};
+export const getGateAnswer = (): number | null => gateAnswer;

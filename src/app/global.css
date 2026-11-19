@@ -344,6 +344,16 @@ button {
   }
 }
 
+/* The parent's Reduce motion toggle (SPEC §2.3, §12) forces the same rules as the device setting. */
+html.reduce-motion .splash-tap,
+html.reduce-motion .turn-cue {
+  animation: none;
+}
+html.reduce-motion .btn:active {
+  transform: none;
+}
+
+
 /* ---- Debug screen (not part of the play surface) ---- */
 html.debug-mode,
 html.debug-mode body,
@@ -510,6 +520,160 @@ html.debug-mode #root {
   border: 2px solid currentColor;
   border-radius: 14px;
   background: var(--c-bg);
+}
+
+/* ---- Parent gate (SPEC §12, D134): full screen, not rotated; question beside the pad when wide ---- */
+.parent-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+}
+.gate-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px 40px;
+  max-width: 760px;
+}
+.gate-ask {
+  flex: 1 1 260px;
+  max-width: 360px;
+  text-align: center;
+}
+.gate-ask h1 {
+  font-size: 24px;
+  margin: 0 0 4px;
+}
+.gate-text {
+  margin: 0 0 8px;
+}
+.gate-question {
+  font-size: 40px;
+  font-weight: bold;
+  margin: 0;
+}
+.gate-typed {
+  font-size: 34px;
+  min-width: 4ch;
+  margin: 4px auto;
+  padding: 2px 12px;
+  border-bottom: 3px solid currentColor;
+  display: inline-block;
+}
+.gate-note {
+  margin: 0 0 8px;
+  min-height: 1.3em;
+}
+.gate-locked {
+  font-size: 20px;
+  margin: 16px 0;
+}
+.gate-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 72px);
+  grid-auto-rows: 60px;
+  gap: 8px;
+}
+.gate-pad-off {
+  opacity: 0.35;
+}
+.gate-key {
+  font: inherit;
+  font-size: 26px;
+  border: 2px solid var(--c-ink);
+  border-radius: 14px;
+  background: var(--c-paper);
+  color: var(--c-ink);
+  touch-action: manipulation;
+}
+.gate-key:active {
+  background: var(--c-hold-fill-down);
+}
+.gate-ok {
+  background: var(--c-secondary);
+  border-color: var(--c-secondary);
+  color: var(--c-secondary-ink);
+  font-weight: bold;
+}
+.parent-gate .parent-back,
+.parent-button {
+  min-height: 56px;
+  padding: 0 20px;
+  font: inherit;
+  font-size: 18px;
+  border: 2px solid currentColor;
+  border-radius: 14px;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  margin: 4px 0;
+}
+.parent-button:disabled {
+  opacity: 0.5;
+}
+.parent-danger {
+  background: #fde3d6;
+}
+.parent-confirm {
+  max-width: 60em;
+  padding: 8px 14px;
+  margin: 8px 0;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.05);
+}
+.parent-warn {
+  font-weight: bold;
+}
+.parent-range {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 32em;
+  min-height: 44px;
+}
+.parent-range span {
+  min-width: 5em;
+}
+.parent-range input {
+  flex: 1;
+  min-height: 44px;
+}
+.parent-range output {
+  min-width: 3.5em;
+  text-align: right;
+}
+.parent-check {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  max-width: 60em;
+}
+.parent-check input {
+  width: 28px;
+  height: 28px;
+  flex: none;
+}
+.parent-screen h3 {
+  margin: 16px 0 4px;
+  font-size: 17px;
+}
+.parent-help ol {
+  max-width: 60em;
+  padding-left: 1.4em;
+}
+.parent-screen .parent-select {
+  max-width: 100%;
 }
 
 /* ?gallery monster sheet (look-only, scrolls like ?debug). */

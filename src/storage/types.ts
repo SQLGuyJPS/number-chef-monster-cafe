@@ -61,6 +61,13 @@ export interface Storage {
   getState(): Promise<unknown>;
   allSettings(): Promise<Record<string, unknown>>;
   putSnapshot(s: Snapshot): Promise<void>;
+  /**
+   * Replace import (SPEC §11.6): in one transaction, clears the events, the derived cache, the
+   * resume row and the settings, then writes the imported events and settings. `meta` stays.
+   */
+  replaceData(events: readonly Evt[], settings: Record<string, unknown>): Promise<void>;
+  /** Reset (SPEC §11.6, D44): clears every store except `snapshots`, in one transaction. */
+  wipeExceptSnapshots(): Promise<void>;
   getSnapshot(): Promise<Snapshot | undefined>;
   close(): void;
 }

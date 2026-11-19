@@ -2,7 +2,13 @@
 // AudioContext (not unlocked yet, or unsupported) nothing plays and nothing breaks.
 import { audioStats, getAudioContext } from './unlock';
 
-const SFX_VOLUME = 0.7 * 0.8; // SFX × master defaults (SPEC §8.3)
+/** SFX × master volume (SPEC §8.3; defaults 0.7 × 0.8); set from the parent area (D135). */
+let sfxVolume = 0.7 * 0.8;
+export function setSfxVolume(v: number): void {
+  sfxVolume = Math.max(0, Math.min(1, v));
+}
+/** An exponential ramp can't reach 0, so a muted effect is not played at all. */
+const level = (gain: number): number => Math.max(0.0002, gain * sfxVolume);
 const PENTATONIC = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5, 1174.66, 1318.51, 1567.98, 1760.0];
 
 /** A tone that waits longer than this for the context to resume is dropped: late is worse than silent. */
@@ -25,7 +31,7 @@ function whenRunning(play: (ctx: AudioContext) => void): void {
     audioStats.tonesPlayed++;
     play(c);
   };
-  if (!ctx || ctx.state === 'closed') return skip();
+  if (!ctx || ctx.state === 'closed' || sfxVolume === 0) return skip();
   if (ctx.state === 'running') return run(ctx);
   const asked = performance.now();
   void ctx
@@ -57,7 +63,7 @@ function playTone(
   osc.frequency.setValueAtTime(freq, t0);
   if (endFreq) osc.frequency.exponentialRampToValueAtTime(endFreq, t0 + dur);
   g.gain.setValueAtTime(0.0001, t0);
-  g.gain.exponentialRampToValueAtTime(gain * SFX_VOLUME, t0 + 0.01);
+  g.gain.exponentialRampToValueAtTime(level(gain), t0 + 0.01);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
   osc.connect(g).connect(ctx.destination);
   osc.start(t0);
@@ -85,7 +91,7 @@ function noise(start: number, dur: number, freq: number, gain: number): void {
     bp.Q.value = 1.2;
     const g = ctx.createGain();
     g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(gain * SFX_VOLUME, t0 + 0.015);
+    g.gain.exponentialRampToValueAtTime(level(gain), t0 + 0.015);
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
     src.connect(bp).connect(g).connect(ctx.destination);
     src.start(t0);

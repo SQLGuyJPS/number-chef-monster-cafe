@@ -11,6 +11,11 @@ const START_WATCHDOG_MS = 1500;
 const PREFERRED = [/Samantha/i, /Ava/i, /Allison/i, /Google US English/i, /Samsung/i];
 
 let voice: SpeechSynthesisVoice | null = null;
+/** Parent settings (SPEC §8.2, D135): a chosen voice, the speed and the voice volume. */
+let chosenURI: string | null = null;
+/** The parent's speed over the default; monster and Pip rates scale with it. */
+let rateScale = 1;
+let voiceVolume = 1;
 let token = 0;
 /** Tokens of non-count lines still playing. Counts never cut these off (D75). */
 const activeLines = new Set<number>();
@@ -32,11 +37,33 @@ export function pickVoice(voices: readonly SpeechSynthesisVoice[]): SpeechSynthe
   return [...english].sort((a, b) => score(b) - score(a))[0] ?? null;
 }
 
+/** English voices installed on this device, for the parent's voice picker. */
+export function englishVoices(): SpeechSynthesisVoice[] {
+  const s = synth();
+  if (!s) return [];
+  try {
+    return s.getVoices().filter((v) => /^en([-_]|$)/i.test(v.lang));
+  } catch {
+    return [];
+  }
+}
+
 function loadVoices(): void {
   const s = synth();
   if (!s) return;
-  const v = pickVoice(s.getVoices());
+  const all = s.getVoices();
+  // A chosen network voice can't speak offline (Android): fall back to the automatic pick.
+  const chosen = chosenURI ? all.find((v) => v.voiceURI === chosenURI) : undefined;
+  const usable = chosen && (chosen.localService || navigator.onLine !== false) ? chosen : undefined;
+  const v = usable ?? pickVoice(all);
   if (v) voice = v;
+}
+
+export function configureSpeech(c: { voiceURI: string | null; rate: number; volume: number }): void {
+  chosenURI = c.voiceURI;
+  rateScale = c.rate / DEFAULT_RATE;
+  voiceVolume = Math.max(0, Math.min(1, c.volume));
+  loadVoices();
 }
 
 /** Voices load asynchronously: `voiceschanged` plus retries at 0/250/1000/3000 ms (SPEC §8.2). */
@@ -71,7 +98,7 @@ export interface SpeakOptions {
 }
 
 export function speakText(text: string, opts: SpeakOptions = {}): Promise<void> {
-  const rate = opts.rate ?? DEFAULT_RATE;
+  const rate = Math.min(1.5, Math.max(0.5, (opts.rate ?? DEFAULT_RATE) * rateScale));
   const ms = speechTimeoutMs(text, rate) * getTimeScale();
   const my = ++token;
   if (!opts.count) activeLines.add(my);
@@ -95,6 +122,7 @@ export function speakText(text: string, opts: SpeakOptions = {}): Promise<void> 
       u.lang = voice?.lang ?? 'en-US';
       u.rate = rate;
       u.pitch = opts.pitch ?? 1;
+      u.volume = voiceVolume;
       u.onstart = () => void (started = true);
       u.onend = finish;
       u.onerror = finish;

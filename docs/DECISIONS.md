@@ -141,3 +141,6 @@
 | D131 | Progress list: one card per dish on a portrait phone, a tighter table elsewhere (fits landscape iPhone with the notch); rotation swaps them; Skills rows stack in portrait | SPEC §12; phone-landscape table superseded by D132 | Table was cut off on the iPhone |
 | D132 | Progress on a phone in landscape: two cards per row instead of the table; confidence note and Least help wording | SPEC §3.2, §12; amends D131, D130, D129 | Owner: landscape table counts ran together |
 | D133 | Sound and speed tests hidden from the grown-ups' screen; still on `?debug` and `?speedtest` | SPEC §2.2, §12 | Owner: not needed now, keep the code |
+| D134 | Parent gate: new question per miss, 30 s lockout with no countdown kept for the launch; 5-minute wall-clock idle lock; leaving locks, backgrounding doesn't | SPEC §12 | SPEC left lockout display, idle and leaving open |
+| D135 | Per-device settings: keys and defaults in the `settings` store, speed scales every voice, volume products, Reduce motion forces the device rule; no schema bump | SPEC §8.2, §8.3, §11.3, §12 | Keys and combinations unspecified |
+| D136 | Export checksum input and file name, file built before the tap, share fallbacks; Replace keeps `meta`; Reset clears `meta` too; app restarts after both | SPEC §11.6 | Hash input, activation and what each keeps were open |

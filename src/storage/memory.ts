@@ -63,6 +63,14 @@ export class MemoryStorage implements Storage {
   async putSnapshot(s: Snapshot): Promise<void> {
     this.store('snapshots').set('latest', clone(s));
   }
+  async replaceData(events: readonly Evt[], settings: Record<string, unknown>): Promise<void> {
+    for (const n of ['events', 'state', 'resume', 'settings'] as const) this.store(n).clear();
+    for (const e of events) this.store('events').set(e.id, clone(e));
+    for (const [k, v] of Object.entries(settings)) this.store('settings').set(k, clone(v));
+  }
+  async wipeExceptSnapshots(): Promise<void> {
+    for (const n of STORE_NAMES) if (n !== 'snapshots') this.store(n).clear();
+  }
   async getSnapshot(): Promise<Snapshot | undefined> {
     return clone(this.store('snapshots').get('latest') as Snapshot | undefined);
   }
