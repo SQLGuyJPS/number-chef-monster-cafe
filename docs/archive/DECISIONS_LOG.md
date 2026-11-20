@@ -775,3 +775,10 @@ How to revisit: if the repeating ghost is distracting, show each hint once; `war
 - (c) The voice picker lists each voice name and language once. iOS reports Samantha, Daniel, Moira and others twice under different voice URIs; the picker keeps the parent's chosen one if it is one of a pair, else an on-device one, else the first listed. The automatic pick (SPEC §8.2) is unchanged.
 **Why:** Owner playtest of M3b: the phone sleeps at 5 minutes so the lock was never seen, and 5 minutes is too long anyway; the keys lit up blue while greyed out; voices appeared twice on iPhone and iPad.
 **How to revisit:** `PARENT_IDLE_MS` in `src/engine/parentGate.ts`; `.gate-pad-off` in `src/app/global.css`; `uniqueVoices` in `src/audio/speech.ts`.
+
+## D138 — Gate fits a short browser window; the last monster stays for the closing line (2026-11-20)
+**What:**
+- (a) The parent gate is centred with auto margins instead of flex `align-items: center`, so when the window is shorter than the gate (a phone in landscape in Safari, with the address and tab bars) it starts at the top and scrolls down; nothing is lost above the top edge.
+- (b) After the last order of a service the monster does not play the walk-off: it stays where it is, delighted, for "All done! Thank you, chef!", then Results. Every other monster still leaves to the left before the next one arrives.
+**Why:** Owner playtest after D137: the top of "For grown-ups" was cut off in landscape browser tabs and could not be scrolled to; the last monster walked off and then popped back in the same spot to say thanks.
+**How to revisit:** `.parent-gate` / `.gate-panel` in `src/app/global.css`; the end of the eat sequence in `src/game/service/controller.ts`.

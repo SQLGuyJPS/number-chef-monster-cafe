@@ -325,9 +325,20 @@ test('a whole service of six orders ends on Results; Another service, Change dis
   for (let i = 0; i < 6; i++) {
     await expect.poll(async () => (await probe(page))?.index).toBe(i);
     await waitPhase(page, 'building');
+    if (i === 5) {
+      // The last monster stays for the closing line: it never walks off (D138).
+      await page.evaluate(() => {
+        const w = window as unknown as { __left: boolean };
+        w.__left = false;
+        new MutationObserver(() => {
+          if (document.querySelector('.monster-slot.mood-leave')) w.__left = true;
+        }).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'], childList: true });
+      });
+    }
     await serveCorrect(page);
   }
   await expect(page.getByTestId('screen-results')).toBeVisible({ timeout: 10_000 });
+  expect(await page.evaluate(() => (window as unknown as { __left: boolean }).__left)).toBe(false);
   // The tally counts up to the exact total: 6 orders × 3 coins + the 5-coin tip (SPEC §9).
   await expect(page.getByTestId('results-count')).toHaveText('23', { timeout: 15_000 });
   await expect(page.getByTestId('results-tally')).toHaveAttribute('data-done', 'true');

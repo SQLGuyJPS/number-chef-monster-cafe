@@ -281,6 +281,10 @@ Use the **Home Screen app** on each device. Nothing here changes how the child p
 Not verifiable in the cloud build, so only you can judge: the real share sheets (iOS, Android), the iOS Files picker, the installed voices, whether *Voice* volume has any effect, and storage after a reset and restore on each device.
 
 Owner notes (2026-11-19): all of M3b works on the devices. Three changes (D137), to check on the next build:
-- [ ] **1-minute lock.** Leave the device on the parent area for one minute without touching it: it returns to Home. Notes:
-- [ ] **Locked pad.** Three wrong answers: tapping the greyed-out keys shows no colour at all. Notes:
-- [ ] **No repeated voices** in the Voice list on the iPhone and iPad (Samantha once, Daniel once, Moira once). If you had picked a voice before, it is still selected. Notes:
+- [x] **1-minute lock.** Leave the device on the parent area for one minute without touching it: it returns to Home. Notes:
+- [x] **Locked pad.** Three wrong answers: tapping the greyed-out keys shows no colour at all. Notes:
+- [x] **No repeated voices** in the Voice list on the iPhone and iPad (Samantha once, Daniel once, Moira once). If you had picked a voice before, it is still selected. Notes: all three pass (2026-11-20).
+
+Owner notes (2026-11-20): D137 items pass. Two more changes (D138), to check on the next build:
+- [ ] **Gate in a browser tab, landscape.** Open the gate in Safari (not the Home Screen app) with the phone sideways: "For grown-ups" is whole at the top, and you can scroll down to the pad if it doesn't fit. Notes:
+- [ ] **Last monster stays.** At the end of a service the last monster eats, stays where it is and says "All done! Thank you, chef!", without walking off first. Notes:
