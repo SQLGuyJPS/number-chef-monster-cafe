@@ -286,5 +286,5 @@ Owner notes (2026-11-19): all of M3b works on the devices. Three changes (D137),
 - [x] **No repeated voices** in the Voice list on the iPhone and iPad (Samantha once, Daniel once, Moira once). If you had picked a voice before, it is still selected. Notes: all three pass (2026-11-20).
 
 Owner notes (2026-11-20): D137 items pass. Two more changes (D138), to check on the next build:
-- [ ] **Gate in a browser tab, landscape.** Open the gate in Safari (not the Home Screen app) with the phone sideways: "For grown-ups" is whole at the top, and you can scroll down to the pad if it doesn't fit. Notes:
-- [ ] **Last monster stays.** At the end of a service the last monster eats, stays where it is and says "All done! Thank you, chef!", without walking off first. Notes:
+- [x] **Gate in a browser tab, landscape.** Open the gate in Safari (not the Home Screen app) with the phone sideways: "For grown-ups" is whole at the top, and you can scroll down to the pad if it doesn't fit. Notes:
+- [x] **Last monster stays.** At the end of a service the last monster eats, stays where it is and says "All done! Thank you, chef!", without walking off first. Notes: both pass (2026-11-20). **M3b signed off by the owner.**
