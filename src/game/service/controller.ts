@@ -736,14 +736,16 @@ export class ServiceController {
     this.skipEat = null;
     this.landed = base + COINS_PER_PROBLEM;
 
-    this.set((s) => ({ attempt: stepAttempt(s.attempt, { type: 'phaseDone' }), mood: 'leave', eat: null }));
-    await this.wait(350);
-    if (!alive()) return;
     const next = this.s.index + 1;
     if (next < this.orders.length) {
+      this.set((s) => ({ attempt: stepAttempt(s.attempt, { type: 'phaseDone' }), mood: 'leave', eat: null }));
+      await this.wait(350);
+      if (!alive()) return;
       this.startOrder(next);
       return;
     }
+    // The last monster stays where it is for the closing line instead of leaving and popping back (D138).
+    this.set((s) => ({ attempt: stepAttempt(s.attempt, { type: 'phaseDone' }), mood: 'delight', eat: null }));
     // A finished service earns the tip (SPEC §9), kept in its `serviceEnd`; a voluntary exit does not.
     this.tip = SERVICE_TIP;
     this.opts.onCoins?.(SERVICE_TIP);

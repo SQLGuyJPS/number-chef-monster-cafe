@@ -94,6 +94,20 @@ test('the gate: wrong answers, a 30 s lockout with no countdown, then the right 
   await expect(page.getByTestId('parent-screen')).toBeVisible();
 });
 
+test('in a short browser window the gate scrolls and its title is never cut off at the top (D138)', async ({ page }, info) => {
+  onIpads(info.project.name);
+  // Safari in landscape with its tab bar leaves about 330 px of an 844 px-wide phone screen.
+  await page.setViewportSize({ width: 844, height: 280 });
+  await startApp(page);
+  await holdGear(page);
+  const title = page.getByTestId('parent-gate').locator('h1');
+  const top = (await title.boundingBox())!.y;
+  expect(top).toBeGreaterThanOrEqual(0);
+  // The rest stays reachable by scrolling.
+  await page.getByTestId('gate-key-ok').scrollIntoViewIfNeeded();
+  await expect(page.getByTestId('gate-key-ok')).toBeInViewport();
+});
+
 test('the parent area locks after 1 minute idle and on leaving; every visit asks again', async ({ page }, info) => {
   onIpads(info.project.name);
   await startApp(page);
