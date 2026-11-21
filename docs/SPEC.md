@@ -742,7 +742,7 @@ Colorways round 2, four themed sets with their new pieces and set-complete surpr
 **Accept:** set completion is replay-derived; `economy:sim` with the real catalog still meets the lifespan target.
 
 #### M15 — Monster Wardrobe (D149)
-Hats, skins and accessories for all 8 monsters (§10.1), equipped per monster and shown whenever it visits, within the SVG budget (§2.4); delivered by M14's crates.
+Hats, skins and accessories for all 8 monsters (§10.1), equipped per monster and shown whenever it visits, within the SVG budget (§2.4); delivered by M4's crates (D151).
 
 #### M16 — Monster Album and friendship gifts (D149)
 The album pages and the free friendship gifts (§10.1). Story episodes are a later idea.

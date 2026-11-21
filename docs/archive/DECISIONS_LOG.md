@@ -865,6 +865,8 @@ How to revisit: if the repeating ghost is distracting, show each hint once; `war
 **Why:** Keeps the §8.1 contract (never block, never overlap) with real clip lengths instead of the TTS formula (PLAN §6.6), and keeps a slow first decode on an old iPad from leaving a silent gap.
 **How to revisit:** `src/audio/voice.ts`, `src/audio/voicePlan.ts`; the owner's playtest (cut-offs, gaps, latency of the first line).
 
+*D148–D152 were written on a branch as D139–D143 with milestones M13–M16; renumbered on 2026-11-21 when merged with main, which had already used D139–D147 and M13 for recorded voices. Commit messages before the merge use the old numbers.*
+
 ## D148 — Shop prices in five tiers with colorways, sized to last about two months (2026-11-21)
 **What:**
 - (a) **Lifespan target.** The shop is sized for the owner's estimate of play: an hour a week in sittings of 15–20 minutes, services of 3–4 minutes (simulated: about 14 services, 85 monsters and 320 coins a week). The M4 stock lasts about 2 months (simulated 2.3); the later content (D149) about 6–9 more.
@@ -877,7 +879,7 @@ How to revisit: if the repeating ghost is distracting, show each hint once; `war
 *Amended by D152: Wood is the free floor and Checkerboard a T2 item; the M4 stock is 55 paid entries, 3,105 coins.*
 
 ## D149 — Later shop content in five milestones; delivery crates every 30 monsters (2026-11-21)
-**What:** The owner approved and split the economy follow-ups (numbering chosen by the owner: fill the unused M6, then M14+):
+**What:** The owner approved and split the economy follow-ups (numbering chosen by the owner: fill the unused M6, then the next free numbers, M14+):
 - **M6 Wish Jar** (fast follow-up to M4): the child pins an unowned item; the jar on Home and Results shows how full the wish is; Pip may say how close it is at Results. Reuses the M6 number left free by D21.
 - **M14 Deliveries & Themed Sets:** 1–2 more colorways on items that have them, four themed sets of three new pieces each (completing a set gives a free surprise, never coins), and delivery crates for all later content: **2 items every 30 monsters served, held while 6 or more unbought items are in the shop**; the first crate of an update arrives with it; a crate's arrival is recorded when first seen, so a backlog arrives one crate at a time. Counted in monsters, not services, because services can be cut short and their length is a parent setting. Never calendar-based, never expiring.
 - **M15 Monster Wardrobe:** per monster, including the two guests: 2–3 hats (T2), 4–5 skins (T5) and 2–3 accessories (T3), worn whenever the monster visits.
