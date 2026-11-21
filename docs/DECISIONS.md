@@ -28,7 +28,7 @@
 | D18 | `ncmc` namespacing on the shared Pages origin | SPEC §11.5 | Never touch the owner's other apps' storage |
 | D19 | Back guard opens "Take a break?" | SPEC §2.3; amended by D37, D46 | Back gestures would exit mid-service |
 | D20 | Build tiers instead of an hour cap | SPEC §0, §14; amended by D36, D44 | Playable game first, bonus work after |
-| D21 | Story tickets declined (M6 unused) | SPEC §0, §14 | Reading load; keyword shortcuts |
+| D21 | Story tickets declined (M6 number later reused for the Wish Jar, D140) | SPEC §0, §14 | Reading load; keyword shortcuts |
 | D22 | The owner picks the skill; no automatic leveling | SPEC §1.2, §4.1 | Owner directs practice; automatic path was unpredictable |
 | D23 | Stage is a per-skill parent setting (`skillConfig`) | SPEC §3.2, §11.2 | Adjustable scaffold that syncs through merge |
 | D24 | Per-skill operations filter | SPEC §4.1, §12; amended by D43 | A1 addition is mostly known |
@@ -146,3 +146,6 @@
 | D136 | Export checksum input and file name, file built before the tap, share fallbacks; Replace keeps `meta`; Reset clears `meta` too; app restarts after both | SPEC §11.6 | Hash input, activation and what each keeps were open |
 | D137 | M3b playtest: parent area idle lock 1 minute; gate pad takes no touches and shows no pressed colour during lockout; voice picker lists each name and language once | SPEC §8.2, §12; amends D134 | Owner: phone sleeps before 5 min; keys lit while locked; iOS voices listed twice |
 | D138 | Parent gate scrolls from the top in a short window (no cut-off title); the last monster of a service stays in place for the closing line instead of walking off | SPEC §5.6, §12 | Owner: gate title cut off in landscape Safari; last monster left and popped back |
+| D139 | Shop prices in five tiers (20/30/55/100/180) with colorways and shared colour families; M4 stock 3,080 coins, about 2 months at an hour a week | SPEC §9, §10, §7.4, §14 | Old 1,340-coin shop lasted 4–5 hours of play |
+| D140 | Later shop content: M6 Wish Jar, M13 Deliveries & Themed Sets (crates of 2 every 30 monsters, held at 6 unbought), M14 Monster Wardrobe, M15 Monster Album, M16 Treat Time | SPEC §0, §10.1, §14 | Owner wants the shop to last 6–9 more months without relying on art alone |
+| D141 | Economy simulator `npm run economy:sim` writes `docs/ECONOMY_SIM.md` | SPEC §13.1 | Test prices against play time before committing to them |

@@ -1,6 +1,6 @@
-// Shop catalog and price tiers (SPEC §9, §10). DRAFT for the owner's economy review (2026-11-21):
-// SPEC §10 still lists the old 1,340-coin table until the owner approves these prices; the
-// simulator (`npm run economy:sim`, engine/economySim.ts) reads this file. Earning rates stay in
+// Shop catalog and price tiers (SPEC §9, §10, D139). Sized for about an hour of play a week: the
+// M4 stock lasts about 2 months, the later groups (D140) about 6–9 more. Check a price change with
+// `npm run economy:sim` (engine/economySim.ts, D141) before it ships. Earning rates stay in
 // engine/config.ts (COINS_PER_PROBLEM, SERVICE_TIP); only spending lives here.
 
 export type DecorSlot =

@@ -10,8 +10,14 @@ import {
 import { DEFAULT_PROFILE, percentile, simulate, type SimInput } from '../../src/engine/economySim';
 import { mulberry32 } from '../../src/engine/rng';
 
-describe('shop catalog (draft)', () => {
+describe('shop catalog', () => {
   const entries = expandCatalog(M4_ITEMS);
+
+  it('matches SPEC §10: 54 paid entries, 3,080 coins (D139)', () => {
+    const paid = entries.filter((e) => e.price > 0);
+    expect(paid).toHaveLength(54);
+    expect(paid.reduce((s, e) => s + e.price, 0)).toBe(3080);
+  });
 
   it('has unique keys, prices in steps of 5 and known colour families', () => {
     expect(new Set(entries.map((e) => e.key)).size).toBe(entries.length);
