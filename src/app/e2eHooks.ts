@@ -17,6 +17,8 @@ import type { Ops, SkillId, Stage } from '../engine/types';
 import { getStageLayout } from './Stage';
 import { getSwStatus } from './pwa';
 import { countMovingSvgElements, countSvgElements } from './svgCount';
+import { loadVoiceManifest, say, voiceCacheStats, voiceLog } from '../audio/voice';
+import type { Line } from '../engine/clips';
 
 export function installE2eHooks(): void {
   const hooks = {
@@ -64,6 +66,18 @@ export function installE2eHooks(): void {
       const boot = await getStorageBoot();
       if (boot) await boot.storage.setMeta('warmupShown', shown);
     },
+    /** Lines spoken so far, recorded or TTS, with their clips and outcome (SPEC §8.4). */
+    voiceLog: () => voiceLog.map((e) => ({ ...e })),
+    /** Speaks a line through the voice layer; resolves with how long `say` took. */
+    async voiceSay(line: Line, voice: string) {
+      await loadVoiceManifest();
+      const t0 = performance.now();
+      const done = say(line, voice);
+      const entry = voiceLog[voiceLog.length - 1]!; // logged synchronously when the line starts
+      await done;
+      return { ms: performance.now() - t0, entry: { ...entry } };
+    },
+    voiceCache: voiceCacheStats,
     /** The answer to the parent gate question on screen (it is never spoken; D134). */
     gateAnswer: getGateAnswer,
     /** Moves the gate's lockout and the parent area's idle clock forward. */

@@ -284,6 +284,8 @@ Goal: the monsters, Pip and the narrator speak every line the built dishes (A1�
 9. **Tests:** unit (clip plans, manifest schema, label matching, LRU cap, scheduling offsets with an injected clock); e2e `voice.spec.ts` on Chromium iPad Pro 11 and WebKit iPad gen 7 with the WAV test set: a recorded line plays its clips in order (hook), a missing clip gives whole-line TTS, a clip that never ends does not block the service, playback offline after precache (Chromium), zero external requests.
 10. Commit, push, **STOP** with recording instructions for step 2.
 
+**Step 1 status (2026-11-21): done.** Items 1–10 built and tested (D143–D147). Checks: `ffmpeg-static` installs in the cloud container; its Linux and Windows x64 binaries both have `rubberband` (D145); Playwright's Chromium and WebKit here decode AAC, e2e stays on the WAV set (D146). `npm run check` and the full e2e suite green; `tests/e2e/voice.spec.ts` on Chromium iPad Pro 11 and WebKit iPad gen 7.
+
 ### 6.3 Step 2 — the owner's listening test
 1. Install Audacity (free). Record `docs/VOICE_SPIKE.md` in a quiet room, mic at a steady distance, at an even pace.
 2. Mark each bold target with a region label (select it, Ctrl+B) whose text is its number; export the audio as WAV and the labels as text into `voice-masters/spike/`.

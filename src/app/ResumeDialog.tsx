@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 import { TapButton } from '../game/input/TapButton';
 import { phrase } from '../engine/phrases';
-import { PIP_PITCH, speakText } from '../audio/speech';
+import { PIP_PITCH } from '../audio/speech';
+import { say } from '../audio/voice';
+import { phraseLine } from '../engine/clips';
 
 /**
  * "Continue dinner service?" (SPEC §5.8, §11.6, D33): offered, never resumed silently. Two big
@@ -9,7 +11,7 @@ import { PIP_PITCH, speakText } from '../audio/speech';
  */
 export function ResumeDialog({ onContinue, onNew }: { onContinue: () => void; onNew: () => void }) {
   useEffect(() => {
-    void speakText(phrase('resume.ask'), { pitch: PIP_PITCH });
+    void say(phraseLine('resume.ask'), 'pip', { pitch: PIP_PITCH });
   }, []);
   return (
     <div className="dialog-scrim" data-testid="resume-dialog" role="dialog" aria-modal="true">

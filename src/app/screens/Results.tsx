@@ -3,9 +3,9 @@ import { TapButton } from '../../game/input/TapButton';
 import { Monster } from '../../art/monsters/Monster';
 import { CoinJar, at } from '../../game/service/ServiceParts';
 import { COUNTER, FRONT } from '../metrics';
-import { hush, speakText } from '../../audio/speech';
+import { hushVoice as hush, say } from '../../audio/voice';
+import { phraseLine } from '../../engine/clips';
 import { sfx } from '../../audio/sfx';
-import { phrase } from '../../engine/phrases';
 import { tallySchedule } from '../../engine/tally';
 import { getTimeScale } from '../runtime';
 
@@ -65,7 +65,7 @@ export function Results({
       counting.current = false;
       setShown(coins);
       setDone(true);
-      later(() => void speakText(phrase('results.total', { n: coins })), SAY_TOTAL_MS);
+      later(() => void say(phraseLine('results.total', { n: coins }), 'narrator'), SAY_TOTAL_MS);
     };
     const tick = (i: number) => {
       const step = schedule[i];

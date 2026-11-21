@@ -7,3 +7,6 @@ blob-report/
 *.tsbuildinfo
 .vite/
 .DS_Store
+
+# Voice recordings: WAV masters and Audacity label files stay out of git (D140b).
+voice-masters/

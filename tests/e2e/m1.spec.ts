@@ -11,6 +11,7 @@ import {
   trayTo,
   typeNumber,
   waitPhase,
+  heard,
 } from './service';
 
 // M1 acceptance (SPEC §14 M1, PLAN §4): tap flows in landscape on Chromium and one WebKit iPad
@@ -77,16 +78,16 @@ test('tapping food while the order is read stops the order at once and counts th
   // Real time: the stubbed order line never ends, so it is still "talking" when the child taps.
   await openService(page, { skill: 'A2', stage: 3, ops: 'add', seed: 3, timeScale: 1 });
   const s = await probe(page);
-  const before = await page.evaluate(() => ({
-    cancels: window.__cancels,
-    spoken: window.__spoken.length,
-  }));
+  const before = {
+    cancels: await page.evaluate(() => window.__cancels),
+    spoken: (await heard(page)).all.length,
+  };
   await tapId(page, 'bin');
   expect((await probe(page)).filled).toBe(s.prefill + 1);
-  const after = await page.evaluate(() => ({
-    cancels: window.__cancels,
-    spoken: window.__spoken.slice(),
-  }));
+  const after = {
+    cancels: await page.evaluate(() => window.__cancels),
+    spoken: (await heard(page)).all,
+  };
   expect(after.cancels).toBeGreaterThan(before.cancels);
   // The count is spoken right away instead of being skipped behind the order.
   expect(after.spoken.length).toBeGreaterThan(before.spoken);
@@ -149,10 +150,7 @@ test('wrong → wrong → help offer → yes → demo → follow-me: the bell pu
   await expect(page.getByTestId('pip')).toBeVisible();
   await expect(page.getByTestId('caption')).toHaveAttribute('data-speaker', 'pip');
   await waitPhase(page, 'followMe', 40_000);
-  const voices = await page.evaluate(() => ({
-    all: window.__spoken.slice(),
-    pip: window.__pipSpoken.slice(),
-  }));
+  const voices = await heard(page);
   expect(voices.pip).toContain('Your turn! Follow me.');
   expect(voices.pip.some((l) => l.includes('Want Pip'))).toBe(false); // the monster asks
   expect(voices.all.some((l) => l.includes('Want Pip'))).toBe(true);
@@ -332,7 +330,12 @@ test('a whole service of six orders ends on Results; Another service, Change dis
         w.__left = false;
         new MutationObserver(() => {
           if (document.querySelector('.monster-slot.mood-leave')) w.__left = true;
-        }).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'], childList: true });
+        }).observe(document.body, {
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['class'],
+          childList: true,
+        });
       });
     }
     await serveCorrect(page);
@@ -375,7 +378,9 @@ test('Results: buttons wait for the count; a tap skips to the total with no spee
   await expect(page.getByTestId('screen-results')).toBeVisible({ timeout: 30_000 });
   const count = page.getByTestId('results-count');
   // Mid-count: a number between 1 and 22 shows, and no button exists yet.
-  await expect.poll(async () => Number(await count.textContent()), { timeout: 5_000 }).toBeGreaterThan(0);
+  await expect
+    .poll(async () => Number(await count.textContent()), { timeout: 5_000 })
+    .toBeGreaterThan(0);
   expect(Number(await count.textContent())).toBeLessThan(23);
   await expect(page.getByTestId('results-tally')).toHaveAttribute('data-done', 'false');
   for (const id of ['results-another', 'results-change', 'results-home'])
@@ -390,7 +395,9 @@ test('Results: buttons wait for the count; a tap skips to the total with no spee
   await expect(page.getByTestId('screen-results')).toBeVisible();
   // Longer than the rest of the count plus the beat before the total would have been said.
   await page.waitForTimeout(5_000);
-  expect(await page.evaluate(() => window.__spoken.filter((t) => t.startsWith('You earned')))).toEqual([]);
+  expect(
+    await page.evaluate(() => window.__spoken.filter((t) => t.startsWith('You earned'))),
+  ).toEqual([]);
   await expect(count).toHaveText('23');
 
   await tapId(page, 'results-home');

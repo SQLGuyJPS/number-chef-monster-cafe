@@ -379,7 +379,9 @@ html.debug-mode #root {
 }
 
 .audio-test button,
-.audio-test select {
+.audio-test select,
+.voice-test button,
+.voice-test select {
   font-size: 16px;
   padding: 10px 14px;
   margin: 4px 4px 4px 0;
@@ -387,8 +389,36 @@ html.debug-mode #root {
   border-radius: 10px;
   background: var(--c-bg);
 }
-.audio-test button:active {
+.audio-test button:active,
+.voice-test button:active {
   opacity: 0.6;
+}
+/* ?debug Voice test (M13): each line with its variants side by side and the clips they use. */
+.voice-test input[type='range'] {
+  width: 220px;
+  vertical-align: middle;
+}
+.vt-row {
+  padding: 8px 0;
+  border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+}
+.vt-line {
+  font-weight: bold;
+}
+.vt-variants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+}
+.vt-clips {
+  font-size: 13px;
+  word-break: break-all;
+}
+.vt-clips code {
+  margin-right: 6px;
+}
+.vt-missing {
+  opacity: 0.55;
 }
 .debug-skills select,
 .parent-select {

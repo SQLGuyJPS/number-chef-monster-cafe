@@ -288,3 +288,13 @@ Owner notes (2026-11-19): all of M3b works on the devices. Three changes (D137),
 Owner notes (2026-11-20): D137 items pass. Two more changes (D138), to check on the next build:
 - [ ] **Gate in a browser tab, landscape.** Open the gate in Safari (not the Home Screen app) with the phone sideways: "For grown-ups" is whole at the top, and you can scroll down to the pad if it doesn't fit. Notes:
 - [ ] **Last monster stays.** At the end of a service the last monster eats, stays where it is and says "All done! Thank you, chef!", without walking off first. Notes:
+
+## M13 step 2 — Voice listening test (D139d, D143–D147; iPad first, about 45 minutes with the recording)
+
+Record `docs/VOICE_SPIKE.md`, build it, push to `main`, then open the app with `?debug` on the iPad and scroll to **Voice test**. Until clips exist every button says "(TTS)" and lists what is "not recorded". Tap the screen once first so sound is on. Only you can judge these:
+- [ ] **(a) Stitched or one take.** For the three lines, *Stitched* next to *One take*: are the stitched lines good enough to ship? Notes:
+- [ ] **(b) Three number forms or one.** *Three forms* next to *One form* (try the lead, mid and end recording as the one form): is one form enough? Which? Notes:
+- [ ] **(c) Pair or two clips.** "Two more!" … "Five left!": is a one-take pair clearly better than the number plus "more!"/"left!"? Notes:
+- [ ] **Crossfade.** Move the slider (0–40 ms) and replay a stitched line: which value hides the joins best? Notes:
+- [ ] **Voices.** Pick each monster, Pip and the narrator: do they sound distinct and friendly? Any pitch to move up or down (starting shifts are shown next to the picker, D145)? Notes:
+- [ ] **Basics.** Nothing cut off at the start or end of a clip; the first tap of a line plays without a long pause; the iPad does not reload or stutter. Notes:
