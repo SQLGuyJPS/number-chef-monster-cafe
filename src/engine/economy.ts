@@ -1,6 +1,6 @@
-// Shop catalog and price tiers (SPEC §9, §10, D139). Sized for about an hour of play a week: the
-// M4 stock lasts about 2 months, the later groups (D140) about 6–9 more. Check a price change with
-// `npm run economy:sim` (engine/economySim.ts, D141) before it ships. Earning rates stay in
+// Shop catalog and price tiers (SPEC §9, §10, D148). Sized for about an hour of play a week: the
+// M4 stock lasts about 2 months, the later groups (D149) about 6–9 more. Check a price change with
+// `npm run economy:sim` (engine/economySim.ts, D150) before it ships. Earning rates stay in
 // engine/config.ts (COINS_PER_PROBLEM, SERVICE_TIP); only spending lives here.
 
 export type DecorSlot =
@@ -126,7 +126,7 @@ export const M4_ITEMS: readonly ItemDef[] = [
     slot: 'floor',
     name: 'Wood',
     tier: 1,
-    // Classic is the floor the café art already has (D143).
+    // Classic is the floor the café art already has (D152).
     colorways: ['classic', 'honey', 'cocoa'],
     free: true,
   },
@@ -234,7 +234,7 @@ export const M4_ITEMS: readonly ItemDef[] = [
 ];
 
 /**
- * The M4 shop opens with this shelf (D142): the first colour of every tier 1–2 item, the tier-1
+ * The M4 shop opens with this shelf (D151): the first colour of every tier 1–2 item, the tier-1
  * recolours of the free defaults, and four things to save for. Every other M4 entry arrives in
  * delivery crates, so a young child faces about 7 unbought choices, not 50.
  */
@@ -259,7 +259,7 @@ export const STARTER_SHELF: readonly string[] = [
 ];
 
 /**
- * Delivery crates (SPEC §10.1, D140, D142): 2 entries every 30 monsters served, held while 6 or
+ * Delivery crates (SPEC §10.1, D149, D151): 2 entries every 30 monsters served, held while 6 or
  * more unbought entries are in the shop. A crate is worth about what the child earns between
  * crates (about 3.8 coins a monster), so the shelf neither empties nor piles up.
  */

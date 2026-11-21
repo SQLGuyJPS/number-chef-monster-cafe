@@ -15,7 +15,7 @@ import { mulberry32 } from '../../src/engine/rng';
 describe('shop catalog', () => {
   const entries = expandCatalog(M4_ITEMS);
 
-  it('matches SPEC §10: 55 paid entries, 3,105 coins (D139)', () => {
+  it('matches SPEC §10: 55 paid entries, 3,105 coins (D148)', () => {
     const paid = entries.filter((e) => e.price > 0);
     expect(paid).toHaveLength(55);
     expect(paid.reduce((s, e) => s + e.price, 0)).toBe(3105);
@@ -44,7 +44,7 @@ describe('shop catalog', () => {
     }
   });
 
-  it('opens M4 with a starter shelf that covers every slot (D142)', () => {
+  it('opens M4 with a starter shelf that covers every slot (D151)', () => {
     const paid = entries.filter((e) => e.price > 0);
     const keys = new Set(paid.map((e) => e.key));
     expect(new Set(STARTER_SHELF).size).toBe(STARTER_SHELF.length);
