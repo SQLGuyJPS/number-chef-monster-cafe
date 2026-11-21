@@ -134,7 +134,7 @@ Notes:
 
 ### M1 feedback round 7: quieter counting, slower hand-off (D91)
 - [x] Pip's demo: only Pip's counting is heard as food goes in or out (no tones). Clear?
-  Yes, only Pip's voice. Known issue, left as is by the owner: tapping the next food item before the previous count has finished cuts the counting off, and counting stays silent until the bell is pressed. Speech cancelling/sticking is accepted until recorded voice-overs replace TTS (OPEN_ITEMS, Recordings).
+  Yes, only Pip's voice. Known issue, left as is by the owner: tapping the next food item before the previous count has finished cuts the counting off, and counting stays silent until the bell is pressed. Speech cancelling/sticking is accepted until recorded voice-overs replace TTS (M13, D139).
 - [x] Counting-on / counting-back orders (S3): each tap says its number with no tone under it. Does the child still get enough feedback from a tap? Other orders (no counting) keep their tones.
   Yes.
 - [x] Pip sinking back behind the counter and the monster walking back: the right pace now, or still too quick / now too slow?

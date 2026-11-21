@@ -8,6 +8,7 @@ A math game for a young child. `docs/SPEC.md` is the single, current statement o
 ## Working agreement
 - Build in the milestones listed in SPEC §14. **Tier 1 (M0, M1, M2, M2b, M3a, M3b; ≈ 10 h as a guide, not a cap, D44) is the target for a playable game**; Tier 2 (M4+) is bonus work in any order the owner picks, with no hour cap. **Stop after each milestone** (M3a and M3b each count) and wait for the owner's playtest feedback. Do not start the next milestone unprompted. M1 starts with a static layout mock; stop for the owner's OK before building interaction (D36).
 - First task of the project: write `docs/PLAN.md` (steps, order, risks, a redone hour estimate per milestone, D36) and wait for approval. The risks section carries the platform risks listed in D37.
+- From M13 on, a milestone that adds or changes spoken lines ships them on the TTS fallback, regenerates the recording script (`npm run audio:todo`), and is closed by a **voice pass** after the owner's playtest (owner records and builds; `audio:todo` then reports nothing missing for those dishes) before the next milestone starts (D142).
 - Record every assumption you make that the spec doesn't cover as a decision, numbered one higher than the highest `D<n>` in the index: append the full entry (What, Why, How to revisit) to `docs/archive/DECISIONS_LOG.md`, add its line to `docs/DECISIONS.md`, **and update SPEC.md in the same commit** (citing `(Dn)`; implementation-only decisions skip SPEC). If it replaces an earlier decision, update that one's index status too.
 - The owner is technical but is the playtester, not the reviewer of every line. Keep explanations short; flag only what needs a decision.
 - Windows 11 host. Scripts must be cross-platform Node (no `rm -rf`, no bash-only syntax in package.json). Use `cross-env` if env vars are needed.
@@ -23,6 +24,8 @@ npm run typecheck | lint | test | test:e2e
 npm run lint:content   # generator/content/emoji/monster validation
 npm run content:table  # regenerate docs/CONTENT_REVIEW.md
 npm run check          # typecheck + lint + test + lint:content  (MUST be green before every commit)
+npm run audio:todo     # (from M13) write docs/VOICE_SCRIPT.md, list missing voice clips
+npm run audio:build    # (from M13) owner's recordings -> public/audio clips + manifest (D140)
 ```
 E2E runs against the production build with `VITE_E2E=1`; hooks at `window.__ncmc` must not exist in a normal build.
 

@@ -1,6 +1,6 @@
 # Build plan — Number Chef: Monster Café
 
-Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**; M1 playtest rounds 1–7 and the gear popup recorded in PLAYTEST.md (last 2026-11-09). **M2 done 2026-11-10** (started 2026-11-09); waiting for the M2 playtest. **M2b (device speed test, D112) added by the owner and done 2026-11-12**; the iPad result set the SVG budget (D113, 2026-11-12). **Play-time limit moved from M3b to Tier 2 milestone M12, postponed indefinitely (D124, 2026-11-14).** **M3a done 2026-11-14** (D125); M3a playtest rounds 1–3 applied and merged 2026-11-19 (D126–D133). **M3b done 2026-11-19** (D134–D136); waiting for the M3b playtest. Tier 1 is complete. Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
+Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**; M1 playtest rounds 1–7 and the gear popup recorded in PLAYTEST.md (last 2026-11-09). **M2 done 2026-11-10** (started 2026-11-09); waiting for the M2 playtest. **M2b (device speed test, D112) added by the owner and done 2026-11-12**; the iPad result set the SVG budget (D113, 2026-11-12). **Play-time limit moved from M3b to Tier 2 milestone M12, postponed indefinitely (D124, 2026-11-14).** **M3a done 2026-11-14** (D125); M3a playtest rounds 1–3 applied and merged 2026-11-19 (D126–D133). **M3b done 2026-11-19** (D134–D136); waiting for the M3b playtest. Tier 1 is complete. **M13 Recorded voices planned 2026-11-21** (D139–D142, §6). Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
 
 ---
 
@@ -18,7 +18,7 @@ Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 r
 
 The 10 h guide is exceeded (allowed by D44). The figure excludes fixes from each playtest (SPEC §14 says each milestone starts with them); budget ~0.5 h per round. The estimate is driven by what the spec requires, not by optional polish; I have not cut scope to fit. If you want it shorter, the cheapest levers are yours to choose (e.g. fewer monsters in M2, deferring the 4× CPU throttle report), and each would need a DECISIONS entry.
 
-Tier 2 (rough, re-estimated when you pick one): M4 2.0 · M5 3.5 · M7 3.0 · M8 2.5 (incl. layout mock) · M9 1.5 · M10 2.0 · M11 2.0 · M12 1.75 (play-time limit, postponed indefinitely, D124).
+Tier 2 (rough, re-estimated when you pick one): M4 2.0 · M5 3.5 · M7 3.0 · M8 2.5 (incl. layout mock) · M9 1.5 · M10 2.0 · M11 2.0 · M12 1.75 (play-time limit, postponed indefinitely, D124) · M13 4.0 agent + about 2.5–3.5 h of the owner's recording and listening (§6).
 
 ---
 
@@ -252,14 +252,83 @@ The play-time limit moved to M12 (D124).
 - **M5 Rest of the Little Menu** (3.5 h): A0, A4–A8 generators, orderings for A4–A6, demos (teens, bridge, back-through-ten, make-ten variants), `frames2` UI, A5 whole-frame moves, FollowMe past 10. Counter-layout checks carried here: the two-frame tray has only run in the mock, so M5 must exercise it in the real service (drag and tap onto the tight cells, flights, eating, both basket sides); and the two-frame tray at S0 has no room for the lifted cloche lid (open question, decide when the first two-frame S0 skill is built); and nine menu tiles do not fit one counter row (D123).
 - **M7 Full parent area + merge** (3.0 h): Merge import with dry-run summary, device label, Focus list, Starting-point editor, hide/show, heatmap, trouble spots, history, median S0 time, snapshots restore, two-context e2e.
 - **M8 Big Menu** (2.5 h): static layout mock first (stop for OK), then tens shelf + ones frame, auto-bundle, two bins, B1–B2 generators/orderings/demos, two-digit pad.
-- **M9 B3** (1.5 h). **M10 Polish** (2.0 h): accessibility, big-text captions, bundle report, Lighthouse, audio manifest + `audio-todo.ts`. **M11 Profiles** (2.0 h): `profileId` migration (first real migration), picker, per-profile preset.
+- **M9 B3** (1.5 h). **M10 Polish** (2.0 h): accessibility, big-text captions, bundle report, Lighthouse (recorded voices moved to M13). **M11 Profiles** (2.0 h): `profileId` migration (first real migration), picker, per-profile preset.
 - **M12 Play-time limit** (1.75 h; postponed indefinitely by the owner, D124): allowance model with injected monotonic and wall clocks (idle pause, grace cap in wall time, last customer, shorter service, tip rule, lock clears resume, boot check, refill modes, 60 s cue) and all §6.5 tests; locked Home, wind-down, lights dim + Pip yawn; limit setting with Start new session / Add time behind M3b's gate; e2e limit-off-never-locks and run-out → locked → reload → unlock → no resume offer. The `clock` IDB store already exists, so no IDB upgrade is needed.
+- **M13 Recorded voices** (4.0 h agent + the owner's recording): detailed in §6.
+- **Voice passes (D142).** From M13 on, every milestone that adds or changes spoken lines (M4 guest monsters, M5, M8, M9, playtest rewording) ships them on the TTS fallback, regenerates `docs/VOICE_SCRIPT.md`, and is closed by a voice pass after the owner's playtest: the owner records and builds the new clips, I check that `audio:todo` reports nothing missing for that milestone's dishes, then the next milestone starts. Budget about 0.25 h agent per pass.
 
 ---
 
-## 6. What I need from you
+## 6. M13 — Recorded voices for the Little Menu (D139–D142)
+
+Goal: the monsters, Pip and the narrator speak every line the built dishes (A1–A3) use in the owner's recorded voice, stitched from clips (SPEC §8.4), with TTS only as a whole-line fallback. Numbers 0–20 are covered in full, so M5's dishes need only their new phrases.
+
+### 6.1 Estimate
+
+| Step | Who | Time |
+|---|---|---|
+| 1. Plumbing + `?debug` Voice test page, then STOP | agent | 2.5 h |
+| 2. Record the spike script, build, listen on the iPad | owner | ≈ 45 min (≈ 10 min reading, labelling, one command, listening) |
+| 3. Final inventory, full script, every speaker wired, then STOP | agent | 1.0 h |
+| 4. Record and build the full set; check, report, STOP | owner, then agent | owner ≈ 1.5–2.5 h (≈ 150–250 clips: 25–40 min reading, the rest labelling and retakes); agent 0.5 h |
+
+### 6.2 Step 1 — plumbing and the listening test (agent)
+1. **Engine:** `PHRASE_SPEAKERS` (who says each phrase: monster, Pip or narrator) and `clipPlan(key, params)` with the clip ids of D141 and the clip transcripts; numbers carry a form (`lead` / `mid` / `end`) and pair clips are optional, so the listening-test outcome is a table change, not new code. Unit test: for every phrase key × every parameter in range (numbers 0–20, every food) and every monster line, the transcripts join to `phrase()`'s text.
+2. **`npm run audio:todo`** (`scripts/audio-todo.ts`): collects every (voice, clip) the built dishes need; writes `docs/VOICE_SCRIPT.md` (sections: numbers, foods, connecting words, fixed lines, monster lines; each item a carrier sentence with the target clip in bold and numbered); lists clips missing from the manifest. `--spike` writes `docs/VOICE_SPIKE.md` instead.
+3. **`npm run audio:build -- --src <folder>`** (`scripts/audio-build.ts`, pure helpers in a tested module): reads each WAV with its Audacity label export; matches label numbers to the script (reports missing, extra, duplicate); cuts with a small pad; trims silence; gentle high-pass and loudness normalization; pitch-shifts per voice; encodes AAC-LC 48 kbps mono to `public/audio/<voice>/<clipId>.m4a`; writes `public/audio/manifest.json` (durations included) and prints a size report. Adds `ffmpeg-static` as a dev dependency (D140). Masters default to a git-ignored `voice-masters/` folder.
+4. **`src/audio/voice.ts`:** manifest, cache-first fetch, one-at-a-time decode queue, decoded-audio LRU capped at about 10 MB, silence trim at load, back-to-back scheduling on the audio clock with a crossfade, voice-volume gain, `interrupt`/cancel, latest-wins counting, resolve on end or a timeout from the clip durations.
+5. **Line routing:** today the controller turns a phrase into text before `talk()`, and `Results`, `ResumeDialog` and `useService` call `speakText` with text. They pass a line (key, params, text) instead, so the voice layer can look up clips and fall back to `speakText` for the whole line. Captions are unchanged. The parent area's *Test the voice* stays TTS (it tests the TTS voice).
+6. **PWA:** `m4a` joins the Workbox `globPatterns`; check the per-file precache limit; the e2e-only WAV test set is never in a production build.
+7. **`?debug` Voice test page** (next to the sound test): for the spike lines, play side by side (a) stitched vs the one-take recording, (b) one number form vs three, (c) pair clip vs two clips; pick the voice (each monster, Pip, narrator); a crossfade slider (0–40 ms); each button shows the clips it uses; missing clips show "not recorded".
+8. **Spike script** `docs/VOICE_SPIKE.md` (about 5 minutes of reading): numbers 0–10 in lead, mid and end carriers; "plus", "minus"; two food tails; "I see", "I wanted", "One more!"; "more!", "left!" and the pairs "two more!" … "five left!"; one-take references "Seven plus two cookies, please!", "Four minus one doughnuts, please!", "I see six… I wanted seven. One more!".
+9. **Tests:** unit (clip plans, manifest schema, label matching, LRU cap, scheduling offsets with an injected clock); e2e `voice.spec.ts` on Chromium iPad Pro 11 and WebKit iPad gen 7 with the WAV test set: a recorded line plays its clips in order (hook), a missing clip gives whole-line TTS, a clip that never ends does not block the service, playback offline after precache (Chromium), zero external requests.
+10. Commit, push, **STOP** with recording instructions for step 2.
+
+### 6.3 Step 2 — the owner's listening test
+1. Install Audacity (free). Record `docs/VOICE_SPIKE.md` in a quiet room, mic at a steady distance, at an even pace.
+2. Mark each bold target with a region label (select it, Ctrl+B) whose text is its number; export the audio as WAV and the labels as text into `voice-masters/spike/`.
+3. `npm run audio:build -- --src voice-masters/spike`, push to `main`, open `?debug` → Voice test on the iPad.
+4. Tell me: is stitching acceptable next to the one take? One number form or three? Pairs or two clips for the counting lines? Which crossfade sounds best? Do the shifted voices (monsters, Pip) sound friendly, or should any pitch move?
+5. I record the answers as a decision and adjust the tables.
+
+### 6.4 Step 3 — full inventory and wiring (agent)
+1. Apply the listening result to `clipPlan` and the voice pitches; settle the form for counting while building (`count.n`; the *end* form unless the test says otherwise).
+2. Generate the full `docs/VOICE_SCRIPT.md` for A1–A3 and numbers 0–20, ordered for one sitting, with its clip count and estimated reading time.
+3. Wire every speaker: monsters (orders, plate lines, arrive/thanks, Yum, the eaten total, the help offer, "I'm back!", the closing line), Pip (counting, CountTogether, demos, FollowMe, warm-up, resume question), narrator (Results total).
+4. Recorded / TTS toggle on `?debug` (per device, an `ncmc` settings key).
+5. E2E: a full service with the WAV test set, every line recorded (hook), nothing blocks; **STOP** for the owner's recording.
+
+### 6.5 Step 4 — full recording and close
+1. Owner: record `docs/VOICE_SCRIPT.md` the same way (several takes per section are fine; label only the keeper), build, push.
+2. Agent: `audio:todo` reports nothing missing; `lint:content` passes the manifest; size report (per voice, total, precache) into `docs/perf/M13-voice-sizes.md`; Voice test page screenshots in `docs/screens/M13/`; PLAYTEST.md M13 section; accept boxes ticked; commit, push, **STOP**.
+
+### 6.6 Risks
+- **AAC in the test browsers:** Playwright's Chromium and its Linux WebKit may not decode AAC, so e2e uses a WAV test set; real AAC decoding is an owner check on each device (D141).
+- **Pitch shift on Windows:** if `ffmpeg-static`'s build has no formant-preserving shift (the `rubberband` filter), step 1 picks another tool, records it as a decision, and says so at the stop. Large shifts (Bloop low, Pip high) may sound odd; the listening test is where pitches get tuned.
+- **Joins:** encoder padding differs by browser, so the app trims silence itself; how natural the joins sound is only judged on the iPad (step 2).
+- **Memory on the iPad 7th gen:** decoding one clip at a time with a capped cache; watch for reloads or stutter in the playtest.
+- **iOS audio session:** recorded lines use WebAudio, not the speech engine, so the D86–D88 speech conflicts should mostly disappear; the workarounds stay for the TTS fallback. Unverified until the iPad playtest.
+- **Download and repo size:** about 2–3 MB of clips on the first launch after the update; Workbox revisions mean a voice pass refetches only changed clips. Every full re-encode adds about 3 MB to git history, so re-encode only when needed.
+- **Timing:** the TTS timeout formula (§8.1) does not apply to clips; they use their real durations plus a margin.
+
+### 6.7 Accept (SPEC §14 M13)
+- [ ] `check` + e2e green
+- [ ] `clipPlan` transcripts join to the phrase text for every phrase and parameter in range (unit)
+- [ ] `audio:todo` reports no missing clip for A1–A3 (lines never recorded by D139e excepted)
+- [ ] missing clip → whole-line TTS (e2e)
+- [ ] a clip that never ends does not block the flow (e2e)
+- [ ] clips precached and played offline (Chromium e2e, WAV test set)
+- [ ] decoded-audio cache stays under its cap (unit)
+- [ ] zero external requests; CSP unchanged
+- [ ] size report committed; Voice test screenshots saved; PLAYTEST.md updated
+- [ ] Owner check (PLAYTEST, not agent acceptance): joins acceptable, voices distinct and friendly, nothing cut off, no clash with SFX, works after backgrounding and with the silent switch on (iPad, then iPhone and Android)
+
+---
+
+## 7. What I need from you
 
 1. ~~Approve this plan~~ — approved 2026-11-05.
 2. ~~WebKit~~ — answered: WebKit runs in the cloud environment via the setup script, and locally on Windows too; every session runs it (D80).
 3. ~~Objections to §2~~ — none; the M0 session records the §2 resolutions as D48+ in DECISIONS.md as its first step.
 4. M0 owner action: set Pages source to "GitHub Actions" once you push.
+5. M13, when you pick it: two recording sessions (the spike in step 2, the full script in step 4; §6.1), each on your Windows PC with Audacity.
