@@ -8,6 +8,7 @@ import {
   serveWrong,
   tapId,
   waitPhase,
+  heard,
 } from './service';
 
 // M2 flows (SPEC §14 M2). Same projects as the M1 flows until the full M2 matrix lands.
@@ -204,9 +205,7 @@ test('first-ever service: the warm-up order, ghost hand on the bin then the bell
     timeout: 8000,
   });
   await expect(page.getByTestId('pip')).toBeVisible();
-  expect(await page.evaluate(() => window.__pipSpoken.includes('Ring the bell to serve!'))).toBe(
-    true,
-  );
+  expect((await heard(page)).pip).toContain('Ring the bell to serve!');
   // Nothing serves itself.
   await page.waitForTimeout(1500);
   expect((await probe(page)).phase).toBe('building');

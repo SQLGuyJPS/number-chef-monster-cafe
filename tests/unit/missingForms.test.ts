@@ -6,6 +6,8 @@ import { phrase } from '../../src/engine/phrases';
 import type { Order } from '../../src/engine/session';
 import { eatenPlate, spokenCount, startState, tapBin, toTrayTask } from '../../src/engine/tray';
 import type { Stage } from '../../src/engine/types';
+import { checkSpeaker } from './speakerCheck';
+import { lineText } from '../../src/engine/clips';
 import { ServiceController, type ServiceDeps } from '../../src/game/service/controller';
 
 // D104, D105: on missing-number forms the orange group is the answer, everywhere.
@@ -16,8 +18,8 @@ function rig(problems: string[], stage: Stage) {
   let clock = 0;
   let timers: (() => void)[] = [];
   const deps: ServiceDeps = {
-    speak: (t) => (log.push(`say:${t}`), Promise.resolve()),
-    countAloud: (t) => void log.push(`count:${t}`),
+    speak: (t, who) => (checkSpeaker(t, who), log.push(`say:${lineText(t)}`), Promise.resolve()),
+    countAloud: (t) => void log.push(`count:${lineText(t)}`),
     hush: () => {},
     sfx: {
       place: () => void log.push('tone'),

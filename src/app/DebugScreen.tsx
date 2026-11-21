@@ -5,6 +5,7 @@ import { APP_NAME } from './identity';
 import { BasketSidePicker } from './BasketSidePicker';
 import { SkillPicker } from './SkillPicker';
 import { AudioTest } from './AudioTest';
+import { VoiceTest } from './VoiceTest';
 
 interface Info {
   rows: [string, string][];
@@ -93,6 +94,7 @@ export function PlaytestTools({
       {deviceTests && (
         <>
           <AudioTest />
+          <VoiceTest />
           <h2>Speed test</h2>
           <p>How many drawing pieces this device can show smoothly (D112). About 2 minutes.</p>
           <button

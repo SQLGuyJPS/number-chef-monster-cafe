@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { lineText } from '../../src/engine/clips';
 import { REGULARS } from '../../src/engine/monsters';
 import { buildService } from '../../src/engine/session';
 import type { Stage } from '../../src/engine/types';
@@ -10,7 +11,7 @@ function rig(stage: Stage) {
   const timers: (() => void)[] = [];
   const deps: ServiceDeps = {
     speak: () => Promise.resolve(),
-    countAloud: (t) => void log.push(`count:${t}`),
+    countAloud: (t) => void log.push(`count:${lineText(t)}`),
     hush: () => {},
     sfx: {
       place: () => void log.push('place'),

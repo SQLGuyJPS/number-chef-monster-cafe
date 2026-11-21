@@ -21,6 +21,7 @@ import { startProgress } from './app/progress';
 import { onSettings, startSettings } from './app/deviceSettings';
 import { configureSpeech } from './audio/speech';
 import { setSfxVolume } from './audio/sfx';
+import { loadVoiceManifest } from './audio/voice';
 
 const flags = parseFlags(location.search);
 
@@ -40,6 +41,8 @@ onSettings((s) => {
   document.documentElement.classList.toggle('reduce-motion', s.reducedMotion);
 });
 initPwa(getCurrentScreen, lastInputAt);
+// Which recorded clips exist (SPEC §8.4); until it loads, or if it fails, every line is TTS.
+void loadVoiceManifest();
 
 if (flags.mock) {
   // Look-only layout mock: the normal stage styles, no input hardening needed.

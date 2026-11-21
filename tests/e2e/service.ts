@@ -55,8 +55,17 @@ interface Hooks {
   svgCounts(): { total: number; moving: number };
   gateAnswer(): number | null;
   skewParentClock(ms: number): void;
-  stores(): Promise<{ counts: Record<string, number>; snapshot?: { reason: string; events: unknown[] }; deviceId: string } | null>;
-  progress(): Promise<{ balance: number; count: number; kinds: string[]; events: { id: string; k: string }[] } | null>;
+  stores(): Promise<{
+    counts: Record<string, number>;
+    snapshot?: { reason: string; events: unknown[] };
+    deviceId: string;
+  } | null>;
+  progress(): Promise<{
+    balance: number;
+    count: number;
+    kinds: string[];
+    events: { id: string; k: string }[];
+  } | null>;
 }
 declare global {
   interface Window {
@@ -150,6 +159,22 @@ export async function openService(page: Page, o: OpenOptions = {}): Promise<void
   await expect(page.getByTestId('screen-service')).toBeVisible();
   await waitPhase(page, 'building');
 }
+
+/**
+ * Every line the game spoke, recorded or TTS, from the voice layer's log (SPEC §8.4): `pip` holds
+ * Pip's lines. Since M13 the e2e build's WAV test set plays some lines recorded, so they never reach
+ * the stubbed speech engine (`__spoken`).
+ */
+export const heard = (page: Page): Promise<{ all: string[]; pip: string[] }> =>
+  page.evaluate(() => {
+    const log = (
+      window.__ncmc as unknown as { voiceLog(): { text: string; voice: string }[] }
+    ).voiceLog();
+    return {
+      all: log.map((e) => e.text),
+      pip: log.filter((e) => e.voice === 'pip').map((e) => e.text),
+    };
+  });
 
 export const probe = (page: Page): Promise<Probe> => page.evaluate(() => window.__ncmc.service()!);
 export const phases = (page: Page): Promise<string[]> => page.evaluate(() => window.__phases);

@@ -4,7 +4,10 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { cspPlugin } from './scripts/vite-csp-plugin';
+import { e2eVoicePlugin } from './scripts/vite-e2e-voice-plugin';
 import { APP_NAME, APP_SHORT_NAME, THEME_COLOR, BACKGROUND_COLOR } from './src/app/identity';
+
+const e2e = process.env.VITE_E2E === '1';
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as {
   version: string;
@@ -35,6 +38,8 @@ export default defineConfig({
   plugins: [
     react(),
     cspPlugin(),
+    // The WAV voice test set, e2e builds only (D141e, D146).
+    e2eVoicePlugin(),
     VitePWA({
       registerType: 'prompt',
       // The default inline registration script would violate the CSP (D58).
@@ -62,7 +67,9 @@ export default defineConfig({
       workbox: {
         // Shared github.io origin: every cache name carries the ncmc prefix (SPEC §11.5).
         cacheId: 'ncmc',
-        globPatterns: ['**/*.{js,css,html,woff2,woff,png,svg,json,webmanifest}'],
+        // Recorded voice clips are precached so they play offline (SPEC §8.4, D141c); each is a few
+        // KB, far under Workbox's 2 MB per-file limit. `wav` is the e2e test set only (D146).
+        globPatterns: [`**/*.{js,css,html,woff2,woff,png,svg,json,webmanifest,m4a${e2e ? ',wav' : ''}}`],
         navigateFallback: 'index.html',
         clientsClaim: true,
         skipWaiting: false,
