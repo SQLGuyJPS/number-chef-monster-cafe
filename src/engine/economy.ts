@@ -1,0 +1,297 @@
+// Shop catalog and price tiers (SPEC §9, §10). DRAFT for the owner's economy review (2026-11-21):
+// SPEC §10 still lists the old 1,340-coin table until the owner approves these prices; the
+// simulator (`npm run economy:sim`, engine/economySim.ts) reads this file. Earning rates stay in
+// engine/config.ts (COINS_PER_PROBLEM, SERVICE_TIP); only spending lives here.
+
+export type DecorSlot =
+  'wallpaper' | 'floor' | 'lights' | 'window' | 'counter' | 'wallArt' | 'staff';
+export type MonsterSlot = 'hat' | 'skin' | 'accessory';
+export type ShopSlot = DecorSlot | MonsterSlot;
+
+/**
+ * Price tiers, sized against what a child earns (about 23 coins a service, 4 services a sitting):
+ * 1 ≈ one service, 2 ≈ two services, 3 ≈ most of a sitting, 4 ≈ two sittings, 5 ≈ most of a week
+ * at an hour a week. Young children save for at most a week or two, so tier 5 stays under that.
+ */
+export type Tier = 1 | 2 | 3 | 4 | 5;
+export const TIER_PRICE: Readonly<Record<Tier, number>> = { 1: 20, 2: 30, 3: 55, 4: 100, 5: 180 };
+
+/** A second or third colorway of an item costs this share of the item's price (same shape, new paint). */
+export const COLORWAY_SHARE = 0.75;
+
+/**
+ * Colour families shared across slots, so a Berry wallpaper, Berry tiles and Berry lanterns match.
+ * Values are drafts for the art pass; they sit a step paler than the foreground (SPEC §7.4: muted
+ * background). `classic` means the item's one designed look (no family).
+ */
+export const COLOR_FAMILIES = {
+  sunny: { label: 'Sunny', base: '#ffe2a8', accent: '#f0b54a' },
+  berry: { label: 'Berry', base: '#f7c4d8', accent: '#d9487f' },
+  mint: { label: 'Mint', base: '#c6ecd9', accent: '#3aa57a' },
+  sky: { label: 'Sky', base: '#c4e0f6', accent: '#3d86c6' },
+  honey: { label: 'Honey', base: '#ffdc85', accent: '#d99a1e' },
+  lavender: { label: 'Lavender', base: '#ddd0f4', accent: '#7d5cc4' },
+  cocoa: { label: 'Cocoa', base: '#d9b694', accent: '#7a4e2d' },
+} as const;
+export type ColorFamily = keyof typeof COLOR_FAMILIES;
+export type Colorway = ColorFamily | 'classic';
+
+export interface ItemDef {
+  /** Stable id stem; each colorway becomes `${slot}.${id}.${colorway}`. */
+  id: string;
+  slot: ShopSlot;
+  name: string;
+  tier: Tier;
+  /** First entry is the item's original look. Max 3 in M4 (owner, 2026-11-21). */
+  colorways: readonly Colorway[];
+  /** The slot's free default: its first colorway costs nothing, the others cost tier 1. */
+  free?: boolean;
+}
+
+/** One purchasable (or free) entry: an item in one colorway. */
+export interface ShopEntry {
+  key: string;
+  slot: ShopSlot;
+  item: string;
+  name: string;
+  colorway: Colorway;
+  tier: Tier;
+  price: number;
+}
+
+const roundTo5 = (n: number): number => Math.max(5, Math.round(n / 5) * 5);
+
+export function entryPrice(
+  def: ItemDef,
+  index: number,
+  tiers: Readonly<Record<Tier, number>> = TIER_PRICE,
+): number {
+  if (def.free) return index === 0 ? 0 : tiers[1];
+  return index === 0 ? tiers[def.tier] : roundTo5(tiers[def.tier] * COLORWAY_SHARE);
+}
+
+export function expandCatalog(
+  defs: readonly ItemDef[],
+  tiers: Readonly<Record<Tier, number>> = TIER_PRICE,
+): ShopEntry[] {
+  return defs.flatMap((def) =>
+    def.colorways.map((colorway, i) => ({
+      key: `${def.slot}.${def.id}.${colorway}`,
+      slot: def.slot,
+      item: def.id,
+      name: def.name,
+      colorway,
+      tier: def.tier,
+      price: entryPrice(def, i, tiers),
+    })),
+  );
+}
+
+/**
+ * M4 shop: SPEC §10's items with tiers, plus 2–3 colorways on items where paint makes sense.
+ * No colorways on scenes (windows), named looks (Brick, Starry Night, Rainbow), metal or glass
+ * (Disco Ball, Chandelier, Fish Bowl, Trophies), the serve bell (a control, not decor), the menu
+ * board (chalk), or staff. Families are spread so every family appears in several slots.
+ */
+export const M4_ITEMS: readonly ItemDef[] = [
+  // Wallpaper
+  {
+    id: 'plain',
+    slot: 'wallpaper',
+    name: 'Plain Paint',
+    tier: 1,
+    colorways: ['sunny', 'berry', 'lavender'],
+    free: true,
+  },
+  {
+    id: 'polka-dots',
+    slot: 'wallpaper',
+    name: 'Polka Dots',
+    tier: 2,
+    colorways: ['berry', 'sky', 'lavender'],
+  },
+  {
+    id: 'stripes',
+    slot: 'wallpaper',
+    name: 'Stripes',
+    tier: 2,
+    colorways: ['mint', 'honey', 'berry'],
+  },
+  { id: 'brick', slot: 'wallpaper', name: 'Brick', tier: 3, colorways: ['classic'] },
+  { id: 'starry-night', slot: 'wallpaper', name: 'Starry Night', tier: 4, colorways: ['classic'] },
+  { id: 'rainbow', slot: 'wallpaper', name: 'Rainbow', tier: 4, colorways: ['classic'] },
+  // Floor
+  {
+    id: 'checkerboard',
+    slot: 'floor',
+    name: 'Checkerboard',
+    tier: 1,
+    colorways: ['classic', 'berry', 'mint'],
+    free: true,
+  },
+  { id: 'wood', slot: 'floor', name: 'Wood', tier: 2, colorways: ['honey', 'cocoa'] },
+  { id: 'tiles', slot: 'floor', name: 'Tiles', tier: 2, colorways: ['berry', 'sky', 'mint'] },
+  {
+    id: 'cloud-carpet',
+    slot: 'floor',
+    name: 'Cloud Carpet',
+    tier: 4,
+    colorways: ['sky', 'lavender', 'berry'],
+  },
+  // Lights
+  { id: 'none', slot: 'lights', name: 'No Lights', tier: 1, colorways: ['classic'], free: true },
+  {
+    id: 'string-lights',
+    slot: 'lights',
+    name: 'String Lights',
+    tier: 2,
+    colorways: ['honey', 'berry', 'sky'],
+  },
+  {
+    id: 'paper-lanterns',
+    slot: 'lights',
+    name: 'Paper Lanterns',
+    tier: 3,
+    colorways: ['berry', 'mint', 'honey'],
+  },
+  { id: 'disco-ball', slot: 'lights', name: 'Disco Ball', tier: 4, colorways: ['classic'] },
+  {
+    id: 'star-chandelier',
+    slot: 'lights',
+    name: 'Star Chandelier',
+    tier: 5,
+    colorways: ['classic'],
+  },
+  // Window
+  { id: 'street', slot: 'window', name: 'Street', tier: 1, colorways: ['classic'], free: true },
+  { id: 'garden', slot: 'window', name: 'Garden', tier: 3, colorways: ['classic'] },
+  { id: 'moonlit', slot: 'window', name: 'Moonlit', tier: 3, colorways: ['classic'] },
+  { id: 'snowy', slot: 'window', name: 'Snowy', tier: 3, colorways: ['classic'] },
+  // Counter-top
+  { id: 'bell', slot: 'counter', name: 'Bell', tier: 1, colorways: ['classic'], free: true },
+  {
+    id: 'flower-vase',
+    slot: 'counter',
+    name: 'Flower Vase',
+    tier: 1,
+    colorways: ['berry', 'sky', 'honey'],
+  },
+  { id: 'cake-stand', slot: 'counter', name: 'Cake Stand', tier: 2, colorways: ['berry', 'mint'] },
+  {
+    id: 'cookie-jar',
+    slot: 'counter',
+    name: 'Cookie Jar',
+    tier: 2,
+    colorways: ['sky', 'lavender'],
+  },
+  { id: 'fish-bowl', slot: 'counter', name: 'Fish Bowl', tier: 3, colorways: ['classic'] },
+  { id: 'tiny-robot', slot: 'counter', name: 'Tiny Robot', tier: 4, colorways: ['sky', 'berry'] },
+  // Wall art
+  {
+    id: 'menu-board',
+    slot: 'wallArt',
+    name: 'Menu Board',
+    tier: 1,
+    colorways: ['classic'],
+    free: true,
+  },
+  {
+    id: 'neon-open',
+    slot: 'wallArt',
+    name: 'Neon OPEN',
+    tier: 2,
+    colorways: ['berry', 'sky', 'mint'],
+  },
+  {
+    id: 'giant-clock',
+    slot: 'wallArt',
+    name: 'Giant Clock',
+    tier: 3,
+    colorways: ['honey', 'lavender'],
+  },
+  {
+    id: 'monster-portraits',
+    slot: 'wallArt',
+    name: 'Monster Portraits',
+    tier: 3,
+    colorways: ['classic'],
+  },
+  { id: 'trophy-shelf', slot: 'wallArt', name: 'Trophy Shelf', tier: 4, colorways: ['classic'] },
+  // Staff & pets
+  { id: 'pip', slot: 'staff', name: 'Pip', tier: 1, colorways: ['classic'], free: true },
+  { id: 'bunny-barista', slot: 'staff', name: 'Bunny Barista', tier: 4, colorways: ['classic'] },
+  { id: 'cat-waiter', slot: 'staff', name: 'Cat Waiter', tier: 5, colorways: ['classic'] },
+  { id: 'bear-busker', slot: 'staff', name: 'Bear Busker', tier: 5, colorways: ['classic'] },
+  { id: 'owl-cashier', slot: 'staff', name: 'Owl Cashier', tier: 5, colorways: ['classic'] },
+  { id: 'fox-baker', slot: 'staff', name: 'Fox Baker', tier: 5, colorways: ['classic'] },
+];
+
+/**
+ * Later content is not designed yet, so it is planned as counts per tier (owner's milestone split,
+ * 2026-11-21). Each group ships as one wave and is delivered in crates (economySim.ts).
+ */
+export interface PlannedGroup {
+  label: string;
+  slot: ShopSlot;
+  /** The wave (milestone) it ships with; waves open in order. */
+  wave: string;
+  count: number;
+  tier: Tier;
+  /** Priced as a second colorway (COLORWAY_SHARE). */
+  colorway?: boolean;
+}
+
+/** Regular monsters plus the two guests (SPEC §7.2). */
+export const WARDROBE_MONSTERS = 8;
+
+export const LATER_GROUPS: readonly PlannedGroup[] = [
+  // Decor wave: 1–2 more colorways on the 17 items that have them (~25), and 4 themed sets of
+  // 3 new pieces each that complete them alongside M4 items.
+  {
+    label: 'Colorways round 2 (small items)',
+    slot: 'wallpaper',
+    wave: 'decor',
+    count: 13,
+    tier: 2,
+    colorway: true,
+  },
+  {
+    label: 'Colorways round 2 (bigger items)',
+    slot: 'wallpaper',
+    wave: 'decor',
+    count: 12,
+    tier: 3,
+    colorway: true,
+  },
+  { label: 'Themed-set pieces', slot: 'counter', wave: 'decor', count: 8, tier: 3 },
+  { label: 'Themed-set centrepieces', slot: 'wallArt', wave: 'decor', count: 4, tier: 4 },
+  // Wardrobe wave, per monster: 3 hats, 4 skins, 3 accessories. A skin changes the whole monster,
+  // so it is a top-tier wish like a staff member.
+  { label: 'Monster hats', slot: 'hat', wave: 'wardrobe', count: 3 * WARDROBE_MONSTERS, tier: 2 },
+  {
+    label: 'Monster accessories',
+    slot: 'accessory',
+    wave: 'wardrobe',
+    count: 3 * WARDROBE_MONSTERS,
+    tier: 3,
+  },
+  { label: 'Monster skins', slot: 'skin', wave: 'wardrobe', count: 4 * WARDROBE_MONSTERS, tier: 5 },
+];
+
+export function expandPlanned(
+  groups: readonly PlannedGroup[],
+  tiers: Readonly<Record<Tier, number>> = TIER_PRICE,
+): (ShopEntry & { wave: string })[] {
+  return groups.flatMap((g, gi) =>
+    Array.from({ length: g.count }, (_, i) => ({
+      key: `planned.${gi}.${i}`,
+      slot: g.slot,
+      item: `planned-${gi}-${i}`,
+      name: g.label,
+      colorway: 'classic' as const,
+      tier: g.tier,
+      price: g.colorway ? roundTo5(tiers[g.tier] * COLORWAY_SHARE) : tiers[g.tier],
+      wave: g.wave,
+    })),
+  );
+}
