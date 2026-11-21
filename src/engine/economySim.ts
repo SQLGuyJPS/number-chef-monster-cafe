@@ -179,7 +179,10 @@ export function simulate(input: SimInput, rng: Rng): SimResult {
   const deliverCrates = () => {
     if (!input.crates) return;
     const hold = input.crates.holdAtStock ?? Infinity;
-    while (queue.length > 0 && monsters >= nextCrateAt && unowned().length < hold) {
+    // D154: a due crate is written when she opens the shop, one per visit. The next one is due
+    // `everyMonsters` after this one was due, so waiting for the shop visit doesn't stretch the
+    // pace; after a hold or a long gap it is due at the next visit (the event's `next`).
+    if (queue.length > 0 && monsters >= nextCrateAt && unowned().length < hold) {
       for (const e of queue.splice(0, input.crates.size)) shop.set(e.key, e);
       nextCrateAt = Math.max(nextCrateAt + input.crates.everyMonsters, monsters + 1);
     }
@@ -263,9 +266,8 @@ export function simulate(input: SimInput, rng: Rng): SimResult {
         stat.services++;
         stat.monsters += served;
         stat.coins += earned;
-        deliverCrates();
       }
-      deliverCrates(); // a held crate lands once purchases make room
+      deliverCrates();
       const stock = unowned();
       const active = allBoughtOutWeek === null && week >= (input.measureFromWeek ?? 0);
       if (active) {
