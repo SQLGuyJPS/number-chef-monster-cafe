@@ -14,7 +14,7 @@ Audience: one young child (first-year primary school level), who reads easy chap
 
 Targets: iPad Safari (primary), iPhone Safari, Android Chrome; the child may use all three. The family's devices are an iPad 7th gen, an iPhone 17 and a Pixel 10 Pro (D111). Baseline iOS/iPadOS 18+ (the newest the iPad 7th gen runs) and a recent Chrome on Android (D111, amends D37); `navigator.audioSession` (iOS 17+) is therefore on every target iOS device but stays feature-detected. Landscape layout (portrait shows the rotated stage, D8). Progress is stored per device and merged by exported file (§11). Works offline after first load. No backend, accounts, analytics, ads, external links, or purchases. All data local.
 
-Build budget (D20, D36, D44): **Tier 1 (M0, M1, M2, M2b, M3a, M3b) is a playable game in ≈ 10 agentic hours**, a guide rather than a cap; **Tier 2 (M4–M13)** is bonus work in any order with no upper limit. `PLAN.md` holds the authoritative per-milestone estimates; the figures in §14 are indicative.
+Build budget (D20, D36, D44): **Tier 1 (M0, M1, M2, M2b, M3a, M3b) is a playable game in ≈ 10 agentic hours**, a guide rather than a cap; **Tier 2 (M4–M17)** is bonus work in any order with no upper limit. `PLAN.md` holds the authoritative per-milestone estimates; the figures in §14 are indicative.
 
 ### Non-goals (v1)
 Monster designer, rush-hour mode, regrouping (carry/borrow), multiplication, multi-child profile UI (profiles are M11, D9), music, localization, handwriting/tracing, word-problem story tickets (D21), automatic stage changes (the stage is a parent setting, D22, D23).
@@ -455,7 +455,7 @@ interface MonsterSpec { id; name; body:'blob'|'tall'|'round'|'square'|'jelly'|'f
 Pip, a mouse in a chef hat, is the guide and **the one who helps (D90)**: the Help button (Pip's hat), the help-offer button, the helper on the counter and the tutorial pointer are one character. While help is offered or given (OfferHelp, CountTogether, Worked, FollowMe) Pip pops up behind the counter left of the monster and bobs while talking; every help line (CountTogether, demo and FollowMe lines) comes from Pip, in Pip's own caption bubble with its tail pointing down at Pip and the same voice at pitch 1.5. The monster keeps the order, PlateCount, the help question, "Yum!", its reactions and the closing line. When help ends Pip sinks back behind the counter over 0.5 s (`PIP_EXIT_MS`), and the monster's moves between its spot and the aside spots take 0.5 s (a CSS transition on the monster's slot; D91, D93). Pip is hand-authored SVG from M2 (`src/art/Pip.tsx`). Other animal staff are shop items (§10) that idle in the café and react to events (clap, bounce); staff do not speak.
 
 ### 7.4 Café background
-The service is seen **from behind the counter (D114)**: the back wall with the café's front door and one street window beside it, one table with two front-view chairs on the floor, and the counter top filling the bottom band, with the counter's far edge at y 432. A cream status bar runs across the top. Layered SVG in stage coordinates (`CounterScene` on every child screen: Splash, Home, Menu, Service and Results, D123; the old room `CafeScene` remains only as the speed test's scene), muted so the foreground stays brightest (D100); every layer runs past the safe box to fill the bleed. Slots: counter top, wall art, staff spots. No lights by default: the string lights wait for the shop's Lights slot (`StringLights`, unrendered). The leave button is a wooden sign hanging in the status bar (D110, D114). Shop item = `{slot, svg component, price}`. The **Service screen shows the same café decorations**, so purchases show while the child plays (D37), and since every child screen shares the one scene, an item is drawn once (D123). Missing art falls back to a labeled placeholder shape.
+The service is seen **from behind the counter (D114)**: the back wall with the café's front door and one street window beside it, one table with two front-view chairs on the floor, and the counter top filling the bottom band, with the counter's far edge at y 432. A cream status bar runs across the top. Layered SVG in stage coordinates (`CounterScene` on every child screen: Splash, Home, Menu, Service and Results, D123; the old room `CafeScene` remains only as the speed test's scene), muted so the foreground stays brightest (D100); every layer runs past the safe box to fill the bleed. Slots: counter top, wall art, staff spots. No lights by default: the string lights wait for the shop's Lights slot (`StringLights`, unrendered). The leave button is a wooden sign hanging in the status bar (D110, D114). Shop item = `{slot, svg component, tier, colorways}`; colours come from the shared families in `engine/economy.ts` (§9, D148). The **Service screen shows the same café decorations**, so purchases show while the child plays (D37), and since every child screen shares the one scene, an item is drawn once (D123). Missing art falls back to a labeled placeholder shape.
 
 ---
 
@@ -511,26 +511,41 @@ Master, SFX and voice volume; defaults 0.8 / 0.7 / 1.0. SFX play at master × SF
 ---
 
 ## 9. Economy
-All numbers live in `engine/economy.ts`.
+Earning amounts live in `engine/config.ts` and prices in `engine/economy.ts`.
+- **Lifespan target (D148):** sized for an hour of play a week (sittings of 15–20 min, services of 3–4 min: about 14 services, 85 monsters and 320 coins a week). The M4 shop lasts about 2 months; the later shop content (M14–M15) about 6–9 more. `npm run economy:sim` checks a price change against this before it ships (D150); retune after the M4 playtest.
 - **Coins (D6, D31, D40):** +3 per completed problem (flat, regardless of correctness, speed, or hints), each a `coin` event written when the problem completes; requeued problems and the warm-up order pay 3 too; a problem cut off at the play-time grace cap is not completed and pays nothing. +5 service tip on completion, or when the allowance closes the café mid-service; not on a voluntary exit. A 6-monster service pays **23**; with the maximum 2 requeues, **29**.
 - Coins only go down through a confirmed shop purchase; swapping is free, so no refunds. A parent's Reset or Replace import may lower the balance; that is an explicit parent action, not play (D44).
 - No streaks, daily rewards, expiring items, ads, loot boxes, timers on rewards, or external links.
 - Coin display: jar with count; counts spoken in Results only.
+- **Price tiers (D148):** T1 **20** (one service) · T2 **30** · T3 **55** · T4 **100** (about one sitting) · T5 **180** (about two sittings). A tier-1 price is always reachable after one full service. Until the Wish Jar (M6) gives the child a savings goal to watch, nothing costs more than about two sittings; a pricier "grand wish" tier waits for M6.
+- **Colorways (D148):** an item may come in more than one colour. Each colorway is its own purchase; the first is the item's price, each other one 75% of it (rounded to 5); colorways of a slot's free default cost T1. Colours come from shared families, so items of one family match across slots: **Sunny, Berry, Mint, Sky, Honey, Lavender, Cocoa** (`COLOR_FAMILIES`). No colorways on scenes (windows), named looks (Brick, Starry Night, Rainbow), metal or glass (Disco Ball, Star Chandelier, Fish Bowl, Trophy Shelf), the serve bell, the menu board or staff.
 
 ## 10. Café shop
-Seven slots; every slot has a free default. Tapping an item previews it live in the café; a **Buy** button (160 px) then a confirm with big *Yes!* / *Not yet*. Owned items re-equip free any time. Everything is available from day one.
+Seven slots; every slot has a free default. Tapping an item previews it live in the café; an item with colorways shows one tile with colour dots, and tapping a dot previews that colour. A **Buy** button (160 px) then a confirm with big *Yes!* / *Not yet*. Owned items and colorways re-equip free any time. The shop opens with a **starter shelf**; every other entry, in M4 and after, arrives in **delivery crates** (§10.1, D149, D151), so the child faces about 7 unbought choices at a time rather than 55.
 
-| Slot | Items (price) |
+**M4 stock (D148):** 36 items, 55 paid entries, **3,105 coins** (about 2.4 months at an hour a week). Prices are tier, then colorways (first colour full price).
+
+| Slot | Items: colorways (price) |
 |---|---|
-| Wallpaper | Sunny Yellow (free), Polka Dots 20, Mint Stripes 20, Brick 30, Starry Night 40, Rainbow 60 |
-| Floor | Checkerboard (free), Wood 25, Pink Tiles 25, Cloud Carpet 45 |
-| Lights | None (free), String Lights 20, Paper Lanterns 30, Disco Ball 60, Star Chandelier 90 |
-| Window | Street (free), Garden 25, Moonlit 35, Snowy 35 |
-| Counter-top | Bell (free), Flower Vase 15, Cake Stand 25, Cookie Jar 30, Fish Bowl 35, Tiny Robot 50 |
-| Wall art | Menu Board (free), Neon OPEN 30, Giant Clock 35, Monster Portraits 40, Trophy Shelf 60 |
-| Staff & pets | Pip (free), Bunny Barista 60, Cat Waiter 80, Bear Busker 100, Owl Cashier 100, Fox Baker 120 |
+| Wallpaper | Plain Paint: Sunny free, Berry 20, Lavender 20 · Polka Dots (T2): Berry 30, Sky 25, Lavender 25 · Stripes (T2): Mint 30, Honey 25, Berry 25 · Brick (T3) 55 · Starry Night (T4) 100 · Rainbow (T4) 100 |
+| Floor | Wood: classic free (the café's current floor, D152), Honey 20, Cocoa 20 · Checkerboard (T2): Classic 30, Berry 25, Mint 25 · Tiles (T2): Berry 30, Sky 25, Mint 25 · Cloud Carpet (T4): Sky 100, Lavender 75, Berry 75 |
+| Lights | None (free) · String Lights (T2): Honey 30, Berry 25, Sky 25 · Paper Lanterns (T3): Berry 55, Mint 40, Honey 40 · Disco Ball (T4) 100 · Star Chandelier (T5) 180 |
+| Window | Street (free) · Garden (T3) 55 · Moonlit (T3) 55 · Snowy (T3) 55 |
+| Counter-top | Bell (free) · Flower Vase (T1): Berry 20, Sky 15, Honey 15 · Cake Stand (T2): Berry 30, Mint 25 · Cookie Jar (T2): Sky 30, Lavender 25 · Fish Bowl (T3) 55 · Tiny Robot (T4): Sky 100, Berry 75 |
+| Wall art | Menu Board (free) · Neon OPEN (T2): Berry 30, Sky 25, Mint 25 · Giant Clock (T3): Honey 55, Lavender 40 · Monster Portraits (T3) 55 · Trophy Shelf (T4) 100 |
+| Staff & pets | Pip (free) · Bunny Barista (T4) 100 · Cat Waiter, Bear Busker, Owl Cashier, Fox Baker (T5) 180 each |
 
-Total **1,340 coins** ≈ 58 services at 23 coins. First purchases (15–25 coins) are reachable in the first service. Equipped items persist per slot; staff can be multiple (up to 3 visible).
+**Starter shelf (D151):** 17 entries, 775 coins: Plain Paint Berry and Lavender, Polka Dots Berry, Stripes Mint, Wood Honey and Cocoa, Checkerboard Classic, Tiles Berry, String Lights Honey, Flower Vase Berry, Cake Stand Berry, Cookie Jar Sky, Neon OPEN Berry (the first colour of every tier 1–2 item and the recolours of the free defaults), and four things to save for: Garden window, Disco Ball, Bunny Barista, Cat Waiter (`STARTER_SHELF`). The other 38 entries arrive in crates over the first two months.
+
+The first purchase comes at the end of the first sitting; in simulation 84–94% of sittings end with something new, depending on how she spends and no run of more than two sittings goes without one (D150). Equipped items persist per slot (one colorway of an item at a time); staff can be multiple (up to 3 visible). A purchase's `buy` event names the entry as `slot.item.colorway` (§11.2).
+
+### 10.1 Later shop content (D149)
+Built in its own milestones (§14), priced from the same tiers, about 9,500 coins together (about 6.8 months at an hour a week).
+- **Deliveries & Themed Sets (M14):** 1–2 more colorways on the 15 items that have them (about 25, priced as colorways of their item), four themed sets of three new pieces each that complete a set with M4 items (e.g. Space: Starry Night, Moonlit, Star Chandelier plus new pieces). Completing a set gives a free surprise (an idle animation or a visiting guest), never a coin bonus.
+- **Delivery crates (built in M4, D151):** new stock arrives in crates of **2 items every 30 monsters served** (counted in monsters, not services, so short, partial and 4- or 8-order services all move it on; at an hour a week about every 2–3 days), **held while 6 or more unbought items are already in the shop**. The first crate of an update arrives with it unless the hold applies; an update's items join the queue behind any that are still waiting. A crate's arrival is recorded in the progress log when the child first sees it (a `crate` event, §11.2, D154; merged like every event, so all devices show the same shelf), so a child who served hundreds of monsters before an update gets one crate, not all of them at once. Crates never expire and are not tied to the calendar.
+- **Monster Wardrobe (M15):** per monster, including the two guests: 2–3 hats (T2), 4–5 skins (patterns or colours; T5, a skin changes the whole monster) and 2–3 accessories (T3). The monster wears what the child equips whenever it visits.
+- **Monster Album and friendship gifts (M16):** not bought. Each monster's page shows its portrait, name, favourite foods, a brief bio, the hats, skins and accessories collected for it, and its friendship gift. After a monster has been served a set number of times it brings the café a gift item (free). Later: short story episodes per monster.
+- **Treat Time (M17):** a repeatable treat the child can buy (T2, 30 coins, D153) that throws a short party in the café. Nothing decays or needs feeding, so it never becomes a chore; it keeps coins meaningful when the shop is bought out.
 
 ---
 
@@ -547,6 +562,7 @@ type Evt = { id: string; t: number; dev: string; v: number } & (   // id = crypt
  | { k:'serviceEnd'; svc:string; skill:SkillId; seed:number; orders:number; served:number; tip:number; activeMs:number; partial:boolean }   // tip 0 or 5; partial = ended before all orders were served (D39)
  | { k:'buy'; item:string; price:number }
  | { k:'equip'; slot:string; items:string[] }
+ | { k:'crate'; n:number; next:number }   // delivery crate n (1, 2, …) arrived; crate n+1 is due at `next` monsters served (M4, D154)
  | { k:'skillConfig'; skill:SkillId; stage:Stage; ops:'both'|'add'|'sub' }   // per-skill parent settings (D23, D24)
  | { k:'known'; facts:string[] }   // starting-point toggles
  | { k:'focus'; list:string[] } )  // focus list
@@ -556,6 +572,7 @@ Rules:
 - **Event shapes are frozen from M1 (D36):** `attempt` (four outcomes) and `coin`; M2 keeps coins in memory and M3a starts writing them (D51).
 - **Coins (D31, D39):** `earned = Σ coin.n (distinct event id) + Σ over distinct svc of the largest serviceEnd.tip`. A resumed service (two `serviceEnd` rows for one `svc`) loses nothing, and an app killed mid-service keeps every coin the child saw fly into the jar. Amounts live in the events and are never recomputed, so a merge cannot reduce earned coins. `spent = Σ price over distinct purchased items` (the same item bought on two devices is charged once). `balance = max(0, earned − spent)`. Owned items = union of `buy` events.
 - Fact boxes (both sets, §4.2, D127) are derived and may shift after a merge (adaptation, not reward). Stage and operations are explicit `skillConfig` events, so a merge does not shift them.
+- **Crates (D154):** delivered crates = distinct `crate.n`; crate n holds queue entries 2n−1 and 2n of the fixed crate order (catalog order, never random), so two devices that each record crate 5 get the same two items and a merge keeps one. A crate is written when the child opens the shop, one per visit, if queued items remain, served monsters ≥ `next` of the largest `n` (two rows for one `n`: the smaller `next`) and fewer than 6 unbought items are on the shelf. Its `next` = max(that crate's due point + 30, served + 1): the pace stays 30 monsters even though crates wait for a shop visit, and after a hold, a long gap or a new update the next crate comes at the next visit, never as a pile. With no crate yet, the first is due at once. Served monsters = Σ `serviceEnd.served` over distinct `svc` (largest row).
 - `equip`, `known`, `focus`, and `skillConfig` (per skill): latest `t` wins.
 - `factKey` is a persisted identifier (§3.1): changing it needs a migration.
 - Initial state before any events = the starting-state preset (§4.2), applied implicitly and never as events, so two fresh devices do not double-seed.
@@ -604,7 +621,7 @@ No external links anywhere. "About" is plain text.
 ## 13. Quality gates
 
 ### 13.1 Scripts (cross-platform Node; owner is on Windows)
-`npm run dev | build | preview | typecheck | lint | test | test:e2e | lint:content | content:table | check`, where `check` = typecheck + lint + test + lint:content. From M13: `audio:todo | audio:build` (§8.4; not part of `check`, since missing clips fall back to TTS).
+`npm run dev | build | preview | typecheck | lint | test | test:e2e | lint:content | content:table | economy:sim | check`, where `check` = typecheck + lint + test + lint:content. `economy:sim` writes `docs/ECONOMY_SIM.md` (D150). From M13: `audio:todo | audio:build` (§8.4; not part of `check`, since missing clips fall back to TTS).
 
 ### 13.2 Content lint (`scripts/lint-content.ts`; fails `check`)
 - Every pool problem: recompute the answer with an *independent* evaluator (parse `display` tokens and solve) and compare to `answer`.
@@ -682,15 +699,17 @@ Parent gate, minimal parent area (§12), Export (checksum, share fallbacks), Rep
 ### Tier 2 — Bonus features (no cap; any order)
 From M13 on, a milestone that adds or changes spoken lines ships them on the TTS fallback and is closed by a **voice pass** after the owner's playtest: the owner records the new clips, `npm run audio:build`, and `audio:todo` reports nothing missing for that milestone's dishes. The next milestone starts after the voice pass (D142).
 
-#### M4 — Economy and shop (≈ 1.75 h)
-Coin spending, shop slots/items (placeholder-quality SVG), preview/buy/confirm, equip, staff reactions, guest monsters; `buy`/`equip` events.
-**Accept:** economy table sums to 1,340; purchase idempotent and persisted; confirm prevents accidental buys; no code path lowers earned coins; purchases show on the Service screen; the shop counts as play time.
+#### M4 — Economy and shop (≈ 3.5 h)
+Coin spending, shop slots/items (placeholder-quality SVG) with their colorways (D148), preview/buy/confirm, equip, staff reactions, guest monsters; `buy`/`equip` events; the starter shelf and delivery crates (§10, §10.1, D151).
+**Accept:** the catalog matches §10 (3,105 coins, 55 paid entries) and `economy:sim` reports the M4 stock lasting 2–3 months at the default profile; crate arrival is replay-derived and recorded as a `crate` event when first seen (D154), with `schemaVersion` 2, its migration and fixture test, and a two-device merge test giving the same shelf; a backlog delivers one crate at a time; the hold at 6 unbought works; purchase idempotent and persisted; confirm prevents accidental buys; no code path lowers earned coins; purchases show on the Service screen; the shop counts as play time.
 
 #### M5 — Rest of the Little Menu (≈ 3 h)
 A0 and A4–A8 generators + demos, two-frame layouts, difficulty orderings for A4–A6 (D43), A5 whole-frame moves and FollowMe past 10 (D47), tiles live.
 **Accept:** pool sizes match §4; all demos end in the expected state for every pool item; bridging fills frame 1 first (e2e); content table reviewed; every skill completes a service at each stage in e2e.
 
-#### M6 — unused (story tickets were declined, D21; numbering kept stable)
+#### M6 — Wish Jar (≈ 1 h; was unused since D21, reused by D149)
+The child pins one unowned item as a wish; the coin jar on Home and Results shows how full the wish is, and at Results Pip may say a short fixed line about it ("Your wish is getting closer!", "Just a little more for your wish!", "You can get your wish!"). The line never names the item or says an amount, so it needs no clip per item (D153). Changing or clearing the wish is free. Shown on Home and Results only; never a "come back" nag.
+**Accept:** the wish survives reload and merge; the fill matches balance ÷ price, full at or above the price; no wish, no meter.
 
 #### M7 — Full parent area and multi-device merge (≈ 2.5 h)
 Merge import, device label, Focus list, Starting-point editor, hide/show skills, heatmap, trouble spots, history, snapshot restore, renaming monsters.
@@ -720,7 +739,20 @@ Four steps, with stops for the owner (detail in PLAN.md §6). **Step 1 (agent):*
 **Accept:** `check` + e2e green; for every phrase and parameter in range, `clipPlan` transcripts join to the phrase text; `audio:todo` reports no missing clip for A1–A3 (lines that are never recorded, D139e, excepted); a missing clip gives whole-line TTS (e2e); a clip that never ends does not block the flow (e2e); clips precached and played offline (Chromium e2e, WAV test set); decoded-audio cache stays under its cap (unit); zero external requests, CSP unchanged; clip sizes reported.
 **Owner playtest:** on the iPad (then iPhone and Android): joins acceptable, monsters and Pip sound distinct and friendly, nothing cut off, no clash with the sound effects, voices still work after backgrounding and with the silent switch on.
 
-Later ideas, unscheduled: B4 compare (needs a response mechanic), rush-hour mode, monster designer, zero-answer lesson, Mystery Orders (`? − 3 = 5`), regrouping; **garnish choice** after each correct serve (nothing to do with correctness; revisit after the M2 playtest); **monster album** (portraits fill in as monsters are served; after M4).
+#### M14 — Deliveries & Themed Sets (D149)
+Colorways round 2, four themed sets with their new pieces and set-complete surprises, all delivered by M4's crates (§10.1, D151).
+**Accept:** set completion is replay-derived; `economy:sim` with the real catalog still meets the lifespan target.
+
+#### M15 — Monster Wardrobe (D149)
+Hats, skins and accessories for all 8 monsters (§10.1), equipped per monster and shown whenever it visits, within the SVG budget (§2.4); delivered by M4's crates (D151).
+
+#### M16 — Monster Album and friendship gifts (D149)
+The album pages and the free friendship gifts (§10.1). Story episodes are a later idea.
+
+#### M17 — Treat Time (D149)
+The repeatable party treat (§10.1).
+
+Later ideas, unscheduled: B4 compare (needs a response mechanic), rush-hour mode, monster designer, zero-answer lesson, Mystery Orders (`? − 3 = 5`), regrouping; **garnish choice** after each correct serve (nothing to do with correctness; revisit after the M2 playtest); **monster story episodes** in the album (after M16).
 
 ---
 

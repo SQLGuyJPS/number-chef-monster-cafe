@@ -18,7 +18,7 @@ Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 r
 
 The 10 h guide is exceeded (allowed by D44). The figure excludes fixes from each playtest (SPEC §14 says each milestone starts with them); budget ~0.5 h per round. The estimate is driven by what the spec requires, not by optional polish; I have not cut scope to fit. If you want it shorter, the cheapest levers are yours to choose (e.g. fewer monsters in M2, deferring the 4× CPU throttle report), and each would need a DECISIONS entry.
 
-Tier 2 (rough, re-estimated when you pick one): M4 2.0 · M5 3.5 · M7 3.0 · M8 2.5 (incl. layout mock) · M9 1.5 · M10 2.0 · M11 2.0 · M12 1.75 (play-time limit, postponed indefinitely, D124) · M13 4.0 agent + about 2.5–3.5 h of the owner's recording and listening (§6).
+Tier 2 (rough, re-estimated when you pick one): M4 3.5 (incl. crates, D151) · M6 Wish Jar 1.0 (fast follow-up to M4, D149) · M5 3.5 · M7 3.0 · M8 2.5 (incl. layout mock) · M9 1.5 · M10 2.0 · M11 2.0 · M12 1.75 (play-time limit, postponed indefinitely, D124) · M13 4.0 agent + about 2.5–3.5 h of the owner's recording and listening (§6) · M14 Deliveries & Themed Sets · M15 Monster Wardrobe · M16 Monster Album · M17 Treat Time (estimated when picked; content-heavy, mostly art).
 
 ---
 
@@ -248,14 +248,19 @@ The play-time limit moved to M12 (D124).
 
 ## 5. Tier 2 outline (order picked by the owner)
 
-- **M4 Shop** (2.0 h): `economy.ts` tables (sum 1,340), shop screen with live preview, Buy + confirm, `buy`/`equip` events, staff reactions, guest monsters, purchases visible in Service.
+- **M4 Shop** (3.5 h): `economy.ts` catalog (D148: tiers, colorways, 3,105 coins, D152; the draft table and `npm run economy:sim` already exist, D150), colour-family palette tokens, shop screen with live preview and colour dots, Buy + confirm, `buy`/`equip` events, staff reactions, guest monsters, purchases visible in Service; starter shelf and delivery crates (D151): crate arrival derived from the log and recorded when first seen (a `crate` event in the progress log, D154: the project's first schema change, so `schemaVersion` 2 with a migration and fixture test; export/import validation accepts it), one crate at a time from a backlog, the hold at 6 unbought, a small "a delivery arrived!" moment in the shop.
+- **M6 Wish Jar** (1.0 h, D149): pin a wish, jar fill on Home and Results, Pip's generic wish line at Results (D153); how the wish is stored (event vs per-device setting) is decided when built.
 - **M5 Rest of the Little Menu** (3.5 h): A0, A4–A8 generators, orderings for A4–A6, demos (teens, bridge, back-through-ten, make-ten variants), `frames2` UI, A5 whole-frame moves, FollowMe past 10. Counter-layout checks carried here: the two-frame tray has only run in the mock, so M5 must exercise it in the real service (drag and tap onto the tight cells, flights, eating, both basket sides); and the two-frame tray at S0 has no room for the lifted cloche lid (open question, decide when the first two-frame S0 skill is built); and nine menu tiles do not fit one counter row (D123).
 - **M7 Full parent area + merge** (3.0 h): Merge import with dry-run summary, device label, Focus list, Starting-point editor, hide/show, heatmap, trouble spots, history, median S0 time, snapshots restore, two-context e2e.
 - **M8 Big Menu** (2.5 h): static layout mock first (stop for OK), then tens shelf + ones frame, auto-bundle, two bins, B1–B2 generators/orderings/demos, two-digit pad.
 - **M9 B3** (1.5 h). **M10 Polish** (2.0 h): accessibility, big-text captions, bundle report, Lighthouse (recorded voices moved to M13). **M11 Profiles** (2.0 h): `profileId` migration (first real migration), picker, per-profile preset.
 - **M12 Play-time limit** (1.75 h; postponed indefinitely by the owner, D124): allowance model with injected monotonic and wall clocks (idle pause, grace cap in wall time, last customer, shorter service, tip rule, lock clears resume, boot check, refill modes, 60 s cue) and all §6.5 tests; locked Home, wind-down, lights dim + Pip yawn; limit setting with Start new session / Add time behind M3b's gate; e2e limit-off-never-locks and run-out → locked → reload → unlock → no resume offer. The `clock` IDB store already exists, so no IDB upgrade is needed.
 - **M13 Recorded voices** (4.0 h agent + the owner's recording): detailed in §6.
-- **Voice passes (D142).** From M13 on, every milestone that adds or changes spoken lines (M4 guest monsters, M5, M8, M9, playtest rewording) ships them on the TTS fallback, regenerates `docs/VOICE_SCRIPT.md`, and is closed by a voice pass after the owner's playtest: the owner records and builds the new clips, I check that `audio:todo` reports nothing missing for that milestone's dishes, then the next milestone starts. Budget about 0.25 h agent per pass.
+- **Voice passes (D142).** From M13 on, every milestone that adds or changes spoken lines (M4 guest monsters and shop lines, M5, M6's wish line, M8, M9, M14–M17 lines, playtest rewording) ships them on the TTS fallback, regenerates `docs/VOICE_SCRIPT.md`, and is closed by a voice pass after the owner's playtest: the owner records and builds the new clips, I check that `audio:todo` reports nothing missing for that milestone's dishes, then the next milestone starts. Budget about 0.25 h agent per pass.
+- **M14 Deliveries & Themed Sets** (D149, D151): colorways round 2, four themed sets, set-complete surprises; content only, delivered by M4's crates. Re-run `economy:sim` with the real catalog.
+- **M15 Monster Wardrobe** (D149): hats, skins, accessories for 8 monsters; per-monster equip; SVG budget check.
+- **M16 Monster Album** (D149): album pages and friendship gifts.
+- **M17 Treat Time** (D149): repeatable party treat.
 
 ---
 
