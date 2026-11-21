@@ -72,6 +72,17 @@ describe('production build', () => {
     expect(leaks).toEqual([]);
   });
 
+  it('ships the voice manifest, precaches m4a clips, and has no e2e WAV test set (D141e, D146)', () => {
+    const rel = files.map((f) => relative(out, f).replace(/\\/g, '/'));
+    expect(rel).toContain('audio/manifest.json');
+    expect(rel.filter((f) => f.startsWith('audio-e2e/') || f.endsWith('.wav'))).toEqual([]);
+    const sw = readFileSync(join(out, 'sw.js'), 'utf8');
+    expect(sw).toContain('audio/manifest.json');
+    expect(sw).not.toContain('audio-e2e');
+    const js = files.filter((f) => f.endsWith('.js')).map((f) => readFileSync(f, 'utf8')).join('\n');
+    expect(js).not.toContain('audio-e2e');
+  });
+
   it('manifest is landscape standalone with relative start_url and scope', () => {
     const p = join(out, 'manifest.webmanifest');
     expect(existsSync(p)).toBe(true);

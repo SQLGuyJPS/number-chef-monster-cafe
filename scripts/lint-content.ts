@@ -1,6 +1,6 @@
 // Content lint v1 (SPEC §13.2). Fails `npm run check` on any problem. Covers the A1–A3 pools,
 // spoken text, phrases, toTrayTask/check agreement, monster specs (SPEC §7.2) and the emoji allowlist.
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { FOOD_IDS, FOODS } from '../src/engine/foods';
@@ -28,6 +28,9 @@ import {
   REACTIONS,
 } from '../src/art/monsters/specs';
 import { DRAWINGS } from '../src/art/monsters/roster';
+import { clipPath, parseManifest } from '../src/engine/voiceManifest';
+import { spikeScript, voiceInventory } from '../src/engine/voiceScript';
+import { MONSTER_LINES, TICKETS } from './voice-data';
 
 const repo = fileURLToPath(new URL('../', import.meta.url));
 const errors: string[] = [];
@@ -294,6 +297,47 @@ for (const file of walk(join(repo, 'src')).filter((f) => /\.(tsx?|css|html|json)
   }
 }
 
+// ---------- recorded voice manifest (SPEC §8.4, D141b) ----------
+// Every clip in public/audio/manifest.json is a known clip for its voice (the A1–A3 inventory or the
+// spike), every listed file exists, and no file sits in public/audio without a manifest entry.
+let voiceClips = 0;
+{
+  const audioDir = join(repo, 'public/audio');
+  const manifestFile = join(audioDir, 'manifest.json');
+  const raw = (() => {
+    try {
+      return JSON.parse(readFileSync(manifestFile, 'utf8')) as unknown;
+    } catch (e) {
+      fail(`public/audio/manifest.json: ${(e as Error).message}`);
+      return null;
+    }
+  })();
+  const manifest = raw === null ? null : parseManifest(raw);
+  if (raw !== null && !manifest) fail('public/audio/manifest.json does not match the manifest schema (D141a)');
+  if (manifest) {
+    if (manifest.ext !== 'm4a') fail('public/audio/manifest.json: shipped clips are m4a (D140b)');
+    const inventory = voiceInventory(MONSTER_LINES, TICKETS);
+    const spike = new Set(spikeScript().flatMap((sec) => sec.items.map((i) => i.clip)));
+    const listed = new Set<string>(['manifest.json']);
+    for (const [voice, clips] of Object.entries(manifest.voices)) {
+      for (const [clip, ms] of Object.entries(clips)) {
+        voiceClips++;
+        if (!inventory.get(voice)?.has(clip) && !spike.has(clip)) fail(`voice manifest: ${voice}/${clip} is not a clip that voice says`);
+        if (ms > 8000) fail(`voice manifest: ${voice}/${clip} is ${ms} ms (over the 8 s line cap, SPEC §8.1)`);
+        const path = clipPath(manifest, voice, clip);
+        listed.add(path);
+        if (!existsSync(join(audioDir, path))) fail(`voice manifest: public/audio/${path} is missing`);
+      }
+    }
+    const walk = (dir: string): string[] =>
+      readdirSync(dir).flatMap((e) => (statSync(join(dir, e)).isDirectory() ? walk(join(dir, e)) : [join(dir, e)]));
+    for (const f of walk(audioDir)) {
+      const rel = relative(audioDir, f).replace(/\\/g, '/');
+      if (!listed.has(rel)) fail(`public/audio/${rel} is not in the voice manifest (stray file)`);
+    }
+  }
+}
+
 if (errors.length) {
   console.error(`lint:content: ${errors.length} problem(s)`);
   for (const e of errors.slice(0, 50)) console.error(`  ✗ ${e}`);
@@ -301,5 +345,5 @@ if (errors.length) {
 }
 const sizes = BUILT_SKILLS.map((s) => `${s} ${pool(s).length}`).join(', ');
 console.log(
-  `lint:content: OK (pools ${sizes}; ${Object.keys(PHRASES).length} phrases; ${MONSTER_SPECS.length} monsters × ${EXPRESSIONS.length} expressions; emoji allowlist clean)`,
+  `lint:content: OK (pools ${sizes}; ${Object.keys(PHRASES).length} phrases; ${MONSTER_SPECS.length} monsters × ${EXPRESSIONS.length} expressions; emoji allowlist clean; ${voiceClips} voice clips)`,
 );

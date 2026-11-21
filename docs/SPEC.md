@@ -17,7 +17,7 @@ Targets: iPad Safari (primary), iPhone Safari, Android Chrome; the child may use
 Build budget (D20, D36, D44): **Tier 1 (M0, M1, M2, M2b, M3a, M3b) is a playable game in ≈ 10 agentic hours**, a guide rather than a cap; **Tier 2 (M4–M17)** is bonus work in any order with no upper limit. `PLAN.md` holds the authoritative per-milestone estimates; the figures in §14 are indicative.
 
 ### Non-goals (v1)
-Monster designer, rush-hour mode, regrouping (carry/borrow), multiplication, multi-child profile UI (profiles are M11, D9), recorded audio, music, localization, handwriting/tracing, word-problem story tickets (D21), automatic stage changes (the stage is a parent setting, D22, D23).
+Monster designer, rush-hour mode, regrouping (carry/borrow), multiplication, multi-child profile UI (profiles are M11, D9), music, localization, handwriting/tracing, word-problem story tickets (D21), automatic stage changes (the stage is a parent setting, D22, D23).
 
 ---
 
@@ -93,6 +93,7 @@ Yes, with these constraints (all encoded below):
 | Validation | `zod` for import/export and settings. |
 | PWA | `vite-plugin-pwa` (Workbox), precache everything, `registerType: 'prompt'` (D12): a waiting service worker is activated (with reload) only while the Splash shows on cold launch or after 30 s without input on Home — **never on any other screen, never mid-service** (D54). |
 | Font | `@fontsource/andika` (self-hosted, OFL). |
+| Voice clips | Build time only (M13, D140): `ffmpeg-static` (dev dependency) cuts and encodes the owner's recordings; the app plays AAC `.m4a` clips through WebAudio (§8.4). |
 | Tests | Vitest (unit/property), Playwright (e2e; Chromium + WebKit projects). |
 | Lint | ESLint + Prettier; custom `lint:content`. |
 | Network | No runtime requests except same-origin static assets. CSP meta: `default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; worker-src 'self'` (inline styles are needed for React style props); e2e asserts zero external requests. The CSP meta is emitted in **production builds only**, and `build.assetsInlineLimit: 0` keeps small assets from becoming `data:` URIs the default `font-src` would block (D37). |
@@ -105,13 +106,13 @@ Yes, with these constraints (all encoded below):
     engine/      PURE TS. No DOM, no React. rng, problems, generators, attempt flow, scheduler, mastery, tray model, demos, economy
     game/        tray UI, ten-frame, packs, drag/input, service controller, numpad
     art/         monsters (SVG), foods, shop items, Pip
-    audio/       sfx (WebAudio synth), speech (TTS), unlock, manifest
+    audio/       sfx (WebAudio synth), speech (TTS), unlock, voice (recorded clips, M13)
     storage/     idb, schema (zod), migrations, export/import, snapshots
     parent/      gate, progress, settings
     app/         screens (Splash, Home, Menu, Service, Results, Shop), layout/scale, metrics.ts
 / tests/unit  /tests/e2e
-/ scripts/ lint-content.ts content-table.ts make-icons.ts
-/ public/ manifest, icons
+/ scripts/ lint-content.ts content-table.ts make-icons.ts audio-todo.ts audio-build.ts (M13)
+/ public/ manifest, icons, audio/ (manifest.json + clips, M13)
 ```
 ESLint MUST forbid `src/engine/**` importing `react`, `react-dom`, or touching `window`/`document`/`indexedDB`.
 
@@ -472,8 +473,8 @@ The service is seen **from behind the counter (D114)**: the back wall with the c
 - Commas are dropped from the text sent to the engine (engines pause on them as on a full stop); captions keep them; ellipses stay as wanted pauses (D77).
 - Voice selection: prefer `localService` voices with `lang` `en-US`, then `en-*`; prefer names matching /Samantha|Ava|Allison|Google US English|Samsung/ in that order; the parent can pick any installed English voice (listed once per name and language, D137) and a rate 0.7–1.1 (default 0.85) with a Test button. Voice is stored per device; on Android, when offline, only `localService` voices are used and captions carry the rest. Voices load async: handle `voiceschanged`, retry `getVoices()` at 0/250/1000/3000 ms.
 - Call `speechSynthesis.cancel()` before each non-queued utterance (iOS quirk). `interrupt:false` queues. Counts while building follow §3.3 (D75).
-- Monster and Pip voices differ only by `pitch`/`rate` (Pip: pitch 1.5).
-- **Recorded audio later (M10):** `resolveAudio(key)` looks up `public/audio/manifest.json` (`key → file`); missing → TTS. Phrase keys are stable (`num.14`, `op.plus`, `line.blobbo.thanks.2`). `scripts/audio-todo.ts` prints keys without recordings (target set: ~21 numbers 0–20, 8 tens 30–100, ~35 operator/prompt phrases, ~50 monster lines).
+- With TTS, monster and Pip voices differ only by `pitch`/`rate` (Pip: pitch 1.5); recorded voices are shifted copies of one recording (§8.4).
+- **Recorded voices (M13, §8.4)** replace TTS line by line; TTS stays the fallback for any line with a missing clip. Phrase keys are stable because recordings are keyed to them.
 
 ### 8.3 SFX (WebAudio synthesis, `sfx.ts`, no audio files)
 Tones start 30 ms ahead of the audio clock (D87). Place/remove tones play only where nothing is counted aloud (S2, S1, the S0 digit pad; never at S3 or in Pip's demo, D91); the other effects are unchanged.
@@ -493,6 +494,19 @@ Tones start 30 ms ahead of the audio clock (D87). Place/remove tones play only w
 | arrive | rubber "boing" (sine with pitch envelope) |
 
 Master, SFX and voice volume; defaults 0.8 / 0.7 / 1.0. SFX play at master × SFX and speech at master × voice (`utterance.volume`, which iOS ignores); the parent's speed multiplies every voice's rate (monsters and Pip) by speed ÷ 0.85 (D135). No background music in v1.
+
+### 8.4 Recorded voices (M13; D139–D147)
+- **Clips, not sentences (D139).** The game says about 13,000 distinct lines with numbers 0–20, so whole sentences are never recorded. Lines without numbers are recorded whole. Number words are recorded **whole** (never "thirty" + "one") and cut out of carrier sentences in the position the game uses them: *lead* ("**Seven** plus two…"), *mid* ("…plus **two** cookies…") and *end* ("I wanted **nine**."). Each food's order tail is one clip ("cookies, please!"); connecting words and phrases are clips. The phrase wording is not changed to suit recording. The M13 listening test decides whether one number form is enough and whether short counting lines ("Seven more!") are recorded as pairs.
+- **Whole-line fallback (D139).** A line plays recorded only when every clip it needs exists for that voice; otherwise the whole line is TTS. Lines with the child's name or (from M7) a renamed monster are never recorded: the clips are public on Pages.
+- **One voice, shifted per character (D140).** The owner records one set; each monster's voice and Pip's are made at build time by pitch-shifting it to that character's pitch; the unshifted voice is the narrator (Results). The monsters' arrive and thanks lines are recorded one by one and shifted like the rest.
+- **Format (D140).** Masters WAV 48 kHz / 24-bit / mono, outside git. Shipped AAC-LC `.m4a`, mono, 48 kbps (64 if hissy), loudness-normalized: about 6 KB per second, roughly 2–3 MB for every voice of A1–A3.
+- **Pipeline (D140).** `npm run audio:todo` writes `docs/VOICE_SCRIPT.md` (carrier sentences in reading order, target clips numbered) and lists missing clips. The owner records in Audacity, labels each target clip with its number, exports WAV + labels; `npm run audio:build` cuts, trims, normalizes, shifts and encodes into `public/audio/<voice>/<clipId>.m4a` and writes `public/audio/manifest.json`. Voice cloning from a short sample is the last resort if recording proves too much (D140d).
+- **Clip ids (D141):** `num.<n>.<form>`, `food.<id>.please`, `w.<slug>`, `line.<phraseKey>`, `mon.<monsterId>.<arrive|thanks>.<i>`; voices are the monster ids, `pip` and `narrator`. `clipPlan(key, params)` (pure, `src/engine/`) gives a line's clips and `PHRASE_SPEAKERS` says who says each phrase; their transcripts must join to the phrase text for every parameter in range (unit test). `lint:content` validates the manifest.
+- **Playback (D141).** `src/audio/voice.ts` plays clips through the game's AudioContext. Clips are precached by the service worker, decoded one at a time on demand into a small cache (about 10 MB of decoded audio), silence-trimmed at load and scheduled back to back on the audio clock with a short crossfade. Voice volume applies; speed applies only to TTS. `speak()` keeps its contract (§8.1): resolves on end or timeout, never blocks the flow, `interrupt` cancels, counting is latest-wins, and recorded speech counts as speech for the SFX rule (D109). `?debug` has the Voice test page and a recorded / TTS toggle; there is no parent setting.
+- **Clip plan details (D143).** A fourth number form, *ask*, ends a question ("**Two?** I wanted three.", "…equals **ten?**"). Connecting words keep their punctuation as intonation ("more!", "more…", "more." are separate clips). The spike adds `pair.<n>.<more|left>` (a counting line in one take) and `ref.<slug>` (whole lines in one take, Voice test only). The listening-test outcome is the `CLIP_POLICY` table (which recorded form serves each position; pairs on or off). The game hands the voice layer a line (phrase, ticket, monster line or plain text), never only text.
+- **Scripts and build (D144, D145).** Script items are numbered carrier sentences with the target in bold and the clip id; `audio:build` reads the numbers back from the committed script the owner read, stops on unknown, duplicate or point labels, and lists missing ones. One gain per take (−18 LUFS), silence trimmed, AAC 48 kbps. The spike is built for every voice; the full set follows the inventory (148 recordings → 807 files for A1–A3). Pitch shifts use ffmpeg's formant-preserving `rubberband` filter (in the Linux and Windows `ffmpeg-static` builds) with starting shifts per voice, tuned by the listening test.
+- **Playback limits (D147).** A recorded line times out at its clips' lengths plus 700 ms and is cut there; it goes to TTS as a whole if its clips are not loaded within 1.5 s or audio is not running, or its audio clock has not moved 300 ms after it starts (iOS, D87). Joins crossfade 15 ms (0–40 ms on the Voice test). Counting while building is Pip's voice when recorded.
+- **New lines later (D142).** A milestone that adds or changes spoken lines ships them on the TTS fallback; after the owner's playtest settles the wording, a voice pass (record, `audio:build`, `audio:todo` empty for those dishes) closes it.
 
 ---
 
@@ -605,7 +619,7 @@ No external links anywhere. "About" is plain text.
 ## 13. Quality gates
 
 ### 13.1 Scripts (cross-platform Node; owner is on Windows)
-`npm run dev | build | preview | typecheck | lint | test | test:e2e | lint:content | content:table | economy:sim | check`, where `check` = typecheck + lint + test + lint:content. `economy:sim` writes `docs/ECONOMY_SIM.md` (D150).
+`npm run dev | build | preview | typecheck | lint | test | test:e2e | lint:content | content:table | economy:sim | check`, where `check` = typecheck + lint + test + lint:content. `economy:sim` writes `docs/ECONOMY_SIM.md` (D150). From M13: `audio:todo | audio:build` (§8.4; not part of `check`, since missing clips fall back to TTS).
 
 ### 13.2 Content lint (`scripts/lint-content.ts`; fails `check`)
 - Every pool problem: recompute the answer with an *independent* evaluator (parse `display` tokens and solve) and compare to `answer`.
@@ -681,6 +695,7 @@ Parent gate, minimal parent area (§12), Export (checksum, share fallbacks), Rep
 **Owner playtest:** is the gate easy for a grown-up and out of the child's reach; export on each device (share sheet or download), reset, import it back.
 
 ### Tier 2 — Bonus features (no cap; any order)
+From M13 on, a milestone that adds or changes spoken lines ships them on the TTS fallback and is closed by a **voice pass** after the owner's playtest: the owner records the new clips, `npm run audio:build`, and `audio:todo` reports nothing missing for that milestone's dishes. The next milestone starts after the voice pass (D142).
 
 #### M4 — Economy and shop (≈ 3.5 h)
 Coin spending, shop slots/items (placeholder-quality SVG) with their colorways (D148), preview/buy/confirm, equip, staff reactions, guest monsters; `buy`/`equip` events; the starter shelf and delivery crates (§10, §10.1, D151).
@@ -706,7 +721,7 @@ Starts with a static layout mock of the tens shelf, ones frame and two bins at 1
 B3 generators + layout reuse (B4 stays in the backlog, D47).
 
 #### M10 — Polish and hardening (≈ 1.5 h, and after any playtest round)
-Accessibility pass (labels, parent-area tab order, contrast), big-text captions (D47), full e2e matrix, bundle-size report (target < 1.5 MB gz), icon generation, README for deploy and restore, recorded-audio manifest support.
+Accessibility pass (labels, parent-area tab order, contrast), big-text captions (D47), full e2e matrix, bundle-size report (target < 1.5 MB gz), icon generation, README for deploy and restore. (Recorded voices moved to M13, D139.)
 **Accept:** `check` + e2e green on all projects; Lighthouse PWA installable; text contrast ≥ 4.5:1; no console errors; bundle report committed.
 
 #### M11 — Profiles (≈ 1.5–2 h)
@@ -716,6 +731,11 @@ Profile picker on Splash/Home, `profileId` on events (migration, D47), per-profi
 Optional play-time limit and lock (§6): the allowance clock (idle pause, flushes), wind-down / last customer, shorter service, grace cap, tip rule, lock clears resume, boot check, locked Home, 60 s cue, refill modes, and in the parent area the limit setting with Start new session / Add time. Needs M3b's gate.
 **Accept:** limit off by default (a fresh install never accumulates time, locks or cues); §6.5 when enabled.
 **Owner playtest:** limit on (10 min), hand over the iPad, walk away: does it lock, is the ending gentle, is unlocking easy.
+
+#### M13 — Recorded voices for the Little Menu (≈ 4 h agent + the owner's recording; D139–D147)
+Four steps, with stops for the owner (detail in PLAN.md §6). **Step 1 (agent):** plumbing (§8.4: `clipPlan` + `PHRASE_SPEAKERS`, `audio:todo`, `audio:build`, `voice.ts`, precache, whole-line fallback) and the `?debug` Voice test page with a short spike script; stop. **Step 2 (owner):** record the spike, build, listen on the iPad: stitched vs one take, one vs three number forms, pair clips vs two clips; the answers become a decision. **Step 3 (agent):** final clip inventory for A1–A3 and numbers 0–20, the full recording script, every speaker wired, the recorded / TTS toggle; stop. **Step 4 (owner, then agent):** record and build the full set; the agent checks it, reports sizes, updates PLAYTEST; stop.
+**Accept:** `check` + e2e green; for every phrase and parameter in range, `clipPlan` transcripts join to the phrase text; `audio:todo` reports no missing clip for A1–A3 (lines that are never recorded, D139e, excepted); a missing clip gives whole-line TTS (e2e); a clip that never ends does not block the flow (e2e); clips precached and played offline (Chromium e2e, WAV test set); decoded-audio cache stays under its cap (unit); zero external requests, CSP unchanged; clip sizes reported.
+**Owner playtest:** on the iPad (then iPhone and Android): joins acceptable, monsters and Pip sound distinct and friendly, nothing cut off, no clash with the sound effects, voices still work after backgrounding and with the silent switch on.
 
 #### M14 — Deliveries & Themed Sets (D149)
 Colorways round 2, four themed sets with their new pieces and set-complete surprises, all delivered by M4's crates (§10.1, D151).

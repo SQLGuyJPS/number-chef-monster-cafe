@@ -82,6 +82,9 @@ function loadVoices(): void {
   if (v) voice = v;
 }
 
+/** The parent's voice volume; recorded lines use it too (SPEC §8.4). */
+export const getVoiceVolume = (): number => voiceVolume;
+
 export function configureSpeech(c: { voiceURI: string | null; rate: number; volume: number }): void {
   chosenURI = c.voiceURI;
   rateScale = c.rate / DEFAULT_RATE;

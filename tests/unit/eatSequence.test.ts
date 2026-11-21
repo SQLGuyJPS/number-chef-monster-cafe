@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { checkSpeaker } from './speakerCheck';
+import { lineText } from '../../src/engine/clips';
 import { REGULARS } from '../../src/engine/monsters';
 import { buildService } from '../../src/engine/session';
 import { numberToWords } from '../../src/engine/numberWords';
@@ -17,8 +19,8 @@ function rig(extra: Partial<ServiceOptions> = {}) {
   let timers: (() => void)[] = [];
   const done: ServiceSummary[] = [];
   const deps: ServiceDeps = {
-    speak: (t, who, m) => (log.push(`say:${who ?? 'monster'}:${m ?? ''}:${t}`), Promise.resolve()),
-    countAloud: (t) => void log.push(`count:${t}`),
+    speak: (t, who, m) => (checkSpeaker(t, who), log.push(`say:${who ?? 'monster'}:${m ?? ''}:${lineText(t)}`), Promise.resolve()),
+    countAloud: (t) => void log.push(`count:${lineText(t)}`),
     hush: () => {},
     sfx: {
       place: () => {},

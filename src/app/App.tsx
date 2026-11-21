@@ -35,7 +35,7 @@ import { getSettings, settingsLoaded } from './deviceSettings';
 import { onBack, pushGuard } from './backGuard';
 import { unlockFromGesture } from '../audio/unlock';
 import { setCurrentScreen } from './runtime';
-import { hush } from '../audio/speech';
+import { hushVoice } from '../audio/voice';
 import type { ScreenId } from './pwaPolicy';
 
 type AppScreen = Extract<ScreenId, 'splash' | 'home' | 'menu' | 'service' | 'results' | 'gate' | 'parent'>;
@@ -379,7 +379,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
               ? () => {
                   const ctrl = ctrlRef.current;
                   if (service && ctrl) endService(service, ctrl.summary());
-                  hush();
+                  hushVoice();
                   setBreakOpen(false);
                   setService(null);
                   go('home');
