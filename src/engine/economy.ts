@@ -286,22 +286,31 @@ export interface PlannedGroup {
 export const WARDROBE_MONSTERS = 8;
 
 export const LATER_GROUPS: readonly PlannedGroup[] = [
-  // Decor wave: 1–2 more colorways on the 17 items that have them (~25), and 4 themed sets of
-  // 3 new pieces each that complete them alongside M4 items.
+  // Decor wave: 1–2 more colorways on the 15 M4 items that have them (~25, priced as colorways of
+  // their own item: 11 items at T1–T2, 2 at T3, 2 at T4), and 4 themed sets of 3 new pieces each
+  // that complete them alongside M4 items.
   {
-    label: 'Colorways round 2 (small items)',
+    label: 'Colorways round 2 (T1–T2 items)',
     slot: 'wallpaper',
     wave: 'decor',
-    count: 13,
+    count: 17,
     tier: 2,
     colorway: true,
   },
   {
-    label: 'Colorways round 2 (bigger items)',
-    slot: 'wallpaper',
+    label: 'Colorways round 2 (T3 items)',
+    slot: 'lights',
     wave: 'decor',
-    count: 12,
+    count: 4,
     tier: 3,
+    colorway: true,
+  },
+  {
+    label: 'Colorways round 2 (T4 items)',
+    slot: 'floor',
+    wave: 'decor',
+    count: 4,
+    tier: 4,
     colorway: true,
   },
   { label: 'Themed-set pieces', slot: 'counter', wave: 'decor', count: 8, tier: 3 },

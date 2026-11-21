@@ -102,6 +102,7 @@ function runMany(
   );
 }
 
+const n0 = (n: number) => Math.round(n).toLocaleString('en-US');
 const fmt = (n: number | null, digits = 1) => (n === null ? 'never' : n.toFixed(digits));
 const med = (xs: (number | null)[]) => percentile(xs, 50);
 const spread = (xs: (number | null)[], digits = 1) =>
@@ -172,7 +173,7 @@ out(
 );
 out();
 out(
-  `So about **${Math.round(coinsWeek)} coins a week** and **${Math.round(monstersWeek)} monsters a week**, about ${Math.round(coinsWeek * WEEKS_PER_MONTH)} coins a month. Two months of play is about ${Math.round(coinsWeek * 2 * WEEKS_PER_MONTH)} coins; another 6–9 months is about ${Math.round(coinsWeek * 6 * WEEKS_PER_MONTH)}–${Math.round(coinsWeek * 9 * WEEKS_PER_MONTH)}.`,
+  `So about **${Math.round(coinsWeek)} coins a week** and **${Math.round(monstersWeek)} monsters a week**, about ${n0(coinsWeek * WEEKS_PER_MONTH)} coins a month. Two months of play is about ${n0(coinsWeek * 2 * WEEKS_PER_MONTH)} coins; another 6–9 months is about ${n0(coinsWeek * 6 * WEEKS_PER_MONTH)}–${n0(coinsWeek * 9 * WEEKS_PER_MONTH)}.`,
 );
 out();
 
