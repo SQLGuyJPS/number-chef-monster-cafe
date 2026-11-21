@@ -30,6 +30,9 @@ Claude Code will use the noted default until you answer. Answer in DECISIONS.md 
 | Tier 1 hours | ≈ 10 h is a guide; PLAN.md may exceed it | D44 |
 | Restore in Tier 1 | Replace-only import ships in M3b; Merge in M7 | D44 |
 | Second spec review (2026-11-04) | All findings decided | D40–D47 |
+| Recorded voices (2026-11-21) | Yes, as Tier 2 milestone M13: the owner records one voice, shifted per monster and Pip; numbers whole, in their sentence positions; wording unchanged; listening test on `?debug` first; voice cloning only as a last resort | D139, D140, M13 |
+| Recording format and workflow | WAV masters outside git; AAC .m4a 48 kbps mono shipped; Audacity labels + `npm run audio:build` | D140 |
+| Voice lines added after M13 | A voice pass after the owner's playtest closes each milestone that adds or changes spoken lines | D142 |
 
 ## Still open
 | # | Question | Default used |
@@ -52,10 +55,10 @@ Claude Code will use the noted default until you answer. Answer in DECISIONS.md 
 
 ## Assets
 - **None required to start.** Fonts come from `@fontsource/andika`; SFX are synthesized; art is SVG/emoji; icons are generated.
-- Optional later: custom food illustrations, hand-drawn monsters, a real app icon, recorded voice lines.
+- Optional later: custom food illustrations, hand-drawn monsters, a real app icon. Recorded voices are M13 (D139).
 
-## Recordings (later, optional)
-Target list is produced by `scripts/audio-todo.ts` (≈ 21 numbers 0–20, 8 tens 30–100, ~35 prompt/operator phrases, ~50 monster lines ≈ 115 clips). Decide who records (a parent voice is usually best for a young child), format (m4a/mp3, mono, normalized), and when (once phrases are final).
+## Recordings (M13)
+Decided (D139–D142): you record one voice in Audacity; `npm run audio:todo` writes the script (`docs/VOICE_SCRIPT.md`) and `npm run audio:build` makes every character's clips. M13 starts with a short spike recording and a listening test on the iPad (PLAN.md §6). Later dishes get their clips in a voice pass after each milestone's playtest.
 
 ## Needed during playtests
 - A real iPad session with the child at M1 (about 5 min), M2, M3a and M3b (about 15 min each). Builds reach the devices when you push to `main`; reset playtest progress once before the child's real use (D44). PLAYTEST.md lists what to watch. The 10-minute walk-away test with the play-time limit waits for M12 (postponed, D124). Repeat key checks on the iPhone and Android phone at M2 and M3b.
