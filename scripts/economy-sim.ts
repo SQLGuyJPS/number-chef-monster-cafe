@@ -4,7 +4,7 @@
 //   --session 15-20     minutes per sitting
 //   --service 3-4       minutes per 6-order service
 //   --tiers 20,35,65,120,220   tier 1–5 prices
-//   --decor-week 8 --wardrobe-week 16   when the later waves reach the device
+//   --decor-week 7 --wardrobe-week 12 --staff-week 20   when the later waves reach the device
 //   --runs 300          seeded runs per scenario
 //   --out docs/ECONOMY_SIM.md   (use --out - to print instead)
 import { writeFileSync } from 'node:fs';
@@ -60,8 +60,9 @@ const tiers = {
   4: tierList[3]!,
   5: tierList[4]!,
 } as Record<Tier, number>;
-const decorWeek = Number(flag('decor-week') ?? 8);
-const wardrobeWeek = Number(flag('wardrobe-week') ?? 16);
+const decorWeek = Number(flag('decor-week') ?? 7);
+const wardrobeWeek = Number(flag('wardrobe-week') ?? 12);
+const staffWeek = Number(flag('staff-week') ?? 20);
 const RUNS = Number(flag('runs') ?? 300);
 const outFlag = flag('out') ?? fileURLToPath(new URL('../docs/ECONOMY_SIM.md', import.meta.url));
 
@@ -84,12 +85,18 @@ const CRATES: CrateRule = {
   size: CRATE_SIZE,
   holdAtStock: CRATE_HOLD_AT_UNBOUGHT,
 };
-const waves = (t = tiers, decor = decorWeek, wardrobe = wardrobeWeek) => {
+const WAVE_WEEKS: Record<string, number> = {
+  decor: decorWeek,
+  wardrobe: wardrobeWeek,
+  staff: staffWeek,
+};
+const waves = (t = tiers) => {
   const all = later(t);
-  return [
-    { id: 'decor', opensWeek: decor, entries: all.filter((e) => e.wave === 'decor') },
-    { id: 'wardrobe', opensWeek: wardrobe, entries: all.filter((e) => e.wave === 'wardrobe') },
-  ];
+  return Object.entries(WAVE_WEEKS).map(([id, opensWeek]) => ({
+    id,
+    opensWeek,
+    entries: all.filter((e) => e.wave === id),
+  }));
 };
 
 function runMany(
@@ -319,16 +326,17 @@ for (const g of LATER_GROUPS) {
 }
 const decorCoins = sum(lat.filter((e) => e.wave === 'decor'));
 const wardCoins = sum(lat.filter((e) => e.wave === 'wardrobe'));
+const staffCoins = sum(lat.filter((e) => e.wave === 'staff'));
 out(`| **Total** | | ${lat.length} | | **${sum(lat).toLocaleString('en-US')}** |`);
 out();
 out(
-  `Decor wave ${decorCoins.toLocaleString('en-US')} coins (≈ ${(decorCoins / coinsWeek).toFixed(1)} weeks of earning); wardrobe wave ${wardCoins.toLocaleString('en-US')} (≈ ${(wardCoins / coinsWeek).toFixed(1)} weeks). Together ≈ ${months(sum(lat) / coinsWeek)} months of earning; the target is 6–9.`,
+  `Decor wave ${decorCoins.toLocaleString('en-US')} coins (≈ ${(decorCoins / coinsWeek).toFixed(1)} weeks of earning); wardrobe wave ${wardCoins.toLocaleString('en-US')} (≈ ${(wardCoins / coinsWeek).toFixed(1)} weeks); staff wave (M18, D157) ${staffCoins.toLocaleString('en-US')} (≈ ${(staffCoins / coinsWeek).toFixed(1)} weeks). Together ≈ ${months(sum(lat) / coinsWeek)} months of earning; the target is 6–9.`,
 );
 out();
 
 // ---- Roadmap with crates
 out(
-  `## Whole roadmap with crates (M4 starter shelf and M4 crates from day one, decor wave in week ${decorWeek}, wardrobe wave in week ${wardrobeWeek})`,
+  `## Whole roadmap with crates (M4 starter shelf and M4 crates from day one, decor wave in week ${decorWeek}, wardrobe wave in week ${wardrobeWeek}, staff wave in week ${staffWeek})`,
 );
 out();
 out(
@@ -364,7 +372,7 @@ for (const crates of rules) {
   const done = rs.map((r) => r.allBoughtOutWeek);
   const empty = rs.map((r) => (100 * r.emptyShopSessions) / Math.max(1, r.activeSessions));
   out(
-    `| ${crates.size} every ${crates.everyMonsters} monsters${crates.holdAtStock ? `, held while ${crates.holdAtStock}+ unbought` : ''}${crates.everyMonsters === 30 && crates.size === 2 && crates.holdAtStock ? ' **(chosen, D149, D151)**' : ''} (≈ every ${((crates.everyMonsters / monstersWeek) * 7).toFixed(1)} days) | ${Math.ceil(lat.filter((e) => e.wave === 'decor').length / crates.size) + Math.ceil(lat.filter((e) => e.wave === 'wardrobe').length / crates.size)} | ${months(med(done))} (${months(percentile(done, 10))}–${months(percentile(done, 90))}) | ${fmt(med(rs.map((r) => r.meanStock)))} | ${fmt(med(empty), 0)}% | ${fmt(
+    `| ${crates.size} every ${crates.everyMonsters} monsters${crates.holdAtStock ? `, held while ${crates.holdAtStock}+ unbought` : ''}${crates.everyMonsters === 30 && crates.size === 2 && crates.holdAtStock ? ' **(chosen, D149, D151)**' : ''} (≈ every ${((crates.everyMonsters / monstersWeek) * 7).toFixed(1)} days) | ${Object.keys(WAVE_WEEKS).reduce((n, id) => n + Math.ceil(lat.filter((e) => e.wave === id).length / crates.size), 0)} | ${months(med(done))} (${months(percentile(done, 10))}–${months(percentile(done, 90))}) | ${fmt(med(rs.map((r) => r.meanStock)))} | ${fmt(med(empty), 0)}% | ${fmt(
       percentile(
         rs.map((r) => r.longestDry),
         90,
