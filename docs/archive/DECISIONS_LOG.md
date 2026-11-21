@@ -861,5 +861,6 @@ How to revisit: if the repeating ghost is distracting, show each hint once; `war
 - (c) Joins: equal-gain linear crossfade, 15 ms by default (0–40 ms on the Voice test page, not stored); at load each clip is trimmed below −44 dBFS with a 12 ms pad.
 - (d) Counting while building (`count.n`) plays in Pip's recorded voice (PHRASE_SPEAKERS); its TTS fallback keeps today's plain voice. Monster greetings and thanks use the monster's line 0, as the game does.
 - (e) `voiceBusy()` covers recorded and TTS lines, and every interrupting line stops both.
+- (f) A line whose audio clock has not moved 300 ms after it starts (iOS can report a frozen context as running, D87) is cut and goes to TTS as a whole; one decode that never calls back is given up after 3 s so it cannot block the one-at-a-time queue. Each join's fade lasts exactly the clips' overlap.
 **Why:** Keeps the §8.1 contract (never block, never overlap) with real clip lengths instead of the TTS formula (PLAN §6.6), and keeps a slow first decode on an old iPad from leaving a silent gap.
 **How to revisit:** `src/audio/voice.ts`, `src/audio/voicePlan.ts`; the owner's playtest (cut-offs, gaps, latency of the first line).

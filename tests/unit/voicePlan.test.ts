@@ -4,6 +4,7 @@ import {
   DECODED_CAP_BYTES,
   RECORDED_MARGIN_MS,
   decodedBytes,
+  joinFades,
   recordedTimeoutMs,
   scheduleOffsets,
   trimBounds,
@@ -72,6 +73,14 @@ describe('back-to-back scheduling (injected clock)', () => {
   it('a crossfade never exceeds half a short clip', () => {
     const { starts } = scheduleOffsets([0.02, 0.5], 0.04);
     expect(starts[1]).toBeCloseTo(0.01, 6);
+  });
+  it('each join fades over exactly the overlap, even next to a very short clip', () => {
+    const lens = [0.5, 0.02, 0.4];
+    const { starts } = scheduleOffsets(lens, 0.015);
+    const f = joinFades(starts, lens);
+    expect(f[0]).toBeCloseTo(0.01, 6);
+    expect(f[1]).toBeCloseTo(0.01, 6);
+    expect(joinFades([0, 0.2], [0.2, 0.2])).toEqual([0]);
   });
   it('no crossfade plays clips end to end', () => {
     expect(scheduleOffsets([0.2, 0.2], 0).starts).toEqual([0, 0.2]);

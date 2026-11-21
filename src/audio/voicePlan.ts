@@ -103,6 +103,14 @@ export function scheduleOffsets(
   return { starts, total: t };
 }
 
+/**
+ * How long each join overlaps (seconds): `fades[i]` is the overlap between clip i and clip i+1, so
+ * clip i fades out and clip i+1 fades in over exactly the time they play together.
+ */
+export function joinFades(starts: readonly number[], durations: readonly number[]): number[] {
+  return starts.slice(1).map((s, i) => Math.max(0, starts[i]! + durations[i]! - s));
+}
+
 /** Margin past a recorded line's length before it counts as stuck and is cut (SPEC §8.1, §8.4). */
 export const RECORDED_MARGIN_MS = 700;
 

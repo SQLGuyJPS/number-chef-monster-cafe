@@ -126,6 +126,18 @@ test('a stuck recorded greeting does not block the service', async ({ page, base
   expect(net.external).toEqual([]);
 });
 
+test('a context whose clock stands still (iOS, D87) gives the line to TTS', async ({ page }) => {
+  await stubSpeechNeverEnds(page);
+  // The clock never moves: the line would be silent until its timeout.
+  await page.addInitScript(() => {
+    Object.defineProperty(BaseAudioContext.prototype, 'currentTime', { get: () => 0 });
+  });
+  await startApp(page);
+  const r = await voiceSay(page, { kind: 'phrase', key: 'ct.more', params: { n: 3 } }, 'pip');
+  expect(r.entry).toMatchObject({ mode: 'tts', why: 'stalled' });
+  expect(await page.evaluate(() => window.__spoken)).toContain('Three more!');
+});
+
 test('clips are precached and play offline', async ({ page, context, browserName }) => {
   test.skip(browserName !== 'chromium', 'offline playback is checked on Chromium (PLAN §6.2)');
   await stubSpeechNeverEnds(page);

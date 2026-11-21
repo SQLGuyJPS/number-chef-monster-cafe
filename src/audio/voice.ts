@@ -17,6 +17,7 @@ import {
   ByteLru,
   DECODED_CAP_BYTES,
   decodedBytes,
+  joinFades,
   recordedTimeoutMs,
   scheduleOffsets,
   trimBounds,
@@ -33,6 +34,13 @@ const START_LEAD_S = 0.03;
 const LOAD_DEADLINE_MS = 1500;
 /** A context that is not running after this long is not waited for: the line goes to TTS. */
 const RESUME_WAIT_MS = 250;
+/** One decode that never calls back (seen on old WebKit) must not hold up the queue for good. */
+const DECODE_TIMEOUT_MS = 3000;
+/**
+ * iOS can report a context as running while its clock stands still (D87): nothing would be heard
+ * until the timeout. A clock that has not moved this long after a line starts gives it to TTS.
+ */
+const STALL_CHECK_MS = 300;
 
 /** Join crossfade (D141c: about 15 ms, tuned by ear on the ?debug Voice test). */
 let crossfadeMs = 15;
@@ -80,9 +88,12 @@ function decode(ctx: AudioContext, data: ArrayBuffer): Promise<AudioBuffer> {
   const job = decodeQueue.then(
     () =>
       new Promise<AudioBuffer>((ok, err) => {
+        const timer = window.setTimeout(() => err(new Error('decode timeout')), DECODE_TIMEOUT_MS);
+        const done = (b: AudioBuffer) => (window.clearTimeout(timer), ok(b));
+        const fail = (e: unknown) => (window.clearTimeout(timer), err(e));
         // The callback form also works on older WebKit, where the promise form was missing.
-        const p = ctx.decodeAudioData(data, ok, err) as Promise<AudioBuffer> | undefined;
-        p?.catch?.(err);
+        const p = ctx.decodeAudioData(data, done, fail) as Promise<AudioBuffer> | undefined;
+        p?.catch?.(fail);
       }),
   );
   decodeQueue = job.catch(() => undefined);
@@ -120,7 +131,7 @@ export interface VoiceLogEntry {
   mode: 'recorded' | 'tts';
   clips: string[] | null;
   /** Why a line went to TTS. */
-  why?: 'never recorded' | 'missing' | 'no audio' | 'load failed';
+  why?: 'never recorded' | 'missing' | 'no audio' | 'load failed' | 'stalled';
   missing?: string[];
   outcome?: 'ended' | 'timeout' | 'cut';
   /** When each clip starts, in seconds from the line's start (recorded lines). */
@@ -198,7 +209,12 @@ export async function sayClips(
     stopRecorded();
     hushTts();
   } else {
+    const before = token;
     await playing?.done;
+    if (token !== before) {
+      entry.outcome = 'cut'; // hushed while it waited its turn
+      return;
+    }
   }
   const my = ++token;
   if (!clips) {
@@ -249,7 +265,11 @@ export async function sayClips(
     entry.why = 'load failed';
     return tts(text, opts, entry);
   }
-  return play(ctx, voice, clips, loaded, my, entry, release);
+  const stalled = await play(ctx, voice, clips, loaded, my, entry, release);
+  if (!stalled || my !== token) return;
+  entry.why = 'stalled';
+  entry.outcome = undefined;
+  return tts(text, opts, entry);
 }
 
 function play(
@@ -260,10 +280,11 @@ function play(
   my: number,
   entry: VoiceLogEntry,
   release: () => void,
-): Promise<void> {
+): Promise<boolean> {
   const xf = crossfadeMs / 1000;
   const lens = parts.map((d) => d.end - d.start);
   const { starts } = scheduleOffsets(lens, xf);
+  const fades = joinFades(starts, lens);
   entry.starts = starts.map((t) => Math.round(t * 1000) / 1000);
   const out = ctx.createGain();
   out.gain.value = getVoiceVolume();
@@ -275,14 +296,16 @@ function play(
     const g = ctx.createGain();
     const at = t0 + starts[i]!;
     const len = lens[i]!;
-    const fade = Math.min(xf, len / 2);
-    // Equal-gain crossfade at each join; the first clip starts and the last ends at full level.
-    if (i > 0 && fade > 0) {
+    // Equal-gain crossfade over each join's overlap; the first clip starts and the last ends at
+    // full level.
+    const fadeIn = i > 0 ? fades[i - 1]! : 0;
+    const fadeOut = i < parts.length - 1 ? fades[i]! : 0;
+    if (fadeIn > 0) {
       g.gain.setValueAtTime(0, at);
-      g.gain.linearRampToValueAtTime(1, at + fade);
+      g.gain.linearRampToValueAtTime(1, at + fadeIn);
     }
-    if (i < parts.length - 1 && fade > 0) {
-      g.gain.setValueAtTime(1, at + len - fade);
+    if (fadeOut > 0) {
+      g.gain.setValueAtTime(1, at + len - fadeOut);
       g.gain.linearRampToValueAtTime(0, at + len);
     }
     src.connect(g).connect(out);
@@ -292,14 +315,22 @@ function play(
   const manifestMs = clips.map((c) => manifest?.voices[voice]?.[c] ?? 0);
   const limit = recordedTimeoutMs(manifestMs, crossfadeMs) * getTimeScale();
 
+  const clockAt = ctx.currentTime;
+  let stalled = false;
   let finish: (outcome: VoiceLogEntry['outcome']) => void = () => undefined;
   const done = new Promise<void>((resolve) => {
     let settled = false;
     const timer = window.setTimeout(() => finish('timeout'), limit);
+    const check = window.setTimeout(() => {
+      if (ctx.currentTime - clockAt > 0.05) return;
+      stalled = true;
+      finish('cut');
+    }, STALL_CHECK_MS);
     finish = (outcome) => {
       if (settled) return;
       settled = true;
       window.clearTimeout(timer);
+      window.clearTimeout(check);
       // A clip that runs past its manifest length is cut, so it never talks over the next line.
       for (const s of sources) {
         s.onended = null;
@@ -322,7 +353,7 @@ function play(
   });
   sources[sources.length - 1]!.onended = () => finish('ended');
   playing = { token: my, sources, out, done, finish };
-  return done;
+  return done.then(() => stalled);
 }
 
 /** Speaks a game line in `voice` (the monster's id, `pip` or `narrator`); `tts` is the fallback's voice. */
