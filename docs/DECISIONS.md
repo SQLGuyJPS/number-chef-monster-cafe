@@ -160,3 +160,4 @@
 | D150 | Economy simulator `npm run economy:sim` writes `docs/ECONOMY_SIM.md` | SPEC §13.1 | Test prices against play time before committing to them |
 | D151 | Delivery crates move into M4; the shop opens with a 17-entry starter shelf and the other M4 entries (38 after D152) arrive in crates | SPEC §10, §10.1, §14; amended by D152 | 54 entries on day one is too many choices for a young child; crates keep about 7 on the shelf at no cost to lifespan |
 | D152 | Wood is the free default floor (the café art already has it); Checkerboard becomes a T2 item | SPEC §10 | The free default must match the floor already drawn |
+| D153 | Pip's wish line (M6) is generic: never names the item or an amount; Treat Time (M17) costs T2, 30 coins | SPEC §10.1, §14 | Item names would each need a recorded clip (D142); 40 was not a tier price |

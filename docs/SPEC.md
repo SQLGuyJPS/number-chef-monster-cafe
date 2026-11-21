@@ -545,7 +545,7 @@ Built in its own milestones (§14), priced from the same tiers, about 9,500 coin
 - **Delivery crates (built in M4, D151):** new stock arrives in crates of **2 items every 30 monsters served** (counted in monsters, not services, so short, partial and 4- or 8-order services all move it on; at an hour a week about every 2–3 days), **held while 6 or more unbought items are already in the shop**. The first crate of an update arrives with it unless the hold applies; an update's items join the queue behind any that are still waiting. A crate's arrival is recorded when the child first sees it, so a child who served hundreds of monsters before an update gets one crate, not all of them at once. Crates never expire and are not tied to the calendar.
 - **Monster Wardrobe (M15):** per monster, including the two guests: 2–3 hats (T2), 4–5 skins (patterns or colours; T5, a skin changes the whole monster) and 2–3 accessories (T3). The monster wears what the child equips whenever it visits.
 - **Monster Album and friendship gifts (M16):** not bought. Each monster's page shows its portrait, name, favourite foods, a brief bio, the hats, skins and accessories collected for it, and its friendship gift. After a monster has been served a set number of times it brings the café a gift item (free). Later: short story episodes per monster.
-- **Treat Time (M17):** a repeatable treat the child can buy (about 40 coins) that throws a short party in the café. Nothing decays or needs feeding, so it never becomes a chore; it keeps coins meaningful when the shop is bought out.
+- **Treat Time (M17):** a repeatable treat the child can buy (T2, 30 coins, D153) that throws a short party in the café. Nothing decays or needs feeding, so it never becomes a chore; it keeps coins meaningful when the shop is bought out.
 
 ---
 
@@ -706,7 +706,7 @@ A0 and A4–A8 generators + demos, two-frame layouts, difficulty orderings for A
 **Accept:** pool sizes match §4; all demos end in the expected state for every pool item; bridging fills frame 1 first (e2e); content table reviewed; every skill completes a service at each stage in e2e.
 
 #### M6 — Wish Jar (≈ 1 h; was unused since D21, reused by D149)
-The child pins one unowned item as a wish; the coin jar on Home and Results shows how full the wish is, and at Results Pip may say how close it is ("Just a little more for the Disco Ball!"), amounts spoken as words. Changing or clearing the wish is free. Shown on Home and Results only; never a "come back" nag.
+The child pins one unowned item as a wish; the coin jar on Home and Results shows how full the wish is, and at Results Pip may say a short fixed line about it ("Your wish is getting closer!", "Just a little more for your wish!", "You can get your wish!"). The line never names the item or says an amount, so it needs no clip per item (D153). Changing or clearing the wish is free. Shown on Home and Results only; never a "come back" nag.
 **Accept:** the wish survives reload and merge; the fill matches balance ÷ price, full at or above the price; no wish, no meter.
 
 #### M7 — Full parent area and multi-device merge (≈ 2.5 h)
