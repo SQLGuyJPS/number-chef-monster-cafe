@@ -1,62 +1,97 @@
-# Art guide (D156)
+# Art guide (D156, D158)
 
-Drawing rules for shop art: decor in M4b, and later the wardrobe (M15) and staff (M18). Every art chat reads this file first. It describes what the existing art already does, so new pieces match it. **Draft:** M4b batch 0 checks these rules against the test pieces and the owner's verdict, then fills in the open items (marked *TBD*). Rules change only with the owner's OK, noted under Change notes.
+How to draw shop art: decor in M4b, and later the wardrobe (M15) and staff (M18). Every art chat reads this file first.
+
+The guide has three parts, held to different strengths:
+1. **Firm limits (§2):** what the game needs to work for a young child on an iPad. Always met.
+2. **House style (§3):** how the existing café, Pip and the monsters are drawn. It's the starting point, not a fence.
+3. **Room to experiment (§4):** new ideas are welcome. The owner decides what stays, and an idea the owner likes becomes part of the house style.
 
 ## 1. Where to look
-- **Reference art:** `src/art/CounterScene.tsx` (the café every child screen uses), `src/art/Pip.tsx` (character standard), `src/art/monsters/` (monster standard), `StringLights` in `src/art/CafeScene.tsx` (the only decor drawn so far, unrendered).
-- **Reference screenshots:** `docs/screens/counter/` (Home, Menu, Service, Results at 1194×834 and 844×390).
-- **Review surface:** the `?decor` contact sheet (built in M4a). Each batch saves its sheets to `docs/screens/M4b/<batch>/`.
-- **Colours:** `COLOR_FAMILIES` in `src/engine/economy.ts` (Sunny, Berry, Mint, Sky, Honey, Lavender, Cocoa: each a pale `base` and a stronger `accent`) and the scene's named constants (`WOOD`, `WOOD_DARK`, `TRIM`, …) in `CounterScene.tsx`.
+- **Existing art:**
+  - `src/art/CounterScene.tsx`: the café behind every child screen.
+  - `src/art/Pip.tsx`: Pip.
+  - `src/art/monsters/`: the monsters.
+  - `StringLights` in `src/art/CafeScene.tsx`: the only decor drawn so far, not shown in the game yet.
+- **Screenshots:** `docs/screens/counter/`: Home, Menu, Service and Results at 1194×834 and 844×390.
+- **Review page:** the `?decor` contact sheet (built in M4a). Each batch saves its sheets to `docs/screens/M4b/<batch>/`.
+- **Colours:**
+  - `COLOR_FAMILIES` in `src/engine/economy.ts`: Sunny, Berry, Mint, Sky, Honey, Lavender and Cocoa, each a pale `base` and a stronger `accent`.
+  - The scene's named colours (`WOOD`, `WOOD_DARK`, `TRIM` and others) in `CounterScene.tsx`.
 
-## 2. The look
-1. **Flat shapes, no outlines on scenery.** Walls, floor, furniture and windows are filled shapes; depth comes from a darker shade of the same hue (`FLOOR_B` on `FLOOR_A`, `WOOD_DARK` under `WOOD`), never from a black line.
-2. **Thin, tinted outlines only on small objects** that would otherwise melt into the wall (cups, the door sign, the coin jar): 1.5–3 px in a darker tone of the object's own colour, never ink black.
-3. **Ink (`#2b2b3a`) is for faces only** (characters' eyes and mouths). Decor has no faces unless the owner asks (*TBD at batch 0: e.g. the Tiny Robot*).
-4. **Rounded everything.** Rects get `rx` 3–8; corners and ends are soft (`strokeLinecap="round"`). No sharp spikes.
-5. **One shade, one highlight.** A shape may have one darker shade and one white highlight (`#fff` at about 0.5 opacity, like the door glass); no gradients, no filters, no blur, no drop shadows beyond the scene's flat `rgba(0,0,0,0.08)` strips.
-6. **Muted behind, bright in front (D100).** Back-wall and floor decor is a step paler than the monsters, the tray and the food; whole groups sit at 0.8–0.92 opacity like the door and window. Nothing on the wall may be brighter or more saturated than the monster standing in front of it.
-7. **Warm palette.** Whites are cream (`#fffaf0`, `#fffdf6`), not pure white, except highlights. The café's own accent is the peach awning (`#ff9f7a`).
-8. **Readable at phone size.** Judge every piece at 844×390, where the stage is about 0.54 of its size: details under about 6 stage px vanish, so leave them out.
+## 2. Firm limits
+1. **The play stays readable.** Monsters, food, the tray and the buttons are what the child reads, so they stay the brightest and clearest things on screen (D100). Decor may be bold, but it must not compete with them. Above all it must stay quiet behind the monster's head and around the tray.
+2. **It reads at phone size.** Judge every piece at 844×390, where the stage is about half size. Detail smaller than about 6 stage px disappears.
+3. **Colours are shared across the café.** An item with colorways is drawn once and takes its colours as props (`{base, accent}`), so a new colorway costs no new drawing. The same colour family must look like the same family in every slot.
+4. **It fits the element budget.** The screen may hold at most 4,800 SVG elements, 650 of them moving (`SVG_BUDGET`, D113). The busiest choice of one item per slot, plus a full service, must stay within that. `budget.spec.ts` enforces it.
+5. **Motion is gentle and optional.** Nothing flashes or strobes. With reduced motion on, every piece is drawn still. Animation must never slow down or get in the way of play.
+6. **It's safe and kind for a young child.** Nothing scary, no words or numbers the child would need to read, no brand names or logos, and nothing copied from an existing game or character.
+7. **It has a slot and a fallback.** A piece draws inside its slot (§5), runs past the safe box where it is a wall or floor layer, and falls back to the labelled stand-in shape if it's missing.
 
-## 3. Colour rules
-- Colorway items use only their family's `base` and `accent`, plus shades derived from them (*TBD at batch 0: one fixed darkening step, e.g. accent mixed 20% toward `WOOD_DARK`*). The same family must look the same in every slot.
-- `classic` items (windows, named looks, metal and glass) pick from the scene constants and the families; no new loose hex values. Any new constant is named and added to this guide.
-- An item is drawn once and takes its colours as props (`{base, accent}`), so its colorways need no extra drawing.
+## 3. House style (the starting point)
+This is what the existing art does. Following it gives pieces that match. Leaving it is fine when you have a reason (§4).
+- **Flat shapes.** Depth comes from a darker shade of the same colour rather than outlines or gradients.
+- **Outlines are rare.** The few there are sit on small objects and are thin and tinted, never black. Ink (`#2b2b3a`) is kept for faces.
+- **Soft and round.** Corners are rounded and line ends are round.
+- **One shade and one highlight** per shape is typical. The highlight is white at about 0.5 opacity, like the door glass.
+- **The room is warm and a little muted.** Whites are cream (`#fffaf0`), and background groups sit at about 0.8–0.92 opacity. The café's own accent is the peach awning (`#ff9f7a`).
+- **Characters follow the existing standard:**
+  - The guest monsters follow the monster standard (SPEC §7.2): five expressions, a reaction of about 1.4 s, still poses for reduced motion, and the `lint:content` monster checks.
+  - Staff start from Pip: soft fur shapes, ink eyes with a white catch-light, blush on the cheeks.
 
-## 4. Slots
-Stage coordinates (1280×720). The floor line is y 330, the wainscot top y 262, the counter's far edge y 432 (`COUNTER_Y`), the status bar ends at y 120 (`BAR_H`). Every wall or floor layer runs far past the safe box to fill the bleed, like the existing walls.
+## 4. Room to experiment
+- **A batch may try something new:** a texture, a little glow, a different shape language for one item, a playful touch such as a face on the Tiny Robot. Keep the firm limits (§2).
+- **When a piece leaves the house style, say so.** In the batch report, name what's different and why it might be nice, so the owner can judge it on purpose.
+- **Offer a wildcard when unsure.** Show the house-style version beside the wildcard on the contact sheet, and let the owner pick.
+- **What the owner likes becomes the style.** Add it to §3, or to the item's note in §6, with a line in the change notes. Later chats then build on it rather than reverting it.
+- **One wildcard is not a rule change.** A single item that breaks from the style doesn't mean the rest should follow, unless the owner says so.
+
+## 5. Slots
+All positions are in stage coordinates (1280×720). The floor line is at y 330 and the wainscot top at y 262. The counter's far edge is at y 432 (`COUNTER_Y`), and the status bar ends at y 120 (`BAR_H`).
 
 | Slot | Free default | Where it draws | Notes |
 |---|---|---|---|
-| Wallpaper | Plain Paint (Sunny) | the back wall above the wainscot | A pattern tile (`<pattern>`), so it costs a few elements however wide the wall is. The current two-tone stripe is the Sunny default. |
-| Floor | Wood (classic) | y 330 down to the counter | Also a pattern or a few long rects; mostly hidden by the counter, so keep detail near the top. |
-| Lights | None | hanging from the status bar's lower edge | Must not cover the status bar's buttons or the monster's head. |
-| Window | Street | the window beside the door (x 208, y 142, 214×150) | Only the view changes; frame, bars and awning stay. |
-| Counter-top | Bell | *TBD in M4a* | Must keep clear of the tray, bin, Pip's hat and the bell at both basket sides. |
-| Wall art | Menu Board | *TBD in M4a* | Behind the monster's head zone it must stay quiet. |
+| Wallpaper | Plain Paint (Sunny) | the back wall above the wainscot | A repeating pattern keeps the element count low; today's two-tone stripe is the Sunny default. |
+| Floor | Wood (classic) | from y 330 down to the counter | Mostly hidden by the counter, so put any interest near the top. |
+| Lights | None | hanging below the status bar | Keeps clear of the bar's buttons and the monster's head. |
+| Window | Street | the window beside the door (x 208, y 142, 214×150) | Usually only the view changes. A new frame is fair game if it still reads as the same window. |
+| Counter-top | Bell | *set in M4a* | Keeps clear of the tray, the bin, Pip's hat and the bell on both basket sides. |
+| Wall art | Menu Board | *set in M4a* | Stays quiet behind the monster's head. |
 
-M4a sets the exact anchors in `src/app/metrics.ts` (one place for sizes) and draws a labelled stand-in in each.
+M4a puts the exact positions in `src/app/metrics.ts` and draws a labelled stand-in in each slot.
 
-## 5. Budget
-The whole screen may have at most 4,800 SVG elements, 650 of them moving (`SVG_BUDGET`, D113). The busiest combination of one item per slot, plus a full service, must stay inside it. Rough per-item allowance until batch 0 measures it: wallpaper and floor 40 each, lights 120 (bulbs may twinkle: they count as moving), window 60, counter-top 60, wall art 60. Prefer patterns and repeated `<use>` over many shapes. Animation only where it adds life (lights twinkle, the fish swims); the rest is still.
+**Rough element allowance per item** (batch 0 measures the real numbers):
 
-## 6. Characters (guest monsters now; staff in M18)
-- Guest monsters follow the monster standard exactly: `MonsterSpec`, five expressions, reaction about 1.4 s, reduced-motion still poses, `lint:content` monster checks (SPEC §7.2).
-- Staff are drawn to Pip's standard: soft fur shapes, ink eyes with a white catch-light, blush ellipses, tinted outlines only on clothing. They are smaller than the monsters and stand back in the room.
+| Item | Elements |
+|---|---|
+| Wallpaper | 40 |
+| Floor | 40 |
+| Lights | 120 (bulbs that twinkle count as moving) |
+| Window | 60 |
+| Counter-top | 60 |
+| Wall art | 60 |
 
-## 7. Batch checklist (every art chat)
-1. Read this guide, the locked list below and the batch's entries in SPEC §10.
-2. Draw the batch's items as components that take colours as props; register them in the decor table.
-3. Run `npm run check` (includes the decor lint rules once batch 0 adds them) and the budget e2e.
-4. Save the `?decor` sheets at 1194×834 and 844×390, plus one Service screenshot with the batch's busiest item equipped, to `docs/screens/M4b/<batch>/`.
-5. Stop and ask the owner for a verdict per item: **keep**, **tweak** (say what) or **redo**.
-6. Mark approved items locked below; record any new rule the owner states in this guide.
+An item may go over if another stays under. What must fit is the total.
 
-**Giving feedback (owner):** number your notes by item; say what works as well as what doesn't; point to a reference ("match the door's shading", "as quiet as the wall"); judge at phone size inside the café.
+## 6. Batch routine (every art chat)
+1. Read this guide, the locked list (§7) and the batch's items in SPEC §10.
+2. Draw the items as components that take their colours as props, and register them in the decor table.
+3. Run `npm run check` and the budget e2e.
+4. Save the `?decor` sheets at 1194×834 and 844×390 to `docs/screens/M4b/<batch>/`, plus one Service screenshot with the batch's busiest item equipped.
+5. Report each item as house style or as an experiment (§4), then stop for the owner's verdict on each: **keep**, **tweak** (say what) or **redo**.
+6. Mark approved items as locked in §7, and write any taste the owner states into §3 or into that item's note.
 
-## 8. Locked items
-Approved items. Do not redraw them without asking.
+**Giving feedback (for the owner):**
+- Number your notes by item.
+- Say what works as well as what doesn't.
+- Point to a reference: "match the door's shading", "as quiet as the wall".
+- Judge at phone size, inside the café.
+- When you like an experiment, say whether it should become the style or stay a one-off.
+
+## 7. Locked items
+These are approved: don't redraw them without asking. Notes record what the owner liked about each.
 - *(none yet)*
 
-## 9. Change notes
+## 8. Change notes
 - 2026-11-21: first draft (D156), from the existing café, Pip and monster art.
+- 2026-11-21: split into firm limits, house style and room to experiment, at the owner's request (D158). Lint checks only the firm limits.
