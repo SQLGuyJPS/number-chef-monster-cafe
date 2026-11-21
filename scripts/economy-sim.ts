@@ -196,7 +196,7 @@ const paid = entries.filter((e) => e.price > 0);
 out('## M4 catalog (SPEC §10)');
 out();
 out(
-  `${M4_ITEMS.length} items, ${paid.length} paid entries (items × colorways), total **${sum(paid).toLocaleString('en-US')} coins** (SPEC §10 today: 30 items, 1,340).`,
+  `${M4_ITEMS.length} items, ${paid.length} paid entries (items × colorways), total **${sum(paid).toLocaleString('en-US')} coins** (before D139: 30 items, 1,340).`,
 );
 out();
 out('| Slot | Item | Tier | Colorways (price) |');

@@ -509,19 +509,19 @@ Earning amounts live in `engine/config.ts` and prices in `engine/economy.ts`.
 ## 10. Café shop
 Seven slots; every slot has a free default. Tapping an item previews it live in the café; an item with colorways shows one tile with colour dots, and tapping a dot previews that colour. A **Buy** button (160 px) then a confirm with big *Yes!* / *Not yet*. Owned items and colorways re-equip free any time. The shop opens with a **starter shelf**; every other entry, in M4 and after, arrives in **delivery crates** (§10.1, D140, D142), so the child faces about 7 unbought choices at a time rather than 50.
 
-**M4 stock (D139):** 36 items, 54 paid entries, **3,080 coins** (about 2.3 months at an hour a week). Prices are tier, then colorways (first colour full price).
+**M4 stock (D139):** 36 items, 55 paid entries, **3,105 coins** (about 2.4 months at an hour a week). Prices are tier, then colorways (first colour full price).
 
 | Slot | Items: colorways (price) |
 |---|---|
 | Wallpaper | Plain Paint: Sunny free, Berry 20, Lavender 20 · Polka Dots (T2): Berry 30, Sky 25, Lavender 25 · Stripes (T2): Mint 30, Honey 25, Berry 25 · Brick (T3) 55 · Starry Night (T4) 100 · Rainbow (T4) 100 |
-| Floor | Checkerboard: classic free, Berry 20, Mint 20 · Wood (T2): Honey 30, Cocoa 25 · Tiles (T2): Berry 30, Sky 25, Mint 25 · Cloud Carpet (T4): Sky 100, Lavender 75, Berry 75 |
+| Floor | Wood: classic free (the café's current floor, D143), Honey 20, Cocoa 20 · Checkerboard (T2): Classic 30, Berry 25, Mint 25 · Tiles (T2): Berry 30, Sky 25, Mint 25 · Cloud Carpet (T4): Sky 100, Lavender 75, Berry 75 |
 | Lights | None (free) · String Lights (T2): Honey 30, Berry 25, Sky 25 · Paper Lanterns (T3): Berry 55, Mint 40, Honey 40 · Disco Ball (T4) 100 · Star Chandelier (T5) 180 |
 | Window | Street (free) · Garden (T3) 55 · Moonlit (T3) 55 · Snowy (T3) 55 |
 | Counter-top | Bell (free) · Flower Vase (T1): Berry 20, Sky 15, Honey 15 · Cake Stand (T2): Berry 30, Mint 25 · Cookie Jar (T2): Sky 30, Lavender 25 · Fish Bowl (T3) 55 · Tiny Robot (T4): Sky 100, Berry 75 |
 | Wall art | Menu Board (free) · Neon OPEN (T2): Berry 30, Sky 25, Mint 25 · Giant Clock (T3): Honey 55, Lavender 40 · Monster Portraits (T3) 55 · Trophy Shelf (T4) 100 |
 | Staff & pets | Pip (free) · Bunny Barista (T4) 100 · Cat Waiter, Bear Busker, Owl Cashier, Fox Baker (T5) 180 each |
 
-**Starter shelf (D142):** 17 entries, 775 coins: Plain Paint Berry and Lavender, Polka Dots Berry, Stripes Mint, Checkerboard Berry and Mint, Wood Honey, Tiles Berry, String Lights Honey, Flower Vase Berry, Cake Stand Berry, Cookie Jar Sky, Neon OPEN Berry (the first colour of every tier 1–2 item and the recolours of the free defaults), and four things to save for: Garden window, Disco Ball, Bunny Barista, Cat Waiter (`STARTER_SHELF`). The other 37 entries arrive in crates over the first two months.
+**Starter shelf (D142):** 17 entries, 775 coins: Plain Paint Berry and Lavender, Polka Dots Berry, Stripes Mint, Wood Honey and Cocoa, Checkerboard Classic, Tiles Berry, String Lights Honey, Flower Vase Berry, Cake Stand Berry, Cookie Jar Sky, Neon OPEN Berry (the first colour of every tier 1–2 item and the recolours of the free defaults), and four things to save for: Garden window, Disco Ball, Bunny Barista, Cat Waiter (`STARTER_SHELF`). The other 38 entries arrive in crates over the first two months.
 
 The first purchase comes at the end of the first sitting; in simulation about 85–90% of sittings end with something new and no run of more than two sittings goes without one (D141). Equipped items persist per slot (one colorway of an item at a time); staff can be multiple (up to 3 visible). A purchase's `buy` event names the entry as `slot.item.colorway` (§11.2).
 
@@ -684,7 +684,7 @@ Parent gate, minimal parent area (§12), Export (checksum, share fallbacks), Rep
 
 #### M4 — Economy and shop (≈ 3.5 h)
 Coin spending, shop slots/items (placeholder-quality SVG) with their colorways (D139), preview/buy/confirm, equip, staff reactions, guest monsters; `buy`/`equip` events; the starter shelf and delivery crates (§10, §10.1, D142).
-**Accept:** the catalog matches §10 (3,080 coins, 54 paid entries) and `economy:sim` reports the M4 stock lasting 2–3 months at the default profile; crate arrival is replay-derived and recorded when first seen; a backlog delivers one crate at a time; the hold at 6 unbought works; purchase idempotent and persisted; confirm prevents accidental buys; no code path lowers earned coins; purchases show on the Service screen; the shop counts as play time.
+**Accept:** the catalog matches §10 (3,105 coins, 55 paid entries) and `economy:sim` reports the M4 stock lasting 2–3 months at the default profile; crate arrival is replay-derived and recorded when first seen; a backlog delivers one crate at a time; the hold at 6 unbought works; purchase idempotent and persisted; confirm prevents accidental buys; no code path lowers earned coins; purchases show on the Service screen; the shop counts as play time.
 
 #### M5 — Rest of the Little Menu (≈ 3 h)
 A0 and A4–A8 generators + demos, two-frame layouts, difficulty orderings for A4–A6 (D43), A5 whole-frame moves and FollowMe past 10 (D47), tiles live.

@@ -15,10 +15,10 @@ import { mulberry32 } from '../../src/engine/rng';
 describe('shop catalog', () => {
   const entries = expandCatalog(M4_ITEMS);
 
-  it('matches SPEC §10: 54 paid entries, 3,080 coins (D139)', () => {
+  it('matches SPEC §10: 55 paid entries, 3,105 coins (D139)', () => {
     const paid = entries.filter((e) => e.price > 0);
-    expect(paid).toHaveLength(54);
-    expect(paid.reduce((s, e) => s + e.price, 0)).toBe(3080);
+    expect(paid).toHaveLength(55);
+    expect(paid.reduce((s, e) => s + e.price, 0)).toBe(3105);
   });
 
   it('has unique keys, prices in steps of 5 and known colour families', () => {

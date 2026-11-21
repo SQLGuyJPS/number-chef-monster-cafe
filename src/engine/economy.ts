@@ -122,14 +122,21 @@ export const M4_ITEMS: readonly ItemDef[] = [
   { id: 'rainbow', slot: 'wallpaper', name: 'Rainbow', tier: 4, colorways: ['classic'] },
   // Floor
   {
+    id: 'wood',
+    slot: 'floor',
+    name: 'Wood',
+    tier: 1,
+    // Classic is the floor the café art already has (D143).
+    colorways: ['classic', 'honey', 'cocoa'],
+    free: true,
+  },
+  {
     id: 'checkerboard',
     slot: 'floor',
     name: 'Checkerboard',
-    tier: 1,
+    tier: 2,
     colorways: ['classic', 'berry', 'mint'],
-    free: true,
   },
-  { id: 'wood', slot: 'floor', name: 'Wood', tier: 2, colorways: ['honey', 'cocoa'] },
   { id: 'tiles', slot: 'floor', name: 'Tiles', tier: 2, colorways: ['berry', 'sky', 'mint'] },
   {
     id: 'cloud-carpet',
@@ -236,9 +243,9 @@ export const STARTER_SHELF: readonly string[] = [
   'wallpaper.plain.lavender',
   'wallpaper.polka-dots.berry',
   'wallpaper.stripes.mint',
-  'floor.checkerboard.berry',
-  'floor.checkerboard.mint',
   'floor.wood.honey',
+  'floor.wood.cocoa',
+  'floor.checkerboard.classic',
   'floor.tiles.berry',
   'lights.string-lights.honey',
   'counter.flower-vase.berry',
