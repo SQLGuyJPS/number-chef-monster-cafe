@@ -507,7 +507,7 @@ Earning amounts live in `engine/config.ts` and prices in `engine/economy.ts`.
 - **Colorways (D139):** an item may come in more than one colour. Each colorway is its own purchase; the first is the item's price, each other one 75% of it (rounded to 5); colorways of a slot's free default cost T1. Colours come from shared families, so items of one family match across slots: **Sunny, Berry, Mint, Sky, Honey, Lavender, Cocoa** (`COLOR_FAMILIES`). No colorways on scenes (windows), named looks (Brick, Starry Night, Rainbow), metal or glass (Disco Ball, Star Chandelier, Fish Bowl, Trophy Shelf), the serve bell, the menu board or staff.
 
 ## 10. Café shop
-Seven slots; every slot has a free default. Tapping an item previews it live in the café; an item with colorways shows one tile with colour dots, and tapping a dot previews that colour. A **Buy** button (160 px) then a confirm with big *Yes!* / *Not yet*. Owned items and colorways re-equip free any time. The M4 stock is all available from day one; content added later arrives in delivery crates (§10.1, D140).
+Seven slots; every slot has a free default. Tapping an item previews it live in the café; an item with colorways shows one tile with colour dots, and tapping a dot previews that colour. A **Buy** button (160 px) then a confirm with big *Yes!* / *Not yet*. Owned items and colorways re-equip free any time. The shop opens with a **starter shelf**; every other entry, in M4 and after, arrives in **delivery crates** (§10.1, D140, D142), so the child faces about 7 unbought choices at a time rather than 50.
 
 **M4 stock (D139):** 36 items, 54 paid entries, **3,080 coins** (about 2.3 months at an hour a week). Prices are tier, then colorways (first colour full price).
 
@@ -521,12 +521,14 @@ Seven slots; every slot has a free default. Tapping an item previews it live in 
 | Wall art | Menu Board (free) · Neon OPEN (T2): Berry 30, Sky 25, Mint 25 · Giant Clock (T3): Honey 55, Lavender 40 · Monster Portraits (T3) 55 · Trophy Shelf (T4) 100 |
 | Staff & pets | Pip (free) · Bunny Barista (T4) 100 · Cat Waiter, Bear Busker, Owl Cashier, Fox Baker (T5) 180 each |
 
+**Starter shelf (D142):** 17 entries, 775 coins: Plain Paint Berry and Lavender, Polka Dots Berry, Stripes Mint, Checkerboard Berry and Mint, Wood Honey, Tiles Berry, String Lights Honey, Flower Vase Berry, Cake Stand Berry, Cookie Jar Sky, Neon OPEN Berry (the first colour of every tier 1–2 item and the recolours of the free defaults), and four things to save for: Garden window, Disco Ball, Bunny Barista, Cat Waiter (`STARTER_SHELF`). The other 37 entries arrive in crates over the first two months.
+
 The first purchase comes at the end of the first sitting; in simulation about 85–90% of sittings end with something new and no run of more than two sittings goes without one (D141). Equipped items persist per slot (one colorway of an item at a time); staff can be multiple (up to 3 visible). A purchase's `buy` event names the entry as `slot.item.colorway` (§11.2).
 
 ### 10.1 Later shop content (D140)
 Built in its own milestones (§14), priced from the same tiers, about 9,400 coins together (about 6.8 months at an hour a week).
 - **Deliveries & Themed Sets (M13):** 1–2 more colorways on items that have them (about 25), four themed sets of three new pieces each that complete a set with M4 items (e.g. Space: Starry Night, Moonlit, Star Chandelier plus new pieces). Completing a set gives a free surprise (an idle animation or a visiting guest), never a coin bonus.
-- **Delivery crates:** new stock arrives in crates of **2 items every 30 monsters served** (counted in monsters, not services, so short, partial and 4- or 8-order services all move it on; at an hour a week about every 2–3 days), **held while 6 or more unbought items are already in the shop**. The first crate of an update arrives with it. A crate's arrival is recorded when the child first sees it, so a child who served hundreds of monsters before an update gets one crate, not all of them at once. Crates never expire and are not tied to the calendar.
+- **Delivery crates (built in M4, D142):** new stock arrives in crates of **2 items every 30 monsters served** (counted in monsters, not services, so short, partial and 4- or 8-order services all move it on; at an hour a week about every 2–3 days), **held while 6 or more unbought items are already in the shop**. The first crate of an update arrives with it unless the hold applies; an update's items join the queue behind any that are still waiting. A crate's arrival is recorded when the child first sees it, so a child who served hundreds of monsters before an update gets one crate, not all of them at once. Crates never expire and are not tied to the calendar.
 - **Monster Wardrobe (M14):** per monster, including the two guests: 2–3 hats (T2), 4–5 skins (patterns or colours; T5, a skin changes the whole monster) and 2–3 accessories (T3). The monster wears what the child equips whenever it visits.
 - **Monster Album and friendship gifts (M15):** not bought. Each monster's page shows its portrait, name, favourite foods, a brief bio, the hats, skins and accessories collected for it, and its friendship gift. After a monster has been served a set number of times it brings the café a gift item (free). Later: short story episodes per monster.
 - **Treat Time (M16):** a repeatable treat the child can buy (about 40 coins) that throws a short party in the café. Nothing decays or needs feeding, so it never becomes a chore; it keeps coins meaningful when the shop is bought out.
@@ -680,9 +682,9 @@ Parent gate, minimal parent area (§12), Export (checksum, share fallbacks), Rep
 
 ### Tier 2 — Bonus features (no cap; any order)
 
-#### M4 — Economy and shop (≈ 2.5 h)
-Coin spending, shop slots/items (placeholder-quality SVG) with their colorways (D139), preview/buy/confirm, equip, staff reactions, guest monsters; `buy`/`equip` events.
-**Accept:** the catalog matches §10 (3,080 coins, 54 paid entries) and `economy:sim` reports the M4 stock lasting 2–3 months at the default profile; purchase idempotent and persisted; confirm prevents accidental buys; no code path lowers earned coins; purchases show on the Service screen; the shop counts as play time.
+#### M4 — Economy and shop (≈ 3.5 h)
+Coin spending, shop slots/items (placeholder-quality SVG) with their colorways (D139), preview/buy/confirm, equip, staff reactions, guest monsters; `buy`/`equip` events; the starter shelf and delivery crates (§10, §10.1, D142).
+**Accept:** the catalog matches §10 (3,080 coins, 54 paid entries) and `economy:sim` reports the M4 stock lasting 2–3 months at the default profile; crate arrival is replay-derived and recorded when first seen; a backlog delivers one crate at a time; the hold at 6 unbought works; purchase idempotent and persisted; confirm prevents accidental buys; no code path lowers earned coins; purchases show on the Service screen; the shop counts as play time.
 
 #### M5 — Rest of the Little Menu (≈ 3 h)
 A0 and A4–A8 generators + demos, two-frame layouts, difficulty orderings for A4–A6 (D43), A5 whole-frame moves and FollowMe past 10 (D47), tiles live.
@@ -716,8 +718,8 @@ Optional play-time limit and lock (§6): the allowance clock (idle pause, flushe
 **Owner playtest:** limit on (10 min), hand over the iPad, walk away: does it lock, is the ending gentle, is unlocking easy.
 
 #### M13 — Deliveries & Themed Sets (D140)
-Colorways round 2, four themed sets with their new pieces and set-complete surprises, and delivery crates (§10.1).
-**Accept:** crate arrival is replay-derived and recorded when first seen; a backlog delivers one crate at a time; the hold at 6 unbought works; `economy:sim` still meets the lifespan target.
+Colorways round 2, four themed sets with their new pieces and set-complete surprises, all delivered by M4's crates (§10.1, D142).
+**Accept:** set completion is replay-derived; `economy:sim` with the real catalog still meets the lifespan target.
 
 #### M14 — Monster Wardrobe (D140)
 Hats, skins and accessories for all 8 monsters (§10.1), equipped per monster and shown whenever it visits, within the SVG budget (§2.4); delivered by M13's crates.

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   COLOR_FAMILIES,
+  CRATE_HOLD_AT_UNBOUGHT,
+  STARTER_SHELF,
   LATER_GROUPS,
   M4_ITEMS,
   TIER_PRICE,
@@ -40,6 +42,21 @@ describe('shop catalog', () => {
       const [first, ...rest] = entries.filter((e) => e.item === def.id && e.slot === def.slot);
       if (!def.free) for (const e of rest) expect(e.price).toBeLessThan(first!.price);
     }
+  });
+
+  it('opens M4 with a starter shelf that covers every slot (D142)', () => {
+    const paid = entries.filter((e) => e.price > 0);
+    const keys = new Set(paid.map((e) => e.key));
+    expect(new Set(STARTER_SHELF).size).toBe(STARTER_SHELF.length);
+    for (const k of STARTER_SHELF) expect(keys.has(k)).toBe(true);
+    const shelfSlots = new Set(
+      paid.filter((e) => STARTER_SHELF.includes(e.key)).map((e) => e.slot),
+    );
+    for (const slot of new Set(paid.map((e) => e.slot))) expect(shelfSlots.has(slot)).toBe(true);
+    // A tier-1 entry is on the shelf, so the first service buys something.
+    expect(paid.some((e) => STARTER_SHELF.includes(e.key) && e.price === TIER_PRICE[1])).toBe(true);
+    // Bigger than the hold, so no crate lands on top of a fresh shelf.
+    expect(STARTER_SHELF.length).toBeGreaterThanOrEqual(CRATE_HOLD_AT_UNBOUGHT);
   });
 
   it('prices planned groups from the same tiers', () => {

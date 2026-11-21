@@ -11,8 +11,12 @@ import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import {
   COLORWAY_SHARE,
+  CRATE_EVERY_MONSTERS,
+  CRATE_HOLD_AT_UNBOUGHT,
+  CRATE_SIZE,
   LATER_GROUPS,
   M4_ITEMS,
+  STARTER_SHELF,
   TIER_PRICE,
   expandCatalog,
   expandPlanned,
@@ -67,6 +71,19 @@ const scaled = (k: number) =>
   ) as Record<Tier, number>;
 const m4 = (t = tiers) => expandCatalog(M4_ITEMS, t);
 const later = (t = tiers) => expandPlanned(LATER_GROUPS, t);
+const shelf = new Set(STARTER_SHELF);
+const starter = (t = tiers) => m4(t).filter((e) => shelf.has(e.key));
+/** The rest of M4 waits in the crate queue from day one (D142). */
+const m4Wave = (t = tiers) => ({
+  id: 'm4',
+  opensWeek: 0,
+  entries: m4(t).filter((e) => e.price > 0 && !shelf.has(e.key)),
+});
+const CRATES: CrateRule = {
+  everyMonsters: CRATE_EVERY_MONSTERS,
+  size: CRATE_SIZE,
+  holdAtStock: CRATE_HOLD_AT_UNBOUGHT,
+};
 const waves = (t = tiers, decor = decorWeek, wardrobe = wardrobeWeek) => {
   const all = later(t);
   return [
@@ -214,39 +231,49 @@ out();
 out('## M4 shop alone (no later content)');
 out();
 out(
-  '| Habit | First purchase: end of sitting / after services | Bought out (weeks) | Bought out (months) | Sittings ending with a purchase | Longest dry spell (sittings, 90th pct) |',
+  `M4 opens with a starter shelf of ${starter().length} entries (${sum(starter())} coins); the other ${m4Wave().entries.length} arrive in crates (D142). The all-on-day-one rows are for comparison.`,
 );
-out('|---|---|---|---|---|---|');
-for (const policy of ['impulse', 'cheapest', 'saver'] as BuyPolicy[]) {
-  const rs = runMany(
-    'm4',
-    () => ({ profile, maxBuysPerVisit: 2, starting: m4(), waves: [], weeks: 60 }),
-    policy,
-  );
-  const bo = rs.map((r) => r.startingBoughtOutWeek);
-  const share = rs.map((r) =>
-    r.activeSessions > 0 ? (100 * r.purchaseSessions) / r.activeSessions : 0,
-  );
-  out(
-    `| ${policy} | ${fmt(med(rs.map((r) => r.firstPurchaseSession)), 0)} / ${fmt(med(rs.map((r) => r.firstPurchaseServices)), 0)} | ${spread(bo)} | ${months(med(bo))} | ${fmt(med(share), 0)}% | ${fmt(
-      percentile(
-        rs.map((r) => r.longestDry),
-        90,
-      ),
-      0,
-    )} |`,
-  );
-}
+out();
+out(
+  '| Setup | Habit | First purchase: end of sitting / after services | Bought out (weeks) | Bought out (months) | Mean unbought items on the shelf | Sittings ending with a purchase | Longest dry spell (sittings, 90th pct) |',
+);
+out('|---|---|---|---|---|---|---|---|');
+const setups: [string, () => Omit<SimInput, 'policy' | 'profile' | 'maxBuysPerVisit' | 'weeks'>][] =
+  [
+    ['Starter shelf + crates', () => ({ starting: starter(), waves: [m4Wave()], crates: CRATES })],
+    ['All on day one', () => ({ starting: m4(), waves: [] })],
+  ];
+for (const [setup, make] of setups)
+  for (const policy of ['impulse', 'cheapest', 'saver'] as BuyPolicy[]) {
+    const rs = runMany(
+      `m4-${setup}`,
+      () => ({ profile, maxBuysPerVisit: 2, weeks: 60, ...make() }),
+      policy,
+    );
+    const bo = rs.map((r) => r.allBoughtOutWeek);
+    const share = rs.map((r) =>
+      r.activeSessions > 0 ? (100 * r.purchaseSessions) / r.activeSessions : 0,
+    );
+    out(
+      `| ${setup} | ${policy} | ${fmt(med(rs.map((r) => r.firstPurchaseSession)), 0)} / ${fmt(med(rs.map((r) => r.firstPurchaseServices)), 0)} | ${spread(bo)} | ${months(med(bo))} | ${fmt(med(rs.map((r) => r.meanStock)))} | ${fmt(med(share), 0)}% | ${fmt(
+        percentile(
+          rs.map((r) => r.longestDry),
+          90,
+        ),
+        0,
+      )} |`,
+    );
+  }
 out();
 
 // ---- Sensitivity
-out('### How the buy-out moves (impulse habit)');
+out('### How the buy-out moves (impulse habit, starter shelf + crates)');
 out();
 out('| Change | Catalog coins | Bought out (weeks) | Months |');
 out('|---|---|---|---|');
 const sens: [string, PlayProfile, Record<Tier, number>][] = [
   ['Prices × 0.8', profile, scaled(0.8)],
-  ['Draft prices', profile, tiers],
+  ['Prices as set (D139)', profile, tiers],
   ['Prices × 1.2', profile, scaled(1.2)],
   ['45 min a week', { ...profile, minutesPerWeek: 45 }, tiers],
   ['90 min a week', { ...profile, minutesPerWeek: 90 }, tiers],
@@ -265,11 +292,12 @@ for (const [label, prof, t] of sens) {
   const rs = runMany(`sens-${label}`, () => ({
     profile: prof,
     maxBuysPerVisit: 2,
-    starting: m4(t),
-    waves: [],
+    starting: starter(t),
+    waves: [m4Wave(t)],
+    crates: CRATES,
     weeks: 80,
   }));
-  const bo = rs.map((r) => r.startingBoughtOutWeek);
+  const bo = rs.map((r) => r.allBoughtOutWeek);
   out(
     `| ${label} | ${sum(m4(t).filter((e) => e.price > 0)).toLocaleString('en-US')} | ${spread(bo)} | ${months(med(bo))} |`,
   );
@@ -299,11 +327,11 @@ out();
 
 // ---- Roadmap with crates
 out(
-  `## Whole roadmap with crates (M4 on day one, decor wave in week ${decorWeek}, wardrobe wave in week ${wardrobeWeek})`,
+  `## Whole roadmap with crates (M4 starter shelf and M4 crates from day one, decor wave in week ${decorWeek}, wardrobe wave in week ${wardrobeWeek})`,
 );
 out();
 out(
-  'Shop-stock, waiting and dry-spell columns count from the decor wave on. A crate is counted in monsters served (owner, 2026-11-21), so a short or 4-order service still moves it on. The first crate of a wave comes with the update; the rest follow every N monsters. Target: everything owned about 8–11 months after M4 (2 months of M4 + 6–9 more).',
+  'Shop-stock, waiting and dry-spell columns count from the decor wave on; a later wave joins the crate queue behind whatever M4 items are still waiting. A crate is counted in monsters served (owner, 2026-11-21), so a short or 4-order service still moves it on. The first crate of a wave comes with the update; the rest follow every N monsters. Target: everything owned about 8–11 months after M4 (2 months of M4 + 6–9 more).',
 );
 out();
 out(
@@ -326,8 +354,8 @@ for (const crates of rules) {
   const rs = runMany(`crates-${crates.everyMonsters}-${crates.size}`, () => ({
     profile,
     maxBuysPerVisit: 2,
-    starting: m4(),
-    waves: waves(),
+    starting: starter(),
+    waves: [m4Wave(), ...waves()],
     crates,
     weeks: 120,
     measureFromWeek: decorWeek,
@@ -335,7 +363,7 @@ for (const crates of rules) {
   const done = rs.map((r) => r.allBoughtOutWeek);
   const empty = rs.map((r) => (100 * r.emptyShopSessions) / Math.max(1, r.activeSessions));
   out(
-    `| ${crates.size} every ${crates.everyMonsters} monsters${crates.holdAtStock ? `, held while ${crates.holdAtStock}+ unbought` : ''}${crates.everyMonsters === 30 && crates.size === 2 && crates.holdAtStock ? ' **(chosen, D140)**' : ''} (≈ every ${((crates.everyMonsters / monstersWeek) * 7).toFixed(1)} days) | ${Math.ceil(lat.filter((e) => e.wave === 'decor').length / crates.size) + Math.ceil(lat.filter((e) => e.wave === 'wardrobe').length / crates.size)} | ${months(med(done))} (${months(percentile(done, 10))}–${months(percentile(done, 90))}) | ${fmt(med(rs.map((r) => r.meanStock)))} | ${fmt(med(empty), 0)}% | ${fmt(
+    `| ${crates.size} every ${crates.everyMonsters} monsters${crates.holdAtStock ? `, held while ${crates.holdAtStock}+ unbought` : ''}${crates.everyMonsters === 30 && crates.size === 2 && crates.holdAtStock ? ' **(chosen, D140, D142)**' : ''} (≈ every ${((crates.everyMonsters / monstersWeek) * 7).toFixed(1)} days) | ${Math.ceil(lat.filter((e) => e.wave === 'decor').length / crates.size) + Math.ceil(lat.filter((e) => e.wave === 'wardrobe').length / crates.size)} | ${months(med(done))} (${months(percentile(done, 10))}–${months(percentile(done, 90))}) | ${fmt(med(rs.map((r) => r.meanStock)))} | ${fmt(med(empty), 0)}% | ${fmt(
       percentile(
         rs.map((r) => r.longestDry),
         90,

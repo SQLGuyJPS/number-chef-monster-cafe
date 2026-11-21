@@ -227,6 +227,40 @@ export const M4_ITEMS: readonly ItemDef[] = [
 ];
 
 /**
+ * The M4 shop opens with this shelf (D142): the first colour of every tier 1–2 item, the tier-1
+ * recolours of the free defaults, and four things to save for. Every other M4 entry arrives in
+ * delivery crates, so a young child faces about 7 unbought choices, not 50.
+ */
+export const STARTER_SHELF: readonly string[] = [
+  'wallpaper.plain.berry',
+  'wallpaper.plain.lavender',
+  'wallpaper.polka-dots.berry',
+  'wallpaper.stripes.mint',
+  'floor.checkerboard.berry',
+  'floor.checkerboard.mint',
+  'floor.wood.honey',
+  'floor.tiles.berry',
+  'lights.string-lights.honey',
+  'counter.flower-vase.berry',
+  'counter.cake-stand.berry',
+  'counter.cookie-jar.sky',
+  'wallArt.neon-open.berry',
+  'window.garden.classic',
+  'lights.disco-ball.classic',
+  'staff.bunny-barista.classic',
+  'staff.cat-waiter.classic',
+];
+
+/**
+ * Delivery crates (SPEC §10.1, D140, D142): 2 entries every 30 monsters served, held while 6 or
+ * more unbought entries are in the shop. A crate is worth about what the child earns between
+ * crates (about 3.8 coins a monster), so the shelf neither empties nor piles up.
+ */
+export const CRATE_SIZE = 2;
+export const CRATE_EVERY_MONSTERS = 30;
+export const CRATE_HOLD_AT_UNBOUGHT = 6;
+
+/**
  * Later content is not designed yet, so it is planned as counts per tier (owner's milestone split,
  * 2026-11-21). Each group ships as one wave and is delivered in crates (economySim.ts).
  */

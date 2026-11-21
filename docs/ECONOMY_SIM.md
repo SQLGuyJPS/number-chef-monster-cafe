@@ -88,20 +88,25 @@ Entries per tier (colorways counted with their item's tier): T1: 7 · T2: 21 · 
 
 ## M4 shop alone (no later content)
 
-| Habit | First purchase: end of sitting / after services | Bought out (weeks) | Bought out (months) | Sittings ending with a purchase | Longest dry spell (sittings, 90th pct) |
-|---|---|---|---|---|---|
-| impulse | 1 / 4 | 10.0 (9.9–10.4) | 2.3 | 91% | 2 |
-| cheapest | 1 / 4 | 10.0 (9.9–10.4) | 2.3 | 84% | 2 |
-| saver | 1 / 4 | 10.0 (9.9–10.3) | 2.3 | 84% | 2 |
+M4 opens with a starter shelf of 17 entries (775 coins); the other 37 arrive in crates (D142). The all-on-day-one rows are for comparison.
 
-### How the buy-out moves (impulse habit)
+| Setup | Habit | First purchase: end of sitting / after services | Bought out (weeks) | Bought out (months) | Mean unbought items on the shelf | Sittings ending with a purchase | Longest dry spell (sittings, 90th pct) |
+|---|---|---|---|---|---|---|---|
+| Starter shelf + crates | impulse | 1 / 4 | 10.0 (9.9–10.3) | 2.3 | 6.7 | 94% | 2 |
+| Starter shelf + crates | cheapest | 1 / 4 | 10.0 (9.9–10.3) | 2.3 | 6.2 | 88% | 2 |
+| Starter shelf + crates | saver | 1 / 4 | 10.0 (9.9–10.4) | 2.3 | 7.1 | 84% | 2 |
+| All on day one | impulse | 1 / 4 | 10.0 (9.9–10.4) | 2.3 | 23.9 | 91% | 2 |
+| All on day one | cheapest | 1 / 4 | 10.0 (9.9–10.4) | 2.3 | 17.0 | 84% | 2 |
+| All on day one | saver | 1 / 4 | 10.0 (9.9–10.4) | 2.3 | 27.8 | 84% | 2 |
+
+### How the buy-out moves (impulse habit, starter shelf + crates)
 
 | Change | Catalog coins | Bought out (weeks) | Months |
 |---|---|---|---|
-| Prices × 0.8 | 2,485 | 8.5 (8.3–9.0) | 2.0 |
-| Draft prices | 3,080 | 10.0 (9.9–10.4) | 2.3 |
+| Prices × 0.8 | 2,485 | 8.6 (8.3–9.0) | 2.0 |
+| Prices as set (D139) | 3,080 | 10.0 (9.9–10.4) | 2.3 |
 | Prices × 1.2 | 3,625 | 11.9 (11.6–12.0) | 2.8 |
-| 45 min a week | 3,080 | 13.4 (13.0–13.8) | 3.1 |
+| 45 min a week | 3,080 | 13.4 (13.0–13.5) | 3.1 |
 | 90 min a week | 3,080 | 6.6 (6.4–6.7) | 1.5 |
 | Services take 4–5 min | 3,080 | 12.6 (12.3–12.7) | 2.9 |
 | 8 orders a service | 3,080 | 10.3 (10.0–10.4) | 2.4 |
@@ -121,21 +126,21 @@ Entries per tier (colorways counted with their item's tier): T1: 7 · T2: 21 · 
 
 Decor wave 1,645 coins (≈ 5.1 weeks of earning); wardrobe wave 7,800 (≈ 24.2 weeks). Together ≈ 6.8 months of earning; the target is 6–9.
 
-## Whole roadmap with crates (M4 on day one, decor wave in week 8, wardrobe wave in week 16)
+## Whole roadmap with crates (M4 starter shelf and M4 crates from day one, decor wave in week 8, wardrobe wave in week 16)
 
-Shop-stock, waiting and dry-spell columns count from the decor wave on. A crate is counted in monsters served (owner, 2026-11-21), so a short or 4-order service still moves it on. The first crate of a wave comes with the update; the rest follow every N monsters. Target: everything owned about 8–11 months after M4 (2 months of M4 + 6–9 more).
+Shop-stock, waiting and dry-spell columns count from the decor wave on; a later wave joins the crate queue behind whatever M4 items are still waiting. A crate is counted in monsters served (owner, 2026-11-21), so a short or 4-order service still moves it on. The first crate of a wave comes with the update; the rest follow every N monsters. Target: everything owned about 8–11 months after M4 (2 months of M4 + 6–9 more).
 
 | Crate rule | Crates for all later items | Everything owned (months) | Mean unowned items in the shop | Sittings with nothing to buy (waiting) | Longest dry spell (90th pct) |
 |---|---|---|---|---|---|
-| 1 every 30 monsters (≈ every 2.5 days) | 117 | 11.6 (11.5–11.7) | 1.1 | 16% | 1 |
-| 2 every 45 monsters (≈ every 3.7 days) | 59 | 9.2 (9.1–9.3) | 1.6 | 36% | 2 |
-| 2 every 60 monsters (≈ every 4.9 days) | 59 | 11.3 (11.2–11.4) | 1.1 | 53% | 2 |
-| 3 every 60 monsters (≈ every 4.9 days) | 40 | 9.4 (9.3–9.5) | 3.2 | 6% | 2 |
-| 3 every 90 monsters (≈ every 7.4 days) | 40 | 11.3 (11.2–11.4) | 1.4 | 40% | 2 |
-| 4 every 90 monsters (≈ every 7.4 days) | 30 | 9.2 (9.1–9.2) | 2.2 | 35% | 2 |
-| 4 every 120 monsters (≈ every 9.8 days) | 30 | 11.3 (11.2–11.4) | 1.5 | 53% | 2 |
-| 2 every 30 monsters, held while 6+ unbought **(chosen, D140)** (≈ every 2.5 days) | 59 | 9.4 (9.3–9.5) | 5.4 | 2% | 2 |
-| 2 every 40 monsters, held while 6+ unbought (≈ every 3.3 days) | 59 | 9.3 (9.2–9.4) | 2.9 | 13% | 2 |
-| 3 every 45 monsters, held while 6+ unbought (≈ every 3.7 days) | 40 | 9.4 (9.3–9.5) | 5.8 | 2% | 2 |
+| 1 every 30 monsters (≈ every 2.5 days) | 117 | 12.8 (12.7–12.9) | 0.8 | 18% | 1 |
+| 2 every 45 monsters (≈ every 3.7 days) | 59 | 9.4 (9.4–9.5) | 1.2 | 42% | 2 |
+| 2 every 60 monsters (≈ every 4.9 days) | 59 | 12.4 (12.3–12.5) | 0.8 | 59% | 1 |
+| 3 every 60 monsters (≈ every 4.9 days) | 40 | 9.4 (9.2–9.4) | 2.3 | 10% | 2 |
+| 3 every 90 monsters (≈ every 7.4 days) | 40 | 12.5 (12.4–12.7) | 1.1 | 46% | 1 |
+| 4 every 90 monsters (≈ every 7.4 days) | 30 | 9.4 (9.3–9.5) | 1.7 | 42% | 2 |
+| 4 every 120 monsters (≈ every 9.8 days) | 30 | 12.4 (12.3–12.4) | 1.2 | 59% | 1 |
+| 2 every 30 monsters, held while 6+ unbought **(chosen, D140, D142)** (≈ every 2.5 days) | 59 | 9.4 (9.3–9.5) | 5.3 | 2% | 2 |
+| 2 every 40 monsters, held while 6+ unbought (≈ every 3.3 days) | 59 | 9.2 (9.1–9.3) | 1.4 | 33% | 2 |
+| 3 every 45 monsters, held while 6+ unbought (≈ every 3.7 days) | 40 | 9.4 (9.3–9.5) | 5.7 | 2% | 2 |
 | No crates (each wave all at once) | — | 9.4 (9.3–9.5) | 25.7 | 2% | 2 |
 
