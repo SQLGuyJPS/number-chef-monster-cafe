@@ -5,7 +5,28 @@ import { MIN_BUTTON_CSS_PX, MIN_CELL_CSS_PX } from '../../src/app/metrics';
 // Over-the-counter layout mock (`?mock`, owner request before M3a). Tap sizes are asserted at
 // 844×390 for every variant on both basket sides; screenshots only when NCMC_SCREENS is set:
 //   npx cross-env NCMC_SCREENS=counter-mock playwright test counterMock --project=chromium-ipad-pro-11 --project=webkit-iphone-13
-const VARIANTS = ['s3', 'taken', 'frames2', 's0', 'cloche', 'offer', 'count', 'shop', 'later', 'five', 'confirm', 'delivery', 'home', 'results'] as const;
+const VARIANTS = [
+  's3',
+  'taken',
+  'frames2',
+  's0',
+  'cloche',
+  'offer',
+  'count',
+  'shop',
+  'later',
+  'five',
+  'max',
+  'pages',
+  'strip',
+  'rows',
+  'more',
+  'more-open',
+  'confirm',
+  'delivery',
+  'home',
+  'results',
+] as const;
 const SIDES = ['right', 'left'] as const;
 
 async function open(page: Page, q: string) {
@@ -20,27 +41,41 @@ async function measure(page: Page) {
       [...document.querySelectorAll<HTMLElement>('[data-tap]')].map((el, i) => {
         const r = el.getBoundingClientRect();
         const kind = el.dataset.tap;
-        return { id: el.dataset.testid ?? `${kind}${i}`, w: r.width, h: r.height, need: kind === 'cell' ? cell : button };
+        return {
+          id: el.dataset.testid ?? `${kind}${i}`,
+          w: r.width,
+          h: r.height,
+          need: kind === 'cell' ? cell : button,
+        };
       }),
     { cell: MIN_CELL_CSS_PX, button: MIN_BUTTON_CSS_PX },
   );
 }
 
-test('every mock variant keeps the 844×390 tap minimums on both basket sides', async ({ page }, info) => {
+test('every mock variant keeps the 844×390 tap minimums on both basket sides', async ({
+  page,
+}, info) => {
   test.skip(info.project.name !== 'webkit-iphone-13', 'tap sizes are asserted at 844×390');
   for (const v of VARIANTS)
     for (const side of SIDES) {
       await open(page, `v=${v}&basket=${side}`);
       const found = await measure(page);
-      expect(found.length, `${v}/${side}: tap targets`).toBeGreaterThan(v === 'home' ? 1 : v === 'results' ? 2 : 3);
+      expect(found.length, `${v}/${side}: tap targets`).toBeGreaterThan(
+        v === 'home' ? 1 : v === 'results' ? 2 : 3,
+      );
       const small = found.filter((f) => Math.min(f.w, f.h) < f.need - 0.01);
       expect(small, `${v}/${side}: below the minimum`).toEqual([]);
     }
 });
 
-test('the two-frame crate holds its whole heap, tilt included, on both sides', async ({ page }, info) => {
+test('the two-frame crate holds its whole heap, tilt included, on both sides', async ({
+  page,
+}, info) => {
   // Measured along the screen's x axis, which is the stage's only when the stage is not rotated.
-  test.skip(info.project.name.includes('portrait'), 'landscape only: the rotated stage swaps the axes');
+  test.skip(
+    info.project.name.includes('portrait'),
+    'landscape only: the rotated stage swaps the axes',
+  );
   for (const side of SIDES) {
     await open(page, `v=frames2&basket=${side}`);
     const worst = await page.evaluate(() => {
@@ -60,7 +95,10 @@ const milestone = process.env.NCMC_SCREENS;
 const SHOT_PROJECTS = ['chromium-ipad-pro-11', 'webkit-iphone-13'];
 
 test('counter mock screenshots', async ({ page }, info) => {
-  test.skip(!milestone || !SHOT_PROJECTS.includes(info.project.name), 'set NCMC_SCREENS to capture');
+  test.skip(
+    !milestone || !SHOT_PROJECTS.includes(info.project.name),
+    'set NCMC_SCREENS to capture',
+  );
   test.setTimeout(120_000);
   const dir = `docs/screens/${milestone}`;
   mkdirSync(dir, { recursive: true });
@@ -87,13 +125,22 @@ test('counter mock screenshots', async ({ page }, info) => {
   for (const q of ['v=s3', 'v=s3&line=9', 'v=count&line=9', 'v=frames2&line=9']) {
     await open(page, q);
     await page.waitForTimeout(300);
-    counts[q] = await page.evaluate(() => (window as unknown as { __ncmc: Hooks }).__ncmc.svgCounts());
+    counts[q] = await page.evaluate(() =>
+      (window as unknown as { __ncmc: Hooks }).__ncmc.svgCounts(),
+    );
   }
   await open(page, 'v=s3');
   const sizes = await measure(page);
   writeFileSync(
     `${dir}/measure-${tag}.json`,
-    JSON.stringify({ svgCounts: counts, targets: sizes.map((s) => ({ ...s, w: +s.w.toFixed(1), h: +s.h.toFixed(1) })) }, null, 2),
+    JSON.stringify(
+      {
+        svgCounts: counts,
+        targets: sizes.map((s) => ({ ...s, w: +s.w.toFixed(1), h: +s.h.toFixed(1) })),
+      },
+      null,
+      2,
+    ),
   );
   for (const c of Object.values(counts)) {
     expect(c.total).toBeLessThanOrEqual(4800);

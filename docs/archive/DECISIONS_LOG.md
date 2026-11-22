@@ -977,3 +977,8 @@ The decor lint check covers only what can be checked mechanically among the firm
 **What:** Amends SPEC §5.4. The ticket keeps its width and bottom but starts lower: x 808–1168, y 172–360 (was y 140–360), and x 904–1264 while counting together. It still holds the food and the widest sentence (`10 − ? = 6`) above its torn edge.
 **Why:** Owner (2026-11-22): the right string of lights hangs just under the status bar (y 122–166) and was always hidden behind the ticket.
 **How to revisit:** `TICKET_Y` in `src/app/metrics.ts`.
+
+## D166 — Mocks test fit at the maximum count (2026-11-22)
+**What:** Whenever a mock lays out UI elements whose number varies on one screen (shop tiles, colour dots, monsters on Results, buttons, tabs), it also shows the maximum number planned for any milestone, with the longest names and widest numbers, and is checked for overlap, clipping and even spacing before the owner reviews it.
+**Why:** Owner (2026-11-22): the round-2 shop mock showed three colour dots and three tiles while five dots and up to fourteen items are planned.
+**How to revisit:** The working agreement in CLAUDE.md.

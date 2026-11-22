@@ -173,3 +173,4 @@
 | D163 | Home's shop button reads "Shop" with a drawn paintbrush, right of Open the Café; the left side is kept for the Monster Album (M16) | SPEC §5.2, §5.7 | Owner's word; space planned for the album |
 | D164 | Delivery: the box drops onto the counter, sparkles, opens on a tap or after 2 s (flaps fold out), entries rise out; Buy without enough coins is dimmed and Pip encourages | SPEC §10, §10.1 | Owner: an event that never waits on the child; no fail feel |
 | D165 | Ticket shortened to y 172–360 so the right string of lights shows | SPEC §5.4 | Owner: the lights were always hidden behind the ticket |
+| D166 | Mocks of a varying number of elements also show the maximum planned count (longest names, widest numbers) and are checked for fit | CLAUDE.md | Owner: catch overlap before it is built |

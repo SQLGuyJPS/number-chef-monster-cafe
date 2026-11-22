@@ -306,3 +306,115 @@ html.reduce-motion .dbox.open .dbox-closed {
     display: none;
   }
 }
+
+/* Shelf overflow proposals (mock only until the owner picks one). */
+.shop-tile.compact {
+  padding: 6px 4px;
+  gap: 2px;
+  border-width: 4px;
+  border-radius: 18px;
+}
+.shop-tile.compact .shop-tile-pic {
+  width: 80px;
+  height: 62px;
+}
+.shop-tile.compact .shop-tile-foot {
+  font-size: 24px;
+}
+.shop-tile.compact .shop-coin {
+  width: 22px;
+  height: 22px;
+}
+.shop-tile.compact .shop-tick {
+  transform: scale(0.75);
+}
+.shop-tile.compact.selected {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.14);
+}
+.shop-tile.wide .shop-tile-pic {
+  width: 110px;
+}
+.shop-arrow {
+  position: absolute;
+  box-sizing: border-box;
+  padding: 0;
+  border: none;
+  background: none;
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.16));
+}
+.shop-arrow.off {
+  opacity: 0.3;
+}
+.shop-pips {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+}
+.shop-pips span {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(107, 74, 46, 0.3);
+}
+.shop-pips span.on {
+  background: #6b4a2e;
+}
+.shop-strip {
+  position: absolute;
+  overflow: hidden;
+}
+.shop-strip::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60px;
+  height: 100%;
+  background: linear-gradient(to right, rgba(217, 160, 102, 0), rgba(217, 160, 102, 0.85));
+  pointer-events: none;
+}
+.shop-more-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 34px;
+  font-weight: 700;
+  color: #6b4a2e;
+}
+.shop-sheet {
+  position: absolute;
+  box-sizing: border-box;
+  border-radius: 32px;
+  background: #fff3df;
+  border: 6px solid #e2d3b6;
+  box-shadow: 0 12px 0 rgba(0, 0, 0, 0.16);
+}
+.shop-sheet-head {
+  position: absolute;
+  left: 30px;
+  top: 14px;
+  width: 96px;
+  height: 96px;
+}
+.shop-close {
+  position: absolute;
+  box-sizing: border-box;
+  padding: 14px;
+  border-radius: 24px;
+  border: none;
+  background: #3aa57a;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18);
+}
+.results-shop .shop-button-inner {
+  font-size: 44px;
+}
+.results4 {
+  font-size: 38px;
+}

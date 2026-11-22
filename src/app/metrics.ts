@@ -104,7 +104,9 @@ const CLOCHE_BIN: Rect = { x: 960, y: rowY(130), w: 300, h: 130 };
  */
 export const LID_ART_SHIFT = 16;
 const CLOCHE_LID_X = Math.round(
-  (CLOCHE_TRAY.x + CLOCHE_TRAY.w + PLATE_BLEED + CLOCHE_BIN.x + CRATE_INSET) / 2 - BUTTON_MIN / 2 - LID_ART_SHIFT,
+  (CLOCHE_TRAY.x + CLOCHE_TRAY.w + PLATE_BLEED + CLOCHE_BIN.x + CRATE_INSET) / 2 -
+    BUTTON_MIN / 2 -
+    LID_ART_SHIFT,
 );
 
 /** One layout per mock variant; every rect a tap target or a band the child must see. */
@@ -163,7 +165,12 @@ export const COUNTER = {
   frames2: {
     help: { x: 8, y: 460, w: BUTTON_MIN, h: BUTTON_MIN },
     bell: { x: 8, y: 588, w: BUTTON_MIN, h: BUTTON_MIN },
-    tray: { x: 132, y: rowY(TIGHT_FRAME.h), w: 2 * TIGHT_FRAME.w + TIGHT.framesGap, h: TIGHT_FRAME.h },
+    tray: {
+      x: 132,
+      y: rowY(TIGHT_FRAME.h),
+      w: 2 * TIGHT_FRAME.w + TIGHT.framesGap,
+      h: TIGHT_FRAME.h,
+    },
     bin: { x: 1100, y: rowY(200), w: 172, h: 200 },
   },
   /** S0 pad: Pip, bell, Peek, display, backspace in the upper row; ten digits below. */
@@ -173,7 +180,12 @@ export const COUNTER = {
     peek: { x: 400, y: 460, w: 128, h: BUTTON_MIN },
     display: { x: 544, y: 460, w: 240, h: BUTTON_MIN },
     backspace: { x: 800, y: 460, w: 128, h: BUTTON_MIN },
-    digits: { x: centeredX(10 * BUTTON_MIN + 9 * 8), y: 592, w: 10 * BUTTON_MIN + 9 * 8, h: BUTTON_MIN },
+    digits: {
+      x: centeredX(10 * BUTTON_MIN + 9 * 8),
+      y: 592,
+      w: 10 * BUTTON_MIN + 9 * 8,
+      h: BUTTON_MIN,
+    },
     digitGap: 8,
   },
   /**
@@ -266,7 +278,12 @@ export const SHOP = {
   tab: (i: number): Rect => ({ x: 16 + i * (SHOP_TAB + 12), y: 0, w: SHOP_TAB, h: SHOP_TAB }),
   home: { x: STAGE_W - 12 - SHOP_TAB, y: 0, w: SHOP_TAB, h: SHOP_TAB },
   /** Counter band: the slot's items as tiles, left to right; dots and Buy on the right. */
-  tile: (i: number): Rect => ({ x: 16 + i * SHOP_TILE.step, y: 464, w: SHOP_TILE.w, h: SHOP_TILE.h }),
+  tile: (i: number): Rect => ({
+    x: 16 + i * SHOP_TILE.step,
+    y: 464,
+    w: SHOP_TILE.w,
+    h: SHOP_TILE.h,
+  }),
   dots: { x: 736, y: 456, w: 536, h: CELL },
   buy: { x: 854, y: 552, w: 300, h: BIG_BUTTON },
   /** Confirm: a card over the dimmed screen, the item's picture and two big answers. */
@@ -280,4 +297,52 @@ export const SHOP = {
    * the Monster Album button (M16).
    */
   shopButton: { x: 940, y: 500, w: 300, h: BIG_BUTTON },
+} as const;
+
+/**
+ * Proposals for slots with more items than one row of six tiles (M14 brings up to 14 to a slot).
+ * Mock only until the owner picks one; the others are then deleted.
+ */
+export const SHOP_MORE = {
+  /** A: pages of four wider tiles between two arrows (88-px cells), page pips underneath. */
+  pages: {
+    back: { x: 16, y: 464, w: CELL, h: 220 },
+    next: { x: 656, y: 464, w: CELL, h: 220 },
+    tile: (i: number): Rect => ({ x: 112 + i * 136, y: 464, w: 128, h: 220 }),
+    pips: { x: 112, y: 692, w: 536, h: 20 },
+  },
+  /** B: a sliding strip; the half tile at the cut shows there is more. Swipe it or tap the arrow. */
+  strip: {
+    window: { x: 16, y: 452, w: 664, h: 256 },
+    tile: (i: number): Rect => ({ x: 16 + i * 118, y: 464, w: 110, h: 232 }),
+    next: { x: 688, y: 464, w: CELL, h: 232 },
+  },
+  /** C: two rows of seven picture-only tiles (the name is spoken when tapped): 14 per page. */
+  rows: {
+    tile: (i: number): Rect => ({
+      x: 16 + (i % 7) * 102,
+      y: 456 + Math.floor(i / 7) * 128,
+      w: 96,
+      h: 120,
+    }),
+  },
+  /** D: five tiles and a "more" tile that opens every item of the slot on a sheet over the café. */
+  more: {
+    sheet: { x: 40, y: 124, w: 1200, h: 584 },
+    close: { x: 1124, y: 136, w: BIG_BUTTON - 56, h: BIG_BUTTON - 56 },
+    tile: (i: number): Rect => ({
+      x: 70 + (i % 7) * 164,
+      y: 248 + Math.floor(i / 7) * 228,
+      w: 152,
+      h: 216,
+    }),
+  },
+} as const;
+
+/** Results with Shop (SPEC §5.7): four buttons on one line, the primary one second. */
+export const RESULTS4 = {
+  change: { x: 65, y: 500, w: 280, h: BIG_BUTTON },
+  another: { x: 365, y: 500, w: 350, h: BIG_BUTTON },
+  shop: { x: 735, y: 500, w: 240, h: BIG_BUTTON },
+  home: { x: 995, y: 500, w: 220, h: BIG_BUTTON },
 } as const;

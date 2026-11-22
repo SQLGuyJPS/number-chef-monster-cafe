@@ -23,7 +23,14 @@ export function SlotIcon({ slot }: { slot: DecorSlot }) {
       <>
         {[0, 1, 2].map((r) =>
           [0, 1, 2].map((c) => (
-            <rect key={`${r}${c}`} x={12 + c * 17} y={14 + r * 17} width={16} height={16} fill={(r + c) % 2 ? '#fffaf0' : '#3aa57a'} />
+            <rect
+              key={`${r}${c}`}
+              x={12 + c * 17}
+              y={14 + r * 17}
+              width={16}
+              height={16}
+              fill={(r + c) % 2 ? '#fffaf0' : '#3aa57a'}
+            />
           )),
         )}
       </>
@@ -32,13 +39,28 @@ export function SlotIcon({ slot }: { slot: DecorSlot }) {
       <>
         <path d="M6 16 Q 36 40 66 16" fill="none" stroke={ink} strokeWidth={2} />
         {[18, 36, 54].map((x, i) => (
-          <circle key={x} cx={x} cy={i === 1 ? 34 : 28} r={7} fill={['#f0b54a', '#d9487f', '#3d86c6'][i]} />
+          <circle
+            key={x}
+            cx={x}
+            cy={i === 1 ? 34 : 28}
+            r={7}
+            fill={['#f0b54a', '#d9487f', '#3d86c6'][i]}
+          />
         ))}
       </>
     ),
     window: (
       <>
-        <rect x={12} y={12} width={48} height={44} rx={4} fill="#cfeaff" stroke="#fff" strokeWidth={5} />
+        <rect
+          x={12}
+          y={12}
+          width={48}
+          height={44}
+          rx={4}
+          fill="#cfeaff"
+          stroke="#fff"
+          strokeWidth={5}
+        />
         <line x1={36} y1={12} x2={36} y2={56} stroke="#fff" strokeWidth={4} />
         <circle cx={48} cy={24} r={5} fill="#fff3a6" />
         <rect x={8} y={56} width={56} height={6} rx={2} fill="#e8c48a" />
@@ -55,7 +77,16 @@ export function SlotIcon({ slot }: { slot: DecorSlot }) {
     ),
     wallArt: (
       <>
-        <rect x={12} y={14} width={48} height={40} rx={3} fill="#fffaf0" stroke="#b98352" strokeWidth={5} />
+        <rect
+          x={12}
+          y={14}
+          width={48}
+          height={40}
+          rx={3}
+          fill="#fffaf0"
+          stroke="#b98352"
+          strokeWidth={5}
+        />
         <path d="M18 48 l12 -14 l8 8 l6 -6 l10 12 Z" fill="#3aa57a" />
         <circle cx={46} cy={26} r={4} fill="#f0b54a" />
       </>
@@ -112,7 +143,17 @@ export function Price({ n }: { n: number }) {
 export function MiniStandIn({ look }: { look: DecorLook }) {
   return (
     <svg viewBox="0 0 100 80" width="100%" height="100%" aria-hidden="true">
-      <rect x={4} y={4} width={92} height={72} rx={12} fill={look.base} stroke={look.accent} strokeWidth={5} strokeDasharray="10 6" />
+      <rect
+        x={4}
+        y={4}
+        width={92}
+        height={72}
+        rx={12}
+        fill={look.base}
+        stroke={look.accent}
+        strokeWidth={5}
+        strokeDasharray="10 6"
+      />
       <circle cx={30} cy={30} r={9} fill={look.accent} opacity={0.6} />
       <circle cx={70} cy={50} r={9} fill={look.accent} opacity={0.6} />
     </svg>
@@ -129,6 +170,7 @@ export function ItemTile({
   price,
   selected,
   fresh,
+  compact,
   onTap,
 }: {
   rect: Rect;
@@ -138,21 +180,29 @@ export function ItemTile({
   price: number;
   selected: boolean;
   fresh?: boolean;
+  /** Picture and price only (the name is spoken when tapped); a cell-sized target. */
+  compact?: boolean;
   onTap: () => void;
 }) {
   return (
     <TapButton
-      className={`shop-tile ${state}${selected ? ' selected' : ''}`}
+      className={`shop-tile ${state}${selected ? ' selected' : ''}${compact ? ' compact' : ''}`}
       style={at(rect)}
       testId={`shop-tile-${look?.item ?? 'none'}`}
       label={name}
-      tapKind="button"
+      tapKind={compact ? 'cell' : 'button'}
       onTap={onTap}
     >
-      <span className="shop-tile-pic">{look ? <MiniStandIn look={look} /> : <span className="shop-empty" />}</span>
-      <span className="shop-tile-name">{name}</span>
+      <span className="shop-tile-pic">
+        {look ? <MiniStandIn look={look} /> : <span className="shop-empty" />}
+      </span>
+      {!compact && <span className="shop-tile-name">{name}</span>}
       <span className="shop-tile-foot">
-        {state === 'forSale' ? <Price n={price} /> : <span className="shop-tick" aria-label="yours" />}
+        {state === 'forSale' ? (
+          <Price n={price} />
+        ) : (
+          <span className="shop-tick" aria-label="yours" />
+        )}
       </span>
       {fresh && <span className="shop-new" aria-hidden="true" />}
     </TapButton>
@@ -176,7 +226,12 @@ export function ColourDots({
         <TapButton
           key={d.key}
           className={`shop-dot${d.selected ? ' selected' : ''}`}
-          style={at({ x: x0 + i * (SHOP_DOT.tap + SHOP_DOT.gap), y: rect.y, w: SHOP_DOT.tap, h: SHOP_DOT.tap })}
+          style={at({
+            x: x0 + i * (SHOP_DOT.tap + SHOP_DOT.gap),
+            y: rect.y,
+            w: SHOP_DOT.tap,
+            h: SHOP_DOT.tap,
+          })}
           testId={`shop-dot-${d.key}`}
           label={d.key}
           tapKind="cell"
@@ -188,5 +243,50 @@ export function ColourDots({
         </TapButton>
       ))}
     </>
+  );
+}
+
+/** Obtuse triangle for paging the shelf (owner's suggestion, 2026-11-22). */
+export function PageArrow({
+  rect,
+  dir,
+  off,
+  onTap,
+}: {
+  rect: Rect;
+  dir: 'back' | 'next';
+  off?: boolean;
+  onTap: () => void;
+}) {
+  return (
+    <TapButton
+      className={`shop-arrow${off ? ' off' : ''}`}
+      style={at(rect)}
+      testId={`shop-${dir}`}
+      label={dir === 'next' ? 'More' : 'Back'}
+      tapKind="cell"
+      onTap={onTap}
+    >
+      <svg viewBox="0 0 88 100" width="100%" height="100" aria-hidden="true">
+        <path
+          d={dir === 'next' ? 'M26 8 L70 50 L26 92 Z' : 'M62 8 L18 50 L62 92 Z'}
+          fill="#fffaf0"
+          stroke="#b98352"
+          strokeWidth={7}
+          strokeLinejoin="round"
+        />
+      </svg>
+    </TapButton>
+  );
+}
+
+/** Which page of the shelf is showing; not a target. */
+export function PagePips({ rect, n, at: page }: { rect: Rect; n: number; at: number }) {
+  return (
+    <div className="shop-pips" style={at(rect)} aria-hidden="true">
+      {Array.from({ length: n }, (_, i) => (
+        <span key={i} className={i === page ? 'on' : ''} />
+      ))}
+    </div>
   );
 }
