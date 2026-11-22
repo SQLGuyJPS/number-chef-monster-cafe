@@ -39,7 +39,7 @@ Claude Code will use the noted default until you answer. Answer in DECISIONS.md 
 |---|---|---|
 | 1 | ~~GitHub setup~~ — resolved: the repo exists (see the resolved table; number kept so references stay stable). | — |
 | 2 | **Roster approval.** Monster names/personalities/favorite foods, guide "Pip the mouse", staff animals. The child may enjoy naming them; deferred, so placeholders stay through M2 and in-app renaming comes with M7. | Placeholder names, SPEC §7 |
-| 3 | **Coin pacing.** Resolved 2026-11-21 (D148–D150): earning unchanged (23 a service); M4 shop 2,285 coins in five tiers with colorways, about 1.8 months at an hour a week (staff moved to M18, D157); later content in M14–M18. Retune after the M4 playtest with `npm run economy:sim`. | D148 |
+| 3 | **Coin pacing.** Resolved 2026-11-21 (D148–D150): earning unchanged (23 a service); M4 shop 2,305 coins in five tiers with colorways, about 1.8 months at an hour a week (staff moved to M18, D157; Menu Board 20 coins, D160); later content in M14–M18. Retune after the M4 playtest with `npm run economy:sim`. | D148 |
 | 4 | **Music.** None in v1. | None |
 | 5 | **Voice.** US English; you pick a voice per device in the Parent area after M3b. | Auto-pick |
 | 6 | **Which Tier 2 item first?** I'd suggest the shop (M4: gives coins a purpose) and the rest of the Little Menu (M5: A1–A3 will last weeks, not months). | Shop, then M5 |

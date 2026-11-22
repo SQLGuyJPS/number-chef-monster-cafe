@@ -90,8 +90,8 @@ export function expandCatalog(
 /**
  * M4 shop: SPEC §10's items with tiers, plus 2–3 colorways on items where paint makes sense.
  * No colorways on scenes (windows), named looks (Brick, Starry Night, Rainbow), metal or glass
- * (Disco Ball, Chandelier, Fish Bowl, Trophies), the serve bell (a control, not decor), the menu
- * board (chalk). Families are spread so every family appears in several slots. The staff slot
+ * (Disco Ball, Chandelier, Fish Bowl, Trophies), or the menu board (chalk). The serve bell is not a
+ * shop item: the child always needs it to serve, so it is never swapped out (D159). Families are spread so every family appears in several slots. The staff slot
  * (Pip as its free default plus five animals) moved to M18 (D157); it is planned in LATER_GROUPS.
  */
 export const M4_ITEMS: readonly ItemDef[] = [
@@ -176,7 +176,15 @@ export const M4_ITEMS: readonly ItemDef[] = [
   { id: 'moonlit', slot: 'window', name: 'Moonlit', tier: 3, colorways: ['classic'] },
   { id: 'snowy', slot: 'window', name: 'Snowy', tier: 3, colorways: ['classic'] },
   // Counter-top
-  { id: 'bell', slot: 'counter', name: 'Bell', tier: 1, colorways: ['classic'], free: true },
+  // The counter-top's default is a clear counter; the serve bell is a control, not decor (D159).
+  {
+    id: 'none',
+    slot: 'counter',
+    name: 'Clear Counter',
+    tier: 1,
+    colorways: ['classic'],
+    free: true,
+  },
   {
     id: 'flower-vase',
     slot: 'counter',
@@ -194,15 +202,9 @@ export const M4_ITEMS: readonly ItemDef[] = [
   },
   { id: 'fish-bowl', slot: 'counter', name: 'Fish Bowl', tier: 3, colorways: ['classic'] },
   { id: 'tiny-robot', slot: 'counter', name: 'Tiny Robot', tier: 4, colorways: ['sky', 'berry'] },
-  // Wall art
-  {
-    id: 'menu-board',
-    slot: 'wallArt',
-    name: 'Menu Board',
-    tier: 1,
-    colorways: ['classic'],
-    free: true,
-  },
+  // Wall art: the wall starts bare; the Menu Board is a tier-1 buy, since it was never drawn (D160).
+  { id: 'none', slot: 'wallArt', name: 'Bare Wall', tier: 1, colorways: ['classic'], free: true },
+  { id: 'menu-board', slot: 'wallArt', name: 'Menu Board', tier: 1, colorways: ['classic'] },
   {
     id: 'neon-open',
     slot: 'wallArt',
@@ -247,6 +249,7 @@ export const STARTER_SHELF: readonly string[] = [
   'counter.cake-stand.berry',
   'counter.cookie-jar.sky',
   'wallArt.neon-open.berry',
+  'wallArt.menu-board.classic',
   'window.garden.classic',
   'lights.disco-ball.classic',
   'counter.tiny-robot.sky',
