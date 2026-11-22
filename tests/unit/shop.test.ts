@@ -137,8 +137,13 @@ describe('buying (SPEC §10, §11.2)', () => {
 });
 
 describe('crates (SPEC §10.1, D154)', () => {
-  it('the hold at 6: no crate while 6 or more unbought entries are on the shelf', () => {
+  it('the first crate skips the hold (D176); later ones wait below 6 unbought', () => {
     const dv = new Device();
+    expect(unboughtOnShelf(dv.d)).toHaveLength(18);
+    // The very first visit brings crate 1, though all 18 starter entries are unbought.
+    expect(dv.visit()).toEqual({ n: 1, next: 30 });
+    for (const k of crateEntries(1)) expect(shelfKeys(dv.d)).toContain(k);
+    expect(unboughtOnShelf(dv.d)).toHaveLength(20);
     dv.serve(200);
     expect(dv.visit()).toBeNull();
     dv.buyDownTo(CRATE_HOLD_AT_UNBOUGHT);
@@ -146,8 +151,8 @@ describe('crates (SPEC §10.1, D154)', () => {
     expect(dv.visit()).toBeNull();
     dv.buyDownTo(5);
     const c = dv.visit();
-    expect(c).toEqual({ n: 1, next: servedMonsters(dv.d) + 1 });
-    for (const k of crateEntries(1)) expect(shelfKeys(dv.d)).toContain(k);
+    expect(c).toEqual({ n: 2, next: servedMonsters(dv.d) + 1 });
+    for (const k of crateEntries(2)) expect(shelfKeys(dv.d)).toContain(k);
     expect(unboughtOnShelf(dv.d)).toHaveLength(7);
   });
 

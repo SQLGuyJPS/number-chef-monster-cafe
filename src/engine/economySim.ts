@@ -147,6 +147,8 @@ export function simulate(input: SimInput, rng: Rng): SimResult {
   const queue: ShopEntry[] = [];
   const opened = new Set<string>();
   let nextCrateAt = Infinity;
+  /** Crates delivered so far (the first skips the hold, D176). */
+  let delivered = 0;
   const weeks: WeekStat[] = [];
 
   const openWaves = (week: number) => {
@@ -168,7 +170,9 @@ export function simulate(input: SimInput, rng: Rng): SimResult {
     // D154: a due crate is written when she opens the shop, one per visit. The next one is due
     // `everyMonsters` after this one was due, so waiting for the shop visit doesn't stretch the
     // pace; after a hold or a long gap it is due at the next visit (the event's `next`).
-    if (queue.length > 0 && monsters >= nextCrateAt && unowned().length < hold) {
+    // The very first crate skips the hold (D176).
+    if (queue.length > 0 && monsters >= nextCrateAt && (delivered === 0 || unowned().length < hold)) {
+      delivered++;
       for (const e of queue.splice(0, input.crates.size)) shop.set(e.key, e);
       nextCrateAt = Math.max(nextCrateAt + input.crates.everyMonsters, monsters + 1);
     }

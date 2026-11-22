@@ -1027,3 +1027,8 @@ The decor lint check covers only what can be checked mechanically among the firm
 **What:** Amends §10 (D169). Pip's shop captions stay on screen until his line ends or 2.5 s have passed, whichever is later. The slot names are spoken and captioned with an exclamation mark ("Wallpaper!", "Counter top!"), as every spoken line ends in ?, . or ! (the punctuation sets the intonation of the recording, `lint:content`).
 **Why:** A line that ends early (a fast voice, or no voice at all) would otherwise flash its caption, and the owner wants captions readable (D168). The content lint rejects unpunctuated lines.
 **How to revisit:** `CAPTION_MIN_MS` in `Shop.tsx`; the phrase table.
+
+## D176 — The first crate skips the hold (2026-11-22)
+**What:** Amends §10.1 and §11.2 (D151, D154). The very first delivery crate (n = 1) arrives on the child's first shop visit even though the 18-entry starter shelf is unbought; every later crate keeps the hold at 6 unbought. Only crate 1 ever skips it: a crate that opens a later update still waits for the hold.
+**Why:** With the hold applying, crate 1 waited until she had bought 13 of the 18 starter entries (about 450 coins), so the delivery moment, which is part of what the owner playtests, came weeks in. Owner's call after the M4a review, 2026-11-22. It also shows her early that new things arrive. The simulator does the same; the M4 stock still lasts about 1.8 months at the default profile, with about one more unbought choice on average (ECONOMY_SIM.md).
+**How to revisit:** the `last > 0` condition in `dueCrate` (engine/shop.ts) and `delivered === 0` in economySim.ts.

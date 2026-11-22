@@ -183,3 +183,4 @@
 | D173 | Delivered entries rise and hang, then show starred on the shelf; no flight to the tiles | SPEC §10.1 | Their tiles are often on another tab or page |
 | D174 | Delivery stars are a per-device setting, not an event | SPEC §10.1 | A cue, not progress |
 | D175 | Shop captions stay at least 2.5 s; slot names end with "!" | SPEC §10 | Readable captions (D168); lint wants punctuation |
+| D176 | The first crate skips the hold at 6 unbought; later crates keep it | SPEC §10.1, §11.2 | Owner wants the delivery moment on the first shop visit |

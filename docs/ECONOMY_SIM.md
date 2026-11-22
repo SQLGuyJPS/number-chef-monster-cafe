@@ -86,9 +86,9 @@ M4 opens with a starter shelf of 18 entries (795 coins); the other 33 arrive in 
 
 | Setup | Habit | First purchase: end of sitting / after services | Bought out (weeks) | Bought out (months) | Mean unbought items on the shelf | Sittings ending with a purchase | Longest dry spell (sittings, 90th pct) |
 |---|---|---|---|---|---|---|---|
-| Starter shelf + crates | impulse | 1 / 4 | 8.3 (7.9–8.6) | 1.9 | 6.5 | 100% | 0 |
-| Starter shelf + crates | cheapest | 1 / 4 | 7.6 (7.4–7.9) | 1.8 | 5.6 | 96% | 1 |
-| Starter shelf + crates | saver | 1 / 4 | 8.0 (7.9–8.4) | 1.8 | 6.0 | 92% | 1 |
+| Starter shelf + crates | impulse | 1 / 4 | 8.3 (7.9–8.6) | 1.9 | 7.1 | 100% | 0 |
+| Starter shelf + crates | cheapest | 1 / 4 | 7.6 (7.4–7.9) | 1.8 | 6.5 | 96% | 2 |
+| Starter shelf + crates | saver | 1 / 4 | 8.0 (7.7–8.3) | 1.8 | 6.7 | 92% | 1 |
 | All on day one | impulse | 1 / 4 | 8.0 (7.6–8.6) | 1.8 | 26.0 | 100% | 0 |
 | All on day one | cheapest | 1 / 4 | 7.6 (7.4–7.7) | 1.8 | 17.9 | 92% | 1 |
 | All on day one | saver | 1 / 4 | 7.6 (7.4–7.7) | 1.8 | 26.3 | 93% | 1 |
@@ -100,9 +100,9 @@ M4 opens with a starter shelf of 18 entries (795 coins); the other 33 arrive in 
 | Prices × 0.8 | 1,860 | 8.3 (7.9–8.6) | 1.9 |
 | Prices as set (D148) | 2,305 | 8.3 (7.9–8.6) | 1.9 |
 | Prices × 1.2 | 2,695 | 8.9 (8.6–9.0) | 2.1 |
-| 45 min a week | 2,305 | 10.5 (10.0–10.9) | 2.4 |
-| 90 min a week | 2,305 | 5.4 (5.2–5.4) | 1.2 |
-| Services take 4–5 min | 2,305 | 9.6 (9.3–9.8) | 2.2 |
+| 45 min a week | 2,305 | 10.4 (9.9–10.9) | 2.4 |
+| 90 min a week | 2,305 | 5.2 (5.2–5.4) | 1.2 |
+| Services take 4–5 min | 2,305 | 9.5 (9.3–9.7) | 2.2 |
 | 8 orders a service | 2,305 | 8.3 (8.0–8.7) | 1.9 |
 
 ## Later content (planned counts, not designed yet)
@@ -136,8 +136,8 @@ Shop-stock, waiting and dry-spell columns count from the decor wave on; a later 
 | 3 every 90 monsters (≈ every 7.3 days) | 42 | 12.5 (12.5–12.7) | 1.1 | 46% | 0 |
 | 4 every 90 monsters (≈ every 7.3 days) | 32 | 9.5 (9.4–9.5) | 1.6 | 45% | 0 |
 | 4 every 120 monsters (≈ every 9.7 days) | 32 | 12.4 (12.3–12.5) | 1.2 | 59% | 0 |
-| 2 every 30 monsters, held while 6+ unbought **(chosen, D149, D151)** (≈ every 2.4 days) | 62 | 9.5 (9.4–9.5) | 4.3 | 5% | 2 |
+| 2 every 30 monsters, held while 6+ unbought **(chosen, D149, D151)** (≈ every 2.4 days) | 62 | 9.5 (9.4–9.5) | 4.4 | 5% | 2 |
 | 2 every 40 monsters, held while 6+ unbought (≈ every 3.2 days) | 62 | 9.3 (9.2–9.4) | 1.3 | 35% | 2 |
-| 3 every 45 monsters, held while 6+ unbought (≈ every 3.7 days) | 42 | 9.5 (9.4–9.6) | 4.9 | 1% | 2 |
+| 3 every 45 monsters, held while 6+ unbought (≈ every 3.7 days) | 42 | 9.5 (9.4–9.6) | 5.0 | 1% | 2 |
 | No crates (each wave all at once) | — | 9.5 (9.4–9.6) | 31.8 | 0% | 2 |
 

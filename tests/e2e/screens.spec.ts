@@ -392,6 +392,9 @@ test('M4a screenshots', async ({ page }, info) => {
   await page.evaluate(() => window.__ncmc.earn(30, 8));
   await shot('home-with-shop');
   await tapId(page, 'shop-button');
+  // The first visit brings crate 1 (D176); let it play out before the shelf shots.
+  await tapId(page, 'shop-crate');
+  await expect(page.getByTestId('shop-delivery')).toHaveCount(0, { timeout: 8_000 });
   await shot('shop-wallpaper');
   await tapId(page, 'shop-dot-wallpaper.plain.berry');
   await shot('shop-try-on');

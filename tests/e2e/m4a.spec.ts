@@ -9,9 +9,17 @@ import { openService, tapId } from './service';
 const shop = (page: Page) => page.evaluate(() => window.__ncmc.shop());
 const kinds = async (page: Page) => (await page.evaluate(() => window.__ncmc.progress()))!.kinds;
 
-async function openShop(page: Page) {
+/**
+ * Opens the shop. With `settle`, a delivery (the first visit always brings crate 1, D176) is
+ * opened and waited out, so the shelf takes taps.
+ */
+async function openShop(page: Page, settle = true) {
   await tapId(page, 'shop-button');
   await expect(page.getByTestId('screen-shop')).toBeVisible();
+  if (settle && (await page.getByTestId('shop-delivery').count()) > 0) {
+    await tapId(page, 'shop-crate');
+    await expect(page.getByTestId('shop-delivery')).toHaveCount(0, { timeout: 8_000 });
+  }
 }
 
 test('buy with confirm, live preview, equip; persists across a reload', async ({ page }) => {
@@ -80,16 +88,25 @@ test('below the price: Buy is dimmed and only gets Pip’s line', async ({ page 
   await expect(page.locator('[data-decor="lights"]')).toHaveCount(0);
 });
 
-test('a crate: held at 6 unbought, then one per visit, recorded once', async ({ page }) => {
+test('a crate: the first on the first visit, then held at 6 unbought, one per visit, recorded once', async ({
+  page,
+}) => {
   await startApp(page);
-  await page.evaluate(() => window.__ncmc.earn(2000, 40));
+  await page.evaluate(() => window.__ncmc.earn(2000, 0));
+  // The very first visit brings crate 1 though 18 starter entries are unbought (D176).
+  await openShop(page, false);
+  await expect(page.getByTestId('shop-delivery')).toBeVisible();
+  await expect(page.getByTestId('shop-delivery')).toHaveCount(0, { timeout: 8_000 });
+  expect((await shop(page))!.unbought).toHaveLength(20);
+  await tapId(page, 'shop-home');
+  // 40 monsters later crate 2 is due, but 20 unbought hold it.
+  await page.evaluate(() => window.__ncmc.earn(0, 40));
   await openShop(page);
-  // 18 unbought on the starter shelf: the hold applies.
   await expect(page.getByTestId('shop-delivery')).toHaveCount(0);
   await tapId(page, 'shop-home');
   await page.evaluate(async () => {
     const s = (await window.__ncmc.shop())!;
-    for (const k of s.unbought.slice(0, 12)) await window.__ncmc.buy(k);
+    for (const k of s.unbought.slice(0, 14)) await window.__ncmc.buy(k);
   });
   expect((await shop(page))!.unbought).toHaveLength(6);
   await openShop(page);
@@ -100,17 +117,17 @@ test('a crate: held at 6 unbought, then one per visit, recorded once', async ({ 
     await window.__ncmc.buy(s.unbought[0]!);
   });
 
-  await openShop(page);
+  await openShop(page, false);
   await expect(page.getByTestId('shop-delivery')).toBeVisible();
   await expect(page.getByTestId('caption')).toHaveText('A delivery arrived!');
   await tap(page, page.getByTestId('shop-crate'));
   await expect(page.getByTestId('shop-delivery')).toHaveAttribute('data-phase', 'open');
   await expect(page.getByTestId('shop-delivery')).toHaveCount(0, { timeout: 5_000 });
   const s = (await shop(page))!;
-  expect(Object.keys(s.crates)).toEqual(['1']);
+  expect(Object.keys(s.crates)).toEqual(['1', '2']);
   expect(s.unbought).toHaveLength(7);
   // The new entries are starred, with their tab.
-  await expect(page.getByTestId('shop-tab-wallpaper').locator('.shop-new')).toHaveCount(1);
+  await expect(page.locator('.shop-tab .shop-new').first()).toBeVisible();
 
   // The next visit, with no monster served since, brings nothing more; nor does a reload.
   await tapId(page, 'shop-home');
@@ -120,7 +137,7 @@ test('a crate: held at 6 unbought, then one per visit, recorded once', async ({ 
   await startApp(page);
   await openShop(page);
   await expect(page.getByTestId('shop-delivery')).toHaveCount(0);
-  expect((await kinds(page)).filter((k) => k === 'crate')).toHaveLength(1);
+  expect((await kinds(page)).filter((k) => k === 'crate')).toHaveLength(2);
 });
 
 test('shop tap targets are big enough at 844×390, on every page of every slot', async ({ page }, info) => {

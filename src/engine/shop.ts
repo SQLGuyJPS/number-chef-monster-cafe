@@ -78,7 +78,8 @@ export const unboughtOnShelf = (d: Derived): string[] =>
 /**
  * The crate to record on this shop visit, or null (SPEC §11.2, D154): one per visit, if queued
  * entries remain, the monsters served have reached the due point (the first crate is due at
- * once), and fewer than 6 unbought entries are on the shelf. `next` keeps the pace at 30 monsters
+ * once), and fewer than 6 unbought entries are on the shelf. The very first crate skips the hold
+ * (D176), so the delivery moment is part of her first shop visit, not ~450 coins later. `next` keeps the pace at 30 monsters
  * from the due point, but never in the past, so a backlog arrives one visit at a time.
  */
 export function dueCrate(d: Derived): { n: number; next: number } | null {
@@ -89,7 +90,7 @@ export function dueCrate(d: Derived): { n: number; next: number } | null {
   const due = last === 0 ? 0 : d.crates[last]!;
   const served = servedMonsters(d);
   if (served < due) return null;
-  if (unboughtOnShelf(d).length >= CRATE_HOLD_AT_UNBOUGHT) return null;
+  if (last > 0 && unboughtOnShelf(d).length >= CRATE_HOLD_AT_UNBOUGHT) return null;
   return { n, next: Math.max(due + CRATE_EVERY_MONSTERS, served + 1) };
 }
 
