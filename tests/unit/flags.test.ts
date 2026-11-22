@@ -9,6 +9,7 @@ describe('parseFlags', () => {
       gallery: false,
       speedtest: false,
       mock: false,
+      decor: false,
     });
   });
   it('?debug', () => {
@@ -18,6 +19,7 @@ describe('parseFlags', () => {
       gallery: false,
       speedtest: false,
       mock: false,
+      decor: false,
     });
   });
   it('?rotate=off', () => {
@@ -27,6 +29,7 @@ describe('parseFlags', () => {
       gallery: false,
       speedtest: false,
       mock: false,
+      decor: false,
     });
   });
   it('?debug&rotate=off', () => {
@@ -36,6 +39,7 @@ describe('parseFlags', () => {
       gallery: false,
       speedtest: false,
       mock: false,
+      decor: false,
     });
   });
   it('other rotate values keep rotation on', () => {
@@ -45,6 +49,7 @@ describe('parseFlags', () => {
       gallery: false,
       speedtest: false,
       mock: false,
+      decor: false,
     });
   });
 });

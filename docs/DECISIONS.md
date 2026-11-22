@@ -178,3 +178,8 @@
 | D168 | Caption bubble shrinks to fit its text, anchored so its tail still points at the speaker | SPEC §5.4 | Owner: less of the room covered; captions stay for reading |
 | D169 | Pip says a slot's name (with caption) when its shop tab is tapped | SPEC §10 | Owner: picture-only tabs need a name |
 | D170 | Results: four buttons on one line (Change dish, Another service, Shop, Home), text 38 px | SPEC §5.7 | Owner asked for Shop on Results in M4a |
+| D171 | Crate order: catalog order round-robin across items (`CRATE_QUEUE`), the same as the simulator | SPEC §11.2 | Two colours of one item in a crate feel like one new thing |
+| D172 | Yes! buys and equips; owned tiles and dots equip on a tap; a try-on is dropped on a tab change or leaving | SPEC §10 | Spec did not say what a purchase does to the café |
+| D173 | Delivered entries rise and hang, then show starred on the shelf; no flight to the tiles | SPEC §10.1 | Their tiles are often on another tab or page |
+| D174 | Delivery stars are a per-device setting, not an event | SPEC §10.1 | A cue, not progress |
+| D175 | Shop captions stay at least 2.5 s; slot names end with "!" | SPEC §10 | Readable captions (D168); lint wants punctuation |

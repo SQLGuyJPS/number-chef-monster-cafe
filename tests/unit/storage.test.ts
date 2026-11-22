@@ -26,7 +26,7 @@ describe.each(backends)('%s', (_name, make) => {
   it('ensureMeta writes schemaVersion, createdAt (injected clock) and a deviceId', async () => {
     const s = await make();
     const meta = await ensureMeta(s, () => 12345);
-    expect(meta.schemaVersion).toBe(1);
+    expect(meta.schemaVersion).toBe(SCHEMA_VERSION);
     expect(meta.deviceId).toMatch(/^[0-9a-f-]{36}$/);
     expect(await s.getMeta('schemaVersion')).toBe(SCHEMA_VERSION);
     expect(await s.getMeta('createdAt')).toBe(12345);
@@ -69,7 +69,7 @@ describe.each(backends)('%s', (_name, make) => {
 
   it('ensureMeta throws UnknownSchemaVersionError for a newer stored schema', async () => {
     const s = await make();
-    await s.setMeta('schemaVersion', 2);
+    await s.setMeta('schemaVersion', SCHEMA_VERSION + 1);
     await expect(ensureMeta(s, () => 0)).rejects.toBeInstanceOf(UnknownSchemaVersionError);
     s.close();
   });
@@ -111,7 +111,7 @@ describe('openStorage', () => {
     expect(boot.storage.kind).toBe('idb');
     expect(boot.degraded).toBe(false);
     expect(boot.error).toBeUndefined();
-    expect(boot.schemaVersion).toBe(1);
+    expect(boot.schemaVersion).toBe(SCHEMA_VERSION);
     expect(boot.deviceId).toBeTruthy();
     boot.storage.close();
   });
@@ -128,6 +128,6 @@ describe('openStorage', () => {
     expect(typeof boot.error).toBe('string');
     expect(boot.error).toContain('denied');
     expect(boot.deviceId).toBeTruthy();
-    expect(boot.schemaVersion).toBe(1);
+    expect(boot.schemaVersion).toBe(SCHEMA_VERSION);
   });
 });

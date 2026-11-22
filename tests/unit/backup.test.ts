@@ -150,7 +150,7 @@ describe('import validation', () => {
   });
 
   it('refuses a newer schema with a clear message', async () => {
-    await expect(parseImport(JSON.stringify({ ...(await good()), schemaVersion: 2 }))).rejects.toThrow(/newer app version/);
+    await expect(parseImport(JSON.stringify({ ...(await good()), schemaVersion: 3 }))).rejects.toThrow(/newer app version/);
   });
 
   it('rejects a damaged event', async () => {

@@ -70,6 +70,25 @@ export function entryPrice(
   return index === 0 ? tiers[def.tier] : roundTo5(tiers[def.tier] * COLORWAY_SHARE);
 }
 
+/**
+ * Round-robin across item names, so a crate mixes, say, a wallpaper and a lamp rather than two
+ * colours of one thing. Deterministic: the crate order is fixed, never random (D154).
+ */
+export function interleave<E extends { name: string }>(entries: readonly E[]): E[] {
+  const groups = new Map<string, E[]>();
+  for (const e of entries) {
+    const list = groups.get(e.name) ?? [];
+    list.push(e);
+    groups.set(e.name, list);
+  }
+  const lists = [...groups.values()];
+  const out: E[] = [];
+  for (let i = 0; out.length < entries.length; i++) {
+    for (const list of lists) if (i < list.length) out.push(list[i]!);
+  }
+  return out;
+}
+
 export function expandCatalog(
   defs: readonly ItemDef[],
   tiers: Readonly<Record<Tier, number>> = TIER_PRICE,

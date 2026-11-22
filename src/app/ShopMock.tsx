@@ -13,6 +13,7 @@ import { TapButton } from '../game/input/TapButton';
 import { COUNTER, COUNTER_Y, FRONT, RESULTS4, SHOP, SHOP_PAGE } from './metrics';
 import { lookFor, swatchOf } from './decorLook';
 import {
+  Brush,
   ColourDots,
   ItemTile,
   MiniStandIn,
@@ -377,18 +378,6 @@ export function ShopMock({ variant }: { variant: ShopMockVariant }) {
       {variant === 'confirm' && <Confirm e={preview} />}
       {variant === 'delivery' && <Delivery phase={phaseParam()} />}
     </div>
-  );
-}
-
-function Brush() {
-  return (
-    <svg className="shop-brush" viewBox="0 0 64 64" aria-hidden="true">
-      <g transform="rotate(35 32 32)">
-        <rect x={27} y={2} width={10} height={30} rx={5} fill="#b98352" />
-        <rect x={25} y={30} width={14} height={8} rx={2} fill="#9aa6b2" />
-        <path d="M25 38 h14 q2 12 -7 22 q-9 -10 -7 -22 Z" fill="#d9487f" />
-      </g>
-    </svg>
   );
 }
 

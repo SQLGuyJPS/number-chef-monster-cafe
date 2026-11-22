@@ -401,3 +401,9 @@ html.reduce-motion .dbox.open .dbox-closed {
 .results4 {
   font-size: 38px;
 }
+
+/* Below the price (D164): dimmed, and a tap gets only Pip's "Keep cooking to save up!". */
+.shop-buy.short {
+  filter: saturate(0.3);
+  opacity: 0.55;
+}

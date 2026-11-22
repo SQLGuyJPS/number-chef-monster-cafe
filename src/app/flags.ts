@@ -8,6 +8,8 @@ export interface BootFlags {
   speedtest: false | 'full' | 'quick';
   /** `?mock`: the over-the-counter layout mock (look only, owner review before M3a). */
   mock: boolean;
+  /** `?decor` (D156): the shop contact sheet, every M4 entry in place in the café. */
+  decor: boolean;
 }
 
 export function parseFlags(search: string): BootFlags {
@@ -19,5 +21,7 @@ export function parseFlags(search: string): BootFlags {
     gallery: q.has('gallery'),
     speedtest: st === null ? false : st === 'quick' ? 'quick' : 'full',
     mock: q.has('mock'),
+    // `?mock&decor` is the service mock with every slot dressed; the sheet is `?decor` alone.
+    decor: q.has('decor') && !q.has('mock'),
   };
 }

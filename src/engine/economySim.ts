@@ -3,7 +3,7 @@
 // one of three habits. Answers: when is the first purchase, when is the shop bought out, how often
 // does a sitting end with something new, and how long are the dry spells. Pure: no clock.
 import { COINS_PER_PROBLEM, SERVICE_TIP } from './config';
-import type { ShopEntry } from './economy';
+import { interleave, type ShopEntry } from './economy';
 import type { Rng } from './rng';
 
 export interface PlayProfile {
@@ -114,21 +114,7 @@ export interface SimResult {
 const uniform = (rng: Rng, [lo, hi]: readonly [number, number]): number =>
   lo + rng.next() * (hi - lo);
 
-/** Round-robin across names so a crate mixes, say, a hat, a skin and a colorway. */
-export function interleave(entries: readonly ShopEntry[]): ShopEntry[] {
-  const groups = new Map<string, ShopEntry[]>();
-  for (const e of entries) {
-    const list = groups.get(e.name) ?? [];
-    list.push(e);
-    groups.set(e.name, list);
-  }
-  const lists = [...groups.values()];
-  const out: ShopEntry[] = [];
-  for (let i = 0; out.length < entries.length; i++) {
-    for (const list of lists) if (i < list.length) out.push(list[i]!);
-  }
-  return out;
-}
+export { interleave } from './economy';
 
 export function simulate(input: SimInput, rng: Rng): SimResult {
   const p = input.profile;

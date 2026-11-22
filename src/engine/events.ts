@@ -94,8 +94,25 @@ export interface BuyEvt extends EvtBase {
   price: number;
 }
 
-/** Every event M3a reads or writes. `equip`, `known` and `focus` join with M4 and M7. */
-export type Evt = FrozenEvt | ServiceEndEvt | SkillConfigEvt | BuyEvt;
+/** What a slot shows (M4): the entry keys equipped there, latest `t` wins per slot (§11.2). */
+export interface EquipEvt extends EvtBase {
+  k: 'equip';
+  slot: string;
+  items: string[];
+}
+
+/**
+ * Delivery crate `n` arrived (SPEC §10.1, §11.2, D154); crate n+1 is due at `next` monsters served.
+ * Added in schemaVersion 2.
+ */
+export interface CrateEvt extends EvtBase {
+  k: 'crate';
+  n: number;
+  next: number;
+}
+
+/** Every event the app reads or writes. `known` and `focus` join with M7. */
+export type Evt = FrozenEvt | ServiceEndEvt | SkillConfigEvt | BuyEvt | EquipEvt | CrateEvt;
 export type EvtKind = Evt['k'];
 
 export function serviceEndEvent(
@@ -118,4 +135,16 @@ export function skillConfigEvent(
   a: { skill: SkillId; stage: Stage; ops: Ops },
 ): SkillConfigEvt {
   return { id: ctx.id(), t: ctx.now(), dev: ctx.dev, v: EVENT_VERSION, k: 'skillConfig', ...a };
+}
+
+export function buyEvent(ctx: EventContext, a: { item: string; price: number }): BuyEvt {
+  return { id: ctx.id(), t: ctx.now(), dev: ctx.dev, v: EVENT_VERSION, k: 'buy', ...a };
+}
+
+export function equipEvent(ctx: EventContext, a: { slot: string; items: string[] }): EquipEvt {
+  return { id: ctx.id(), t: ctx.now(), dev: ctx.dev, v: EVENT_VERSION, k: 'equip', ...a };
+}
+
+export function crateEvent(ctx: EventContext, a: { n: number; next: number }): CrateEvt {
+  return { id: ctx.id(), t: ctx.now(), dev: ctx.dev, v: EVENT_VERSION, k: 'crate', ...a };
 }

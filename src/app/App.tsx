@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ServiceScreen } from '../game/service/ServiceScreen';
 import type {
   ProblemRecord,
@@ -37,8 +37,36 @@ import { unlockFromGesture } from '../audio/unlock';
 import { setCurrentScreen } from './runtime';
 import { hushVoice } from '../audio/voice';
 import type { ScreenId } from './pwaPolicy';
+import { Shop } from './screens/Shop';
+import { addShopFresh, loadShopFresh } from './shopFresh';
+import { crateEntries, DECOR_SLOTS, entryOf, equippedKey } from '../engine/shop';
+import type { DecorSlot } from '../engine/economy';
+import type { DecorView } from '../art/CounterScene';
+import { lookFor } from './decorLook';
 
-type AppScreen = Extract<ScreenId, 'splash' | 'home' | 'menu' | 'service' | 'results' | 'gate' | 'parent'>;
+/**
+ * What the café shows (SPEC §10): each slot's equipped entry, or the one being tried on in the
+ * shop. A slot on its free default draws the café as it was (the scene's own wall, floor and
+ * window; nothing on the empty spots).
+ */
+function decorOf(d: Parameters<typeof equippedKey>[0], preview: Preview | null): DecorView {
+  const out: DecorView = {};
+  for (const slot of DECOR_SLOTS) {
+    const key = preview?.slot === slot ? preview.key : equippedKey(d, slot);
+    const e = entryOf(key);
+    if (e && e.price > 0) out[slot] = lookFor(e);
+  }
+  return out;
+}
+interface Preview {
+  slot: DecorSlot;
+  key: string;
+}
+
+type AppScreen = Extract<
+  ScreenId,
+  'splash' | 'home' | 'menu' | 'service' | 'results' | 'shop' | 'gate' | 'parent'
+>;
 
 interface RunningService {
   svc: string;
@@ -95,6 +123,23 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   const [basket, setBasket] = useState<BasketSide>('right');
   /** The dish tiles wait for the per-device settings, so a quick first tap can't start with defaults. */
   const [settingsReady, setSettingsReady] = useState(() => getStorageBoot() === null);
+  /** The shop's try-on (SPEC §10); only while the shop is open. */
+  const [preview, setPreview] = useState<Preview | null>(null);
+  /** The crate recorded when the shop opened (D154), for its delivery moment. */
+  const [crate, setCrate] = useState<number | null>(null);
+  const decor = useMemo(
+    () => decorOf(derived, screen === 'shop' ? preview : null),
+    [derived, preview, screen],
+  );
+  const onPreview = useCallback((slot: DecorSlot, key: string | null) => {
+    setPreview(key === null ? null : { slot, key });
+  }, []);
+
+  useEffect(() => {
+    void getStorageBoot()
+      ?.then((boot) => loadShopFresh(boot.storage))
+      .catch(() => undefined);
+  }, []);
 
   // Per-device settings and the event log; read whenever the menu opens so the tile tap can start
   // the service synchronously, inside the user gesture.
@@ -176,6 +221,18 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
   const go = (next: AppScreen) => {
     setScreen(next);
     pushGuard();
+  };
+
+  /**
+   * Opening the shop is a visit (D154): at most one due crate is recorded, from the tap, and its
+   * entries are starred until tapped (D164).
+   */
+  const openShop = () => {
+    const n = loadedProgress()?.deliverCrate() ?? null;
+    if (n !== null) addShopFresh(crateEntries(n));
+    setCrate(n);
+    setPreview(null);
+    go('shop');
   };
 
   const startService = (skill: SkillId) => {
@@ -294,7 +351,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
       background={<div className="cafe-backdrop counter-backdrop" />}
     >
       {/* Every child screen is seen from behind the same counter (D114, D123). */}
-      <CounterScene />
+      <CounterScene decor={decor} />
       {screen === 'splash' && (
         <Splash
           onStart={() => {
@@ -304,7 +361,12 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
         />
       )}
       {screen === 'home' && (
-        <Home coins={coins} onOpen={() => go('menu')} onGear={() => setGearOpen(true)} />
+        <Home
+          coins={coins}
+          onOpen={() => go('menu')}
+          onShop={openShop}
+          onGear={() => setGearOpen(true)}
+        />
       )}
       {screen === 'home' && offer && !gearOpen && (
         <ResumeDialog
@@ -335,6 +397,15 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
           ready={settingsReady}
         />
       )}
+      {screen === 'shop' && (
+        <Shop
+          derived={derived}
+          coins={coins}
+          crate={crate}
+          onPreview={onPreview}
+          onHome={() => go('home')}
+        />
+      )}
       {screen === 'service' && service && (
         <ServiceScreen
           key={service.svc}
@@ -363,6 +434,7 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
           // SPEC §5.7: Another service repeats the skill; Change dish goes back to the menu board.
           onAnother={() => startService(service.skill)}
           onChangeDish={() => go('menu')}
+          onShop={openShop}
           onHome={() => go('home')}
         />
       )}

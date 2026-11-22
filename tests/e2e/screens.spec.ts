@@ -372,3 +372,99 @@ test('M3b screenshots', async ({ page }, info) => {
   await page.getByTestId('confirm-gate').waitFor();
   await shot('import-gate');
 });
+
+// M4a (SPEC §10, §13.5): Home and Results with Shop, the shop's states, a delivery, purchases in
+// the service, and the `?decor` contact sheet (D156), at 1194×834 and 844×390.
+test('M4a screenshots', async ({ page }, info) => {
+  test.skip(milestone !== 'M4a' || !SERVICE_SHOTS.includes(info.project.name), 'M4a shots at 1194×834 and 844×390');
+  test.setTimeout(180_000);
+  const dir = `docs/screens/${milestone}`;
+  mkdirSync(dir, { recursive: true });
+  const vp = page.viewportSize()!;
+  const tag = `${vp.width}x${vp.height}`;
+  const shot = (name: string, fullPage = false) =>
+    page.screenshot({ path: `${dir}/${name}-${tag}.png`, fullPage });
+  const still = () =>
+    page.addStyleTag({ content: '*{animation:none!important;transition:none!important}' });
+
+  // A first visit: 30 coins, the starter shelf.
+  await startApp(page);
+  await page.evaluate(() => window.__ncmc.earn(30, 8));
+  await shot('home-with-shop');
+  await tapId(page, 'shop-button');
+  await shot('shop-wallpaper');
+  await tapId(page, 'shop-dot-wallpaper.plain.berry');
+  await shot('shop-try-on');
+  await tapId(page, 'shop-buy');
+  await shot('shop-confirm');
+  await tapId(page, 'shop-yes');
+  await shot('shop-bought');
+  await tapId(page, 'shop-tab-lights');
+  await tapId(page, 'shop-tile-star-chandelier');
+  await tapId(page, 'shop-buy');
+  await shot('shop-not-enough-coins');
+
+  // Weeks later: most of the starter shelf bought, a crate due.
+  await tapId(page, 'shop-home');
+  await page.evaluate(async () => {
+    await window.__ncmc.earn(2000, 120);
+    const s = (await window.__ncmc.shop())!;
+    for (const k of s.unbought.slice(0, s.unbought.length - 5)) await window.__ncmc.buy(k);
+  });
+  await tapId(page, 'shop-button');
+  await expect(page.getByTestId('shop-delivery')).toHaveAttribute('data-phase', 'closed');
+  await shot('shop-delivery-closed');
+  await tapId(page, 'shop-crate');
+  await page.waitForTimeout(1000);
+  await shot('shop-delivery-open');
+  await expect(page.getByTestId('shop-delivery')).toHaveCount(0, { timeout: 5_000 });
+  await shot('shop-new-entries-starred');
+  // More crates over the next visits fill the wallpaper shelf to two pages.
+  for (let i = 0; i < 6; i++) {
+    await tapId(page, 'shop-home');
+    await page.evaluate(async () => {
+      await window.__ncmc.earn(0, 30);
+      const s = (await window.__ncmc.shop())!;
+      for (const k of s.unbought.slice(0, Math.max(0, s.unbought.length - 5))) await window.__ncmc.buy(k);
+    });
+    await tapId(page, 'shop-button');
+    await expect(page.getByTestId('shop-delivery')).toHaveCount(0, { timeout: 8_000 });
+  }
+  await tapId(page, 'shop-tab-wallpaper');
+  await still();
+  await shot('shop-wallpaper-page-1');
+  await tapId(page, 'shop-next');
+  await shot('shop-wallpaper-page-2');
+
+  // Purchases in the service (every slot dressed) and Results with Shop.
+  await page.evaluate(async () => {
+    for (const k of [
+      'wallpaper.polka-dots.berry',
+      'floor.tiles.berry',
+      'lights.string-lights.honey',
+      'window.garden.classic',
+      'counter.flower-vase.berry',
+      'wallArt.neon-open.berry',
+    ])
+      await window.__ncmc.buy(k);
+  });
+  await openService(page, { skill: 'A1', stage: 3, seed: 8 });
+  await waitPhase(page, 'building');
+  await shot('service-with-decor');
+  for (let i = 0; i < 6; i++) {
+    await expect.poll(async () => (await probe(page))?.index, { timeout: 20_000 }).toBe(i);
+    await waitPhase(page, 'building');
+    await serveCorrect(page);
+  }
+  await expect(page.getByTestId('results-shop')).toBeVisible({ timeout: 30_000 });
+  await still();
+  await shot('results-with-shop');
+
+  // The contact sheet, one slot per shot.
+  for (const slot of ['wallpaper', 'floor', 'lights', 'window', 'counter', 'wallArt']) {
+    await page.goto(`./?decor&slot=${slot}`);
+    await page.getByTestId('decor-sheet').waitFor();
+    await page.evaluate(() => document.fonts.ready);
+    await shot(`decor-${slot}`, true);
+  }
+});

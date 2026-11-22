@@ -31,7 +31,8 @@ function Tag({ x, y, text }: { x: number; y: number; text: string }) {
 /** Wallpaper: the wall in the item's base colour with an accent pattern, past the safe box. */
 export function WallpaperStandIn({ look }: { look: DecorLook }) {
   const r = DECOR.wallpaper;
-  const id = `w-${look.item}`;
+  // Unique per colour too: the contact sheet draws many cafés on one page, and ids are page-wide.
+  const id = `w-${look.item}-${look.base.slice(1)}-${look.accent.slice(1)}`;
   return (
     <g data-decor="wallpaper" data-item={look.item}>
       <defs>

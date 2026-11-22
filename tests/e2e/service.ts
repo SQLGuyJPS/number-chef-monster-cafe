@@ -66,6 +66,17 @@ interface Hooks {
     kinds: string[];
     events: { id: string; k: string }[];
   } | null>;
+  earn(coins: number, served?: number): Promise<void>;
+  buy(key: string): Promise<boolean>;
+  shop(): Promise<{
+    balance: number;
+    bought: string[];
+    equipped: Record<string, string>;
+    crates: Record<string, number>;
+    served: number;
+    shelf: string[];
+    unbought: string[];
+  } | null>;
 }
 declare global {
   interface Window {

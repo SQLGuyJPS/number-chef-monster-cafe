@@ -165,6 +165,7 @@ export type TileState = 'equipped' | 'owned' | 'forSale';
 export function ItemTile({
   rect,
   look,
+  item,
   name,
   state,
   price,
@@ -174,6 +175,8 @@ export function ItemTile({
 }: {
   rect: Rect;
   look: DecorLook | null;
+  /** For the test id when there is no look (the empty defaults). */
+  item?: string;
   name: string;
   state: TileState;
   price: number;
@@ -185,7 +188,7 @@ export function ItemTile({
     <TapButton
       className={`shop-tile ${state}${selected ? ' selected' : ''}`}
       style={at(rect)}
-      testId={`shop-tile-${look?.item ?? 'none'}`}
+      testId={`shop-tile-${item ?? look?.item ?? 'none'}`}
       label={name}
       tapKind="button"
       onTap={onTap}
@@ -285,5 +288,18 @@ export function PagePips({ rect, n, at: page }: { rect: Rect; n: number; at: num
         <span key={i} className={i === page ? 'on' : ''} />
       ))}
     </div>
+  );
+}
+
+/** The drawn paintbrush beside "Shop" (D163): a drawing, since the emoji allowlist is foods only. */
+export function Brush() {
+  return (
+    <svg className="shop-brush" viewBox="0 0 64 64" aria-hidden="true">
+      <g transform="rotate(35 32 32)">
+        <rect x={27} y={2} width={10} height={30} rx={5} fill="#b98352" />
+        <rect x={25} y={30} width={14} height={8} rx={2} fill="#9aa6b2" />
+        <path d="M25 38 h14 q2 12 -7 22 q-9 -10 -7 -22 Z" fill="#d9487f" />
+      </g>
+    </svg>
   );
 }

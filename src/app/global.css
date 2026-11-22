@@ -724,3 +724,42 @@ html.debug-mode #root {
   background: #fff6e4;
   border-radius: 12px;
 }
+
+/* ?decor contact sheet (D156; look-only, scrolls like ?gallery). */
+.decor-sheet {
+  padding: 16px;
+  background: var(--c-wall);
+  min-height: 100vh;
+  font-family: Andika, sans-serif;
+}
+.decor-sheet h2 {
+  margin: 12px 0 8px;
+  font-size: 22px;
+}
+.decor-grid {
+  display: grid;
+}
+.decor-card {
+  color: inherit;
+  text-decoration: none;
+}
+.decor-frame {
+  overflow: hidden;
+  border-radius: 10px;
+  background: #fff6e4;
+}
+.decor-label {
+  font-size: 15px;
+  font-weight: 700;
+  padding: 2px 4px 6px;
+}
+.decor-one-label {
+  position: absolute;
+  left: 24px;
+  bottom: 24px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: #fffaf0;
+  font-size: 28px;
+  font-weight: 700;
+}

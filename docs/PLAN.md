@@ -265,12 +265,12 @@ The play-time limit moved to M12 (D124).
 - **M17 Treat Time** (D149): repeatable party treat.
 - **M18 Café Staff** (D157): the Staff & pets slot moved out of M4: Pip as the free default, five animal staff drawn as characters to Pip's standard, idle loops and event reactions, up to 3 out; delivered by the crates. Re-run `economy:sim`.
 
-### 5.1 M4a — Coin shop with stand-in art (5.0 h, re-estimated 2026-11-22) — layout mock done, waiting for the owner's OK
+### 5.1 M4a — Coin shop with stand-in art (5.0 h, re-estimated 2026-11-22) — mock approved 2026-11-22; built 2026-11-22, awaiting the owner's playtest
 SPEC §14 said 3.5 h. It is more because the shop is a new screen with four states (browse, preview, confirm, delivery), the first schema change (D154), crates with their merge test, decor on every child screen, the `?decor` sheet and new spoken lines.
 
 | Step | Hours |
 |---|---|
-| 1. Layout mock (static; shop, confirm, delivery, Home button, café slots) — **done, stop for OK** | 0.5 |
+| 1. Layout mock (static; shop, confirm, delivery, Home button, café slots) — **done, approved** | 0.5 |
 | 2. Engine: `buy`/`equip`/`crate` events; replay derives owned, equipped per slot, delivered crates and the shelf; `shopVisit` (which crate is due, D154); `canBuy`; `schemaVersion` 2, migration + fixture test; import/export accept the new events | 1.25 |
 | 3. Scene: `CounterScene` draws the equipped decor (stand-ins) on every child screen; the six slots' rects in `metrics.ts` | 0.5 |
 | 4. Shop screen: tabs (Pip names them), paged tiles, colour dots, live preview, Buy + confirm, equip on tap, the delivery moment, Shop on Home and Results, back guard; caption fit (D168) | 1.25 |
@@ -284,13 +284,13 @@ SPEC §14 said 3.5 h. It is more because the shop is a new screen with four stat
 - **Home:** **Shop** (drawn paintbrush + word) right of Open the Café; the left space is for the Monster Album (D163).
 
 **Accept (SPEC §14 M4a)**
-- [ ] catalog matches §10 (2,305 coins, 51 paid entries; no bell entry) and `economy:sim` reports about 2 months at the default profile
-- [ ] crate arrival replay-derived and recorded as a `crate` event when first seen; `schemaVersion` 2 with migration and fixture test; two-device merge gives the same shelf
-- [ ] a backlog delivers one crate at a time; the hold at 6 unbought works
-- [ ] purchase idempotent and persisted; confirm prevents accidental buys; no code path lowers earned coins
-- [ ] purchases show on the Service screen (and every child screen)
+- [x] catalog matches §10 (2,305 coins, 51 paid entries; no bell entry) and `economy:sim` reports about 2 months at the default profile (`shop.test.ts`; sim unchanged)
+- [x] crate arrival replay-derived and recorded as a `crate` event when first seen; `schemaVersion` 2 with migration and fixture test; two-device merge gives the same shelf (`schema2.test.ts`, `shop.test.ts`)
+- [x] a backlog delivers one crate at a time; the hold at 6 unbought works (unit + `m4a.spec.ts`)
+- [x] purchase idempotent and persisted; confirm prevents accidental buys; no code path lowers earned coins (only `buy` events spend; `Progress.buy` checks `canBuy`)
+- [x] purchases show on the Service screen (and every child screen: one `CounterScene` behind all of them)
 - [x] the shop counts as play time — not applicable until M12 (D161)
-- [ ] `?decor` renders every entry at 1194×834 and 844×390
+- [x] `?decor` renders every entry at 1194×834 and 844×390 (`docs/screens/M4a/decor-*`)
 
 ---
 

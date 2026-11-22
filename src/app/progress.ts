@@ -2,7 +2,15 @@
 // in-memory derived state is the read source; every write updates it first, synchronously, so the
 // coin jar and the next service never wait for IndexedDB, then goes to disk in order.
 import { useSyncExternalStore } from 'react';
-import { skillConfigEvent, type Evt } from '../engine/events';
+import {
+  buyEvent,
+  crateEvent,
+  equipEvent,
+  skillConfigEvent,
+  type Evt,
+} from '../engine/events';
+import type { DecorSlot } from '../engine/economy';
+import { canBuy, dueCrate, entryOf, equippedKey, isOwned } from '../engine/shop';
 import {
   applyEvent,
   emptyDerived,
@@ -123,6 +131,36 @@ export class Progress {
 
   setSkillConfig(skill: SkillId, stage: Stage, ops: Ops): void {
     this.append([skillConfigEvent(this.ctx(), { skill, stage, ops })]);
+  }
+
+  /**
+   * A confirmed purchase (SPEC §10): `buy` and `equip` in one transaction, only if the engine says
+   * it may be bought, so a double tap or an old screen can never charge twice or go below zero.
+   */
+  buy(key: string): boolean {
+    const e = entryOf(key);
+    if (!e || canBuy(this.d, key) !== 'ok') return false;
+    const ctx = this.ctx();
+    this.append([
+      buyEvent(ctx, { item: key, price: e.price }),
+      equipEvent(ctx, { slot: e.slot, items: [key] }),
+    ]);
+    return true;
+  }
+
+  /** Re-equips an owned entry, free (SPEC §10); nothing is written if it is already on. */
+  equip(slot: DecorSlot, key: string): void {
+    if (!isOwned(this.d, key) || entryOf(key)?.slot !== slot) return;
+    if (equippedKey(this.d, slot) === key) return;
+    this.append([equipEvent(this.ctx(), { slot, items: [key] })]);
+  }
+
+  /** On opening the shop: records at most one due crate (D154) and returns its number. */
+  deliverCrate(): number | null {
+    const c = dueCrate(this.d);
+    if (!c) return null;
+    this.append([crateEvent(this.ctx(), c)]);
+    return c.n;
   }
 
   /** Resolves once every queued write has reached storage. */

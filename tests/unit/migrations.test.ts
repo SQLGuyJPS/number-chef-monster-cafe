@@ -26,13 +26,13 @@ const step2: Migration = {
 const chain: Migration[] = [step1, step2];
 
 describe('migration harness (D36)', () => {
-  it('ships schema 1 with no migrations', () => {
-    expect(SCHEMA_VERSION).toBe(1);
-    expect(migrations).toHaveLength(0);
+  it('ships schema 2 with one migration (M4a: equip and crate events, D154)', () => {
+    expect(SCHEMA_VERSION).toBe(2);
+    expect(migrations).toHaveLength(1);
     expect(() => validateChain(migrations, SCHEMA_VERSION)).not.toThrow();
   });
 
-  it('is the identity at v1 but returns a new array', () => {
+  it('v1 → v2 keeps every event as it was but returns a new array', () => {
     const input = [{ a: 1 }, { a: 2 }];
     const out = migrateEvents(input, 1);
     expect(out).toEqual(input);
@@ -40,7 +40,7 @@ describe('migration harness (D36)', () => {
   });
 
   it('rejects data from a newer schema with UnknownSchemaVersionError', () => {
-    expect(() => migrateEvents([], 2)).toThrow(UnknownSchemaVersionError);
+    expect(() => migrateEvents([], 3)).toThrow(UnknownSchemaVersionError);
     let caught: unknown;
     try {
       migrateEvents([], 5);
@@ -49,7 +49,7 @@ describe('migration harness (D36)', () => {
     }
     expect(caught).toBeInstanceOf(UnknownSchemaVersionError);
     expect((caught as UnknownSchemaVersionError).version).toBe(5);
-    expect((caught as UnknownSchemaVersionError).supported).toBe(1);
+    expect((caught as UnknownSchemaVersionError).supported).toBe(2);
   });
 
   it.each([0, 1.5, -1, NaN])('rejects invalid version %s', (v) => {

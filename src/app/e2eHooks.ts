@@ -10,7 +10,9 @@ import {
   setTimeScale,
 } from './runtime';
 import { getProgress } from './progress';
-import { balance } from '../engine/replay';
+import { balance, servedMonsters } from '../engine/replay';
+import { coinEvent, serviceEndEvent } from '../engine/events';
+import { DECOR_SLOTS, equippedKey, shelfKeys, unboughtOnShelf } from '../engine/shop';
 import { saveBasketSide } from './basketSide';
 import type { BasketSide } from './metrics';
 import type { Ops, SkillId, Stage } from '../engine/types';
@@ -54,6 +56,51 @@ export function installE2eHooks(): void {
         kinds: events.map((e) => e.k),
         events,
         resume: await p.storage.getResume(),
+      };
+    },
+    /**
+     * A finished service without playing it: `coins` into the jar and `served` monsters towards
+     * the next crate (M4a shop tests).
+     */
+    async earn(coins: number, served = 0) {
+      const p = await getProgress();
+      if (!p) return;
+      const svc = `e2e-${p.derived.count}`;
+      p.append([
+        coinEvent(p.ctx(), { svc, n: coins }),
+        serviceEndEvent(p.ctx(), {
+          svc,
+          skill: 'A1',
+          seed: 0,
+          orders: served,
+          served,
+          tip: 0,
+          activeMs: 0,
+          partial: false,
+        }),
+      ]);
+      await p.flush();
+    },
+    /** A confirmed purchase without the screen (as the shop's Yes! does). */
+    async buy(key: string) {
+      const p = await getProgress();
+      const ok = p?.buy(key) ?? false;
+      await p?.flush();
+      return ok;
+    },
+    /** The shop as the engine sees it (SPEC §10). */
+    async shop() {
+      const p = await getProgress();
+      if (!p) return null;
+      const d = p.derived;
+      return {
+        balance: balance(d),
+        bought: Object.keys(d.bought),
+        equipped: Object.fromEntries(DECOR_SLOTS.map((s) => [s, equippedKey(d, s)])),
+        crates: d.crates,
+        served: servedMonsters(d),
+        shelf: shelfKeys(d),
+        unbought: unboughtOnShelf(d),
       };
     },
     /** Basket side for the next service (D115). */

@@ -289,6 +289,27 @@ Owner notes (2026-11-20): D137 items pass. Two more changes (D138), to check on 
 - [ ] **Gate in a browser tab, landscape.** Open the gate in Safari (not the Home Screen app) with the phone sideways: "For grown-ups" is whole at the top, and you can scroll down to the pad if it doesn't fit. Notes:
 - [ ] **Last monster stays.** At the end of a service the last monster eats, stays where it is and says "All done! Thank you, chef!", without walking off first. Notes:
 
+## M4a — Coin shop with stand-in art (D155; the drawings come in M4b)
+Everything in the shop is a labelled placeholder shape for now: judge how it works and feels, not how it looks. Prices, crates and stars are the real ones.
+- [ ] **Getting there.** *Shop* (with the paintbrush) is right of *Open the Café* on Home and is the third button on Results. Easy to find? Notes:
+- [ ] **Tabs.** The six picture tabs at the top; tapping one, Pip says its name ("Wallpaper!", "Counter top!") with a caption. Does she know what each tab holds after hearing it? Notes:
+- [ ] **Trying on.** Tapping a tile or a colour dot shows it in the café at once; switching tab or going Home puts the café back as it was. Does she understand it is only a try-on until she buys? Notes:
+- [ ] **Buying.** *Buy* → a card with the name and price → *Yes!* (Pip: "It's yours!") or *Not yet*. The coins go down, the tile gets a tick and the item stays on. Any accidental buys? Is the confirm one step too many, or just right? Notes:
+- [ ] **Not enough coins.** *Buy* is dimmed; a tap gets only "Keep cooking to save up!". Does that read as "save up", not as "wrong"? Notes:
+- [ ] **Changing back.** A tap on anything she owns (a tick) puts it on again for free, including the plain default (No Lights, Bare Wall). Notes:
+- [ ] **Everywhere.** What she buys shows on Home, the menu board, the service and Results. Anything covering something it shouldn't (the ticket, the monster, the tray, the bell)? Notes:
+- [ ] **The first crate.** It comes once she has bought most of the starter shelf (fewer than 6 unbought left) and opens the shop: the box drops, Pip says "A delivery arrived!", it opens on a tap or after 2 s, two new things rise out, then show on the shelf with a star (and a star on their tab) until tapped. Does the moment feel like a treat? Too long, too short? Notes:
+- [ ] **Pace.** After that, a crate every 30 monsters served (about every 2–3 days at an hour a week), one per shop visit, never while 6 or more unbought things wait. Does the shelf ever feel empty, or too full? Notes:
+- [ ] **Pages.** When a slot has more than four items (wallpaper does after a few crates), the triangles page the shelf. Does she find the second page? Notes:
+- [ ] **Two devices** (optional): a crate or purchase on the iPad, backed up and restored on the phone, shows the same shelf there (the stars don't travel, D174). Notes:
+- [ ] **Prices** (your call): anything that feels too cheap or too dear for how long she plays? Notes:
+
+To check the look of every entry: `?decor` (all slots) or `?decor&slot=floor`, and `?decor&key=floor.tiles.mint` for one at full size. Screenshots: `docs/screens/M4a/`.
+
+Not verifiable in the cloud build, so only you can judge: how the shop lines sound in each device's voice (TTS until the voice pass, D142), the drop and sparkle smoothness on the real iPad, and whether the stand-ins are readable enough to choose by.
+
+**Voice pass after this playtest (D142):** ten new Pip lines (four shop lines and six slot names) are in `docs/VOICE_SCRIPT.md`; `npm run audio:todo` lists them as missing until you record them.
+
 ## M13 step 2 — Voice listening test (D139d, D143–D147; iPad first, about 45 minutes with the recording)
 
 Record `docs/VOICE_SPIKE.md`, build it, push to `main`, then open the app with `?debug` on the iPad and scroll to **Voice test**. Until clips exist every button says "(TTS)" and lists what is "not recorded". Tap the screen once first so sound is on. Only you can judge these:
