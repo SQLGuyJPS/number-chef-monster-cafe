@@ -269,21 +269,31 @@ export const DECOR = {
  * stage top, so their bottom and shadow stay clear of the bar's wooden trim and the wall below it.
  */
 const SHOP_TAB = 104;
-/** Six tiles fit the widest M4 slot; more items per slot (M14) will need paging. */
-const SHOP_TILE = { w: 110, h: 232, step: 118 } as const;
+/**
+ * The shelf shows four tiles a page between two arrows (D167): wide enough for the longest names
+ * and a three-digit price; M14 brings a slot up to 14 items (four pages).
+ */
+export const SHOP_PAGE = 4;
+const SHOP_TILE = { x: 112, y: 464, w: 128, h: 220, step: 136 } as const;
 /** Colour dots: drawn 64 px, tapped on an 88-px box (the cell minimum, ≈ 47.6 CSS px at 844×390); room for five. */
 export const SHOP_DOT = { tap: CELL, drawn: 64, gap: 16, max: 5 } as const;
 export const SHOP = {
   /** Status bar: six slot tabs on the left, the jar in its spot, Home in the corner. */
   tab: (i: number): Rect => ({ x: 16 + i * (SHOP_TAB + 12), y: 0, w: SHOP_TAB, h: SHOP_TAB }),
   home: { x: STAGE_W - 12 - SHOP_TAB, y: 0, w: SHOP_TAB, h: SHOP_TAB },
-  /** Counter band: the slot's items as tiles, left to right; dots and Buy on the right. */
+  /**
+   * Counter band: a page of the slot's items between the back and next arrows (88-px cells), page
+   * pips underneath; dots and Buy on the right (D167).
+   */
   tile: (i: number): Rect => ({
-    x: 16 + i * SHOP_TILE.step,
-    y: 464,
+    x: SHOP_TILE.x + i * SHOP_TILE.step,
+    y: SHOP_TILE.y,
     w: SHOP_TILE.w,
     h: SHOP_TILE.h,
   }),
+  back: { x: 16, y: SHOP_TILE.y, w: CELL, h: SHOP_TILE.h },
+  next: { x: SHOP_TILE.x + SHOP_PAGE * SHOP_TILE.step, y: SHOP_TILE.y, w: CELL, h: SHOP_TILE.h },
+  pips: { x: SHOP_TILE.x, y: 692, w: SHOP_PAGE * SHOP_TILE.step - 8, h: 20 },
   dots: { x: 736, y: 456, w: 536, h: CELL },
   buy: { x: 854, y: 552, w: 300, h: BIG_BUTTON },
   /** Confirm: a card over the dimmed screen, the item's picture and two big answers. */
@@ -299,47 +309,7 @@ export const SHOP = {
   shopButton: { x: 940, y: 500, w: 300, h: BIG_BUTTON },
 } as const;
 
-/**
- * Proposals for slots with more items than one row of six tiles (M14 brings up to 14 to a slot).
- * Mock only until the owner picks one; the others are then deleted.
- */
-export const SHOP_MORE = {
-  /** A: pages of four wider tiles between two arrows (88-px cells), page pips underneath. */
-  pages: {
-    back: { x: 16, y: 464, w: CELL, h: 220 },
-    next: { x: 656, y: 464, w: CELL, h: 220 },
-    tile: (i: number): Rect => ({ x: 112 + i * 136, y: 464, w: 128, h: 220 }),
-    pips: { x: 112, y: 692, w: 536, h: 20 },
-  },
-  /** B: a sliding strip; the half tile at the cut shows there is more. Swipe it or tap the arrow. */
-  strip: {
-    window: { x: 16, y: 452, w: 664, h: 256 },
-    tile: (i: number): Rect => ({ x: 16 + i * 118, y: 464, w: 110, h: 232 }),
-    next: { x: 688, y: 464, w: CELL, h: 232 },
-  },
-  /** C: two rows of seven picture-only tiles (the name is spoken when tapped): 14 per page. */
-  rows: {
-    tile: (i: number): Rect => ({
-      x: 16 + (i % 7) * 102,
-      y: 456 + Math.floor(i / 7) * 128,
-      w: 96,
-      h: 120,
-    }),
-  },
-  /** D: five tiles and a "more" tile that opens every item of the slot on a sheet over the café. */
-  more: {
-    sheet: { x: 40, y: 124, w: 1200, h: 584 },
-    close: { x: 1124, y: 136, w: BIG_BUTTON - 56, h: BIG_BUTTON - 56 },
-    tile: (i: number): Rect => ({
-      x: 70 + (i % 7) * 164,
-      y: 248 + Math.floor(i / 7) * 228,
-      w: 152,
-      h: 216,
-    }),
-  },
-} as const;
-
-/** Results with Shop (SPEC §5.7): four buttons on one line, the primary one second. */
+/** Results with Shop (SPEC §5.7, D167): four buttons on one line, the primary one second. */
 export const RESULTS4 = {
   change: { x: 65, y: 500, w: 280, h: BIG_BUTTON },
   another: { x: 365, y: 500, w: 350, h: BIG_BUTTON },

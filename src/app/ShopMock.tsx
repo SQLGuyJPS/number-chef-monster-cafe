@@ -1,4 +1,4 @@
-// `?mock&v=shop|later|confirm|delivery|home`: static layout mock of the M4a shop (look only,
+// `?mock&v=shop|later|five|max|pages|confirm|delivery|home|results`: static layout mock of the M4a shop (look only,
 // owner review before interaction is built). `?mock&v=s3&decor` shows the service with a labelled
 // stand-in in every decor slot.
 import { useEffect, useState } from 'react';
@@ -10,7 +10,7 @@ import { Pip } from '../art/Pip';
 import { expandCatalog, M4_ITEMS, type DecorSlot, type ShopEntry } from '../engine/economy';
 import { Caption, CoinJar, at } from '../game/service/ServiceParts';
 import { TapButton } from '../game/input/TapButton';
-import { COUNTER, COUNTER_Y, FRONT, RESULTS4, SHOP, SHOP_MORE, type Rect } from './metrics';
+import { COUNTER, COUNTER_Y, FRONT, RESULTS4, SHOP, SHOP_PAGE } from './metrics';
 import { lookFor, swatchOf } from './decorLook';
 import {
   ColourDots,
@@ -19,7 +19,6 @@ import {
   PageArrow,
   PagePips,
   Price,
-  SlotIcon,
   SlotTab,
 } from './screens/ShopParts';
 import { FrontMonster, FrontPip, FrontSign } from './screens/FrontRoom';
@@ -31,10 +30,6 @@ export const SHOP_MOCK_VARIANTS = [
   'five',
   'max',
   'pages',
-  'strip',
-  'rows',
-  'more',
-  'more-open',
   'confirm',
   'delivery',
   'home',
@@ -66,8 +61,9 @@ const EXTRA: ShopEntry[] = [
   mk('wallpaper', 'plain', 'Plain Paint', 'sky', 1, 20),
   mk('wallArt', 'neon-open', 'Neon OPEN', 'honey', 2, 20),
   mk('wallArt', 'neon-open', 'Neon OPEN', 'lavender', 2, 20),
-  mk('counter', 'flower-vase', 'Flower Vase', 'mint', 1, 15),
-  mk('counter', 'flower-vase', 'Flower Vase', 'lavender', 1, 15),
+  mk('counter', 'tiny-robot', 'Tiny Robot', 'mint', 4, 75),
+  mk('counter', 'tiny-robot', 'Tiny Robot', 'honey', 4, 75),
+  mk('counter', 'tiny-robot', 'Tiny Robot', 'lavender', 4, 75),
   ...(
     [
       ['rocket-lamp', 'Rocket Lamp', 'sky'],
@@ -188,13 +184,20 @@ const LATER_ONLY: Shelf = {
   dot: 'wallArt.neon-open.sky',
 };
 const LATER = LATER_ONLY;
-
 /**
- * Fit check at the most a slot can hold in one row (D166): six tiles with the longest names and a
- * three-digit price, a star and ticks, and five colour dots.
+ * Fit check at the most one page holds (D166): four tiles with the longest names, a three-digit
+ * price, a star and ticks, and five colour dots.
  */
 const MAX: Shelf = {
-  ...LATER_ONLY,
+  tiles: [
+    { key: 'wallArt.menu-board.classic', state: 'equipped' },
+    { key: 'wallArt.neon-open.berry', state: 'forSale' },
+    { key: 'wallArt.monster-portraits.classic', state: 'forSale', fresh: true },
+    { key: 'wallArt.trophy-shelf.classic', state: 'forSale' },
+    { key: 'wallArt.none.classic', state: 'owned', none: true },
+    { key: 'wallArt.giant-clock.honey', state: 'forSale' },
+  ],
+  selected: 1,
   dots: [
     ...LATER_ONLY.dots,
     { key: 'wallArt.neon-open.honey', owned: false },
@@ -203,7 +206,7 @@ const MAX: Shelf = {
   dot: 'wallArt.neon-open.honey',
 };
 
-/** The counter-top at M14's most (14 items: M4's six and eight themed-set pieces), Flower Vase picked. */
+/** The counter-top at M14's most (14 items: M4's six and eight themed-set pieces), on page 2 of 4. */
 const COUNTER_14: Shelf = {
   tiles: [
     { key: 'counter.none.classic', state: 'owned', none: true },
@@ -213,53 +216,37 @@ const COUNTER_14: Shelf = {
     { key: 'counter.fish-bowl.classic', state: 'forSale' },
     { key: 'counter.tiny-robot.sky', state: 'forSale' },
     { key: 'counter.rocket-lamp.sky', state: 'forSale', fresh: true },
-    { key: 'counter.moon-globe.lavender', state: 'forSale', fresh: true },
+    { key: 'counter.treasure-chest.honey', state: 'forSale', fresh: true },
     { key: 'counter.snow-globe.classic', state: 'forSale' },
-    { key: 'counter.treasure-chest.honey', state: 'forSale' },
+    { key: 'counter.moon-globe.lavender', state: 'forSale' },
     { key: 'counter.tiny-castle.berry', state: 'forSale' },
     { key: 'counter.rainbow-jar.classic', state: 'forSale' },
     { key: 'counter.space-plant.mint', state: 'forSale' },
     { key: 'counter.pirate-ship.cocoa', state: 'forSale' },
   ],
-  selected: 1,
+  selected: 5,
   dots: [
-    { key: 'counter.flower-vase.berry', owned: true },
-    { key: 'counter.flower-vase.sky', owned: false },
-    { key: 'counter.flower-vase.honey', owned: false },
-    { key: 'counter.flower-vase.mint', owned: false },
-    { key: 'counter.flower-vase.lavender', owned: false },
+    { key: 'counter.tiny-robot.sky', owned: false },
+    { key: 'counter.tiny-robot.berry', owned: false },
+    { key: 'counter.tiny-robot.mint', owned: false },
+    { key: 'counter.tiny-robot.honey', owned: false },
+    { key: 'counter.tiny-robot.lavender', owned: false },
   ],
-  dot: 'counter.flower-vase.mint',
+  dot: 'counter.tiny-robot.mint',
 };
 
-type Layout = 'row' | 'pages' | 'strip' | 'rows' | 'more';
-
-function Tiles({
-  shelf,
-  from,
-  count,
-  rect,
-  compact,
-  shift,
-}: {
-  shelf: Shelf;
-  from: number;
-  count: number;
-  rect: (i: number) => Rect;
-  compact?: boolean;
-  shift?: { x: number; y: number };
-}) {
+function Tiles({ shelf, page }: { shelf: Shelf; page: number }) {
   const sel = entry(shelf.dot);
+  const from = page * SHOP_PAGE;
   return (
     <>
-      {shelf.tiles.slice(from, from + count).map((t, j) => {
+      {shelf.tiles.slice(from, from + SHOP_PAGE).map((t, j) => {
         const i = from + j;
         const e = entry(t.key);
-        const r = rect(j);
         return (
           <ItemTile
             key={t.key}
-            rect={shift ? { ...r, x: r.x - shift.x, y: r.y - shift.y } : r}
+            rect={SHOP.tile(j)}
             // The selected tile shows the colour being tried on.
             look={t.none ? null : lookFor(i === shelf.selected ? sel : e)}
             name={e.name}
@@ -267,7 +254,6 @@ function Tiles({
             price={e.price}
             selected={i === shelf.selected}
             fresh={t.fresh}
-            compact={compact}
             onTap={noop}
           />
         );
@@ -276,66 +262,19 @@ function Tiles({
   );
 }
 
-function ShopBand({ shelf, layout = 'row' }: { shelf: Shelf; layout?: Layout }) {
+/** The shelf a page at a time between two arrows (D167), the colour dots and Buy. */
+function ShopBand({ shelf, page = 0 }: { shelf: Shelf; page?: number }) {
   const sel = entry(shelf.dot);
-  const P = SHOP_MORE.pages;
-  const S = SHOP_MORE.strip;
+  const pages = Math.ceil(shelf.tiles.length / SHOP_PAGE);
   return (
     <>
-      {layout === 'row' && <Tiles shelf={shelf} from={0} count={6} rect={SHOP.tile} />}
-      {layout === 'pages' && (
+      <Tiles shelf={shelf} page={page} />
+      {/* One page: no arrows. More: both show, the one with no page that way faded (D167). */}
+      {pages > 1 && (
         <>
-          {/* Page 1 of 4 is showing: the back arrow is faded, not hidden, so nothing jumps. */}
-          <PageArrow rect={P.back} dir="back" off onTap={noop} />
-          <Tiles shelf={shelf} from={0} count={4} rect={P.tile} />
-          <PageArrow rect={P.next} dir="next" onTap={noop} />
-          <PagePips rect={P.pips} n={Math.ceil(shelf.tiles.length / 4)} at={0} />
-        </>
-      )}
-      {layout === 'strip' && (
-        <>
-          <div className="shop-strip" style={at(S.window)}>
-            <Tiles
-              shelf={shelf}
-              from={0}
-              count={7}
-              rect={S.tile}
-              shift={{ x: S.window.x, y: S.window.y }}
-            />
-          </div>
-          <PageArrow rect={S.next} dir="next" onTap={noop} />
-        </>
-      )}
-      {layout === 'rows' && (
-        <Tiles shelf={shelf} from={0} count={14} rect={SHOP_MORE.rows.tile} compact />
-      )}
-      {layout === 'more' && (
-        <>
-          <Tiles shelf={shelf} from={0} count={5} rect={SHOP.tile} />
-          <TapButton
-            className="shop-tile forSale shop-more-tile"
-            style={at(SHOP.tile(5))}
-            testId="shop-more"
-            label="More"
-            tapKind="button"
-            onTap={noop}
-          >
-            <svg viewBox="0 0 72 72" width="80" height="80" aria-hidden="true">
-              {[0, 1, 2, 3].map((k) => (
-                <rect
-                  key={k}
-                  x={6 + (k % 2) * 32}
-                  y={6 + Math.floor(k / 2) * 32}
-                  width={28}
-                  height={28}
-                  rx={7}
-                  fill={['#f7c4d8', '#c4e0f6', '#c6ecd9', '#ffdc85'][k]}
-                />
-              ))}
-            </svg>
-            <span>+{shelf.tiles.length - 5}</span>
-            <span className="shop-new" aria-hidden="true" />
-          </TapButton>
+          <PageArrow rect={SHOP.back} dir="back" off={page === 0} onTap={noop} />
+          <PageArrow rect={SHOP.next} dir="next" off={page === pages - 1} onTap={noop} />
+          <PagePips rect={SHOP.pips} n={pages} at={page} />
         </>
       )}
       <ColourDots
@@ -358,41 +297,6 @@ function ShopBand({ shelf, layout = 'row' }: { shelf: Shelf; layout?: Layout }) 
         Buy <Price n={sel.price} />
       </TapButton>
     </>
-  );
-}
-
-/** D, opened: every item of the slot on a sheet over the café; tapping one picks it and closes it. */
-function MoreSheet({ shelf }: { shelf: Shelf }) {
-  const M = SHOP_MORE.more;
-  return (
-    <div className="shop-confirm-layer" data-testid="shop-sheet">
-      <div className="shop-dim" />
-      <div className="shop-sheet" style={at(M.sheet)}>
-        <div className="shop-sheet-head">
-          <SlotIcon slot="counter" />
-        </div>
-      </div>
-      <Tiles shelf={shelf} from={0} count={14} rect={M.tile} />
-      <TapButton
-        className="shop-close"
-        style={at(M.close)}
-        testId="shop-close"
-        label="Done"
-        tapKind="button"
-        onTap={noop}
-      >
-        <svg viewBox="0 0 72 72" width="100%" height="100%" aria-hidden="true">
-          <path
-            d="M14 38 L30 54 L58 20"
-            fill="none"
-            stroke="#fff"
-            strokeWidth={10}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </TapButton>
-    </div>
   );
 }
 
@@ -445,12 +349,7 @@ export function ShopMock({ variant }: { variant: ShopMockVariant }) {
   }
   if (variant === 'results') return <ResultsMock />;
   const later = variant === 'later' || variant === 'max';
-  const many =
-    variant === 'pages' ||
-    variant === 'strip' ||
-    variant === 'rows' ||
-    variant === 'more' ||
-    variant === 'more-open';
+  const many = variant === 'pages';
   const shelf = many
     ? COUNTER_14
     : variant === 'max'
@@ -466,7 +365,6 @@ export function ShopMock({ variant }: { variant: ShopMockVariant }) {
     : later
       ? { wallArt: lookFor(preview), counter: ALL_SLOTS_DECOR.counter }
       : { wallpaper: lookFor(preview) };
-  const layout: Layout = variant === 'more-open' ? 'more' : many ? variant : 'row';
   return (
     <div className="screen shop counter-mock" data-testid="counter-mock" data-variant={variant}>
       <CounterScene decor={decor} />
@@ -475,8 +373,7 @@ export function ShopMock({ variant }: { variant: ShopMockVariant }) {
         fresh={many ? ['counter'] : later ? ['wallArt', 'counter'] : []}
       />
       <ShopPip />
-      <ShopBand shelf={shelf} layout={layout} />
-      {variant === 'more-open' && <MoreSheet shelf={shelf} />}
+      <ShopBand shelf={shelf} page={many ? 1 : 0} />
       {variant === 'confirm' && <Confirm e={preview} />}
       {variant === 'delivery' && <Delivery phase={phaseParam()} />}
     </div>

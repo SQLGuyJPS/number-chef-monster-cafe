@@ -982,3 +982,23 @@ The decor lint check covers only what can be checked mechanically among the firm
 **What:** Whenever a mock lays out UI elements whose number varies on one screen (shop tiles, colour dots, monsters on Results, buttons, tabs), it also shows the maximum number planned for any milestone, with the longest names and widest numbers, and is checked for overlap, clipping and even spacing before the owner reviews it.
 **Why:** Owner (2026-11-22): the round-2 shop mock showed three colour dots and three tiles while five dots and up to fourteen items are planned.
 **How to revisit:** The working agreement in CLAUDE.md.
+
+## D167 — The shop shelf pages four tiles at a time (2026-11-22)
+**What:** Amends D163/§10 shop layout. The counter band shows a slot's items four to a page (tiles 128 × 220 at x 112–648, y 464–684) between two obtuse-triangle arrows (88-px cells, x 16–104 and x 656–744); page pips under the tiles show which page is on. With one page there are no arrows or pips; with more, both arrows show and the one with no page that way is faded, so nothing jumps. The colour dots (room for five) and Buy stay on the right. M14 brings a slot to at most 14 items (four pages).
+**Why:** Owner (2026-11-22) chose option A of four mocked (pages, sliding strip, two rows of picture-only tiles, a "more" sheet). The max-fit mock (D166) showed six 110-px tiles too narrow for "Monster Portraits" and a three-digit price; tiles keep their names, which help the child read (she reads easy chapter books, §1).
+**How to revisit:** `SHOP_PAGE` and `SHOP` in `src/app/metrics.ts`.
+
+## D168 — The caption bubble fits its text (2026-11-22)
+**What:** Amends §5.4 (D76) and §7.3. The caption bubble shrinks to its widest line (its §5.4 box, x 226–496, y 140–264, is the most it grows to), with balanced line breaks. A monster's bubble stays anchored by its right edge and middle, so its tail still points at the monster; Pip's by its right and bottom edges, so its tail still points down at Pip. Captions always show.
+**Why:** Owner (2026-11-22): the full-size bubble always covered the window and the left string of lights; captions stay because the child reads them and learns words from them.
+**How to revisit:** `Caption` in `src/game/service/ServiceParts.tsx` and `.caption` in `service.css`.
+
+## D169 — Pip names a slot when its tab is tapped (2026-11-22)
+**What:** Amends §10. Tapping a slot tab in the shop has Pip say the slot's name, with his caption: "Wallpaper", "Floor", "Lights", "Window", "Counter top", "Wall art". Six new lines, on the TTS fallback until the voice pass (D142).
+**Why:** Owner (2026-11-22): the tabs are pictures only, so what each one holds might not be obvious; hearing and seeing the word also helps her reading.
+**How to revisit:** the shop phrases in the phrase table.
+
+## D170 — Results gets the Shop button in M4a (2026-11-22)
+**What:** Amends §5.7. Results shows four buttons on one line, text 38 px: Change dish (x 65–345), **Another service** (x 365–715, still the highlighted default), Shop with the paintbrush (x 735–975), Home (x 995–1215), all 160 px tall.
+**Why:** Owner (2026-11-22) asked to see Shop on Results in M4a; four buttons only fit one line with slightly smaller text.
+**How to revisit:** `RESULTS4` in `src/app/metrics.ts`.

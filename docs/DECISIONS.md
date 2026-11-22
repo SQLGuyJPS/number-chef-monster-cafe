@@ -174,3 +174,7 @@
 | D164 | Delivery: the box drops onto the counter, sparkles, opens on a tap or after 2 s (flaps fold out), entries rise out; Buy without enough coins is dimmed and Pip encourages | SPEC §10, §10.1 | Owner: an event that never waits on the child; no fail feel |
 | D165 | Ticket shortened to y 172–360 so the right string of lights shows | SPEC §5.4 | Owner: the lights were always hidden behind the ticket |
 | D166 | Mocks of a varying number of elements also show the maximum planned count (longest names, widest numbers) and are checked for fit | CLAUDE.md | Owner: catch overlap before it is built |
+| D167 | Shop shelf: four tiles a page between two triangle arrows, page pips; no arrows with one page | SPEC §10 | Owner picked option A of four mocks |
+| D168 | Caption bubble shrinks to fit its text, anchored so its tail still points at the speaker | SPEC §5.4 | Owner: less of the room covered; captions stay for reading |
+| D169 | Pip says a slot's name (with caption) when its shop tab is tapped | SPEC §10 | Owner: picture-only tabs need a name |
+| D170 | Results: four buttons on one line (Change dish, Another service, Shop, Home), text 38 px | SPEC §5.7 | Owner asked for Shop on Results in M4a |

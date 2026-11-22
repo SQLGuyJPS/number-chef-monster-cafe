@@ -6,7 +6,7 @@ import { SHOP_DOT, type Rect } from '../metrics';
 import type { DecorSlot } from '../../engine/economy';
 import type { DecorLook } from '../../art/decor/StandIn';
 
-/** Small picture per slot for the tabs: drawn shapes, no words (the child may not read them). */
+/** Small picture per slot for the tabs; Pip says the slot's name when one is tapped (D169). */
 export function SlotIcon({ slot }: { slot: DecorSlot }) {
   const ink = '#6b4a2e';
   const body: Record<DecorSlot, ReactNode> = {
@@ -170,7 +170,6 @@ export function ItemTile({
   price,
   selected,
   fresh,
-  compact,
   onTap,
 }: {
   rect: Rect;
@@ -180,23 +179,21 @@ export function ItemTile({
   price: number;
   selected: boolean;
   fresh?: boolean;
-  /** Picture and price only (the name is spoken when tapped); a cell-sized target. */
-  compact?: boolean;
   onTap: () => void;
 }) {
   return (
     <TapButton
-      className={`shop-tile ${state}${selected ? ' selected' : ''}${compact ? ' compact' : ''}`}
+      className={`shop-tile ${state}${selected ? ' selected' : ''}`}
       style={at(rect)}
       testId={`shop-tile-${look?.item ?? 'none'}`}
       label={name}
-      tapKind={compact ? 'cell' : 'button'}
+      tapKind="button"
       onTap={onTap}
     >
       <span className="shop-tile-pic">
         {look ? <MiniStandIn look={look} /> : <span className="shop-empty" />}
       </span>
-      {!compact && <span className="shop-tile-name">{name}</span>}
+      <span className="shop-tile-name">{name}</span>
       <span className="shop-tile-foot">
         {state === 'forSale' ? (
           <Price n={price} />
@@ -246,7 +243,7 @@ export function ColourDots({
   );
 }
 
-/** Obtuse triangle for paging the shelf (owner's suggestion, 2026-11-22). */
+/** Obtuse triangle that pages the shelf (D167); faded, not hidden, when there is no page that way. */
 export function PageArrow({
   rect,
   dir,
