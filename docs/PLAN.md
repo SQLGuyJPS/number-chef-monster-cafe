@@ -278,10 +278,10 @@ SPEC §14 said 3.5 h. It is more because the shop is a new screen with four stat
 | 6. Tests: unit (replay, crates incl. backlog, hold at 6, fixed order, two-device merge, idempotent buy, no lower earned), e2e (buy flow, confirm, persists over reload, purchase on Service, tap sizes, budget) | 0.75 |
 | 7. Spoken lines on TTS, `audio:todo`, screenshots `docs/screens/M4a/`, PLAYTEST, commit, stop | 0.5 |
 
-**Mock:** `?mock&v=shop|later|confirm|delivery|home`, and `?mock&v=s3&decor` (any service variant) for the café with a labelled stand-in in every slot. Shots: `docs/screens/M4a-mock/`. Geometry: `DECOR` and `SHOP` in `src/app/metrics.ts`.
-- **Slots (proposal):** counter-top stands on the counter's far edge at its right end (x 1176–1272, y 324–436): the room band does not mirror, so it is clear of the tray, basket, Pip's hat and the bell on both basket sides by construction. Wall art is centred above the monster (x 540–740, y 128–200); the tallest monster (Zibbit's eye stalks) just touches its lower edge. Lights hang as two swags left and right of the wall art, so nothing hangs in front of the monster's head. Window and wallpaper as in ART_GUIDE §5; the floor shows only between y 330 and the counter.
-- **Shop:** the café above is the live preview (no monster, so the wall art shows; Pip at his spot). Status bar: six slot tabs (pictures, no words), the jar in its spot, Home in the corner. Counter: the slot's items as tiles (price, or a tick when owned; the one on shows a green card), colour dots (88-px tap box, drawn 64) and a 160-px Buy with the price. Confirm: the item's picture, "Buy Plain Paint? 20", *Yes!* / *Not yet*. Delivery: a crate on the counter's far edge, its two entries popping out, Pip: "A delivery arrived!"; new entries and their tabs wear a star until tapped.
-- **Home:** Decorate (paintbrush) beside Open the Café, which keeps its spot.
+**Mock (round 2, after the owner's notes 2026-11-22, D161–D165):** `?mock&v=shop|later|five|confirm|delivery|home|results`, and `&decor` on any service variant for a labelled stand-in in every slot. `v=delivery` plays live (drop, twinkle, opens on a tap or after 2 s); `&phase=closed|open` freezes it. Shots: `docs/screens/M4a-mock/`. Geometry: `DECOR` and `SHOP` in `src/app/metrics.ts`.
+- **Slots (proposal):** counter-top stands on the counter's far edge at its right end (x 1176–1272, y 324–436): the room band does not mirror, so it is clear of the tray, basket, Pip's hat and the bell on both basket sides. With ten served monsters on Results (8 orders, 2 requeues) the last one stands partly in front of it (`results-ten-monsters`). Wall art is centred above the monster (x 540–740, y 128–200); Zibbit's eye stalks just touch its lower edge. Lights hang as two flat swags (y 122–166) left and right of the wall art; the ticket now starts at y 172 so the right swag shows (D165). Window and wallpaper as in ART_GUIDE §5.
+- **Shop:** the café above is the live preview (no monster, so the wall art shows; Pip at his spot). Status bar: six slot tabs and Home, 104 px from the stage top with short shadows, so they end clear of the bar's trim (y 110) and the wall; the jar in its spot. Counter: up to six item tiles (110 wide; more per slot in M14 will need paging), a row with room for **five** colour dots (88-px tap boxes, drawn 64), and a 160-px Buy centred under them. Confirm: the picture, "Buy Plain Paint? 20", *Yes!* / *Not yet*. Delivery: D164. Not enough coins: D164.
+- **Home:** **Shop** (drawn paintbrush + word) right of Open the Café; the left space is for the Monster Album (D163).
 
 **Accept (SPEC §14 M4a)**
 - [ ] catalog matches §10 (2,305 coins, 51 paid entries; no bell entry) and `economy:sim` reports about 2 months at the default profile
@@ -289,7 +289,7 @@ SPEC §14 said 3.5 h. It is more because the shop is a new screen with four stat
 - [ ] a backlog delivers one crate at a time; the hold at 6 unbought works
 - [ ] purchase idempotent and persisted; confirm prevents accidental buys; no code path lowers earned coins
 - [ ] purchases show on the Service screen (and every child screen)
-- [ ] the shop counts as play time
+- [x] the shop counts as play time — not applicable until M12 (D161)
 - [ ] `?decor` renders every entry at 1194×834 and 844×390
 
 ---

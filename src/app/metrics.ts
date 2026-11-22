@@ -62,6 +62,9 @@ export const TAKEN_FRAME = frameSize(TAKEN_CELL, TAKEN_GAP, TAKEN_PAD); // 324 �
 const centeredX = (w: number) => Math.round((STAGE_W - w) / 2);
 const TICKET_W = 360;
 const TICKET_COUNTING_X = STAGE_W - 16 - TICKET_W;
+/** The ticket's top and height: food, sentence and the torn edge, nothing spare (M4a: was y 140, h 220). */
+const TICKET_Y = 172;
+const TICKET_H = 360 - TICKET_Y;
 
 // ---------------------------------------------------------------------------------------------
 // Service screen layout (SPEC §5.4, D114–D118), seen from behind the counter; `?mock` shows every
@@ -124,8 +127,9 @@ export const COUNTER = {
   /** Room (y 120–432): monster behind the counter, caption left of it, ticket right of it. */
   scene: {
     caption: { x: 226, y: 140, w: 270, h: 124 },
-    ticket: { x: 808, y: 140, w: TICKET_W, h: 220 },
-    ticketCounting: { x: TICKET_COUNTING_X, y: 140, w: TICKET_W, h: 220 },
+    /** Starts below the right string of lights (DECOR.lightsRight), so the lights show (M4a). */
+    ticket: { x: 808, y: TICKET_Y, w: TICKET_W, h: TICKET_H },
+    ticketCounting: { x: TICKET_COUNTING_X, y: TICKET_Y, w: TICKET_W, h: TICKET_H },
     /** Full height: whole body, standing on the counter's far edge. */
     monsterFull: { x: 520, y: COUNTER_Y - 240, w: 240, h: 240 },
     /** Pip pops up behind the counter, under the caption, clear of the monster. */
@@ -241,31 +245,39 @@ export const FRONT = {
 export const DECOR = {
   wallpaper: { x: 0, y: BAR_H, w: STAGE_W, h: 142 },
   floor: { x: 0, y: 330, w: STAGE_W, h: COUNTER_Y - 330 },
-  lightsLeft: { x: 0, y: BAR_H + 2, w: 500, h: 56 },
-  lightsRight: { x: 780, y: BAR_H + 2, w: 500, h: 56 },
+  lightsLeft: { x: 0, y: BAR_H + 2, w: 500, h: 44 },
+  lightsRight: { x: 780, y: BAR_H + 2, w: 500, h: 44 },
   window: { x: 208, y: 142, w: 214, h: 150 },
   wallArt: { x: 540, y: 128, w: 200, h: 72 },
   counter: { x: 1176, y: COUNTER_Y - 108, w: 96, h: 112 },
 } as const;
 
-const SHOP_TAB = BUTTON_MIN;
-const SHOP_TILE = { w: 132, h: 232, step: 142 } as const;
-/** Colour dots: drawn 64 px, tapped on an 88-px box (the cell minimum, ≈ 47.6 CSS px at 844×390). */
-export const SHOP_DOT = { tap: CELL, drawn: 64, gap: 16 } as const;
+/**
+ * Bar buttons in the shop: 104 px (56.3 CSS px at 844×390, just over the button minimum) from the
+ * stage top, so their bottom and shadow stay clear of the bar's wooden trim and the wall below it.
+ */
+const SHOP_TAB = 104;
+/** Six tiles fit the widest M4 slot; more items per slot (M14) will need paging. */
+const SHOP_TILE = { w: 110, h: 232, step: 118 } as const;
+/** Colour dots: drawn 64 px, tapped on an 88-px box (the cell minimum, ≈ 47.6 CSS px at 844×390); room for five. */
+export const SHOP_DOT = { tap: CELL, drawn: 64, gap: 16, max: 5 } as const;
 export const SHOP = {
   /** Status bar: six slot tabs on the left, the jar in its spot, Home in the corner. */
-  tab: (i: number): Rect => ({ x: 16 + i * (SHOP_TAB + 8), y: 4, w: SHOP_TAB, h: SHOP_TAB }),
-  home: COUNTER.bar.door,
+  tab: (i: number): Rect => ({ x: 16 + i * (SHOP_TAB + 12), y: 0, w: SHOP_TAB, h: SHOP_TAB }),
+  home: { x: STAGE_W - 12 - SHOP_TAB, y: 0, w: SHOP_TAB, h: SHOP_TAB },
   /** Counter band: the slot's items as tiles, left to right; dots and Buy on the right. */
   tile: (i: number): Rect => ({ x: 16 + i * SHOP_TILE.step, y: 464, w: SHOP_TILE.w, h: SHOP_TILE.h }),
-  dots: { x: 892, y: 456, w: 380, h: CELL },
-  buy: { x: 932, y: 552, w: 300, h: BIG_BUTTON },
+  dots: { x: 736, y: 456, w: 536, h: CELL },
+  buy: { x: 854, y: 552, w: 300, h: BIG_BUTTON },
   /** Confirm: a card over the dimmed screen, the item's picture and two big answers. */
   confirm: { x: 340, y: 110, w: 600, h: 500 },
   yes: { x: 380, y: 420, w: 240, h: BIG_BUTTON },
   notYet: { x: 660, y: 420, w: 240, h: BIG_BUTTON },
-  /** The delivery crate on the counter's far edge, centred in the room. */
-  crate: { x: 520, y: 250, w: 240, h: 190 },
-  /** Home: Decorate beside Open the Café (SPEC §5.2). */
-  decorate: { x: 930, y: 500, w: 310, h: BIG_BUTTON },
+  /** The delivery box on the counter's far edge, centred in the room (bottom at the edge). */
+  crate: { x: 490, y: 196, w: 300, h: 240 },
+  /**
+   * Home: Shop on the right of Open the Café, centred on the same line. The left side is kept for
+   * the Monster Album button (M16).
+   */
+  shopButton: { x: 940, y: 500, w: 300, h: BIG_BUTTON },
 } as const;

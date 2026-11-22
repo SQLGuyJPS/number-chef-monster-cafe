@@ -1,7 +1,11 @@
 // `?mock&v=shop|later|confirm|delivery|home`: static layout mock of the M4a shop (look only,
 // owner review before interaction is built). `?mock&v=s3&decor` shows the service with a labelled
 // stand-in in every decor slot.
+import { useEffect, useState } from 'react';
 import { CounterScene, type DecorView } from '../art/CounterScene';
+import { DeliveryBox } from '../art/decor/DeliveryBox';
+import { Monster } from '../art/monsters/Monster';
+import { faceX } from './screens/Results';
 import { Pip } from '../art/Pip';
 import { expandCatalog, M4_ITEMS, type DecorSlot, type ShopEntry } from '../engine/economy';
 import { Caption, CoinJar, at } from '../game/service/ServiceParts';
@@ -12,15 +16,26 @@ import { ColourDots, ItemTile, MiniStandIn, Price, SlotTab } from './screens/Sho
 import { FrontMonster, FrontPip, FrontSign } from './screens/FrontRoom';
 import './screens/shop.css';
 
-export const SHOP_MOCK_VARIANTS = ['shop', 'later', 'confirm', 'delivery', 'home'] as const;
+export const SHOP_MOCK_VARIANTS = ['shop', 'later', 'five', 'confirm', 'delivery', 'home', 'results'] as const;
 export type ShopMockVariant = (typeof SHOP_MOCK_VARIANTS)[number];
 
 const ALL = expandCatalog(M4_ITEMS);
+/** Mock-only extra colorways (M14 may bring up to five per item); priced as a colorway. */
+const EXTRA: ShopEntry[] = (['mint', 'sky'] as const).map((c) => ({
+  key: `wallpaper.plain.${c}`,
+  slot: 'wallpaper',
+  item: 'plain',
+  name: 'Plain Paint',
+  colorway: c,
+  tier: 1,
+  price: 20,
+}));
 const entry = (key: string): ShopEntry => {
-  const e = ALL.find((x) => x.key === key);
+  const e = ALL.find((x) => x.key === key) ?? EXTRA.find((x) => x.key === key);
   if (!e) throw new Error(`no entry ${key}`);
   return e;
 };
+
 const SLOTS: DecorSlot[] = ['wallpaper', 'floor', 'lights', 'window', 'counter', 'wallArt'];
 const noop = () => undefined;
 
@@ -71,6 +86,17 @@ const START: Shelf = {
     { key: 'wallpaper.plain.lavender', owned: false },
   ],
   dot: 'wallpaper.plain.berry',
+};
+
+/** Five colorways (room kept for M14's extra colours): the dots row holds five. */
+const FIVE: Shelf = {
+  ...START,
+  dots: [
+    ...START.dots,
+    { key: 'wallpaper.plain.mint', owned: false },
+    { key: 'wallpaper.plain.sky', owned: false },
+  ],
+  dot: 'wallpaper.plain.mint',
 };
 
 /** Weeks later: a full wall-art shelf, the Menu Board bought, a crate's Giant Clock still new. */
@@ -150,17 +176,18 @@ export function ShopMock({ variant }: { variant: ShopMockVariant }) {
         <TapButton className="btn btn-primary front-btn open-cafe" style={at(FRONT.open)} tapKind="button" onTap={noop}>
           Open the Café
         </TapButton>
-        <TapButton className="btn btn-secondary front-btn decorate" style={at(SHOP.decorate)} testId="decorate" tapKind="button" onTap={noop}>
-          <span className="decorate-inner">
+        <TapButton className="btn btn-secondary front-btn shop-button" style={at(SHOP.shopButton)} testId="shop-button" tapKind="button" onTap={noop}>
+          <span className="shop-button-inner">
             <Brush />
-            Decorate
+            <span>Shop</span>
           </span>
         </TapButton>
       </div>
     );
   }
+  if (variant === 'results') return <ResultsMock />;
   const later = variant === 'later';
-  const shelf = later ? LATER : START;
+  const shelf = later ? LATER : variant === 'five' ? FIVE : START;
   const preview = entry(shelf.dot);
   const decor: DecorView = later
     ? { wallArt: lookFor(preview), counter: ALL_SLOTS_DECOR.counter }
@@ -172,16 +199,19 @@ export function ShopMock({ variant }: { variant: ShopMockVariant }) {
       <ShopPip />
       <ShopBand shelf={shelf} />
       {variant === 'confirm' && <Confirm e={preview} />}
-      {variant === 'delivery' && <Delivery />}
+      {variant === 'delivery' && <Delivery phase={phaseParam()} />}
     </div>
   );
 }
 
 function Brush() {
   return (
-    <svg viewBox="0 0 64 64" width={64} height={64} aria-hidden="true">
-      <rect x={28} y={4} width={10} height={30} rx={5} fill="#b98352" transform="rotate(20 33 19)" />
-      <path d="M20 34 q10 -6 18 2 q4 14 -10 22 q-12 4 -16 -2 q8 -4 8 -22 Z" fill="#d9487f" />
+    <svg className="shop-brush" viewBox="0 0 64 64" aria-hidden="true">
+      <g transform="rotate(35 32 32)">
+        <rect x={27} y={2} width={10} height={30} rx={5} fill="#b98352" />
+        <rect x={25} y={30} width={14} height={8} rx={2} fill="#9aa6b2" />
+        <path d="M25 38 h14 q2 12 -7 22 q-9 -10 -7 -22 Z" fill="#d9487f" />
+      </g>
     </svg>
   );
 }
@@ -209,27 +239,91 @@ function Confirm({ e }: { e: ShopEntry }) {
   );
 }
 
-/** A crate on the counter's far edge, lid off, its two entries popping out; Pip says it. */
-function Delivery() {
+type DeliveryPhase = 'drop' | 'closed' | 'open';
+/** `&phase=drop|closed|open` freezes the delivery for screenshots; without it, it plays live. */
+const phaseParam = (): DeliveryPhase | undefined => {
+  const p = new URLSearchParams(location.search).get('phase');
+  return p === 'drop' || p === 'closed' || p === 'open' ? p : undefined;
+};
+const DROP_MS = 700;
+/** It opens on a tap, or by itself this long after it lands (owner, 2026-11-22). */
+const AUTO_OPEN_MS = 2000;
+
+/**
+ * The delivery moment (SPEC §10.1): the box fades in and drops onto the counter's far edge, Pip
+ * says "A delivery arrived!", the box twinkles until it is tapped or two seconds pass, then the
+ * flaps fold out and the two new entries rise out of it. (Built: they then fly to their tiles.)
+ */
+function Delivery({ phase: frozen }: { phase?: DeliveryPhase }) {
+  const [phase, setPhase] = useState<DeliveryPhase>(frozen ?? 'drop');
+  useEffect(() => {
+    if (frozen) return;
+    const t1 = window.setTimeout(() => setPhase((p) => (p === 'drop' ? 'closed' : p)), DROP_MS);
+    const t2 = window.setTimeout(() => setPhase('open'), DROP_MS + AUTO_OPEN_MS);
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+    };
+  }, [frozen]);
   const r = SHOP.crate;
   const items = [entry('wallpaper.polka-dots.sky'), entry('counter.fish-bowl.classic')];
   return (
-    <div className="shop-delivery" data-testid="shop-delivery">
+    <div className="shop-delivery" data-testid="shop-delivery" data-phase={phase}>
       <div className="shop-dim" />
-      <Caption rect={COUNTER.scene.caption} text="A delivery arrived!" speaker="pip" />
-      {items.map((e, i) => (
-        <div key={e.key} className="shop-delivery-item" style={at({ x: r.x + 10 + i * 120, y: r.y - 70, w: 100, h: 80 })}>
-          <MiniStandIn look={lookFor(e)} />
+      {phase !== 'drop' && <Caption rect={COUNTER.scene.caption} text="A delivery arrived!" speaker="pip" />}
+      {phase === 'open' &&
+        items.map((e, i) => (
+          <div
+            key={e.key}
+            className="shop-delivery-item"
+            style={{ ...at({ x: r.x + 36 + i * 128, y: r.y - 10, w: 100, h: 80 }), animationDelay: `${400 + i * 120}ms` }}
+          >
+            <MiniStandIn look={lookFor(e)} />
+          </div>
+        ))}
+      <TapButton
+        className={`shop-crate${phase === 'drop' && !frozen ? ' dropping' : ''}`}
+        style={at(r)}
+        testId="shop-crate"
+        label="Open the box"
+        tapKind="button"
+        onTap={() => setPhase('open')}
+      >
+        <DeliveryBox phase={phase === 'open' ? 'open' : 'closed'} />
+      </TapButton>
+    </div>
+  );
+}
+
+/** Results with the longest service (8 orders, 2 requeues): ten monsters in front of the counter-top item. */
+function ResultsMock() {
+  const ids = ['blobbo', 'gruffles', 'zibbit', 'mimsy', 'chompers', 'wobbleton', 'blobbo', 'gruffles', 'zibbit', 'chompers'];
+  const f = FRONT.faces;
+  return (
+    <div className="screen results counter-mock" data-testid="counter-mock" data-variant="results">
+      <CounterScene decor={ALL_SLOTS_DECOR} />
+      <div className="closed-sign" style={at(FRONT.closed)}>
+        CLOSED
+      </div>
+      <CoinJar rect={COUNTER.bar.jar} count={76} testId="coin-jar" />
+      <div className="results-tally" style={at(FRONT.tally)}>
+        <span className="coin-icon" aria-hidden="true" />
+        <span className="coin-count">29</span>
+      </div>
+      {ids.map((m, i) => (
+        <div key={i} className="results-face" style={at({ x: faceX(i, ids.length), y: f.y, w: f.size, h: f.size })}>
+          <Monster id={m} expression="delight" size={f.size} />
         </div>
       ))}
-      <svg className="shop-crate" style={at(r)} viewBox="0 0 240 190" aria-hidden="true">
-        <path d="M10 70 L40 20 L120 36 L22 86 Z" fill="#e0b47a" />
-        <path d="M230 70 L200 20 L120 36 L218 86 Z" fill="#d6a66a" />
-        <rect x={20} y={60} width={200} height={124} rx={6} fill="#c98f58" />
-        <rect x={20} y={60} width={200} height={16} fill="#b07a46" />
-        <rect x={108} y={60} width={24} height={124} fill="#e8c48a" opacity={0.8} />
-        <path d="M60 116 l10 -10 l10 10 l-10 10 Z M160 130 l10 -10 l10 10 l-10 10 Z" fill="#fff3a6" />
-      </svg>
+      <TapButton className="btn btn-secondary front-btn results-change" style={at(FRONT.change)} tapKind="button" onTap={noop}>
+        Change dish
+      </TapButton>
+      <TapButton className="btn btn-primary front-btn results-another" style={at(FRONT.another)} tapKind="button" onTap={noop}>
+        Another service
+      </TapButton>
+      <TapButton className="btn btn-secondary front-btn results-home" style={at(FRONT.home)} tapKind="button" onTap={noop}>
+        Home
+      </TapButton>
     </div>
   );
 }

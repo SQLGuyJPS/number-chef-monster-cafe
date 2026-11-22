@@ -42,7 +42,7 @@ export function WallpaperStandIn({ look }: { look: DecorLook }) {
         </pattern>
       </defs>
       <rect x={-1000} y={-600} width={3280} height={r.y + r.h + 600} fill={`url(#${id})`} />
-      <Tag x={880} y={150} text={`Wallpaper: ${look.name}`} />
+      <Tag x={1000} y={240} text={`Wallpaper: ${look.name}`} />
     </g>
   );
 }

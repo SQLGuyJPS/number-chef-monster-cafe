@@ -14,12 +14,13 @@
   border-radius: 24px;
   background: #fffaf0;
   border: 4px solid #e2d3b6;
-  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.12);
+  /* Shadow kept short: the button's bottom plus its shadow stay clear of the bar's trim (y 110). */
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.12);
 }
 .shop-tab.active {
   background: #ffe2a8;
   border-color: var(--c-primary);
-  transform: translateY(4px);
+  transform: translateY(2px);
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
 }
 .shop-home {
@@ -28,7 +29,7 @@
   border-radius: 24px;
   background: #fffaf0;
   border: 4px solid #e2d3b6;
-  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.12);
 }
 .shop-new {
   position: absolute;
@@ -140,12 +141,19 @@
   width: 42px;
   height: 42px;
 }
-/* Home: Decorate beside Open the Café. */
-.decorate-inner {
+/* Home: Shop beside Open the Café; the brush and the word sit centred on one line. */
+.shop-button-inner {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 44px;
+  justify-content: center;
+  gap: 14px;
+  font-size: 56px;
+  line-height: 1;
+}
+.shop-brush {
+  width: 60px;
+  height: 60px;
+  flex: none;
 }
 /* Confirm */
 .shop-confirm-layer,
@@ -199,4 +207,102 @@
 .shop-crate,
 .shop-delivery-item {
   position: absolute;
+}
+/* ---- Delivery box (DeliveryBox.tsx): transforms and opacity only ---- */
+.shop-crate {
+  position: absolute;
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+}
+.shop-crate.dropping {
+  animation: dbox-drop 0.7s cubic-bezier(0.3, 0, 0.6, 1) both;
+  transform-origin: 50% 98%;
+}
+@keyframes dbox-drop {
+  0% { opacity: 0; transform: translateY(-170px); }
+  55% { opacity: 1; transform: translateY(0) scale(1, 1); }
+  70% { transform: translateY(0) scale(1.06, 0.9); }
+  85% { transform: translateY(-10px) scale(0.98, 1.03); }
+  100% { opacity: 1; transform: translateY(0) scale(1, 1); }
+}
+.dbox g,
+.dbox path {
+  transform-box: view-box;
+}
+.dbox.closed .dbox-open {
+  display: none;
+}
+/* Opening: closed flaps swing up to their hinges, then the open flaps swing out from them. */
+.dbox.open .dbox-flap-l-closed,
+.dbox.open .dbox-flap-r-closed {
+  animation: dbox-flap-up 0.18s ease-in forwards;
+}
+.dbox.open .dbox-tape {
+  animation: dbox-fade 0.12s ease-in forwards;
+}
+.dbox.open .dbox-flap-l-open,
+.dbox.open .dbox-flap-r-open {
+  animation: dbox-flap-out 0.32s 0.16s cubic-bezier(0.3, 1.5, 0.6, 1) both;
+}
+.dbox.open .dbox-flap-front {
+  animation: dbox-flap-down 0.3s 0.2s ease-out both;
+}
+@keyframes dbox-flap-up {
+  to { transform: scaleX(0); }
+}
+@keyframes dbox-flap-out {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes dbox-flap-down {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+@keyframes dbox-fade {
+  to { opacity: 0; }
+}
+.dbox-twinkle {
+  animation: dbox-twinkle 1.3s ease-in-out infinite;
+}
+@keyframes dbox-twinkle {
+  0%, 100% { transform: scale(0.5); opacity: 0.4; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+.dbox-burst {
+  animation: dbox-burst 0.7s ease-out both;
+}
+@keyframes dbox-burst {
+  0% { transform: scale(0.3); opacity: 0; }
+  40% { transform: scale(1.5); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.9; }
+}
+/* The two new entries rise out of the box once the flaps are open. */
+.shop-delivery-item {
+  animation: dbox-rise 0.5s 0.4s cubic-bezier(0.3, 1.4, 0.6, 1) both;
+}
+@keyframes dbox-rise {
+  from { opacity: 0; transform: translateY(80px) scale(0.5); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+html.reduce-motion .shop-crate.dropping,
+html.reduce-motion .dbox *,
+html.reduce-motion .shop-delivery-item {
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shop-crate.dropping,
+  .dbox *,
+  .shop-delivery-item {
+    animation: none !important;
+  }
+}
+html.reduce-motion .dbox.open .dbox-closed {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dbox.open .dbox-closed {
+    display: none;
+  }
 }

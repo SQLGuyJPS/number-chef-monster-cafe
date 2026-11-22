@@ -952,3 +952,28 @@ The decor lint check covers only what can be checked mechanically among the firm
 **What:** Amends D148 and D151. The Wall art slot's free default was "Menu Board", which the café art has never drawn. The Menu Board becomes a **tier-1 item, 20 coins**, one look (no colorways), and the free default is **Bare Wall** (nothing in the wall-art slot). Following D151's rule (the first colour of every tier 1–2 item is on the starter shelf), the Menu Board joins the starter shelf: 18 entries, 795 coins. With D159, M4 is 31 items (including three empty defaults), 51 paid entries, **2,305 coins**; 33 entries still wait in crates. Simulated (D150): the M4 stock lasts about 1.8–1.9 months (8 weeks), 92–100% of sittings end with a purchase; over the whole roadmap, sittings with nothing to buy are about 5% (4% after D157).
 **Why:** Owner (2026-11-22): the menu board was never drawn, so it can't be a free default already in the café; it is something to buy.
 **How to revisit:** the Wall art entries and `STARTER_SHELF` in `src/engine/economy.ts`; rerun `npm run economy:sim`. Note: "menu board" also names the dish-choice screen (SPEC §5.3); the shop item is the wall decoration only.
+
+## D161 — "The shop counts as play time" waits for M12 (2026-11-22)
+**What:** M4a's acceptance line "the shop counts as play time" is marked not applicable until M12: there is no play-time clock yet (the limit and its active-time accumulator were moved to M12 and postponed, D124). When M12 is built, the Shop is an ordinary child screen and its active time counts like every other.
+**Why:** Owner (2026-11-22). Nothing in the app measures play time today, so the line can't be tested.
+**How to revisit:** M12's acceptance carries the check (§6.5): time on the Shop screen counts toward the allowance.
+
+## D162 — Shop speech uses general lines (2026-11-22)
+**What:** Pip's shop lines never name an item, a colour or an amount: e.g. "Buy this one?", "It's yours!", "A delivery arrived!", "Keep cooking to save up!". The confirm card shows the item's name and price as text; nothing reads them aloud.
+**Why:** Owner (2026-11-22), following D153: every spoken name or amount would need its own recorded clip (D142), 31 items and their prices in M4 alone.
+**How to revisit:** if the owner wants names spoken, add item-name clips to the voice script and a line form that joins them (§8.4).
+
+## D163 — Home's shop button reads "Shop" (2026-11-22)
+**What:** Amends SPEC §5.2 and §5.7. The shop button is labelled **Shop**, with a small drawn paintbrush beside the word (a drawing, not an emoji: the emoji allowlist is foods only, §7.1). On Home it sits right of Open the Café, centred on the same line (x 940–1240, y 500–660); the matching space on the left is kept for the Monster Album button (M16).
+**Why:** Owner (2026-11-22): "Shop" is the word the family uses, and the left side is planned for the album.
+**How to revisit:** `SHOP.shopButton` in `src/app/metrics.ts`.
+
+## D164 — The delivery moment, and Buy without enough coins (2026-11-22)
+**What:** When a crate arrives (§10.1, D154), a cardboard box fades in and drops onto the counter's far edge in the middle of the room with a small bounce, the rest of the shop dims, Pip says "A delivery arrived!", and sparkles twinkle round the box. It opens on a tap or by itself 2 s after it lands: the side flaps fold out to the sides and the front flap folds down, sparkles burst, and the two new entries rise out of it, then go to their tiles, which wear a star (as do their slot tabs) until tapped. Reduced motion: no drop, bounce or twinkle; the box appears and opens. When the balance is below the price, Buy is dimmed; a tap on it gets Pip's "Keep cooking to save up!" and nothing else (no buzzer, no shake).
+**Why:** Owner (2026-11-22): a crate should feel like an event without waiting on the child; the first flaps drawn over the box did not read as flaps.
+**How to revisit:** `AUTO_OPEN_MS` and the delivery CSS (`shop.css`); the box is `src/art/decor/DeliveryBox.tsx`.
+
+## D165 — A shorter ticket so the lights show (2026-11-22)
+**What:** Amends SPEC §5.4. The ticket keeps its width and bottom but starts lower: x 808–1168, y 172–360 (was y 140–360), and x 904–1264 while counting together. It still holds the food and the widest sentence (`10 − ? = 6`) above its torn edge.
+**Why:** Owner (2026-11-22): the right string of lights hangs just under the status bar (y 122–166) and was always hidden behind the ticket.
+**How to revisit:** `TICKET_Y` in `src/app/metrics.ts`.

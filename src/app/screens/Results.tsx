@@ -28,6 +28,13 @@ const SKIP_REVEAL_MS = 300;
  * in the room above the served monsters standing along the counter's far edge, and the three
  * buttons are on the counter top.
  */
+/** Served monsters stand along the counter's far edge, centred; a long service squeezes the spacing. */
+export function faceX(i: number, n: number): number {
+  const f = FRONT.faces;
+  const step = Math.min(f.size + f.gap, (f.maxW - f.size) / Math.max(1, n - 1));
+  return Math.round((1280 - (f.size + step * (n - 1))) / 2 + i * step);
+}
+
 export function Results({
   coins,
   jar,
@@ -128,11 +135,7 @@ export function Results({
       <div className="results-faces" data-testid="results-faces">
         {monsters.map((m, i) => {
           const f = FRONT.faces;
-          const step = Math.min(
-            f.size + f.gap,
-            (f.maxW - f.size) / Math.max(1, monsters.length - 1),
-          );
-          const x = Math.round((1280 - (f.size + step * (monsters.length - 1))) / 2 + i * step);
+          const x = faceX(i, monsters.length);
           return (
             <div
               key={i}
