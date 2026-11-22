@@ -35,7 +35,7 @@ export function nextBox(box: number, outcome: Outcome, stage: Stage): number {
  * Bumped when the shape of `Derived` changes, so an older `state` cache is rebuilt from the log
  * (the events themselves do not change, so no migration, SPEC §11.3).
  */
-export const DERIVED_SHAPE = 2;
+export const DERIVED_SHAPE = 3;
 
 export interface FactStat {
   /** Box in the tray set (S3–S1) and in the number set (S0), D127. */
@@ -72,12 +72,19 @@ export interface Derived {
   skills: Partial<Record<SkillId, SkillStat>>;
   /** Σ coin.n (SPEC §11.2). */
   coinSum: number;
-  /** One row per ended service: its skill and the largest tip seen for it (D39). */
-  ends: Record<string, { skill: SkillId; tip: number; t: number }>;
+  /**
+   * One row per ended service: its skill, the largest tip and the most monsters served seen for it
+   * (D39; a resumed service can end twice).
+   */
+  ends: Record<string, { skill: SkillId; tip: number; t: number; served: number }>;
   /** Distinct purchased items and their price (the same item bought twice is charged once). */
   bought: Record<string, number>;
   /** Latest `skillConfig` per skill. */
   config: Partial<Record<SkillId, SkillConfigState>>;
+  /** Latest `equip` per slot: the entry keys shown there (M4, §11.2). */
+  equipped: Record<string, string[]>;
+  /** Delivered crates: n → the smallest `next` recorded for it (D154). */
+  crates: Record<string, number>;
 }
 
 export const emptyDerived = (): Derived => ({
@@ -90,6 +97,8 @@ export const emptyDerived = (): Derived => ({
   ends: {},
   bought: {},
   config: {},
+  equipped: {},
+  crates: {},
 });
 
 /** Event order for replay (SPEC §11.2): by `t`, then by `id`. */
@@ -143,7 +152,12 @@ export function applyEvent(d: Derived, e: Evt): Derived {
       const prev = d.ends[e.svc];
       next.ends = {
         ...d.ends,
-        [e.svc]: { skill: e.skill, tip: Math.max(prev?.tip ?? 0, e.tip), t: Math.max(prev?.t ?? 0, e.t) },
+        [e.svc]: {
+          skill: e.skill,
+          tip: Math.max(prev?.tip ?? 0, e.tip),
+          t: Math.max(prev?.t ?? 0, e.t),
+          served: Math.max(prev?.served ?? 0, e.served),
+        },
       };
       break;
     }
@@ -153,6 +167,14 @@ export function applyEvent(d: Derived, e: Evt): Derived {
     case 'skillConfig':
       next.config = { ...d.config, [e.skill]: { stage: e.stage, ops: e.ops } };
       break;
+    case 'equip':
+      next.equipped = { ...d.equipped, [e.slot]: [...e.items] };
+      break;
+    case 'crate': {
+      const prev = d.crates[e.n];
+      if (prev === undefined || e.next < prev) next.crates = { ...d.crates, [e.n]: e.next };
+      break;
+    }
   }
   return next;
 }
@@ -188,3 +210,7 @@ export const balance = (d: Derived): number => Math.max(0, earned(d) - spent(d))
 export function servicesOf(d: Derived, skill: SkillId): number {
   return Object.values(d.ends).filter((x) => x.skill === skill).length;
 }
+
+/** Monsters served, ever (D154): Σ over distinct svc of the largest `serviceEnd.served`. */
+export const servedMonsters = (d: Derived): number =>
+  Object.values(d.ends).reduce((s, x) => s + x.served, 0);

@@ -1,7 +1,8 @@
-// Event upcasters (SPEC §11.3). Tier 1 ships schemaVersion 1 with an empty list and its harness
-// (D36); the first schema change adds a migration here, bumps SCHEMA_VERSION and adds a fixture test.
+// Event upcasters (SPEC §11.3). Tier 1 shipped schemaVersion 1 with an empty list and its harness
+// (D36); every schema change adds a migration here, bumps SCHEMA_VERSION and adds a fixture test.
 
-export const SCHEMA_VERSION = 1;
+/** 2: the `equip` and `crate` event kinds (M4a, D154). */
+export const SCHEMA_VERSION = 2;
 
 export interface Migration {
   from: number;
@@ -9,7 +10,11 @@ export interface Migration {
   upcast(event: unknown): unknown;
 }
 
-export const migrations: readonly Migration[] = [];
+export const migrations: readonly Migration[] = [
+  // v1 → v2 adds two event kinds; no v1 event changes shape, so the upcast is the identity. The
+  // version still moves, so an older app refuses a log (or a backup) that may hold crates.
+  { from: 1, to: 2, upcast: (e) => e },
+];
 
 export class UnknownSchemaVersionError extends Error {
   constructor(public readonly version: number, public readonly supported: number) {

@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { SCHEMA_VERSION } from '../../src/storage/migrations';
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { gateAnswer, holdGear, openGrownUps, startApp, tap, typeGate } from './helpers';
@@ -24,7 +25,7 @@ function verify(json: string): { events: { id: string }[]; settings: Record<stri
   };
   expect(Object.keys(f)).toEqual(['app', 'schemaVersion', 'deviceId', 'deviceLabel', 'exportedAt', 'events', 'settings', 'checksum']);
   expect(f.app).toBe('number-chef-monster-cafe');
-  expect(f.schemaVersion).toBe(1);
+  expect(f.schemaVersion).toBe(SCHEMA_VERSION);
   expect(f.checksum).toBe(sha256(JSON.stringify({ events: f.events, settings: f.settings })));
   return f;
 }

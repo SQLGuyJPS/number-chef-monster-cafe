@@ -3,7 +3,7 @@
 // one of three habits. Answers: when is the first purchase, when is the shop bought out, how often
 // does a sitting end with something new, and how long are the dry spells. Pure: no clock.
 import { COINS_PER_PROBLEM, SERVICE_TIP } from './config';
-import type { ShopEntry } from './economy';
+import { interleave, type ShopEntry } from './economy';
 import type { Rng } from './rng';
 
 export interface PlayProfile {
@@ -114,21 +114,7 @@ export interface SimResult {
 const uniform = (rng: Rng, [lo, hi]: readonly [number, number]): number =>
   lo + rng.next() * (hi - lo);
 
-/** Round-robin across names so a crate mixes, say, a hat, a skin and a colorway. */
-export function interleave(entries: readonly ShopEntry[]): ShopEntry[] {
-  const groups = new Map<string, ShopEntry[]>();
-  for (const e of entries) {
-    const list = groups.get(e.name) ?? [];
-    list.push(e);
-    groups.set(e.name, list);
-  }
-  const lists = [...groups.values()];
-  const out: ShopEntry[] = [];
-  for (let i = 0; out.length < entries.length; i++) {
-    for (const list of lists) if (i < list.length) out.push(list[i]!);
-  }
-  return out;
-}
+export { interleave } from './economy';
 
 export function simulate(input: SimInput, rng: Rng): SimResult {
   const p = input.profile;
@@ -161,6 +147,8 @@ export function simulate(input: SimInput, rng: Rng): SimResult {
   const queue: ShopEntry[] = [];
   const opened = new Set<string>();
   let nextCrateAt = Infinity;
+  /** Crates delivered so far (the first skips the hold, D176). */
+  let delivered = 0;
   const weeks: WeekStat[] = [];
 
   const openWaves = (week: number) => {
@@ -182,7 +170,9 @@ export function simulate(input: SimInput, rng: Rng): SimResult {
     // D154: a due crate is written when she opens the shop, one per visit. The next one is due
     // `everyMonsters` after this one was due, so waiting for the shop visit doesn't stretch the
     // pace; after a hold or a long gap it is due at the next visit (the event's `next`).
-    if (queue.length > 0 && monsters >= nextCrateAt && unowned().length < hold) {
+    // The very first crate skips the hold (D176).
+    if (queue.length > 0 && monsters >= nextCrateAt && (delivered === 0 || unowned().length < hold)) {
+      delivered++;
       for (const e of queue.splice(0, input.crates.size)) shop.set(e.key, e);
       nextCrateAt = Math.max(nextCrateAt + input.crates.everyMonsters, monsters + 1);
     }

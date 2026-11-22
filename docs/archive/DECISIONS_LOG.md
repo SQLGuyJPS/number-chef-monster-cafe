@@ -952,3 +952,83 @@ The decor lint check covers only what can be checked mechanically among the firm
 **What:** Amends D148 and D151. The Wall art slot's free default was "Menu Board", which the café art has never drawn. The Menu Board becomes a **tier-1 item, 20 coins**, one look (no colorways), and the free default is **Bare Wall** (nothing in the wall-art slot). Following D151's rule (the first colour of every tier 1–2 item is on the starter shelf), the Menu Board joins the starter shelf: 18 entries, 795 coins. With D159, M4 is 31 items (including three empty defaults), 51 paid entries, **2,305 coins**; 33 entries still wait in crates. Simulated (D150): the M4 stock lasts about 1.8–1.9 months (8 weeks), 92–100% of sittings end with a purchase; over the whole roadmap, sittings with nothing to buy are about 5% (4% after D157).
 **Why:** Owner (2026-11-22): the menu board was never drawn, so it can't be a free default already in the café; it is something to buy.
 **How to revisit:** the Wall art entries and `STARTER_SHELF` in `src/engine/economy.ts`; rerun `npm run economy:sim`. Note: "menu board" also names the dish-choice screen (SPEC §5.3); the shop item is the wall decoration only.
+
+## D161 — "The shop counts as play time" waits for M12 (2026-11-22)
+**What:** M4a's acceptance line "the shop counts as play time" is marked not applicable until M12: there is no play-time clock yet (the limit and its active-time accumulator were moved to M12 and postponed, D124). When M12 is built, the Shop is an ordinary child screen and its active time counts like every other.
+**Why:** Owner (2026-11-22). Nothing in the app measures play time today, so the line can't be tested.
+**How to revisit:** M12's acceptance carries the check (§6.5): time on the Shop screen counts toward the allowance.
+
+## D162 — Shop speech uses general lines (2026-11-22)
+**What:** Pip's shop lines never name an item, a colour or an amount: e.g. "Buy this one?", "It's yours!", "A delivery arrived!", "Keep cooking to save up!". The confirm card shows the item's name and price as text; nothing reads them aloud.
+**Why:** Owner (2026-11-22), following D153: every spoken name or amount would need its own recorded clip (D142), 31 items and their prices in M4 alone.
+**How to revisit:** if the owner wants names spoken, add item-name clips to the voice script and a line form that joins them (§8.4).
+
+## D163 — Home's shop button reads "Shop" (2026-11-22)
+**What:** Amends SPEC §5.2 and §5.7. The shop button is labelled **Shop**, with a small drawn paintbrush beside the word (a drawing, not an emoji: the emoji allowlist is foods only, §7.1). On Home it sits right of Open the Café, centred on the same line (x 940–1240, y 500–660); the matching space on the left is kept for the Monster Album button (M16).
+**Why:** Owner (2026-11-22): "Shop" is the word the family uses, and the left side is planned for the album.
+**How to revisit:** `SHOP.shopButton` in `src/app/metrics.ts`.
+
+## D164 — The delivery moment, and Buy without enough coins (2026-11-22)
+**What:** When a crate arrives (§10.1, D154), a cardboard box fades in and drops onto the counter's far edge in the middle of the room with a small bounce, the rest of the shop dims, Pip says "A delivery arrived!", and sparkles twinkle round the box. It opens on a tap or by itself 2 s after it lands: the side flaps fold out to the sides and the front flap folds down, sparkles burst, and the two new entries rise out of it, then go to their tiles, which wear a star (as do their slot tabs) until tapped. Reduced motion: no drop, bounce or twinkle; the box appears and opens. When the balance is below the price, Buy is dimmed; a tap on it gets Pip's "Keep cooking to save up!" and nothing else (no buzzer, no shake).
+**Why:** Owner (2026-11-22): a crate should feel like an event without waiting on the child; the first flaps drawn over the box did not read as flaps.
+**How to revisit:** `AUTO_OPEN_MS` and the delivery CSS (`shop.css`); the box is `src/art/decor/DeliveryBox.tsx`.
+
+## D165 — A shorter ticket so the lights show (2026-11-22)
+**What:** Amends SPEC §5.4. The ticket keeps its width and bottom but starts lower: x 808–1168, y 172–360 (was y 140–360), and x 904–1264 while counting together. It still holds the food and the widest sentence (`10 − ? = 6`) above its torn edge.
+**Why:** Owner (2026-11-22): the right string of lights hangs just under the status bar (y 122–166) and was always hidden behind the ticket.
+**How to revisit:** `TICKET_Y` in `src/app/metrics.ts`.
+
+## D166 — Mocks test fit at the maximum count (2026-11-22)
+**What:** Whenever a mock lays out UI elements whose number varies on one screen (shop tiles, colour dots, monsters on Results, buttons, tabs), it also shows the maximum number planned for any milestone, with the longest names and widest numbers, and is checked for overlap, clipping and even spacing before the owner reviews it.
+**Why:** Owner (2026-11-22): the round-2 shop mock showed three colour dots and three tiles while five dots and up to fourteen items are planned.
+**How to revisit:** The working agreement in CLAUDE.md.
+
+## D167 — The shop shelf pages four tiles at a time (2026-11-22)
+**What:** Amends D163/§10 shop layout. The counter band shows a slot's items four to a page (tiles 128 × 220 at x 112–648, y 464–684) between two obtuse-triangle arrows (88-px cells, x 16–104 and x 656–744); page pips under the tiles show which page is on. With one page there are no arrows or pips; with more, both arrows show and the one with no page that way is faded, so nothing jumps. The colour dots (room for five) and Buy stay on the right. M14 brings a slot to at most 14 items (four pages).
+**Why:** Owner (2026-11-22) chose option A of four mocked (pages, sliding strip, two rows of picture-only tiles, a "more" sheet). The max-fit mock (D166) showed six 110-px tiles too narrow for "Monster Portraits" and a three-digit price; tiles keep their names, which help the child read (she reads easy chapter books, §1).
+**How to revisit:** `SHOP_PAGE` and `SHOP` in `src/app/metrics.ts`.
+
+## D168 — The caption bubble fits its text (2026-11-22)
+**What:** Amends §5.4 (D76) and §7.3. The caption bubble shrinks to its widest line (its §5.4 box, x 226–496, y 140–264, is the most it grows to), with balanced line breaks. A monster's bubble stays anchored by its right edge and middle, so its tail still points at the monster; Pip's by its right and bottom edges, so its tail still points down at Pip. Captions always show.
+**Why:** Owner (2026-11-22): the full-size bubble always covered the window and the left string of lights; captions stay because the child reads them and learns words from them.
+**How to revisit:** `Caption` in `src/game/service/ServiceParts.tsx` and `.caption` in `service.css`.
+
+## D169 — Pip names a slot when its tab is tapped (2026-11-22)
+**What:** Amends §10. Tapping a slot tab in the shop has Pip say the slot's name, with his caption: "Wallpaper", "Floor", "Lights", "Window", "Counter top", "Wall art". Six new lines, on the TTS fallback until the voice pass (D142).
+**Why:** Owner (2026-11-22): the tabs are pictures only, so what each one holds might not be obvious; hearing and seeing the word also helps her reading.
+**How to revisit:** the shop phrases in the phrase table.
+
+## D170 — Results gets the Shop button in M4a (2026-11-22)
+**What:** Amends §5.7. Results shows four buttons on one line, text 38 px: Change dish (x 65–345), **Another service** (x 365–715, still the highlighted default), Shop with the paintbrush (x 735–975), Home (x 995–1215), all 160 px tall.
+**Why:** Owner (2026-11-22) asked to see Shop on Results in M4a; four buttons only fit one line with slightly smaller text.
+**How to revisit:** `RESULTS4` in `src/app/metrics.ts`.
+
+## D171 — The fixed crate order is the catalog round-robin across items (2026-11-22)
+**What:** Refines D154 and §11.2 ("catalog order, never random"). The crate queue is every paid M4 entry not on the starter shelf, in catalog order, taken round-robin across items (`interleave`): first colour of each item in turn, then the second colours, and so on. Crate n holds queue entries 2n−1 and 2n (`CRATE_QUEUE` in `src/engine/shop.ts`). The economy simulator uses the same function, so its pace is the game's pace.
+**Why:** Plain catalog order would send two colours of one item in the same crate (Polka Dots Sky and Lavender), which feels like one new thing, not two; the simulator (D150) already round-robined, so its results only hold for this order. It stays fixed and deterministic, so two devices agree (D154).
+**How to revisit:** `CRATE_QUEUE`. Changing the order after release changes what an existing crate number holds, so only change it alongside a migration or for items not yet delivered anywhere.
+
+## D172 — Buying puts the item on; leaving the shop drops a try-on (2026-11-22)
+**What:** Amends §10. *Yes!* writes the `buy` and an `equip` for that entry in one transaction, so the café keeps what the child just tried on and bought. Tapping an owned tile or colour dot equips it at once (free, §10). Tapping an unowned one only tries it on; switching slot tab or leaving the shop drops the try-on, and the café shows what is equipped. A tile shows the colour that is on, else one the child owns, else the item's first colour; its tick means that colour is owned. Buy shows only for an unowned selection.
+**Why:** The spec says owned items re-equip free and tapping previews, but not what a purchase does to the café or what happens to an unbought preview; buying something and not seeing it would feel like nothing happened.
+**How to revisit:** `Shop.tsx` and `Progress.buy`/`equip`.
+
+## D173 — Delivered entries rise, then appear on the shelf starred (2026-11-22)
+**What:** Amends §10.1 (D164) for M4a. After the box opens, the two entries rise out of it and hang over it for about 1.6 s; then the delivery layer fades and the shelf shows them, starred with their tabs, on the tab of the first new entry. They do not fly to their tiles.
+**Why:** The tiles of the two entries are often on different tabs or pages, so a flight would land on something not on screen. The stars and the tab the shelf opens on carry the "where did it go" part.
+**How to revisit:** owner's playtest; a flight to the tile (when it is on screen) can be added in M4b with the real art.
+
+## D174 — Delivery stars are per device (2026-11-22)
+**What:** The stars on newly delivered entries and their tabs (§10.1, D164) are kept in a per-device setting row (`shopFresh`), not in the progress log. A crate recorded on another device and merged in arrives here without stars.
+**Why:** A star is a cue, not progress (§11.1 keeps only progress in the log), and a "seen" event per tap would bloat the log and need its own merge rule.
+**How to revisit:** `src/app/shopFresh.ts`; if stars should follow the child across devices, add an event kind (a schema change).
+
+## D175 — Shop captions stay up at least 2.5 s; slot names end with "!" (2026-11-22)
+**What:** Amends §10 (D169). Pip's shop captions stay on screen until his line ends or 2.5 s have passed, whichever is later. The slot names are spoken and captioned with an exclamation mark ("Wallpaper!", "Counter top!"), as every spoken line ends in ?, . or ! (the punctuation sets the intonation of the recording, `lint:content`).
+**Why:** A line that ends early (a fast voice, or no voice at all) would otherwise flash its caption, and the owner wants captions readable (D168). The content lint rejects unpunctuated lines.
+**How to revisit:** `CAPTION_MIN_MS` in `Shop.tsx`; the phrase table.
+
+## D176 — The first crate skips the hold (2026-11-22)
+**What:** Amends §10.1 and §11.2 (D151, D154). The very first delivery crate (n = 1) arrives on the child's first shop visit even though the 18-entry starter shelf is unbought; every later crate keeps the hold at 6 unbought. Only crate 1 ever skips it: a crate that opens a later update still waits for the hold.
+**Why:** With the hold applying, crate 1 waited until she had bought 13 of the 18 starter entries (about 450 coins), so the delivery moment, which is part of what the owner playtests, came weeks in. Owner's call after the M4a review, 2026-11-22. It also shows her early that new things arrive. The simulator does the same; the M4 stock still lasts about 1.8 months at the default profile, with about one more unbought choice on average (ECONOMY_SIM.md).
+**How to revisit:** the `last > 0` condition in `dueCrate` (engine/shop.ts) and `delivered === 0` in economySim.ts.

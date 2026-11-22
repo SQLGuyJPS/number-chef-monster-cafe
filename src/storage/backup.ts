@@ -16,7 +16,7 @@ const skill = z.enum(SKILLS);
 const stage = z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]);
 const base = { id: z.string().min(1), t: z.number().finite(), dev: z.string(), v: z.number().int() };
 
-/** Every event kind schemaVersion 1 writes (SPEC §11.2; `equip`, `known`, `focus` come later). */
+/** Every event kind schemaVersion 2 writes (SPEC §11.2; `known` and `focus` come in M7). */
 export const eventSchema = z.discriminatedUnion('k', [
   z.object({
     ...base,
@@ -43,6 +43,13 @@ export const eventSchema = z.discriminatedUnion('k', [
   }),
   z.object({ ...base, k: z.literal('skillConfig'), skill, stage, ops: z.enum(['both', 'add', 'sub']) }),
   z.object({ ...base, k: z.literal('buy'), item: z.string(), price: z.number().int().nonnegative() }),
+  z.object({ ...base, k: z.literal('equip'), slot: z.string(), items: z.array(z.string()) }),
+  z.object({
+    ...base,
+    k: z.literal('crate'),
+    n: z.number().int().positive(),
+    next: z.number().int().nonnegative(),
+  }),
 ]);
 
 const fileSchema = z.object({

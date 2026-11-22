@@ -3,6 +3,8 @@ import type { Outcome } from '../../src/engine/attempt';
 import {
   attemptEvent,
   coinEvent,
+  crateEvent,
+  equipEvent,
   serviceEndEvent,
   skillConfigEvent,
   type BuyEvt,
@@ -129,8 +131,13 @@ function randomLog(rng: Rng, n: number): Evt[] {
           partial: rng.chance(0.3),
         }),
       );
-    else if (r < 0.95)
+    else if (r < 0.88)
       out.push(skillConfigEvent(ctx, { skill, stage: rng.pick(STAGES), ops: rng.pick(['both', 'add', 'sub'] as const) }));
+    else if (r < 0.91)
+      out.push(equipEvent(ctx, { slot: rng.pick(['floor', 'wallpaper']), items: [rng.pick(['lamp', 'rug'])] }));
+    else if (r < 0.94)
+      // Two devices recording the same crate with different `next` (D154): the smaller wins.
+      out.push(crateEvent(ctx, { n: rng.int(1, 3), next: rng.int(0, 90) }));
     else {
       const buy: BuyEvt = { id: ctx.id(), t, dev: 'd', v: 1, k: 'buy', item: rng.pick(['lamp', 'rug']), price: 20 };
       out.push(buy);

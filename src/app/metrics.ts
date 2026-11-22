@@ -62,6 +62,9 @@ export const TAKEN_FRAME = frameSize(TAKEN_CELL, TAKEN_GAP, TAKEN_PAD); // 324 �
 const centeredX = (w: number) => Math.round((STAGE_W - w) / 2);
 const TICKET_W = 360;
 const TICKET_COUNTING_X = STAGE_W - 16 - TICKET_W;
+/** The ticket's top and height: food, sentence and the torn edge, nothing spare (M4a: was y 140, h 220). */
+const TICKET_Y = 172;
+const TICKET_H = 360 - TICKET_Y;
 
 // ---------------------------------------------------------------------------------------------
 // Service screen layout (SPEC §5.4, D114–D118), seen from behind the counter; `?mock` shows every
@@ -101,7 +104,9 @@ const CLOCHE_BIN: Rect = { x: 960, y: rowY(130), w: 300, h: 130 };
  */
 export const LID_ART_SHIFT = 16;
 const CLOCHE_LID_X = Math.round(
-  (CLOCHE_TRAY.x + CLOCHE_TRAY.w + PLATE_BLEED + CLOCHE_BIN.x + CRATE_INSET) / 2 - BUTTON_MIN / 2 - LID_ART_SHIFT,
+  (CLOCHE_TRAY.x + CLOCHE_TRAY.w + PLATE_BLEED + CLOCHE_BIN.x + CRATE_INSET) / 2 -
+    BUTTON_MIN / 2 -
+    LID_ART_SHIFT,
 );
 
 /** One layout per mock variant; every rect a tap target or a band the child must see. */
@@ -124,8 +129,9 @@ export const COUNTER = {
   /** Room (y 120–432): monster behind the counter, caption left of it, ticket right of it. */
   scene: {
     caption: { x: 226, y: 140, w: 270, h: 124 },
-    ticket: { x: 808, y: 140, w: TICKET_W, h: 220 },
-    ticketCounting: { x: TICKET_COUNTING_X, y: 140, w: TICKET_W, h: 220 },
+    /** Starts below the right string of lights (DECOR.lightsRight), so the lights show (M4a). */
+    ticket: { x: 808, y: TICKET_Y, w: TICKET_W, h: TICKET_H },
+    ticketCounting: { x: TICKET_COUNTING_X, y: TICKET_Y, w: TICKET_W, h: TICKET_H },
     /** Full height: whole body, standing on the counter's far edge. */
     monsterFull: { x: 520, y: COUNTER_Y - 240, w: 240, h: 240 },
     /** Pip pops up behind the counter, under the caption, clear of the monster. */
@@ -159,7 +165,12 @@ export const COUNTER = {
   frames2: {
     help: { x: 8, y: 460, w: BUTTON_MIN, h: BUTTON_MIN },
     bell: { x: 8, y: 588, w: BUTTON_MIN, h: BUTTON_MIN },
-    tray: { x: 132, y: rowY(TIGHT_FRAME.h), w: 2 * TIGHT_FRAME.w + TIGHT.framesGap, h: TIGHT_FRAME.h },
+    tray: {
+      x: 132,
+      y: rowY(TIGHT_FRAME.h),
+      w: 2 * TIGHT_FRAME.w + TIGHT.framesGap,
+      h: TIGHT_FRAME.h,
+    },
     bin: { x: 1100, y: rowY(200), w: 172, h: 200 },
   },
   /** S0 pad: Pip, bell, Peek, display, backspace in the upper row; ten digits below. */
@@ -169,7 +180,12 @@ export const COUNTER = {
     peek: { x: 400, y: 460, w: 128, h: BUTTON_MIN },
     display: { x: 544, y: 460, w: 240, h: BUTTON_MIN },
     backspace: { x: 800, y: 460, w: 128, h: BUTTON_MIN },
-    digits: { x: centeredX(10 * BUTTON_MIN + 9 * 8), y: 592, w: 10 * BUTTON_MIN + 9 * 8, h: BUTTON_MIN },
+    digits: {
+      x: centeredX(10 * BUTTON_MIN + 9 * 8),
+      y: 592,
+      w: 10 * BUTTON_MIN + 9 * 8,
+      h: BUTTON_MIN,
+    },
     digitGap: 8,
   },
   /**
@@ -219,4 +235,84 @@ export const FRONT = {
   change: { x: 120, y: FRONT_BTN_Y, w: 300, h: BIG_BUTTON },
   another: { x: 470, y: FRONT_BTN_Y, w: 340, h: BIG_BUTTON },
   home: { x: 860, y: FRONT_BTN_Y, w: 300, h: BIG_BUTTON },
+} as const;
+
+// ---------------------------------------------------------------------------------------------
+// Shop (SPEC §10, M4a). PROPOSAL for the owner's review (layout mock, `?mock&v=shop…`): the decor
+// slots in the café scene, and the shop screen over the same counter.
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * Where each decor slot draws (ART_GUIDE §5). The room band does not mirror with the basket side,
+ * so slots in the room are clear of the counter row on both sides by construction.
+ * - wallpaper: the back wall above the wainscot; floor: y 330 down to the counter.
+ * - lights: two swags under the status bar, left and right of the wall art, so neither hangs in
+ *   front of the monster's head or the wall art.
+ * - window: the street window beside the door.
+ * - wallArt: centred on the wall above the monster; a tall monster's head covers its lower edge,
+ *   which is why it must stay quiet (ART_GUIDE §2.1).
+ * - counter: standing on the counter's far edge at its right end, under the ticket's corner and
+ *   clear of the whole counter row (tray, basket, Pip's hat, bell) on both basket sides.
+ */
+export const DECOR = {
+  wallpaper: { x: 0, y: BAR_H, w: STAGE_W, h: 142 },
+  floor: { x: 0, y: 330, w: STAGE_W, h: COUNTER_Y - 330 },
+  lightsLeft: { x: 0, y: BAR_H + 2, w: 500, h: 44 },
+  lightsRight: { x: 780, y: BAR_H + 2, w: 500, h: 44 },
+  window: { x: 208, y: 142, w: 214, h: 150 },
+  wallArt: { x: 540, y: 128, w: 200, h: 72 },
+  counter: { x: 1176, y: COUNTER_Y - 108, w: 96, h: 112 },
+} as const;
+
+/**
+ * Bar buttons in the shop: 104 px (56.3 CSS px at 844×390, just over the button minimum) from the
+ * stage top, so their bottom and shadow stay clear of the bar's wooden trim and the wall below it.
+ */
+const SHOP_TAB = 104;
+/**
+ * The shelf shows four tiles a page between two arrows (D167): wide enough for the longest names
+ * and a three-digit price; M14 brings a slot up to 14 items (four pages).
+ */
+export const SHOP_PAGE = 4;
+const SHOP_TILE = { x: 112, y: 464, w: 128, h: 220, step: 136 } as const;
+/** Colour dots: drawn 64 px, tapped on an 88-px box (the cell minimum, ≈ 47.6 CSS px at 844×390); room for five. */
+export const SHOP_DOT = { tap: CELL, drawn: 64, gap: 16, max: 5 } as const;
+export const SHOP = {
+  /** Status bar: six slot tabs on the left, the jar in its spot, Home in the corner. */
+  tab: (i: number): Rect => ({ x: 16 + i * (SHOP_TAB + 12), y: 0, w: SHOP_TAB, h: SHOP_TAB }),
+  home: { x: STAGE_W - 12 - SHOP_TAB, y: 0, w: SHOP_TAB, h: SHOP_TAB },
+  /**
+   * Counter band: a page of the slot's items between the back and next arrows (88-px cells), page
+   * pips underneath; dots and Buy on the right (D167).
+   */
+  tile: (i: number): Rect => ({
+    x: SHOP_TILE.x + i * SHOP_TILE.step,
+    y: SHOP_TILE.y,
+    w: SHOP_TILE.w,
+    h: SHOP_TILE.h,
+  }),
+  back: { x: 16, y: SHOP_TILE.y, w: CELL, h: SHOP_TILE.h },
+  next: { x: SHOP_TILE.x + SHOP_PAGE * SHOP_TILE.step, y: SHOP_TILE.y, w: CELL, h: SHOP_TILE.h },
+  pips: { x: SHOP_TILE.x, y: 692, w: SHOP_PAGE * SHOP_TILE.step - 8, h: 20 },
+  dots: { x: 736, y: 456, w: 536, h: CELL },
+  buy: { x: 854, y: 552, w: 300, h: BIG_BUTTON },
+  /** Confirm: a card over the dimmed screen, the item's picture and two big answers. */
+  confirm: { x: 340, y: 110, w: 600, h: 500 },
+  yes: { x: 380, y: 420, w: 240, h: BIG_BUTTON },
+  notYet: { x: 660, y: 420, w: 240, h: BIG_BUTTON },
+  /** The delivery box on the counter's far edge, centred in the room (bottom at the edge). */
+  crate: { x: 490, y: 196, w: 300, h: 240 },
+  /**
+   * Home: Shop on the right of Open the Café, centred on the same line. The left side is kept for
+   * the Monster Album button (M16).
+   */
+  shopButton: { x: 940, y: 500, w: 300, h: BIG_BUTTON },
+} as const;
+
+/** Results with Shop (SPEC §5.7, D167): four buttons on one line, the primary one second. */
+export const RESULTS4 = {
+  change: { x: 65, y: 500, w: 280, h: BIG_BUTTON },
+  another: { x: 365, y: 500, w: 350, h: BIG_BUTTON },
+  shop: { x: 735, y: 500, w: 240, h: BIG_BUTTON },
+  home: { x: 995, y: 500, w: 220, h: BIG_BUTTON },
 } as const;

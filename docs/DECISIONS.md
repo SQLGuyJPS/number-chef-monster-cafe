@@ -168,3 +168,19 @@
 | D158 | The art guide sets firm limits (readability, phone size, shared colour families, SVG budget, gentle motion, child-safe, slot + fallback) and treats the house style as a starting point; experiments are welcome, flagged in the batch report, and the owner's picks become the style. Lint checks only the firm limits | SPEC §7.4, §14 | Owner: leave room for a style the agent finds that the owner likes |
 | D159 | The serve bell is not a shop item: the Counter-top slot's free default is Clear Counter; new bell looks may come in a later drop | SPEC §10, §14 | The child always needs something to press to serve; it can't be swapped out |
 | D160 | The Menu Board costs 20 coins (T1) and joins the starter shelf; Wall art's free default is Bare Wall. M4: 31 items, 51 paid entries, 2,305 coins; shelf 18 entries, 795 coins | SPEC §10, §14 | The menu board was never drawn, so it can't be a free default already in the café |
+| D161 | M4a's "the shop counts as play time" waits for M12: no play-time clock exists yet (D124) | SPEC §14 | Owner: nothing measures play time today |
+| D162 | Shop speech uses general lines; never names an item, colour or amount | SPEC §10 | Like D153: every name would need a recorded clip |
+| D163 | Home's shop button reads "Shop" with a drawn paintbrush, right of Open the Café; the left side is kept for the Monster Album (M16) | SPEC §5.2, §5.7 | Owner's word; space planned for the album |
+| D164 | Delivery: the box drops onto the counter, sparkles, opens on a tap or after 2 s (flaps fold out), entries rise out; Buy without enough coins is dimmed and Pip encourages | SPEC §10, §10.1 | Owner: an event that never waits on the child; no fail feel |
+| D165 | Ticket shortened to y 172–360 so the right string of lights shows | SPEC §5.4 | Owner: the lights were always hidden behind the ticket |
+| D166 | Mocks of a varying number of elements also show the maximum planned count (longest names, widest numbers) and are checked for fit | CLAUDE.md | Owner: catch overlap before it is built |
+| D167 | Shop shelf: four tiles a page between two triangle arrows, page pips; no arrows with one page | SPEC §10 | Owner picked option A of four mocks |
+| D168 | Caption bubble shrinks to fit its text, anchored so its tail still points at the speaker | SPEC §5.4 | Owner: less of the room covered; captions stay for reading |
+| D169 | Pip says a slot's name (with caption) when its shop tab is tapped | SPEC §10 | Owner: picture-only tabs need a name |
+| D170 | Results: four buttons on one line (Change dish, Another service, Shop, Home), text 38 px | SPEC §5.7 | Owner asked for Shop on Results in M4a |
+| D171 | Crate order: catalog order round-robin across items (`CRATE_QUEUE`), the same as the simulator | SPEC §11.2 | Two colours of one item in a crate feel like one new thing |
+| D172 | Yes! buys and equips; owned tiles and dots equip on a tap; a try-on is dropped on a tab change or leaving | SPEC §10 | Spec did not say what a purchase does to the café |
+| D173 | Delivered entries rise and hang, then show starred on the shelf; no flight to the tiles | SPEC §10.1 | Their tiles are often on another tab or page |
+| D174 | Delivery stars are a per-device setting, not an event | SPEC §10.1 | A cue, not progress |
+| D175 | Shop captions stay at least 2.5 s; slot names end with "!" | SPEC §10 | Readable captions (D168); lint wants punctuation |
+| D176 | The first crate skips the hold at 6 unbought; later crates keep it | SPEC §10.1, §11.2 | Owner wants the delivery moment on the first shop visit |

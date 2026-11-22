@@ -1,0 +1,409 @@
+/* Coin shop (SPEC §10). Positions from SHOP in metrics.ts; these only style. */
+.shop-tab,
+.shop-home,
+.shop-tile,
+.shop-dot {
+  position: absolute;
+  box-sizing: border-box;
+  padding: 0;
+  border: none;
+  background: none;
+}
+.shop-tab {
+  padding: 10px;
+  border-radius: 24px;
+  background: #fffaf0;
+  border: 4px solid #e2d3b6;
+  /* Shadow kept short: the button's bottom plus its shadow stay clear of the bar's trim (y 110). */
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.12);
+}
+.shop-tab.active {
+  background: #ffe2a8;
+  border-color: var(--c-primary);
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+}
+.shop-home {
+  display: grid;
+  place-items: center;
+  border-radius: 24px;
+  background: #fffaf0;
+  border: 4px solid #e2d3b6;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.12);
+}
+.shop-new {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 30px;
+  height: 30px;
+  background: #ffd23f;
+  clip-path: polygon(
+    50% 0,
+    62% 36%,
+    100% 38%,
+    70% 60%,
+    80% 100%,
+    50% 76%,
+    20% 100%,
+    30% 60%,
+    0 38%,
+    38% 36%
+  );
+}
+.shop-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 8px;
+  border-radius: 22px;
+  background: #fffaf0;
+  border: 5px solid #e2d3b6;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.14);
+  color: var(--c-ink);
+}
+.shop-tile.selected {
+  border-color: var(--c-primary);
+  transform: translateY(-10px);
+  box-shadow: 0 14px 0 rgba(0, 0, 0, 0.14);
+}
+.shop-tile.equipped {
+  background: #eaf7ee;
+}
+.shop-tile-pic {
+  width: 104px;
+  height: 84px;
+  display: grid;
+  place-items: center;
+}
+.shop-empty {
+  width: 92px;
+  height: 72px;
+  border-radius: 12px;
+  border: 4px dashed #cbbda3;
+}
+.shop-tile-name {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.05;
+  text-align: center;
+  min-height: 48px;
+  display: grid;
+  place-items: center;
+}
+.shop-tile-foot {
+  font-size: 30px;
+  font-weight: 700;
+}
+.shop-price {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.shop-coin {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--c-coin);
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.15);
+}
+.shop-tick {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #3aa57a
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    center / 70% no-repeat;
+}
+.shop-tick.small {
+  width: 26px;
+  height: 26px;
+}
+.shop-dot {
+  display: grid;
+  place-items: center;
+}
+.shop-dot-paint {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 5px solid #fffaf0;
+  box-shadow: 0 0 0 3px #cbbda3;
+  display: grid;
+  place-items: end end;
+}
+.shop-dot.selected .shop-dot-paint {
+  box-shadow: 0 0 0 6px var(--c-primary);
+}
+.shop-buy {
+  position: absolute;
+  box-sizing: border-box;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  font-size: 52px;
+}
+.shop-buy .shop-coin {
+  width: 42px;
+  height: 42px;
+}
+/* Home: Shop beside Open the Café; the brush and the word sit centred on one line. */
+.shop-button-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  font-size: 56px;
+  line-height: 1;
+}
+.shop-brush {
+  width: 60px;
+  height: 60px;
+  flex: none;
+}
+/* Confirm */
+.shop-confirm-layer,
+.shop-delivery {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+}
+/* Runs past the stage so the bleed on phones and iPads dims too. */
+.shop-dim {
+  position: absolute;
+  inset: -1000px;
+  background: var(--c-scrim);
+}
+.shop-confirm {
+  position: absolute;
+  box-sizing: border-box;
+  border-radius: 32px;
+  background: var(--c-paper);
+  box-shadow: 0 10px 0 rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 30px;
+  gap: 20px;
+}
+.shop-confirm-pic {
+  width: 220px;
+  height: 176px;
+}
+.shop-confirm-title {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--c-ink);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.shop-confirm-title .shop-coin {
+  width: 40px;
+  height: 40px;
+}
+.shop-yes,
+.shop-not-yet {
+  position: absolute;
+  box-sizing: border-box;
+  padding: 0;
+  font-size: 52px;
+}
+/* Delivery moment */
+.shop-crate,
+.shop-delivery-item {
+  position: absolute;
+}
+/* ---- Delivery box (DeliveryBox.tsx): transforms and opacity only ---- */
+.shop-crate {
+  position: absolute;
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+}
+.shop-crate.dropping {
+  animation: dbox-drop 0.7s cubic-bezier(0.3, 0, 0.6, 1) both;
+  transform-origin: 50% 98%;
+}
+@keyframes dbox-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-170px);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(0) scale(1, 1);
+  }
+  70% {
+    transform: translateY(0) scale(1.06, 0.9);
+  }
+  85% {
+    transform: translateY(-10px) scale(0.98, 1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1, 1);
+  }
+}
+.dbox g,
+.dbox path {
+  transform-box: view-box;
+}
+.dbox.closed .dbox-open {
+  display: none;
+}
+/* Opening: closed flaps swing up to their hinges, then the open flaps swing out from them. */
+.dbox.open .dbox-flap-l-closed,
+.dbox.open .dbox-flap-r-closed {
+  animation: dbox-flap-up 0.18s ease-in forwards;
+}
+.dbox.open .dbox-tape {
+  animation: dbox-fade 0.12s ease-in forwards;
+}
+.dbox.open .dbox-flap-l-open,
+.dbox.open .dbox-flap-r-open {
+  animation: dbox-flap-out 0.32s 0.16s cubic-bezier(0.3, 1.5, 0.6, 1) both;
+}
+.dbox.open .dbox-flap-front {
+  animation: dbox-flap-down 0.3s 0.2s ease-out both;
+}
+@keyframes dbox-flap-up {
+  to {
+    transform: scaleX(0);
+  }
+}
+@keyframes dbox-flap-out {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes dbox-flap-down {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes dbox-fade {
+  to {
+    opacity: 0;
+  }
+}
+.dbox-twinkle {
+  animation: dbox-twinkle 1.3s ease-in-out infinite;
+}
+@keyframes dbox-twinkle {
+  0%,
+  100% {
+    transform: scale(0.5);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+.dbox-burst {
+  animation: dbox-burst 0.7s ease-out both;
+}
+@keyframes dbox-burst {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+}
+/* The two new entries rise out of the box once the flaps are open. */
+.shop-delivery-item {
+  animation: dbox-rise 0.5s 0.4s cubic-bezier(0.3, 1.4, 0.6, 1) both;
+}
+@keyframes dbox-rise {
+  from {
+    opacity: 0;
+    transform: translateY(80px) scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+html.reduce-motion .shop-crate.dropping,
+html.reduce-motion .dbox *,
+html.reduce-motion .shop-delivery-item {
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shop-crate.dropping,
+  .dbox *,
+  .shop-delivery-item {
+    animation: none !important;
+  }
+}
+html.reduce-motion .dbox.open .dbox-closed {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dbox.open .dbox-closed {
+    display: none;
+  }
+}
+
+/* Shelf paging (D167). */
+.shop-arrow {
+  position: absolute;
+  box-sizing: border-box;
+  padding: 0;
+  border: none;
+  background: none;
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.16));
+}
+.shop-arrow.off {
+  opacity: 0.3;
+}
+.shop-pips {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+}
+.shop-pips span {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(107, 74, 46, 0.3);
+}
+.shop-pips span.on {
+  background: #6b4a2e;
+}
+.results-shop .shop-button-inner {
+  font-size: 44px;
+}
+.results4 {
+  font-size: 38px;
+}
+
+/* Below the price (D164): dimmed, and a tap gets only Pip's "Keep cooking to save up!". */
+.shop-buy.short {
+  filter: saturate(0.3);
+  opacity: 0.55;
+}

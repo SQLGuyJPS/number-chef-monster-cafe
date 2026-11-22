@@ -84,6 +84,16 @@ export const PHRASE_SPEAKERS: Readonly<Record<PhraseKey, SpeakerKind>> = {
   'eat.total': 'monster',
   'service.closed': 'monster',
   'resume.ask': 'pip',
+  'shop.buy': 'pip',
+  'shop.yours': 'pip',
+  'shop.save': 'pip',
+  'shop.delivery': 'pip',
+  'shop.slot.wallpaper': 'pip',
+  'shop.slot.floor': 'pip',
+  'shop.slot.lights': 'pip',
+  'shop.slot.window': 'pip',
+  'shop.slot.counter': 'pip',
+  'shop.slot.wallArt': 'pip',
   'results.total': 'narrator',
 };
 
@@ -182,6 +192,16 @@ export const FIXED_LINES = [
   'follow.type',
   'service.closed',
   'resume.ask',
+  'shop.buy',
+  'shop.yours',
+  'shop.save',
+  'shop.delivery',
+  'shop.slot.wallpaper',
+  'shop.slot.floor',
+  'shop.slot.lights',
+  'shop.slot.window',
+  'shop.slot.counter',
+  'shop.slot.wallArt',
 ] as const satisfies readonly PhraseKey[];
 
 /** Counting lines that may be recorded as one-take pairs (`pair.<n>.<word>`, D143). */

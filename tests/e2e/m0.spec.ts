@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { isRotated, startApp, tap, watchNetwork } from './helpers';
+import { SCHEMA_VERSION } from '../../src/storage/migrations';
 
 const ORIGIN = 'http://localhost:4173';
 
@@ -149,7 +150,7 @@ test('debug screen shows the version; test hooks exist only in the e2e build', a
   await expect(page.getByTestId('debug-screen')).toBeVisible();
   await expect(page.getByTestId('debug-version')).toHaveText(/^\d+\.\d+\.\d+\+\w+$/);
   await expect(page.getByTestId('debug-storage')).toHaveText('idb');
-  await expect(page.getByTestId('debug-schema-version')).toHaveText('1');
+  await expect(page.getByTestId('debug-schema-version')).toHaveText(String(SCHEMA_VERSION));
   expect(await page.evaluate(() => typeof (window as unknown as { __ncmc?: unknown }).__ncmc)).toBe('object');
 });
 

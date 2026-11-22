@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import { useLayoutEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import { TapButton } from '../input/TapButton';
 import { FOODS, type FoodId } from '../../engine/foods';
 import type { Rect } from '../../app/metrics';
@@ -50,7 +50,12 @@ export function Ticket({
           t.blank && solved !== undefined ? (
             // The answer takes the blank's place in the blank's own role colour (D106): green for
             // `7 + 3 = ?`, orange for `7 + ? = 10`, so the sentence keeps its colours.
-            <span key={i} className={`tok tok-solved tok-${t.role ?? 'result'}`} data-testid="ticket-answer" data-role={t.role}>
+            <span
+              key={i}
+              className={`tok tok-solved tok-${t.role ?? 'result'}`}
+              data-testid="ticket-answer"
+              data-role={t.role}
+            >
               {solved}
             </span>
           ) : (
@@ -189,12 +194,25 @@ export function Bin({
 }) {
   const g = FOODS[food].glyph;
   // Tap or drag (SPEC §3.3), so not a TapButton: handlers come from dragTapHandlers.
-  const cls = ['svc-btn', 'bin', tall ? 'tall' : '', pulsing ? 'pulse' : '', wobble ? `wobble-${wobble % 2}` : '']
+  const cls = [
+    'svc-btn',
+    'bin',
+    tall ? 'tall' : '',
+    pulsing ? 'pulse' : '',
+    wobble ? `wobble-${wobble % 2}` : '',
+  ]
     .filter(Boolean)
     .join(' ');
   if (tall)
     return (
-      <div className={cls} style={at(rect)} data-tap="button" data-testid="bin" aria-label="Food bin" {...handlers}>
+      <div
+        className={cls}
+        style={at(rect)}
+        data-tap="button"
+        data-testid="bin"
+        aria-label="Food bin"
+        {...handlers}
+      >
         {/* Two rows only: a third, perched on top, looked precarious (D116). */}
         {[0, 1].map((row) => (
           <div key={row} className={`heap-row r${row}`}>
@@ -318,10 +336,25 @@ export function DoorSign(props: PartProps) {
     <Btn {...props} className="door-sign" testId="door" label="Take a break">
       <svg viewBox="0 0 100 100" width="100%" height="100%" aria-hidden="true">
         {/* nail and string */}
-        <path d="M18 34 L50 10 L82 34" fill="none" stroke="#7a5536" strokeWidth="3" strokeLinejoin="round" />
+        <path
+          d="M18 34 L50 10 L82 34"
+          fill="none"
+          stroke="#7a5536"
+          strokeWidth="3"
+          strokeLinejoin="round"
+        />
         <circle cx="50" cy="10" r="4.5" fill="#8f8a84" stroke="#5e5a55" strokeWidth="1.5" />
         {/* plaque */}
-        <rect x="8" y="30" width="84" height="64" rx="12" fill="#c98b55" stroke="#8a5a35" strokeWidth="4" />
+        <rect
+          x="8"
+          y="30"
+          width="84"
+          height="64"
+          rx="12"
+          fill="#c98b55"
+          stroke="#8a5a35"
+          strokeWidth="4"
+        />
         <path d="M14 46 H86 M14 62 H86 M14 78 H86" stroke="#b67a47" strokeWidth="2" />
         {/* the little door on it */}
         <rect x="35" y="38" width="30" height="48" rx="4" fill="#8a5a35" />
@@ -354,14 +387,22 @@ export function WaitingLine({
 }) {
   const step = Math.min(maxStep, (rect.w - 16) / Math.max(1, line.length));
   return (
-    <div className="waiting-line" style={at(rect)} data-testid="queue" data-count={line.length} aria-hidden="true">
+    <div
+      className="waiting-line"
+      style={at(rect)}
+      data-testid="queue"
+      data-count={line.length}
+      aria-hidden="true"
+    >
       <div className="line-path" />
       {line.map((m, i) => {
         const newcomer = joining && m.joined;
         return (
           <div
             key={m.key}
-            className={['line-mon', m.back ? 'back-again' : '', newcomer ? 'newcomer' : ''].join(' ')}
+            className={['line-mon', m.back ? 'back-again' : '', newcomer ? 'newcomer' : ''].join(
+              ' ',
+            )}
             // Front first: the front monster stands next to the café on the left; the rest stretch
             // back to the right (D120).
             style={{ left: 8 + i * step, width: mini, height: mini, zIndex: line.length - i }}
@@ -372,7 +413,13 @@ export function WaitingLine({
               <svg className="back-badge" viewBox="0 0 30 30" aria-hidden="true">
                 <circle cx={15} cy={15} r={13.5} fill="#fff" stroke="#4a8fd8" strokeWidth={3} />
                 {/* "back again": a circling arrow, like the try-again picture (D90) */}
-                <path d="M9.5 19.5 A7 7 0 1 1 15 22" fill="none" stroke="#4a8fd8" strokeWidth={3} strokeLinecap="round" />
+                <path
+                  d="M9.5 19.5 A7 7 0 1 1 15 22"
+                  fill="none"
+                  stroke="#4a8fd8"
+                  strokeWidth={3}
+                  strokeLinecap="round"
+                />
                 <path d="M5.5 16.5 L9.6 22.8 L13.2 16.4 Z" fill="#4a8fd8" />
               </svg>
             )}
@@ -384,9 +431,23 @@ export function WaitingLine({
 }
 
 /** Coin jar in the status bar (SPEC §5.4, §9); the coins fly into it. */
-export function CoinJar({ rect, count, testId = 'service-jar' }: { rect: Rect; count: number; testId?: string }) {
+export function CoinJar({
+  rect,
+  count,
+  testId = 'service-jar',
+}: {
+  rect: Rect;
+  count: number;
+  testId?: string;
+}) {
   return (
-    <div className="service-jar" style={at(rect)} data-testid={testId} data-count={count} aria-label={`${count} coins`}>
+    <div
+      className="service-jar"
+      style={at(rect)}
+      data-testid={testId}
+      data-count={count}
+      aria-label={`${count} coins`}
+    >
       <div className="jar-icon">
         <CoinJarIcon />
       </div>
@@ -482,6 +543,11 @@ export function ClocheLid(props: PartProps) {
 
 /** Caption bubble (SPEC §8.1: captions always on). ≤ 8 words by lint (SPEC §13.2). */
 /** The tail points at whoever is talking: right at the monster, down at Pip (D76, D90). */
+/**
+ * The caption bubble shrinks to fit its line (D168) so the room behind it shows. It stays anchored
+ * where its tail points: a monster's line by its right edge and middle (tail at the monster), Pip's
+ * by its right and bottom edges (tail down at Pip). `rect` is the most it may grow to.
+ */
 export function Caption({
   rect,
   text,
@@ -491,18 +557,46 @@ export function Caption({
   text: string;
   speaker: 'monster' | 'pip';
 }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => fitToLines(ref.current), [text, rect.w]);
   if (!text) return null;
   return (
-    <div
-      className={`caption from-${speaker}`}
-      style={at(rect)}
-      data-testid="caption"
-      data-speaker={speaker}
-      aria-live="polite"
-    >
-      {text}
+    <div className={`caption-anchor from-${speaker}`} style={at(rect)}>
+      <div
+        ref={ref}
+        className={`caption from-${speaker}`}
+        data-testid="caption"
+        data-speaker={speaker}
+        aria-live="polite"
+      >
+        {text}
+      </div>
     </div>
   );
+}
+
+/**
+ * A wrapped block keeps its full width even when its lines are short, so measure the widest line
+ * and narrow the bubble to it. Measured in the stage's own pixels (the stage is scaled, §2.2).
+ */
+function fitToLines(el: HTMLDivElement | null): void {
+  if (!el) return;
+  el.style.width = '';
+  const text = el.firstChild;
+  if (!text || !el.offsetWidth) return;
+  const range = document.createRange();
+  range.selectNodeContents(text);
+  const lines = [...range.getClientRects()];
+  if (!lines.length) return;
+  const scale = el.getBoundingClientRect().width / el.offsetWidth || 1;
+  const widest = Math.max(...lines.map((r) => r.width)) / scale;
+  const cs = getComputedStyle(el);
+  const chrome =
+    parseFloat(cs.paddingLeft) +
+    parseFloat(cs.paddingRight) +
+    parseFloat(cs.borderLeftWidth) +
+    parseFloat(cs.borderRightWidth);
+  el.style.width = `${Math.ceil(widest + chrome + 2)}px`;
 }
 
 /** Bubble border width (service.css .model-bubble); children are placed inside it. */
@@ -582,4 +676,3 @@ export function GhostHand({ target, name }: { target: Rect; name: 'bin' | 'bell'
     </div>
   );
 }
-

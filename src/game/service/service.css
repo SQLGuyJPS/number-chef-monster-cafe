@@ -452,11 +452,26 @@
 .service .ticket {
   transition: left 0.35s ease;
 }
-.caption {
+.caption-anchor {
   position: absolute;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  pointer-events: none;
+}
+.caption-anchor.from-pip {
+  align-items: flex-end;
+}
+/* Fits its text (D168), up to the anchor's box. */
+.caption {
+  position: relative;
   box-sizing: border-box;
+  max-width: 100%;
+  max-height: 100%;
+  min-width: 120px;
   display: grid;
   place-items: center;
+  text-wrap: balance;
   padding: 10px 16px;
   background: var(--c-paper);
   border-radius: 22px;
@@ -477,14 +492,14 @@
 }
 .caption::before {
   right: -36px;
-  top: 52px;
+  top: calc(50% - 10px);
   width: 44px;
   height: 46px;
   background: #e2d8c3;
 }
 .caption::after {
   right: -29px;
-  top: 57px;
+  top: calc(50% - 5px);
   width: 37px;
   height: 36px;
   background: var(--c-paper);
@@ -494,18 +509,20 @@
 .caption.from-pip::after {
   clip-path: polygon(0 0, 100% 0, 25% 100%);
 }
+.caption.from-pip {
+  min-width: 170px;
+}
 .caption.from-pip::before {
-  right: auto;
-  /* Pip pops up under the caption's middle-right, left of the monster (D114). */
-  left: 150px;
+  /* Pip pops up under the caption's middle-right, left of the monster (D114); the tail keeps its
+     place on the stage however wide the bubble is (D168). */
+  right: 70px;
   top: auto;
   bottom: -30px;
   width: 50px;
   height: 34px;
 }
 .caption.from-pip::after {
-  right: auto;
-  left: 155px;
+  right: 75px;
   top: auto;
   bottom: -23px;
   width: 40px;

@@ -1,6 +1,6 @@
 # Build plan — Number Chef: Monster Café
 
-Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**; M1 playtest rounds 1–7 and the gear popup recorded in PLAYTEST.md (last 2026-11-09). **M2 done 2026-11-10** (started 2026-11-09); waiting for the M2 playtest. **M2b (device speed test, D112) added by the owner and done 2026-11-12**; the iPad result set the SVG budget (D113, 2026-11-12). **Play-time limit moved from M3b to Tier 2 milestone M12, postponed indefinitely (D124, 2026-11-14).** **M3a done 2026-11-14** (D125); M3a playtest rounds 1–3 applied and merged 2026-11-19 (D126–D133). **M3b done 2026-11-19** (D134–D136); waiting for the M3b playtest. Tier 1 is complete. **M13 Recorded voices planned 2026-11-21** (D139–D142, §6). Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
+Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 resolutions, recorded as D48–D59). **M0 done 2026-11-05.** **M1 done 2026-11-05**; M1 playtest rounds 1–7 and the gear popup recorded in PLAYTEST.md (last 2026-11-09). **M2 done 2026-11-10** (started 2026-11-09); waiting for the M2 playtest. **M2b (device speed test, D112) added by the owner and done 2026-11-12**; the iPad result set the SVG budget (D113, 2026-11-12). **Play-time limit moved from M3b to Tier 2 milestone M12, postponed indefinitely (D124, 2026-11-14).** **M3a done 2026-11-14** (D125); M3a playtest rounds 1–3 applied and merged 2026-11-19 (D126–D133). **M3b done 2026-11-19** (D134–D136); waiting for the M3b playtest. Tier 1 is complete. **M13 Recorded voices planned 2026-11-21** (D139–D142, §6). **M4a done 2026-11-22** (shop with stand-in art, D171–D175); waiting for the M4a playtest. Source of truth stays `docs/SPEC.md`; this file holds the work order, the risks, the authoritative hour estimate (D36, D44) and the acceptance checklists that get ticked as each milestone closes.
 
 ---
 
@@ -18,7 +18,7 @@ Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 r
 
 The 10 h guide is exceeded (allowed by D44). The figure excludes fixes from each playtest (SPEC §14 says each milestone starts with them); budget ~0.5 h per round. The estimate is driven by what the spec requires, not by optional polish; I have not cut scope to fit. If you want it shorter, the cheapest levers are yours to choose (e.g. fewer monsters in M2, deferring the 4× CPU throttle report), and each would need a DECISIONS entry.
 
-Tier 2 (rough, re-estimated when you pick one): M4a 3.5 (shop with stand-in art, incl. crates, D151, D155) · M4b about 3–4 over five art batches plus your reviews (D155, D156) · M6 Wish Jar 1.0 (fast follow-up to M4, D149) · M5 3.5 · M7 3.0 · M8 2.5 (incl. layout mock) · M9 1.5 · M10 2.0 · M11 2.0 · M12 1.75 (play-time limit, postponed indefinitely, D124) · M13 4.0 agent + about 2.5–3.5 h of the owner's recording and listening (§6) · M14 Deliveries & Themed Sets · M15 Monster Wardrobe · M16 Monster Album · M17 Treat Time · M18 Café Staff (D157) (estimated when picked; content-heavy, mostly art).
+Tier 2 (rough, re-estimated when you pick one): M4a 5.0 (re-estimated 2026-11-22, §5.1; shop with stand-in art, incl. crates, D151, D155) · M4b about 3–4 over five art batches plus your reviews (D155, D156) · M6 Wish Jar 1.0 (fast follow-up to M4, D149) · M5 3.5 · M7 3.0 · M8 2.5 (incl. layout mock) · M9 1.5 · M10 2.0 · M11 2.0 · M12 1.75 (play-time limit, postponed indefinitely, D124) · M13 4.0 agent + about 2.5–3.5 h of the owner's recording and listening (§6) · M14 Deliveries & Themed Sets · M15 Monster Wardrobe · M16 Monster Album · M17 Treat Time · M18 Café Staff (D157) (estimated when picked; content-heavy, mostly art).
 
 ---
 
@@ -264,6 +264,33 @@ The play-time limit moved to M12 (D124).
 - **M16 Monster Album** (D149): album pages and friendship gifts.
 - **M17 Treat Time** (D149): repeatable party treat.
 - **M18 Café Staff** (D157): the Staff & pets slot moved out of M4: Pip as the free default, five animal staff drawn as characters to Pip's standard, idle loops and event reactions, up to 3 out; delivered by the crates. Re-run `economy:sim`.
+
+### 5.1 M4a — Coin shop with stand-in art (5.0 h, re-estimated 2026-11-22) — mock approved 2026-11-22; built 2026-11-22, awaiting the owner's playtest
+SPEC §14 said 3.5 h. It is more because the shop is a new screen with four states (browse, preview, confirm, delivery), the first schema change (D154), crates with their merge test, decor on every child screen, the `?decor` sheet and new spoken lines.
+
+| Step | Hours |
+|---|---|
+| 1. Layout mock (static; shop, confirm, delivery, Home button, café slots) — **done, approved** | 0.5 |
+| 2. Engine: `buy`/`equip`/`crate` events; replay derives owned, equipped per slot, delivered crates and the shelf; `shopVisit` (which crate is due, D154); `canBuy`; `schemaVersion` 2, migration + fixture test; import/export accept the new events | 1.25 |
+| 3. Scene: `CounterScene` draws the equipped decor (stand-ins) on every child screen; the six slots' rects in `metrics.ts` | 0.5 |
+| 4. Shop screen: tabs (Pip names them), paged tiles, colour dots, live preview, Buy + confirm, equip on tap, the delivery moment, Shop on Home and Results, back guard; caption fit (D168) | 1.25 |
+| 5. `?decor` contact sheet (every M4 entry in place, both sizes) | 0.25 |
+| 6. Tests: unit (replay, crates incl. backlog, hold at 6, fixed order, two-device merge, idempotent buy, no lower earned), e2e (buy flow, confirm, persists over reload, purchase on Service, tap sizes, budget) | 0.75 |
+| 7. Spoken lines on TTS, `audio:todo`, screenshots `docs/screens/M4a/`, PLAYTEST, commit, stop | 0.5 |
+
+**Mock (round 2, after the owner's notes 2026-11-22, D161–D165):** `?mock&v=shop|later|five|confirm|delivery|home|results`, and `&decor` on any service variant for a labelled stand-in in every slot. `v=delivery` plays live (drop, twinkle, opens on a tap or after 2 s); `&phase=closed|open` freezes it. Shots: `docs/screens/M4a-mock/`. Geometry: `DECOR` and `SHOP` in `src/app/metrics.ts`.
+- **Slots (proposal):** counter-top stands on the counter's far edge at its right end (x 1176–1272, y 324–436): the room band does not mirror, so it is clear of the tray, basket, Pip's hat and the bell on both basket sides. With ten served monsters on Results (8 orders, 2 requeues) the last one stands partly in front of it (`results-ten-monsters`). Wall art is centred above the monster (x 540–740, y 128–200); Zibbit's eye stalks just touch its lower edge. Lights hang as two flat swags (y 122–166) left and right of the wall art; the ticket now starts at y 172 so the right swag shows (D165). Window and wallpaper as in ART_GUIDE §5.
+- **Shop:** the café above is the live preview (no monster, so the wall art shows; Pip at his spot). Status bar: six slot tabs and Home, 104 px from the stage top with short shadows, so they end clear of the bar's trim (y 110) and the wall; the jar in its spot. Counter: four item tiles a page (128 wide) between two triangle arrows with page pips, no arrows with one page (D167; checked at M14's 14 items, D166), a row with room for **five** colour dots (88-px tap boxes, drawn 64), and a 160-px Buy centred under them. Confirm: the picture, "Buy Plain Paint? 20", *Yes!* / *Not yet*. Delivery: D164. Not enough coins: D164. Tabs: Pip says the slot's name (D169). Results: four buttons with Shop (D170). Captions fit their text (D168).
+- **Home:** **Shop** (drawn paintbrush + word) right of Open the Café; the left space is for the Monster Album (D163).
+
+**Accept (SPEC §14 M4a)**
+- [x] catalog matches §10 (2,305 coins, 51 paid entries; no bell entry) and `economy:sim` reports about 2 months at the default profile (`shop.test.ts`; sim unchanged)
+- [x] crate arrival replay-derived and recorded as a `crate` event when first seen; `schemaVersion` 2 with migration and fixture test; two-device merge gives the same shelf (`schema2.test.ts`, `shop.test.ts`)
+- [x] a backlog delivers one crate at a time; the hold at 6 unbought works (unit + `m4a.spec.ts`)
+- [x] purchase idempotent and persisted; confirm prevents accidental buys; no code path lowers earned coins (only `buy` events spend; `Progress.buy` checks `canBuy`)
+- [x] purchases show on the Service screen (and every child screen: one `CounterScene` behind all of them)
+- [x] the shop counts as play time — not applicable until M12 (D161)
+- [x] `?decor` renders every entry at 1194×834 and 844×390 (`docs/screens/M4a/decor-*`)
 
 ---
 

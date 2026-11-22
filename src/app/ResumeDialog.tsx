@@ -7,7 +7,7 @@ import { phraseLine } from '../engine/clips';
 
 /**
  * "Continue dinner service?" (SPEC §5.8, §11.6, D33): offered, never resumed silently. Two big
- * buttons; Pip asks aloud because the child may not read yet.
+ * buttons; Pip also asks aloud, as every child-facing line is spoken and captioned (§8).
  */
 export function ResumeDialog({ onContinue, onNew }: { onContinue: () => void; onNew: () => void }) {
   useEffect(() => {

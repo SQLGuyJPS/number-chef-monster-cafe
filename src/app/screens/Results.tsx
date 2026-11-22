@@ -2,7 +2,9 @@ import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { TapButton } from '../../game/input/TapButton';
 import { Monster } from '../../art/monsters/Monster';
 import { CoinJar, at } from '../../game/service/ServiceParts';
-import { COUNTER, FRONT } from '../metrics';
+import { COUNTER, FRONT, RESULTS4 } from '../metrics';
+import { Brush } from './ShopParts';
+import './shop.css';
 import { hushVoice as hush, say } from '../../audio/voice';
 import { phraseLine } from '../../engine/clips';
 import { sfx } from '../../audio/sfx';
@@ -28,12 +30,20 @@ const SKIP_REVEAL_MS = 300;
  * in the room above the served monsters standing along the counter's far edge, and the three
  * buttons are on the counter top.
  */
+/** Served monsters stand along the counter's far edge, centred; a long service squeezes the spacing. */
+export function faceX(i: number, n: number): number {
+  const f = FRONT.faces;
+  const step = Math.min(f.size + f.gap, (f.maxW - f.size) / Math.max(1, n - 1));
+  return Math.round((1280 - (f.size + step * (n - 1))) / 2 + i * step);
+}
+
 export function Results({
   coins,
   jar,
   monsters,
   onAnother,
   onChangeDish,
+  onShop,
   onHome,
 }: {
   coins: number;
@@ -42,6 +52,7 @@ export function Results({
   monsters: string[];
   onAnother: () => void;
   onChangeDish: () => void;
+  onShop: () => void;
   onHome: () => void;
 }) {
   const [shown, setShown] = useState(0);
@@ -128,11 +139,7 @@ export function Results({
       <div className="results-faces" data-testid="results-faces">
         {monsters.map((m, i) => {
           const f = FRONT.faces;
-          const step = Math.min(
-            f.size + f.gap,
-            (f.maxW - f.size) / Math.max(1, monsters.length - 1),
-          );
-          const x = Math.round((1280 - (f.size + step * (monsters.length - 1))) / 2 + i * step);
+          const x = faceX(i, monsters.length);
           return (
             <div
               key={i}
@@ -147,18 +154,10 @@ export function Results({
       </div>
       {done && (
         <>
+          {/* Four buttons on one line, text a size smaller (D170). */}
           <TapButton
-            className="btn btn-primary front-btn results-another"
-            style={at(FRONT.another)}
-            testId="results-another"
-            tapKind="button"
-            onTap={onAnother}
-          >
-            Another service
-          </TapButton>
-          <TapButton
-            className="btn btn-secondary front-btn results-change"
-            style={at(FRONT.change)}
+            className="btn btn-secondary front-btn results4 results-change"
+            style={at(RESULTS4.change)}
             testId="results-change"
             tapKind="button"
             onTap={onChangeDish}
@@ -166,8 +165,29 @@ export function Results({
             Change dish
           </TapButton>
           <TapButton
-            className="btn btn-secondary front-btn results-home"
-            style={at(FRONT.home)}
+            className="btn btn-primary front-btn results4 results-another"
+            style={at(RESULTS4.another)}
+            testId="results-another"
+            tapKind="button"
+            onTap={onAnother}
+          >
+            Another service
+          </TapButton>
+          <TapButton
+            className="btn btn-secondary front-btn results4 results-shop"
+            style={at(RESULTS4.shop)}
+            testId="results-shop"
+            tapKind="button"
+            onTap={onShop}
+          >
+            <span className="shop-button-inner">
+              <Brush />
+              <span>Shop</span>
+            </span>
+          </TapButton>
+          <TapButton
+            className="btn btn-secondary front-btn results4 results-home"
+            style={at(RESULTS4.home)}
             testId="results-home"
             tapKind="button"
             onTap={onHome}

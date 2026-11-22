@@ -142,6 +142,18 @@ export const PHRASES = {
   'service.closed': { params: {}, text: () => 'All done! Thank you, chef!' },
   // Offered on launch when a service was left unfinished less than 2 h ago (SPEC §5.8).
   'resume.ask': { params: {}, text: () => 'Continue dinner service?' },
+  // Coin shop (SPEC §10, D162): general lines that never name an item, colour or amount.
+  'shop.buy': { params: {}, text: () => 'Buy this one?' },
+  'shop.yours': { params: {}, text: () => "It's yours!" },
+  'shop.save': { params: {}, text: () => 'Keep cooking to save up!' },
+  'shop.delivery': { params: {}, text: () => 'A delivery arrived!' },
+  // Pip names a slot when its tab is tapped (D169).
+  'shop.slot.wallpaper': { params: {}, text: () => 'Wallpaper!' },
+  'shop.slot.floor': { params: {}, text: () => 'Floor!' },
+  'shop.slot.lights': { params: {}, text: () => 'Lights!' },
+  'shop.slot.window': { params: {}, text: () => 'Window!' },
+  'shop.slot.counter': { params: {}, text: () => 'Counter top!' },
+  'shop.slot.wallArt': { params: {}, text: () => 'Wall art!' },
   // Results tally (SPEC §5.7): said once the silent count-up lands on the total.
   'results.total': {
     params: { n: 'n' },
