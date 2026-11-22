@@ -57,6 +57,7 @@ E2E runs against the production build with `VITE_E2E=1`; hooks at `window.__ncmc
 - TypeScript strict; no `any` without a comment. Small modules, named exports. Prefer data tables (skill configs, phrases, shop items) over branching code.
 - Comments explain *why* (pedagogy or platform quirk), not what. Cite SPEC section numbers where a rule comes from.
 - CSS custom properties for the palette; one place for logical sizes (`src/app/metrics.ts`).
+- Shop, wardrobe and staff art follow `docs/ART_GUIDE.md` (D156); read it before drawing, and review art on the `?decor` contact sheet.
 - Don't add dependencies beyond SPEC §2 without a DECISIONS entry.
 
 ## Testing and screenshots

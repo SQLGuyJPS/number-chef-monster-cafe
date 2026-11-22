@@ -1,5 +1,5 @@
 // Shop catalog and price tiers (SPEC §9, §10, D148). Sized for about an hour of play a week: the
-// M4 stock lasts about 2 months, the later groups (D149) about 6–9 more. Check a price change with
+// M4 stock lasts about 2 months, the later groups (D149, D157) about 6–9 more. Check a price change with
 // `npm run economy:sim` (engine/economySim.ts, D150) before it ships. Earning rates stay in
 // engine/config.ts (COINS_PER_PROBLEM, SERVICE_TIP); only spending lives here.
 
@@ -91,7 +91,8 @@ export function expandCatalog(
  * M4 shop: SPEC §10's items with tiers, plus 2–3 colorways on items where paint makes sense.
  * No colorways on scenes (windows), named looks (Brick, Starry Night, Rainbow), metal or glass
  * (Disco Ball, Chandelier, Fish Bowl, Trophies), the serve bell (a control, not decor), the menu
- * board (chalk), or staff. Families are spread so every family appears in several slots.
+ * board (chalk). Families are spread so every family appears in several slots. The staff slot
+ * (Pip as its free default plus five animals) moved to M18 (D157); it is planned in LATER_GROUPS.
  */
 export const M4_ITEMS: readonly ItemDef[] = [
   // Wallpaper
@@ -224,18 +225,12 @@ export const M4_ITEMS: readonly ItemDef[] = [
     colorways: ['classic'],
   },
   { id: 'trophy-shelf', slot: 'wallArt', name: 'Trophy Shelf', tier: 4, colorways: ['classic'] },
-  // Staff & pets
-  { id: 'pip', slot: 'staff', name: 'Pip', tier: 1, colorways: ['classic'], free: true },
-  { id: 'bunny-barista', slot: 'staff', name: 'Bunny Barista', tier: 4, colorways: ['classic'] },
-  { id: 'cat-waiter', slot: 'staff', name: 'Cat Waiter', tier: 5, colorways: ['classic'] },
-  { id: 'bear-busker', slot: 'staff', name: 'Bear Busker', tier: 5, colorways: ['classic'] },
-  { id: 'owl-cashier', slot: 'staff', name: 'Owl Cashier', tier: 5, colorways: ['classic'] },
-  { id: 'fox-baker', slot: 'staff', name: 'Fox Baker', tier: 5, colorways: ['classic'] },
 ];
 
 /**
  * The M4 shop opens with this shelf (D151): the first colour of every tier 1–2 item, the tier-1
- * recolours of the free defaults, and four things to save for. Every other M4 entry arrives in
+ * recolours of the free defaults, and four things to save for (D157 swapped the two staff for the
+ * Tiny Robot and the Star Chandelier). Every other M4 entry arrives in
  * delivery crates, so a young child faces about 7 unbought choices, not 50.
  */
 export const STARTER_SHELF: readonly string[] = [
@@ -254,8 +249,8 @@ export const STARTER_SHELF: readonly string[] = [
   'wallArt.neon-open.berry',
   'window.garden.classic',
   'lights.disco-ball.classic',
-  'staff.bunny-barista.classic',
-  'staff.cat-waiter.classic',
+  'counter.tiny-robot.sky',
+  'lights.star-chandelier.classic',
 ];
 
 /**
@@ -316,7 +311,7 @@ export const LATER_GROUPS: readonly PlannedGroup[] = [
   { label: 'Themed-set pieces', slot: 'counter', wave: 'decor', count: 8, tier: 3 },
   { label: 'Themed-set centrepieces', slot: 'wallArt', wave: 'decor', count: 4, tier: 4 },
   // Wardrobe wave, per monster: 3 hats, 4 skins, 3 accessories. A skin changes the whole monster,
-  // so it is a top-tier wish like a staff member.
+  // so it is a top-tier wish like a staff member (M18).
   { label: 'Monster hats', slot: 'hat', wave: 'wardrobe', count: 3 * WARDROBE_MONSTERS, tier: 2 },
   {
     label: 'Monster accessories',
@@ -326,6 +321,10 @@ export const LATER_GROUPS: readonly PlannedGroup[] = [
     tier: 3,
   },
   { label: 'Monster skins', slot: 'skin', wave: 'wardrobe', count: 4 * WARDROBE_MONSTERS, tier: 5 },
+  // Staff wave (M18, D157): Bunny Barista (T4); Cat Waiter, Bear Busker, Owl Cashier, Fox Baker (T5).
+  // Pip is the slot's free default. Characters that idle and react, so their own milestone.
+  { label: 'Staff (T4)', slot: 'staff', wave: 'staff', count: 1, tier: 4 },
+  { label: 'Staff (T5)', slot: 'staff', wave: 'staff', count: 4, tier: 5 },
 ];
 
 export function expandPlanned(
