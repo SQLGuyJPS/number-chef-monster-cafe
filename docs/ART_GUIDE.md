@@ -55,8 +55,8 @@ All positions are in stage coordinates (1280×720). The floor line is at y 330 a
 | Floor | Wood (classic) | from y 330 down to the counter | Mostly hidden by the counter, so put any interest near the top. |
 | Lights | None | hanging below the status bar | Keeps clear of the bar's buttons and the monster's head. |
 | Window | Street | the window beside the door (x 208, y 142, 214×150) | Usually only the view changes. A new frame is fair game if it still reads as the same window. |
-| Counter-top | Bell | *set in M4a* | Keeps clear of the tray, the bin, Pip's hat and the bell on both basket sides. |
-| Wall art | Menu Board | *set in M4a* | Stays quiet behind the monster's head. |
+| Counter-top | Clear Counter (nothing) | *set in M4a* | Keeps clear of the tray, the bin, Pip's hat and the serve bell on both basket sides. The bell is a control, not decor (D159). |
+| Wall art | Bare Wall (nothing) | *set in M4a* | Stays quiet behind the monster's head. The Menu Board is a 20-coin item to draw (D160). |
 
 M4a puts the exact positions in `src/app/metrics.ts` and draws a labelled stand-in in each slot.
 
