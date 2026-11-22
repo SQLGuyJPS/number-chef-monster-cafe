@@ -4,6 +4,19 @@
 // top filling the bottom band. Stage coordinates (1280×720); every layer runs far past the safe box
 // so the bleed on wide phones and tall iPads is filled.
 import { BAR_H, COUNTER_Y } from '../app/metrics';
+import type { DecorSlot } from '../engine/economy';
+import {
+  CounterTopStandIn,
+  FloorStandIn,
+  LightsStandIn,
+  WallArtStandIn,
+  WallpaperStandIn,
+  WindowStandIn,
+  type DecorLook,
+} from './decor/StandIn';
+
+/** What the café shows per slot; a missing slot draws the café's own default look. */
+export type DecorView = Partial<Record<DecorSlot, DecorLook>>;
 
 const WALL_A = '#ffe2a8';
 const WALL_B = '#fdd99a';
@@ -16,7 +29,7 @@ const WOOD_DARK = '#8a5a35';
 const COUNTER_TOP = '#d9a066';
 const COUNTER_GRAIN = '#c98f58';
 
-export function CounterScene() {
+export function CounterScene({ decor = {} }: { decor?: DecorView }) {
   // The wainscot ends and the floor starts here; the back wall is far away, so things are small.
   const FLOOR_Y = 330;
   const WAINSCOT = FLOOR_Y - 68;
@@ -37,10 +50,13 @@ export function CounterScene() {
         <rect key={i} x={-1000} y={FLOOR_Y + 14 + i * 26} width={3280} height={12} fill={FLOOR_B} opacity={0.5} />
       ))}
       <rect x={-1000} y={FLOOR_Y} width={3280} height={5} fill="rgba(0,0,0,0.08)" />
+      {decor.wallpaper && <WallpaperStandIn look={decor.wallpaper} />}
+      {decor.wallpaper && <rect x={-1000} y={WAINSCOT - 6} width={3280} height={8} fill={TRIM} />}
+      {decor.floor && <FloorStandIn look={decor.floor} />}
 
       <FrontDoor x={36} y={124} w={148} h={FLOOR_Y - 124} />
       {/* one street window beside the door (owner kept it here rather than behind the monster) */}
-      <StreetWindow x={208} y={142} w={214} h={150} />
+      {decor.window ? <WindowStandIn look={decor.window} /> : <StreetWindow x={208} y={142} w={214} h={150} />}
       <TableAndChairs cx={232} floorY={FLOOR_Y} />
 
       {/* right wall: a little shelf with cups and a plant, mostly behind the ticket */}
@@ -52,6 +68,8 @@ export function CounterScene() {
         <rect x={1196} y={290} width={40} height={40} rx={6} fill="#c98b55" />
         <path d="M1216 292 q-30 -30 -14 -58 q8 24 14 30 q6 -30 22 -36 q6 30 -22 64 Z" fill="#8fbf6a" />
       </g>
+      {decor.wallArt && <WallArtStandIn look={decor.wallArt} />}
+      {decor.lights && <LightsStandIn look={decor.lights} />}
       {/* counter: the far edge the monster stands behind, then the top the child works on */}
       <rect x={-1000} y={COUNTER_Y} width={3280} height={16} fill={WOOD_DARK} />
       <rect x={-1000} y={COUNTER_Y + 2} width={3280} height={4} fill="#a8744a" />
@@ -67,6 +85,7 @@ export function CounterScene() {
         />
       ))}
       <rect x={-1000} y={COUNTER_Y + 16} width={3280} height={10} fill="rgba(0,0,0,0.08)" />
+      {decor.counter && <CounterTopStandIn look={decor.counter} />}
 
       {/* status bar: a cream board with a wooden trim, running past the safe box */}
       <rect x={-1000} y={-600} width={3280} height={600 + BAR_H} fill="#f7e6c4" />

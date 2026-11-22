@@ -49,13 +49,14 @@ import {
   at,
   type TicketToken,
 } from '../game/service/ServiceParts';
+import { ALL_SLOTS_DECOR, SHOP_MOCK_VARIANTS, ShopMock, type ShopMockVariant } from './ShopMock';
 import '../game/service/service.css';
 import './counterMock.css';
 
 const SERVICE_VARIANTS = ['s3', 'taken', 'frames2', 's0', 'cloche', 'offer', 'count'] as const;
 type ServiceVariant = (typeof SERVICE_VARIANTS)[number];
-/** Splash, Home, Menu and Results were mocked here too, and are now built (D123). */
-export const MOCK_VARIANTS = SERVICE_VARIANTS;
+/** Splash, Home, Menu and Results were mocked here too, and are now built (D123). M4a adds the shop. */
+export const MOCK_VARIANTS = [...SERVICE_VARIANTS, ...SHOP_MOCK_VARIANTS] as const;
 export type MockVariant = (typeof MOCK_VARIANTS)[number];
 
 export interface MockOptions {
@@ -64,6 +65,8 @@ export interface MockOptions {
   /** Monsters waiting in line (default 5; 9 is the longest a service of 8 with two requeues gets). */
   line: number;
   clean: boolean;
+  /** `&decor`: a labelled stand-in in every decor slot (M4a mock). */
+  decor: boolean;
 }
 
 export function parseMockOptions(search: string): MockOptions {
@@ -74,6 +77,7 @@ export function parseMockOptions(search: string): MockOptions {
     basket: q.get('basket') === 'left' ? 'left' : 'right',
     line: Math.max(1, Math.min(10, Number(q.get('line')) || 5)),
     clean: q.has('clean'),
+    decor: q.has('decor'),
   };
 }
 
@@ -192,11 +196,14 @@ function CounterMonster({ id, rect }: { id: string; rect: Rect }) {
 }
 
 export function CounterMock({ opts }: { opts: MockOptions }) {
+  if ((SHOP_MOCK_VARIANTS as readonly string[]).includes(opts.variant))
+    return <ShopMock variant={opts.variant as ShopMockVariant} />;
   return <ServiceMock opts={opts} />;
 }
 
 function ServiceMock({ opts }: { opts: MockOptions }) {
-  const { variant, basket } = opts;
+  const { basket } = opts;
+  const variant = opts.variant as ServiceVariant;
   const LINE = lineOf(opts.line);
   const s = SAMPLES[variant];
   const side = (r: Rect) => forSide(r, basket);
@@ -296,7 +303,7 @@ function ServiceMock({ opts }: { opts: MockOptions }) {
       data-variant={variant}
       data-basket={basket}
     >
-      <CounterScene />
+      <CounterScene decor={opts.decor ? ALL_SLOTS_DECOR : {}} />
 
       {/* ---- status bar ---- */}
       <ShopDoor rect={bar.shop} />

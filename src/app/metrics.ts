@@ -220,3 +220,52 @@ export const FRONT = {
   another: { x: 470, y: FRONT_BTN_Y, w: 340, h: BIG_BUTTON },
   home: { x: 860, y: FRONT_BTN_Y, w: 300, h: BIG_BUTTON },
 } as const;
+
+// ---------------------------------------------------------------------------------------------
+// Shop (SPEC §10, M4a). PROPOSAL for the owner's review (layout mock, `?mock&v=shop…`): the decor
+// slots in the café scene, and the shop screen over the same counter.
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * Where each decor slot draws (ART_GUIDE §5). The room band does not mirror with the basket side,
+ * so slots in the room are clear of the counter row on both sides by construction.
+ * - wallpaper: the back wall above the wainscot; floor: y 330 down to the counter.
+ * - lights: two swags under the status bar, left and right of the wall art, so neither hangs in
+ *   front of the monster's head or the wall art.
+ * - window: the street window beside the door.
+ * - wallArt: centred on the wall above the monster; a tall monster's head covers its lower edge,
+ *   which is why it must stay quiet (ART_GUIDE §2.1).
+ * - counter: standing on the counter's far edge at its right end, under the ticket's corner and
+ *   clear of the whole counter row (tray, basket, Pip's hat, bell) on both basket sides.
+ */
+export const DECOR = {
+  wallpaper: { x: 0, y: BAR_H, w: STAGE_W, h: 142 },
+  floor: { x: 0, y: 330, w: STAGE_W, h: COUNTER_Y - 330 },
+  lightsLeft: { x: 0, y: BAR_H + 2, w: 500, h: 56 },
+  lightsRight: { x: 780, y: BAR_H + 2, w: 500, h: 56 },
+  window: { x: 208, y: 142, w: 214, h: 150 },
+  wallArt: { x: 540, y: 128, w: 200, h: 72 },
+  counter: { x: 1176, y: COUNTER_Y - 108, w: 96, h: 112 },
+} as const;
+
+const SHOP_TAB = BUTTON_MIN;
+const SHOP_TILE = { w: 132, h: 232, step: 142 } as const;
+/** Colour dots: drawn 64 px, tapped on an 88-px box (the cell minimum, ≈ 47.6 CSS px at 844×390). */
+export const SHOP_DOT = { tap: CELL, drawn: 64, gap: 16 } as const;
+export const SHOP = {
+  /** Status bar: six slot tabs on the left, the jar in its spot, Home in the corner. */
+  tab: (i: number): Rect => ({ x: 16 + i * (SHOP_TAB + 8), y: 4, w: SHOP_TAB, h: SHOP_TAB }),
+  home: COUNTER.bar.door,
+  /** Counter band: the slot's items as tiles, left to right; dots and Buy on the right. */
+  tile: (i: number): Rect => ({ x: 16 + i * SHOP_TILE.step, y: 464, w: SHOP_TILE.w, h: SHOP_TILE.h }),
+  dots: { x: 892, y: 456, w: 380, h: CELL },
+  buy: { x: 932, y: 552, w: 300, h: BIG_BUTTON },
+  /** Confirm: a card over the dimmed screen, the item's picture and two big answers. */
+  confirm: { x: 340, y: 110, w: 600, h: 500 },
+  yes: { x: 380, y: 420, w: 240, h: BIG_BUTTON },
+  notYet: { x: 660, y: 420, w: 240, h: BIG_BUTTON },
+  /** The delivery crate on the counter's far edge, centred in the room. */
+  crate: { x: 520, y: 250, w: 240, h: 190 },
+  /** Home: Decorate beside Open the Café (SPEC §5.2). */
+  decorate: { x: 930, y: 500, w: 310, h: BIG_BUTTON },
+} as const;

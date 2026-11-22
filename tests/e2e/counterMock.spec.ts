@@ -5,7 +5,7 @@ import { MIN_BUTTON_CSS_PX, MIN_CELL_CSS_PX } from '../../src/app/metrics';
 // Over-the-counter layout mock (`?mock`, owner request before M3a). Tap sizes are asserted at
 // 844×390 for every variant on both basket sides; screenshots only when NCMC_SCREENS is set:
 //   npx cross-env NCMC_SCREENS=counter-mock playwright test counterMock --project=chromium-ipad-pro-11 --project=webkit-iphone-13
-const VARIANTS = ['s3', 'taken', 'frames2', 's0', 'cloche', 'offer', 'count'] as const;
+const VARIANTS = ['s3', 'taken', 'frames2', 's0', 'cloche', 'offer', 'count', 'shop', 'later', 'confirm', 'delivery', 'home'] as const;
 const SIDES = ['right', 'left'] as const;
 
 async function open(page: Page, q: string) {
@@ -32,7 +32,7 @@ test('every mock variant keeps the 844×390 tap minimums on both basket sides', 
     for (const side of SIDES) {
       await open(page, `v=${v}&basket=${side}`);
       const found = await measure(page);
-      expect(found.length, `${v}/${side}: tap targets`).toBeGreaterThan(3);
+      expect(found.length, `${v}/${side}: tap targets`).toBeGreaterThan(v === 'home' ? 1 : 3);
       const small = found.filter((f) => Math.min(f.w, f.h) < f.need - 0.01);
       expect(small, `${v}/${side}: below the minimum`).toEqual([]);
     }

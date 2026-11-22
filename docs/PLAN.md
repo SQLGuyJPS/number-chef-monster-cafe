@@ -18,7 +18,7 @@ Status: **approved by the owner 2026-11-05** (estimate, work order and the §2 r
 
 The 10 h guide is exceeded (allowed by D44). The figure excludes fixes from each playtest (SPEC §14 says each milestone starts with them); budget ~0.5 h per round. The estimate is driven by what the spec requires, not by optional polish; I have not cut scope to fit. If you want it shorter, the cheapest levers are yours to choose (e.g. fewer monsters in M2, deferring the 4× CPU throttle report), and each would need a DECISIONS entry.
 
-Tier 2 (rough, re-estimated when you pick one): M4a 3.5 (shop with stand-in art, incl. crates, D151, D155) · M4b about 3–4 over five art batches plus your reviews (D155, D156) · M6 Wish Jar 1.0 (fast follow-up to M4, D149) · M5 3.5 · M7 3.0 · M8 2.5 (incl. layout mock) · M9 1.5 · M10 2.0 · M11 2.0 · M12 1.75 (play-time limit, postponed indefinitely, D124) · M13 4.0 agent + about 2.5–3.5 h of the owner's recording and listening (§6) · M14 Deliveries & Themed Sets · M15 Monster Wardrobe · M16 Monster Album · M17 Treat Time · M18 Café Staff (D157) (estimated when picked; content-heavy, mostly art).
+Tier 2 (rough, re-estimated when you pick one): M4a 4.75 (re-estimated 2026-11-22, §5.1; shop with stand-in art, incl. crates, D151, D155) · M4b about 3–4 over five art batches plus your reviews (D155, D156) · M6 Wish Jar 1.0 (fast follow-up to M4, D149) · M5 3.5 · M7 3.0 · M8 2.5 (incl. layout mock) · M9 1.5 · M10 2.0 · M11 2.0 · M12 1.75 (play-time limit, postponed indefinitely, D124) · M13 4.0 agent + about 2.5–3.5 h of the owner's recording and listening (§6) · M14 Deliveries & Themed Sets · M15 Monster Wardrobe · M16 Monster Album · M17 Treat Time · M18 Café Staff (D157) (estimated when picked; content-heavy, mostly art).
 
 ---
 
@@ -264,6 +264,33 @@ The play-time limit moved to M12 (D124).
 - **M16 Monster Album** (D149): album pages and friendship gifts.
 - **M17 Treat Time** (D149): repeatable party treat.
 - **M18 Café Staff** (D157): the Staff & pets slot moved out of M4: Pip as the free default, five animal staff drawn as characters to Pip's standard, idle loops and event reactions, up to 3 out; delivered by the crates. Re-run `economy:sim`.
+
+### 5.1 M4a — Coin shop with stand-in art (4.75 h, re-estimated 2026-11-22) — layout mock done, waiting for the owner's OK
+SPEC §14 said 3.5 h. It is more because the shop is a new screen with four states (browse, preview, confirm, delivery), the first schema change (D154), crates with their merge test, decor on every child screen, the `?decor` sheet and new spoken lines.
+
+| Step | Hours |
+|---|---|
+| 1. Layout mock (static; shop, confirm, delivery, Home button, café slots) — **done, stop for OK** | 0.5 |
+| 2. Engine: `buy`/`equip`/`crate` events; replay derives owned, equipped per slot, delivered crates and the shelf; `shopVisit` (which crate is due, D154); `canBuy`; `schemaVersion` 2, migration + fixture test; import/export accept the new events | 1.25 |
+| 3. Scene: `CounterScene` draws the equipped decor (stand-ins) on every child screen; the six slots' rects in `metrics.ts` | 0.5 |
+| 4. Shop screen: tabs, tiles, colour dots, live preview, Buy + confirm, equip on tap, the delivery moment, Home's Decorate button, back guard | 1.0 |
+| 5. `?decor` contact sheet (every M4 entry in place, both sizes) | 0.25 |
+| 6. Tests: unit (replay, crates incl. backlog, hold at 6, fixed order, two-device merge, idempotent buy, no lower earned), e2e (buy flow, confirm, persists over reload, purchase on Service, tap sizes, budget) | 0.75 |
+| 7. Spoken lines on TTS, `audio:todo`, screenshots `docs/screens/M4a/`, PLAYTEST, commit, stop | 0.5 |
+
+**Mock:** `?mock&v=shop|later|confirm|delivery|home`, and `?mock&v=s3&decor` (any service variant) for the café with a labelled stand-in in every slot. Shots: `docs/screens/M4a-mock/`. Geometry: `DECOR` and `SHOP` in `src/app/metrics.ts`.
+- **Slots (proposal):** counter-top stands on the counter's far edge at its right end (x 1176–1272, y 324–436): the room band does not mirror, so it is clear of the tray, basket, Pip's hat and the bell on both basket sides by construction. Wall art is centred above the monster (x 540–740, y 128–200); the tallest monster (Zibbit's eye stalks) just touches its lower edge. Lights hang as two swags left and right of the wall art, so nothing hangs in front of the monster's head. Window and wallpaper as in ART_GUIDE §5; the floor shows only between y 330 and the counter.
+- **Shop:** the café above is the live preview (no monster, so the wall art shows; Pip at his spot). Status bar: six slot tabs (pictures, no words), the jar in its spot, Home in the corner. Counter: the slot's items as tiles (price, or a tick when owned; the one on shows a green card), colour dots (88-px tap box, drawn 64) and a 160-px Buy with the price. Confirm: the item's picture, "Buy Plain Paint? 20", *Yes!* / *Not yet*. Delivery: a crate on the counter's far edge, its two entries popping out, Pip: "A delivery arrived!"; new entries and their tabs wear a star until tapped.
+- **Home:** Decorate (paintbrush) beside Open the Café, which keeps its spot.
+
+**Accept (SPEC §14 M4a)**
+- [ ] catalog matches §10 (2,305 coins, 51 paid entries; no bell entry) and `economy:sim` reports about 2 months at the default profile
+- [ ] crate arrival replay-derived and recorded as a `crate` event when first seen; `schemaVersion` 2 with migration and fixture test; two-device merge gives the same shelf
+- [ ] a backlog delivers one crate at a time; the hold at 6 unbought works
+- [ ] purchase idempotent and persisted; confirm prevents accidental buys; no code path lowers earned coins
+- [ ] purchases show on the Service screen (and every child screen)
+- [ ] the shop counts as play time
+- [ ] `?decor` renders every entry at 1194×834 and 844×390
 
 ---
 
