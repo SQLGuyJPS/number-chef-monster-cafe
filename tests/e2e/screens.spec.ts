@@ -480,3 +480,47 @@ test('M4a screenshots', async ({ page }, info) => {
     await shot(`decor-${slot}`, true);
   }
 });
+
+// M4b art batches (ART_GUIDE §6): the batch's `?decor` sheets and one Service shot with its busiest
+// items on, at 1194×834 and 844×390, into docs/screens/M4b/<batch>/:
+//   npx cross-env NCMC_SCREENS=M4b/<batch> NCMC_DECOR_SLOTS=wallpaper,floor NCMC_DECOR_BUSY=<key>,<key> playwright test screens --project=chromium-ipad-pro-11
+test('M4b batch screenshots', async ({ page }, info) => {
+  // Art review is about layout and colour, not the engine: one Chromium project, both sizes.
+  test.skip(!milestone?.startsWith('M4b/') || info.project.name !== 'chromium-ipad-pro-11', 'M4b shots, Chromium');
+  test.setTimeout(180_000);
+  const dir = `docs/screens/${milestone}`;
+  mkdirSync(dir, { recursive: true });
+  const slots = (process.env.NCMC_DECOR_SLOTS ?? '').split(',').filter(Boolean);
+  const busy = (process.env.NCMC_DECOR_BUSY ?? '').split(',').filter(Boolean);
+  const still = () =>
+    page.addStyleTag({ content: '*{animation:none!important;transition:none!important}' });
+
+  await startApp(page);
+  await page.evaluate(async (keys) => {
+    await window.__ncmc.earn(2000, 3);
+    for (const k of keys) await window.__ncmc.buy(k);
+  }, busy);
+  const sizes = [
+    [1194, 834],
+    [844, 390],
+  ] as const;
+  // One service, resized: a second service would first be offered "Continue dinner service?".
+  await openService(page, { skill: 'A1', stage: 3, seed: 8 });
+  await waitPhase(page, 'building');
+  await still();
+  for (const [width, height] of sizes) {
+    await page.setViewportSize({ width, height });
+    await page.waitForTimeout(300);
+    await page.screenshot({ path: `${dir}/service-busiest-${width}x${height}.png` });
+  }
+  for (const [width, height] of sizes) {
+    await page.setViewportSize({ width, height });
+    for (const slot of slots) {
+      await page.goto(`./?decor&slot=${slot}`);
+      await page.getByTestId('decor-sheet').waitFor();
+      await page.evaluate(() => document.fonts.ready);
+      await still();
+      await page.screenshot({ path: `${dir}/decor-${slot}-${width}x${height}.png`, fullPage: true });
+    }
+  }
+});

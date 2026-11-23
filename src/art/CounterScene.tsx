@@ -7,13 +7,13 @@ import { BAR_H, COUNTER_Y } from '../app/metrics';
 import type { DecorSlot } from '../engine/economy';
 import {
   CounterTopStandIn,
-  FloorStandIn,
   LightsStandIn,
   WallArtStandIn,
-  WallpaperStandIn,
   WindowStandIn,
   type DecorLook,
 } from './decor/StandIn';
+import { Boards, CLASSIC_BOARDS, Floor } from './decor/Floor';
+import { PaintedStripe, Wallpaper } from './decor/Wallpaper';
 
 /** What the café shows per slot; a missing slot draws the café's own default look. */
 export type DecorView = Partial<Record<DecorSlot, DecorLook>>;
@@ -22,8 +22,6 @@ const WALL_A = '#ffe2a8';
 const WALL_B = '#fdd99a';
 const PANEL = '#f3cf92';
 const TRIM = '#e8c48a';
-const FLOOR_A = '#e2ad6f';
-const FLOOR_B = '#d79f62';
 const WOOD = '#b98352';
 const WOOD_DARK = '#8a5a35';
 const COUNTER_TOP = '#d9a066';
@@ -35,25 +33,18 @@ export function CounterScene({ decor = {} }: { decor?: DecorView }) {
   const WAINSCOT = FLOOR_Y - 68;
   return (
     <svg className="cafe-scene" viewBox="0 0 1280 720" width="1280" height="720" aria-hidden="true">
-      <defs>
-        <pattern id="cm-wall" width="72" height="72" patternUnits="userSpaceOnUse">
-          <rect width="36" height="72" fill={WALL_A} />
-          <rect x="36" width="36" height="72" fill={WALL_B} />
-        </pattern>
-      </defs>
-      {/* back wall, wainscot, floor */}
-      <rect x={-1000} y={-600} width={3280} height={FLOOR_Y + 600} fill="url(#cm-wall)" />
+      {/* back wall (the free Plain Paint, Sunny), wainscot, floor (the free Wood, classic): the
+          same drawings the shop's recolours use (D152) */}
+      {decor.wallpaper ? <Wallpaper look={decor.wallpaper} /> : <PaintedStripe a={WALL_A} b={WALL_B} />}
       <rect x={-1000} y={WAINSCOT} width={3280} height={FLOOR_Y - WAINSCOT} fill={PANEL} />
       <rect x={-1000} y={WAINSCOT - 6} width={3280} height={8} fill={TRIM} />
-      <rect x={-1000} y={FLOOR_Y} width={3280} height={300} fill={FLOOR_A} />
-      {[0, 1, 2, 3].map((i) => (
-        <rect key={i} x={-1000} y={FLOOR_Y + 14 + i * 26} width={3280} height={12} fill={FLOOR_B} opacity={0.5} />
-      ))}
-      <rect x={-1000} y={FLOOR_Y} width={3280} height={5} fill="rgba(0,0,0,0.08)" />
-      {decor.wallpaper && <WallpaperStandIn look={decor.wallpaper} />}
-      {decor.wallpaper && <rect x={-1000} y={WAINSCOT - 6} width={3280} height={8} fill={TRIM} />}
-      {decor.floor && <FloorStandIn look={decor.floor} />}
+      {decor.floor ? <Floor look={decor.floor} /> : <Boards {...CLASSIC_BOARDS} />}
 
+      {/* The door and window are drawn a little see-through to sit back in the room; a backing in
+          the café's own wall colour keeps a bought wallpaper from showing through their glass. */}
+      <rect x={36} y={124} width={148} height={FLOOR_Y - 124} rx={5} fill={WALL_A} />
+      <rect x={31} y={119} width={158} height={12} rx={4} fill={WALL_A} />
+      <rect x={208} y={142} width={214} height={150} rx={8} fill={WALL_A} />
       <FrontDoor x={36} y={124} w={148} h={FLOOR_Y - 124} />
       {/* one street window beside the door (owner kept it here rather than behind the monster) */}
       {decor.window ? <WindowStandIn look={decor.window} /> : <StreetWindow x={208} y={142} w={214} h={150} />}

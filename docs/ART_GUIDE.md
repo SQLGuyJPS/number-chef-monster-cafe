@@ -95,3 +95,4 @@ These are approved: don't redraw them without asking. Notes record what the owne
 ## 8. Change notes
 - 2026-11-21: first draft (D156), from the existing café, Pip and monster art.
 - 2026-11-21: split into firm limits, house style and room to experiment, at the owner's request (D158). Lint checks only the firm limits.
+- 2026-11-23: batch 1 (wallpaper + floor) drawn in `src/art/decor/Wallpaper.tsx` and `Floor.tsx`, awaiting the owner's verdict. Tones come from `mix()` in `src/art/decor/paint.ts` (base/accent mixes, cream). The café's own wall and floor are drawn by the same components, so a recolour is the same drawing. Experiments: Starry Night (dark wall, twinkling stars), perspective on Checkerboard and Tiles. Sheets: `npx cross-env NCMC_SCREENS=M4b/<batch> NCMC_DECOR_SLOTS=<slots> NCMC_DECOR_BUSY=<keys> playwright test screens --project=chromium-ipad-pro-11`.
