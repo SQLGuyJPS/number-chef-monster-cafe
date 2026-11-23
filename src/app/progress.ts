@@ -4,15 +4,17 @@
 import { useSyncExternalStore } from 'react';
 import {
   buyEvent,
+  coinAdjustEvent,
   crateEvent,
   equipEvent,
   skillConfigEvent,
   type Evt,
 } from '../engine/events';
 import type { DecorSlot } from '../engine/economy';
-import { canBuy, dueCrate, entryOf, equippedKey, isOwned } from '../engine/shop';
+import { canBuy, crateEntries, dueCrate, entryOf, equippedKey, forcedCrate, isOwned } from '../engine/shop';
 import {
   applyEvent,
+  coinAdjustTo,
   emptyDerived,
   inOrder,
   DERIVED_SHAPE,
@@ -161,6 +163,36 @@ export class Progress {
     if (!c) return null;
     this.append([crateEvent(this.ctx(), c)]);
     return c.n;
+  }
+
+  /** Playtest (D179): sets the jar to `target` coins with one `coinAdjust`; nothing if it already shows it. */
+  setCoins(target: number): void {
+    const n = coinAdjustTo(this.d, target);
+    if (n !== 0) this.append([coinAdjustEvent(this.ctx(), { n })]);
+  }
+
+  /** Playtest (D180): records the next crate now, skipping the wait and the hold. */
+  forceCrate(): number | null {
+    const c = forcedCrate(this.d);
+    if (!c) return null;
+    this.append([crateEvent(this.ctx(), c)]);
+    return c.n;
+  }
+
+  /** Playtest (D180): records every crate left in one transaction; returns the entries they brought. */
+  deliverAllCrates(): string[] {
+    let d = this.d;
+    const events: Evt[] = [];
+    const keys: string[] = [];
+    const ctx = this.ctx();
+    for (let c = forcedCrate(d); c; c = forcedCrate(d)) {
+      const e = crateEvent(ctx, c);
+      events.push(e);
+      keys.push(...crateEntries(c.n));
+      d = applyEvent(d, e);
+    }
+    this.append(events);
+    return keys;
   }
 
   /** Resolves once every queued write has reached storage. */

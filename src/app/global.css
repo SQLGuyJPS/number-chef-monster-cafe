@@ -708,6 +708,10 @@ html.debug-mode #root {
 .parent-screen .parent-select {
   max-width: 100%;
 }
+.parent-screen .parent-number {
+  min-width: 0;
+  width: 7em;
+}
 
 /* ?gallery monster sheet (look-only, scrolls like ?debug). */
 .gallery {

@@ -111,8 +111,17 @@ export interface CrateEvt extends EvtBase {
   next: number;
 }
 
+/**
+ * A parent's playtest change to the coin jar (SPEC §9, §12, D179): `n` coins added (negative:
+ * taken away), so the jar shows what the parent set. Never written by play. Added in schemaVersion 3.
+ */
+export interface CoinAdjustEvt extends EvtBase {
+  k: 'coinAdjust';
+  n: number;
+}
+
 /** Every event the app reads or writes. `known` and `focus` join with M7. */
-export type Evt = FrozenEvt | ServiceEndEvt | SkillConfigEvt | BuyEvt | EquipEvt | CrateEvt;
+export type Evt = FrozenEvt | ServiceEndEvt | SkillConfigEvt | BuyEvt | EquipEvt | CrateEvt | CoinAdjustEvt;
 export type EvtKind = Evt['k'];
 
 export function serviceEndEvent(
@@ -147,4 +156,8 @@ export function equipEvent(ctx: EventContext, a: { slot: string; items: string[]
 
 export function crateEvent(ctx: EventContext, a: { n: number; next: number }): CrateEvt {
   return { id: ctx.id(), t: ctx.now(), dev: ctx.dev, v: EVENT_VERSION, k: 'crate', ...a };
+}
+
+export function coinAdjustEvent(ctx: EventContext, a: { n: number }): CoinAdjustEvt {
+  return { id: ctx.id(), t: ctx.now(), dev: ctx.dev, v: EVENT_VERSION, k: 'coinAdjust', n: Math.round(a.n) };
 }

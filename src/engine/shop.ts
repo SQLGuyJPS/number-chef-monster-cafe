@@ -94,6 +94,25 @@ export function dueCrate(d: Derived): { n: number; next: number } | null {
   return { n, next: Math.max(due + CRATE_EVERY_MONSTERS, served + 1) };
 }
 
+/**
+ * A crate the parent sent from the playtest tools (D180): the next one in the queue, skipping the
+ * 30-monster wait and the hold, with the pace restarted from now (`next` = served + 30). Null once
+ * the queue is empty.
+ */
+export function forcedCrate(d: Derived): { n: number; next: number } | null {
+  const done = deliveredCrates(d);
+  const n = (done.length > 0 ? done[done.length - 1]! : 0) + 1;
+  if (crateEntries(n).length === 0) return null;
+  return { n, next: servedMonsters(d) + CRATE_EVERY_MONSTERS };
+}
+
+/** Crates left in the queue after those delivered (D180, the playtest tools' status line). */
+export const cratesLeft = (d: Derived): number => {
+  const done = deliveredCrates(d);
+  const last = done.length > 0 ? done[done.length - 1]! : 0;
+  return Math.max(0, Math.ceil(CRATE_QUEUE.length / CRATE_SIZE) - last);
+};
+
 /** What a slot shows: its latest `equip` if that entry is owned, else the free default. */
 export function equippedKey(d: Derived, slot: DecorSlot): string {
   const k = d.equipped[slot]?.[0];

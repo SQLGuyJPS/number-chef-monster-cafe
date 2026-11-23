@@ -35,7 +35,7 @@ export function nextBox(box: number, outcome: Outcome, stage: Stage): number {
  * Bumped when the shape of `Derived` changes, so an older `state` cache is rebuilt from the log
  * (the events themselves do not change, so no migration, SPEC §11.3).
  */
-export const DERIVED_SHAPE = 3;
+export const DERIVED_SHAPE = 4;
 
 export interface FactStat {
   /** Box in the tray set (S3–S1) and in the number set (S0), D127. */
@@ -72,6 +72,8 @@ export interface Derived {
   skills: Partial<Record<SkillId, SkillStat>>;
   /** Σ coin.n (SPEC §11.2). */
   coinSum: number;
+  /** Σ coinAdjust.n: the parent's playtest changes to the jar (D179). */
+  adjust: number;
   /**
    * One row per ended service: its skill, the largest tip and the most monsters served seen for it
    * (D39; a resumed service can end twice).
@@ -94,6 +96,7 @@ export const emptyDerived = (): Derived => ({
   facts: {},
   skills: {},
   coinSum: 0,
+  adjust: 0,
   ends: {},
   bought: {},
   config: {},
@@ -147,6 +150,9 @@ export function applyEvent(d: Derived, e: Evt): Derived {
     }
     case 'coin':
       next.coinSum = d.coinSum + e.n;
+      break;
+    case 'coinAdjust':
+      next.adjust = d.adjust + e.n;
       break;
     case 'serviceEnd': {
       const prev = d.ends[e.svc];
@@ -204,7 +210,16 @@ export function seenSet(d: Derived): Set<string> {
 export const earned = (d: Derived): number =>
   d.coinSum + Object.values(d.ends).reduce((s, x) => s + x.tip, 0);
 export const spent = (d: Derived): number => Object.values(d.bought).reduce((s, p) => s + p, 0);
-export const balance = (d: Derived): number => Math.max(0, earned(d) - spent(d));
+/**
+ * `earned` stays what play paid; the parent's playtest adjustments (D179) count in the balance
+ * only. Unclamped, so a target can be set exactly (`coinAdjustTo`).
+ */
+const rawBalance = (d: Derived): number => earned(d) - spent(d) + d.adjust;
+export const balance = (d: Derived): number => Math.max(0, rawBalance(d));
+
+/** The `coinAdjust.n` that makes the jar show `target` coins (D179); 0 when it already does. */
+export const coinAdjustTo = (d: Derived, target: number): number =>
+  Math.max(0, Math.round(target)) - rawBalance(d);
 
 /** Services played per skill (distinct `svc` with a `serviceEnd`, partial ones included). */
 export function servicesOf(d: Derived, skill: SkillId): number {

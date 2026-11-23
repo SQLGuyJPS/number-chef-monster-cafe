@@ -49,7 +49,7 @@ E2E runs against the production build with `VITE_E2E=1`; hooks at `window.__ncmc
 - The play-time limit (SPEC §6) is optional and **off by default** (D27); nothing may lock, count down or show a cue unless a parent enabled it. When enabled, the lock is persistent: reload, relaunch and starting another service never refill it; only the parent gate (or an explicitly chosen auto-refill mode) does. Allowance time is a monotonic active-time accumulator, never wall-clock subtraction.
 - Serving is always an explicit bell press; never auto-serve (FollowMe pulses the bell and the child presses it).
 - A reloaded or relaunched service is only ever *offered* ("Continue dinner service?"), never resumed silently, and never offered while the café is locked or after an unlock: the lock clears the resume snapshot (D33, D40).
-- Coins only ever go down through a confirmed shop purchase (or an explicit parent Reset / Replace import, D44).
+- Coins only ever go down through a confirmed shop purchase (or an explicit parent Reset / Replace import, D44, or the parent's playtest coin setting, D179).
 - Touch hardening (SPEC §2.3): no zoom, scroll, selection, or long-press menus on the play surface; single active pointer; reduced-motion honored.
 - Primary tap targets ≥ 44 CSS px at 844×390 (cells) and ≥ 56 (buttons).
 

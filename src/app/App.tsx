@@ -39,7 +39,8 @@ import { hushVoice } from '../audio/voice';
 import type { ScreenId } from './pwaPolicy';
 import { Shop } from './screens/Shop';
 import { addShopFresh, loadShopFresh } from './shopFresh';
-import { crateEntries, DECOR_SLOTS, entryOf, equippedKey } from '../engine/shop';
+import { takeShopPlaytest } from './shopPlaytest';
+import { crateEntries, DECOR_SLOTS, deliveredCrates, entryOf, equippedKey } from '../engine/shop';
 import type { DecorSlot } from '../engine/economy';
 import type { DecorView } from '../art/CounterScene';
 import { lookFor } from './decorLook';
@@ -225,10 +226,18 @@ export function App({ allowRotate }: { allowRotate: boolean }) {
 
   /**
    * Opening the shop is a visit (D154): at most one due crate is recorded, from the tap, and its
-   * entries are starred until tapped (D164).
+   * entries are starred until tapped (D164). A playtest request from the grown-ups' area (D180)
+   * sends the next crate early, or replays the last delivery moment without recording anything.
    */
   const openShop = () => {
-    const n = loadedProgress()?.deliverCrate() ?? null;
+    const p = loadedProgress();
+    const request = takeShopPlaytest();
+    let n = p?.deliverCrate() ?? null;
+    if (n === null && request === 'crate') n = p?.forceCrate() ?? null;
+    if (n === null && request === 'replay' && p) {
+      const done = deliveredCrates(p.derived);
+      n = done.length > 0 ? done[done.length - 1]! : null;
+    }
     if (n !== null) addShopFresh(crateEntries(n));
     setCrate(n);
     setPreview(null);
