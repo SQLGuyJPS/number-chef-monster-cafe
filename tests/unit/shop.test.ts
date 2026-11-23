@@ -15,7 +15,10 @@ import {
   CRATE_QUEUE,
   canBuy,
   crateEntries,
+  cratesLeft,
+  deliveredCrates,
   dueCrate,
+  forcedCrate,
   entryOf,
   equippedKey,
   freeDefault,
@@ -246,5 +249,31 @@ describe('crates (SPEC §10.1, D154)', () => {
         partial: true,
       });
     expect(servedMonsters(replay([end(2), end(5)]))).toBe(5);
+  });
+});
+
+describe('playtest crates (D180)', () => {
+  it('a sent crate skips the wait and the hold, and the pace restarts 30 monsters from now', () => {
+    const dev = new Device();
+    expect(dev.visit()?.n).toBe(1);
+    dev.serve(4);
+    expect(dueCrate(dev.d)).toBeNull(); // the wait (and the hold: 20 unbought)
+    expect(unboughtOnShelf(dev.d).length).toBeGreaterThanOrEqual(CRATE_HOLD_AT_UNBOUGHT);
+    const c = forcedCrate(dev.d)!;
+    expect(c).toEqual({ n: 2, next: 34 });
+    dev.events.push(crateEvent(dev.ctx, c));
+    expect(deliveredCrates(dev.d)).toEqual([1, 2]);
+    expect(dev.d.crates[2]).toBe(34);
+  });
+
+  it('runs out with the queue: every crate sent leaves none and nothing more to force', () => {
+    const dev = new Device();
+    const total = Math.ceil(CRATE_QUEUE.length / 2);
+    expect(cratesLeft(dev.d)).toBe(total);
+    for (let c = forcedCrate(dev.d); c; c = forcedCrate(dev.d)) dev.events.push(crateEvent(dev.ctx, c));
+    expect(deliveredCrates(dev.d)).toHaveLength(total);
+    expect(cratesLeft(dev.d)).toBe(0);
+    expect(dueCrate(dev.d)).toBeNull();
+    expect(new Set(shelfKeys(dev.d)).size).toBe(CATALOG.length);
   });
 });

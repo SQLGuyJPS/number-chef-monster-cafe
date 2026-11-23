@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { MIN_BUTTON_CSS_PX, MIN_CELL_CSS_PX } from '../../src/app/metrics';
 import { SVG_BUDGET } from '../../src/app/svgCount';
-import { startApp, tap } from './helpers';
+import { openGrownUps, startApp, tap } from './helpers';
 import { openService, tapId } from './service';
 
 // M4a (SPEC §10, §10.1, §14): the coin shop end to end with stand-in art.
@@ -138,6 +138,56 @@ test('a crate: the first on the first visit, then held at 6 unbought, one per vi
   await openShop(page);
   await expect(page.getByTestId('shop-delivery')).toHaveCount(0);
   expect((await kinds(page)).filter((k) => k === 'crate')).toHaveLength(2);
+});
+
+test('grown-ups shop playtest: set the coins, send a crate, replay it, deliver all (D179, D180)', async ({ page }) => {
+  await startApp(page);
+  await page.evaluate(() => window.__ncmc.earn(50, 0));
+  await openShop(page); // crate 1 (D176)
+  await tapId(page, 'shop-home');
+
+  await openGrownUps(page);
+  await page.getByTestId('playtest-coins').fill('777');
+  await page.getByTestId('playtest-coins-set').click();
+  await expect(page.getByTestId('playtest-note')).toContainText('777');
+  // Crate 2 is not due (no monsters served, 20 unbought), so only the request brings it.
+  await page.getByTestId('playtest-crate').click();
+  await expect(page.getByTestId('playtest-crate')).toContainText('waiting');
+  await page.getByTestId('parent-back').click();
+
+  await openShop(page, false);
+  await expect(page.getByTestId('shop-delivery')).toBeVisible();
+  await expect(page.getByTestId('coin-jar')).toContainText('777');
+  await expect(page.getByTestId('shop-delivery')).toHaveCount(0, { timeout: 8_000 });
+  let s = (await shop(page))!;
+  expect(Object.keys(s.crates)).toEqual(['1', '2']);
+  expect(s.balance).toBe(777);
+  await tapId(page, 'shop-home');
+  // Used once: the next visit brings nothing.
+  await openShop(page);
+  await expect(page.getByTestId('shop-delivery')).toHaveCount(0);
+  await tapId(page, 'shop-home');
+
+  // A replay shows crate 2 arriving again and records nothing.
+  await openGrownUps(page);
+  await page.getByTestId('playtest-replay').click();
+  await page.getByTestId('parent-back').click();
+  await openShop(page, false);
+  await expect(page.getByTestId('shop-delivery')).toBeVisible();
+  await expect(page.getByTestId('shop-delivery')).toHaveCount(0, { timeout: 8_000 });
+  expect(Object.keys((await shop(page))!.crates)).toEqual(['1', '2']);
+  await tapId(page, 'shop-home');
+
+  // Deliver every crate: two taps.
+  await openGrownUps(page);
+  await page.getByTestId('playtest-crate-all').click();
+  await expect(page.getByTestId('playtest-crate-all')).toContainText('Tap again');
+  await page.getByTestId('playtest-crate-all').click();
+  await expect(page.getByTestId('playtest-crate-status')).toContainText('0 left');
+  await expect(page.getByTestId('playtest-crate')).toBeDisabled();
+  s = (await shop(page))!;
+  expect(s.unbought.length).toBeGreaterThan(20);
+  expect((await kinds(page)).filter((k) => k === 'coinAdjust')).toHaveLength(1);
 });
 
 test('shop tap targets are big enough at 844×390, on every page of every slot', async ({ page }, info) => {

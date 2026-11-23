@@ -9,6 +9,7 @@ import {
   skillConfigEvent,
   type BuyEvt,
   type Evt,
+  coinAdjustEvent,
 } from '../../src/engine/events';
 import { pool } from '../../src/engine/generators';
 import {
@@ -24,6 +25,7 @@ import {
   seenSet,
   servicesOf,
   type Derived,
+  coinAdjustTo,
 } from '../../src/engine/replay';
 import { mulberry32, type Rng } from '../../src/engine/rng';
 import type { SkillId, Stage } from '../../src/engine/types';
@@ -135,6 +137,7 @@ function randomLog(rng: Rng, n: number): Evt[] {
       out.push(skillConfigEvent(ctx, { skill, stage: rng.pick(STAGES), ops: rng.pick(['both', 'add', 'sub'] as const) }));
     else if (r < 0.91)
       out.push(equipEvent(ctx, { slot: rng.pick(['floor', 'wallpaper']), items: [rng.pick(['lamp', 'rug'])] }));
+    else if (r < 0.92) out.push(coinAdjustEvent(ctx, { n: rng.int(-40, 40) }));
     else if (r < 0.94)
       // Two devices recording the same crate with different `next` (D154): the smaller wins.
       out.push(crateEvent(ctx, { n: rng.int(1, 3), next: rng.int(0, 90) }));
@@ -220,6 +223,28 @@ describe('coins (SPEC §11.2, D31, D39)', () => {
     const d = replay([coinEvent(ctxAt(0, 'c'), { svc: 's', n: 30 }), buy('b1', 'lamp', 20), buy('b2', 'lamp', 20)]);
     expect(balance(d)).toBe(10);
     expect(balance(replay([buy('b1', 'lamp', 20)]))).toBe(0);
+  });
+});
+
+describe('playtest coin setting (D179)', () => {
+  const buy = (id: string, t: number, item: string, price: number): BuyEvt => ({ id, t, dev: 'd', v: 1, k: 'buy', item, price });
+
+  it('coinAdjustTo sets the jar exactly, up or down, and leaves earned alone', () => {
+    let log: Evt[] = [coinEvent(ctxAt(1, 'c1'), { svc: 's', n: 30 }), buy('b1', 2, 'lamp', 20)];
+    for (const [i, target] of [500, 0, 7, 7, 1000].entries()) {
+      const n = coinAdjustTo(replay(log), target);
+      log = [...log, coinAdjustEvent(ctxAt(10 + i, `a${i}`), { n })];
+      expect(balance(replay(log))).toBe(target);
+    }
+    expect(earned(replay(log))).toBe(30);
+    expect(coinAdjustTo(replay(log), 1000)).toBe(0);
+  });
+
+  it('a jar in the red after a merge is set exactly too, and play adds on top', () => {
+    const log: Evt[] = [buy('b1', 1, 'lamp', 20), buy('b2', 2, 'rug', 20)];
+    const n = coinAdjustTo(replay(log), 50);
+    const after = [...log, coinAdjustEvent(ctxAt(3, 'a'), { n }), coinEvent(ctxAt(4, 'c'), { svc: 's', n: 3 })];
+    expect(balance(replay(after))).toBe(53);
   });
 });
 

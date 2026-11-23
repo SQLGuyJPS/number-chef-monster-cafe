@@ -6,13 +6,14 @@ import { PlaytestTools } from './DebugScreen';
 import { InstallHelp, ParentData } from './ParentData';
 import { ParentSettings } from './ParentSettings';
 import { ProgressList, StorageStatus } from './ProgressList';
+import { ShopPlaytestTools } from './ShopPlaytestTools';
 import { SkillPicker } from './SkillPicker';
 import { parentClock } from './runtime';
 
 const INPUT_EVENTS = ['pointerdown', 'keydown', 'input', 'change', 'scroll', 'wheel'] as const;
 
 /**
- * The parent area behind the gate (SPEC §12, M3b): Skills, basket side, Progress, Settings, Data,
+ * The parent area behind the gate (SPEC §12, M3b): Skills, basket side, shop playtest (D179, D180), Progress, Settings, Data,
  * storage and install help. Full screen, not rotated, scrollable (SPEC §2.2). It locks (back to
  * Home, so the gate asks again) after 1 minute without input or when left (D134).
  */
@@ -50,6 +51,7 @@ export function ParentScreen({ onBack, onLock }: { onBack: () => void; onLock: (
       <h1>Grown-ups</h1>
       <SkillPicker />
       <BasketSidePicker />
+      <ShopPlaytestTools />
       <ProgressList />
       <ParentSettings />
       <ParentData />
