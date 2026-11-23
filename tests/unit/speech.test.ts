@@ -9,9 +9,17 @@ interface FakeUtterance {
 
 let spoken: FakeUtterance[];
 let playing: FakeUtterance | null;
+let cancels: number;
 
 const fakeSynth = {
+  get speaking() {
+    return playing !== null;
+  },
+  pending: false,
+  paused: false,
+  resume: () => undefined,
   cancel: () => {
+    cancels++;
     const u = playing;
     playing = null;
     u?.onerror?.(); // browsers fire `error` ("interrupted") on the cancelled line
@@ -32,6 +40,7 @@ const endCurrent = () => {
 beforeEach(() => {
   spoken = [];
   playing = null;
+  cancels = 0;
   vi.useFakeTimers();
   vi.stubGlobal('window', {
     speechSynthesis: fakeSynth,
@@ -146,5 +155,50 @@ describe('spokenForm (D77)', () => {
     const sp = await load();
     void sp.speakText('Five plus two cookies, please!');
     expect(spoken[0]?.text).toBe('Five plus two cookies please!');
+  });
+});
+
+describe('WebKit cancel race (D178)', () => {
+  const ipad = () =>
+    vi.stubGlobal('navigator', { userAgent: 'Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15', platform: 'iPad', maxTouchPoints: 5 });
+
+  it('no cancel when nothing is speaking', async () => {
+    const sp = await load();
+    void sp.speakText('Wallpaper!');
+    expect(cancels).toBe(0);
+    expect(playing?.text).toBe('Wallpaper!');
+  });
+
+  it('on iOS a line that cuts another off waits for the engine to settle; only the latest speaks', async () => {
+    ipad();
+    const sp = await load();
+    const first = sp.speakText('Wallpaper!');
+    expect(playing?.text).toBe('Wallpaper!');
+    let firstDone = false;
+    void first.then(() => (firstDone = true));
+    void sp.speakText('Floor!');
+    void sp.speakText('Lights!');
+    await Promise.resolve();
+    expect(firstDone).toBe(true); // the cut line settles at once
+    expect(spoken.map((u) => u.text)).toEqual(['Wallpaper!']);
+    vi.advanceTimersByTime(sp.CANCEL_SETTLE_MS);
+    expect(spoken.map((u) => u.text)).toEqual(['Wallpaper!', 'Lights!']);
+    expect(sp.speechBusy()).toBe(true);
+  });
+
+  it('off WebKit the next line still speaks at once', async () => {
+    vi.stubGlobal('navigator', { userAgent: 'Mozilla/5.0 (Linux; Android 14) Chrome/130 Mobile Safari/537.36', platform: 'Linux', maxTouchPoints: 5 });
+    const sp = await load();
+    void sp.speakText('Wallpaper!');
+    void sp.speakText('Floor!');
+    expect(spoken.map((u) => u.text)).toEqual(['Wallpaper!', 'Floor!']);
+  });
+
+  it('hush settles every line', async () => {
+    const sp = await load();
+    void sp.speakText('Wallpaper!');
+    sp.hush();
+    expect(sp.speechBusy()).toBe(false);
+    expect(playing).toBeNull();
   });
 });

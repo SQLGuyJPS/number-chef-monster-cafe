@@ -91,7 +91,8 @@ declare global {
 
 /**
  * SPEC §8.1 / M1 acceptance: `speechSynthesis` stubbed so `end` never fires. The game must
- * still flow, because every speak() resolves on its timeout.
+ * still flow, because every speak() resolves on its timeout. Like a real engine it reports
+ * `speaking` from a speak() until a cancel(), since the game cancels only a talking engine (D178).
  */
 export async function stubSpeechNeverEnds(page: Page): Promise<void> {
   await page.addInitScript(() => {
@@ -104,8 +105,12 @@ export async function stubSpeechNeverEnds(page: Page): Promise<void> {
       speak: (u: { text: string; pitch: number }) => {
         spoken.push(u.text);
         if (u.pitch >= 1.5) pip.push(u.text); // PIP_PITCH; monster voices stay below it
+        stub.speaking = true;
       },
-      cancel: () => void window.__cancels++,
+      cancel: () => {
+        window.__cancels++;
+        stub.speaking = false;
+      },
       pause: () => undefined,
       resume: () => undefined,
       getVoices: () => [],

@@ -16,9 +16,6 @@ export type ShopSlot = DecorSlot | MonsterSlot;
 export type Tier = 1 | 2 | 3 | 4 | 5;
 export const TIER_PRICE: Readonly<Record<Tier, number>> = { 1: 20, 2: 30, 3: 55, 4: 100, 5: 180 };
 
-/** A second or third colorway of an item costs this share of the item's price (same shape, new paint). */
-export const COLORWAY_SHARE = 0.75;
-
 /**
  * Colour families shared across slots, so a Berry wallpaper, Berry tiles and Berry lanterns match.
  * Values are drafts for the art pass; they sit a step paler than the foreground (SPEC §7.4: muted
@@ -59,15 +56,15 @@ export interface ShopEntry {
   price: number;
 }
 
-const roundTo5 = (n: number): number => Math.max(5, Math.round(n / 5) * 5);
-
 export function entryPrice(
   def: ItemDef,
   index: number,
   tiers: Readonly<Record<Tier, number>> = TIER_PRICE,
 ): number {
   if (def.free) return index === 0 ? 0 : tiers[1];
-  return index === 0 ? tiers[def.tier] : roundTo5(tiers[def.tier] * COLORWAY_SHARE);
+  // Every colorway costs the item's price, and any of them can be bought first (D177): a cheaper
+  // second colour only made sense when the first had to be bought before the others.
+  return tiers[def.tier];
 }
 
 /**
@@ -295,16 +292,14 @@ export interface PlannedGroup {
   wave: string;
   count: number;
   tier: Tier;
-  /** Priced as a second colorway (COLORWAY_SHARE). */
-  colorway?: boolean;
 }
 
 /** Regular monsters plus the two guests (SPEC §7.2). */
 export const WARDROBE_MONSTERS = 8;
 
 export const LATER_GROUPS: readonly PlannedGroup[] = [
-  // Decor wave: 1–2 more colorways on the 15 M4 items that have them (~25, priced as colorways of
-  // their own item: 11 items at T1–T2, 2 at T3, 2 at T4), and 4 themed sets of 3 new pieces each
+  // Decor wave: 1–2 more colorways on the 15 M4 items that have them (~25, at their own item's price,
+  // D177: 11 items at T1–T2, 2 at T3, 2 at T4), and 4 themed sets of 3 new pieces each
   // that complete them alongside M4 items.
   {
     label: 'Colorways round 2 (T1–T2 items)',
@@ -312,7 +307,6 @@ export const LATER_GROUPS: readonly PlannedGroup[] = [
     wave: 'decor',
     count: 17,
     tier: 2,
-    colorway: true,
   },
   {
     label: 'Colorways round 2 (T3 items)',
@@ -320,7 +314,6 @@ export const LATER_GROUPS: readonly PlannedGroup[] = [
     wave: 'decor',
     count: 4,
     tier: 3,
-    colorway: true,
   },
   {
     label: 'Colorways round 2 (T4 items)',
@@ -328,7 +321,6 @@ export const LATER_GROUPS: readonly PlannedGroup[] = [
     wave: 'decor',
     count: 4,
     tier: 4,
-    colorway: true,
   },
   { label: 'Themed-set pieces', slot: 'counter', wave: 'decor', count: 8, tier: 3 },
   { label: 'Themed-set centrepieces', slot: 'wallArt', wave: 'decor', count: 4, tier: 4 },
@@ -361,7 +353,7 @@ export function expandPlanned(
       name: g.label,
       colorway: 'classic' as const,
       tier: g.tier,
-      price: g.colorway ? roundTo5(tiers[g.tier] * COLORWAY_SHARE) : tiers[g.tier],
+      price: tiers[g.tier],
       wave: g.wave,
     })),
   );

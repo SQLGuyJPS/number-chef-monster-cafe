@@ -286,23 +286,29 @@ Owner notes (2026-11-19): all of M3b works on the devices. Three changes (D137),
 - [x] **No repeated voices** in the Voice list on the iPhone and iPad (Samantha once, Daniel once, Moira once). If you had picked a voice before, it is still selected. Notes: all three pass (2026-11-20).
 
 Owner notes (2026-11-20): D137 items pass. Two more changes (D138), to check on the next build:
-- [ ] **Gate in a browser tab, landscape.** Open the gate in Safari (not the Home Screen app) with the phone sideways: "For grown-ups" is whole at the top, and you can scroll down to the pad if it doesn't fit. Notes:
-- [ ] **Last monster stays.** At the end of a service the last monster eats, stays where it is and says "All done! Thank you, chef!", without walking off first. Notes:
+- [x] **Gate in a browser tab, landscape.** Open the gate in Safari (not the Home Screen app) with the phone sideways: "For grown-ups" is whole at the top, and you can scroll down to the pad if it doesn't fit. Notes:
+- [x] **Last monster stays.** At the end of a service the last monster eats, stays where it is and says "All done! Thank you, chef!", without walking off first. Notes: both D138 items pass (2026-11-23).
 
 ## M4a — Coin shop with stand-in art (D155; the drawings come in M4b)
 Everything in the shop is a labelled placeholder shape for now: judge how it works and feels, not how it looks. Prices, crates and stars are the real ones.
-- [ ] **Getting there.** *Shop* (with the paintbrush) is right of *Open the Café* on Home and is the third button on Results. Easy to find? Notes:
-- [ ] **Tabs.** The six picture tabs at the top; tapping one, Pip says its name ("Wallpaper!", "Counter top!") with a caption. Does she know what each tab holds after hearing it? Notes:
-- [ ] **Trying on.** Tapping a tile or a colour dot shows it in the café at once; switching tab or going Home puts the café back as it was. Does she understand it is only a try-on until she buys? Notes:
-- [ ] **Buying.** *Buy* → a card with the name and price → *Yes!* (Pip: "It's yours!") or *Not yet*. The coins go down, the tile gets a tick and the item stays on. Any accidental buys? Is the confirm one step too many, or just right? Notes:
-- [ ] **Not enough coins.** *Buy* is dimmed; a tap gets only "Keep cooking to save up!". Does that read as "save up", not as "wrong"? Notes:
-- [ ] **Changing back.** A tap on anything she owns (a tick) puts it on again for free, including the plain default (No Lights, Bare Wall). Notes:
+- [x] **Getting there.** *Shop* (with the paintbrush) is right of *Open the Café* on Home and is the third button on Results. Easy to find? Notes: yes, looks good.
+- [ ] **Tabs.** The six picture tabs at the top; tapping one, Pip says its name ("Wallpaper!", "Counter top!") with a caption. Does she know what each tab holds after hearing it? Notes: names are fine. On iPhone and iPad only (not Chrome on a laptop, not Android), the first name comes late, and tapping a tab while Pip is still naming another often leaves the new one silent until several more taps → D178 (there are no tap sounds in the shop, so sound effects are not the cause).
+- [ ] **Trying on.** Tapping a tile or a colour dot shows it in the café at once; switching tab or going Home puts the café back as it was. Does she understand it is only a try-on until she buys? Notes: works fine. Colours after the first were cheaper though nothing makes her buy the first one first → every colour now costs the item's price (D177).
+- [ ] **Buying.** *Buy* → a card with the name and price → *Yes!* (Pip: "It's yours!") or *Not yet*. The coins go down, the tile gets a tick and the item stays on. Any accidental buys? Is the confirm one step too many, or just right? Notes: confirm is good; buying works.
+- [ ] **Not enough coins.** *Buy* is dimmed; a tap gets only "Keep cooking to save up!". Does that read as "save up", not as "wrong"? Notes: fine.
+- [ ] **Changing back.** A tap on anything she owns (a tick) puts it on again for free, including the plain default (No Lights, Bare Wall). Notes: works.
 - [ ] **Everywhere.** What she buys shows on Home, the menu board, the service and Results. Anything covering something it shouldn't (the ticket, the monster, the tray, the bell)? Notes:
 - [ ] **The first crate.** It comes on her very first shop visit (D176): the box drops, Pip says "A delivery arrived!", it opens on a tap or after 2 s, two new things rise out, then show on the shelf with a star (and a star on their tab) until tapped. Does the moment feel like a treat? Too long, too short? Notes:
 - [ ] **Pace.** After that, a crate every 30 monsters served (about every 2–3 days at an hour a week), one per shop visit, never while 6 or more unbought things wait. So the second crate comes only once she has bought all but 5 of the 20 things on the shelf, roughly 450 coins, a few weeks in. Does the shelf ever feel empty, or too full? Notes:
 - [ ] **Pages.** When a slot has more than four items (wallpaper does after a few crates), the triangles page the shelf. Does she find the second page? Notes:
 - [ ] **Two devices** (optional): a crate or purchase on the iPad, backed up and restored on the phone, shows the same shelf there (the stars don't travel, D174). Notes:
 - [ ] **Prices** (your call): anything that feels too cheap or too dear for how long she plays? Notes:
+
+Owner notes (2026-11-23): getting there, try-on, buying, save-up and changing back all work. Two changes, to check on the next build (the M4a items above that have no notes yet still stand):
+- [ ] **iOS voice in the shop (D178).** On the iPhone and the iPad, tap a tab, then tap another while Pip is still saying the first: he stops and says the new name, every time, a moment (about a tenth of a second) later. Tap through all six quickly: only the last one is said, then nothing is left silent. Is the first name after opening the shop still late? Also listen during a service: counts while building, the order after the bell, Pip's coaching. Anything cut off or silent that wasn't before? Notes:
+- [ ] **Colour prices (D177).** Every colour of an item shows the same price (Polka Dots: 30 for each colour; Cloud Carpet: 100 each), and any colour can be bought first. Notes:
+
+If iOS still drops lines after D178, the next step is to stop rebuilding the sound engine on every tap (only when a sound effect is about to play); recorded voices (M13) avoid the iOS speech engine altogether.
 
 To check the look of every entry: `?decor` (all slots) or `?decor&slot=floor`, and `?decor&key=floor.tiles.mint` for one at full size. Screenshots: `docs/screens/M4a/`.
 

@@ -2,6 +2,7 @@
 // timeout, because iOS sometimes never fires `onend`. Captions carry everything when no voice exists.
 import { phrase, type PhraseKey, type PhraseParams } from '../engine/phrases';
 import { getTimeScale } from '../app/runtime';
+import { lastAudioBuildAt } from './unlock';
 
 export const DEFAULT_RATE = 0.85;
 /** Pip's voice: the same voice, higher, so the child can tell the helper from the monster (D90). */
@@ -19,6 +20,47 @@ let voiceVolume = 1;
 let token = 0;
 /** Tokens of non-count lines still playing. Counts never cut these off (D75). */
 const activeLines = new Set<number>();
+/** Every line not yet settled (counts too), so a newer interrupting line can settle them. */
+const live = new Map<number, () => void>();
+/** The line the engine holds; kept referenced so it is not garbage-collected mid-line (D178). */
+const held: { u: SpeechSynthesisUtterance | null } = { u: null };
+
+/**
+ * iOS and iPadOS (every browser there is WebKit) and desktop Safari. WebKit drops or delays a line
+ * spoken right after `cancel()` or right after the game's AudioContext was rebuilt in the same tap
+ * (D178); Chrome and Android do not, so they keep speaking at once.
+ */
+function appleSpeech(): boolean {
+  try {
+    const n = navigator;
+    if (/iP(hone|ad|od)/.test(n.userAgent)) return true;
+    if (n.platform === 'MacIntel' && n.maxTouchPoints > 1) return true; // iPadOS reports a Mac
+    return /^((?!chrome|chromium|android|crios|fxios|edg).)*safari/i.test(n.userAgent);
+  } catch {
+    return false;
+  }
+}
+
+/** A line after a cancel waits this long (D178; 100 ms in reports, a little more for old iPads). */
+export const CANCEL_SETTLE_MS = 150;
+/** A line in the same tap as an AudioContext rebuild waits until the audio session has switched. */
+export const BUILD_SETTLE_MS = 250;
+let lastCancelAt = -Infinity;
+
+/** Cancels only when something is speaking or queued: a needless cancel also drops the next line. */
+function cancelEngine(s: SpeechSynthesis, always = false): void {
+  held.u = null;
+  if (!always && !s.speaking && !s.pending) return;
+  s.cancel();
+  lastCancelAt = performance.now();
+}
+
+/** How long a line must wait before `speak()` (0 off WebKit). */
+function settleMs(): number {
+  if (!appleSpeech()) return 0;
+  const now = performance.now();
+  return Math.ceil(Math.max(0, lastCancelAt + CANCEL_SETTLE_MS - now, lastAudioBuildAt() + BUILD_SETTLE_MS - now));
+}
 
 const synth = (): SpeechSynthesis | null => ('speechSynthesis' in window ? window.speechSynthesis : null);
 
@@ -139,11 +181,18 @@ export function speakText(text: string, opts: SpeakOptions = {}): Promise<void> 
       if (settled) return;
       settled = true;
       activeLines.delete(my);
+      live.delete(my);
+      window.clearTimeout(fallback);
+      window.clearTimeout(deferred);
       resolve();
     };
-    let fallback = window.setTimeout(finish, ms);
     const s = synth();
-    if (!s) return; // no speech engine: captions carry the line
+    let deferred = 0;
+    let fallback = 0;
+    if (!s) {
+      fallback = window.setTimeout(finish, ms);
+      return; // no speech engine: captions carry the line
+    }
     let started = false;
     const utter = (): SpeechSynthesisUtterance => {
       const u = new SpeechSynthesisUtterance(spokenForm(text));
@@ -155,35 +204,60 @@ export function speakText(text: string, opts: SpeakOptions = {}): Promise<void> 
       u.onstart = () => void (started = true);
       u.onend = finish;
       u.onerror = finish;
+      // Held until it ends: WebKit can collect an utterance mid-line and never fire `end` (D178).
+      held.u = u;
       return u;
     };
+    /** Speaks now, or once the engine has settled after a cancel or an audio rebuild (D178). */
+    const say = (then?: (u: SpeechSynthesisUtterance) => void) => {
+      const go = () => {
+        if (settled) return;
+        try {
+          if (s.paused) s.resume();
+          const u = utter();
+          s.speak(u);
+          then?.(u);
+        } catch {
+          /* the timeout resolves it */
+        }
+      };
+      const wait = settleMs();
+      if (wait > 0) deferred = window.setTimeout(go, wait);
+      else go();
+      return wait;
+    };
     try {
-      if (opts.interrupt !== false) s.cancel(); // iOS quirk: cancel before each non-queued line
+      if (opts.interrupt !== false) {
+        // A newer line replaces everything before it: settle those now rather than wait for an
+        // `error` event that iOS does not always send.
+        for (const [t, done] of live) if (t !== my) done();
+        cancelEngine(s);
+      }
+      live.set(my, finish);
       // iOS can leave the engine paused after an audio interruption; a paused engine never speaks.
       if (s.paused) s.resume();
-      const u = utter();
-      s.speak(u);
-      // D88: if the line has not started by now (and nothing newer replaced it), the engine is
-      // wedged: cancel, un-pause and say it once more. Counts skip this, and so do lines whose
-      // fallback (≥ 1.2 s) has already settled them, such as a short "Yum!".
-      if (!opts.count) {
+      const wait = say((u) => {
+        // D88: if the line has not started by now (and nothing newer replaced it), the engine is
+        // wedged: cancel, un-pause and say it once more. Counts skip this, and so do lines whose
+        // fallback (≥ 1.2 s) has already settled them, such as a short "Yum!".
+        if (opts.count) return;
         window.setTimeout(() => {
           if (started || settled || my !== token) return;
           try {
             u.onend = u.onerror = null;
-            s.cancel();
-            if (s.paused) s.resume();
-            s.speak(utter());
+            cancelEngine(s, true);
             // The retry starts late: give it its own full fallback so busy lasts as long as it does.
+            const again = say();
             window.clearTimeout(fallback);
-            fallback = window.setTimeout(finish, ms);
+            fallback = window.setTimeout(finish, ms + again);
           } catch {
             /* the timeout resolves it */
           }
         }, START_WATCHDOG_MS);
-      }
+      });
+      fallback = window.setTimeout(finish, ms + wait);
     } catch {
-      /* the timeout resolves it */
+      fallback = window.setTimeout(finish, ms);
     }
   });
 }
@@ -207,9 +281,11 @@ export const speechBusy = (): boolean => activeLines.size > 0;
 /** Stops any line (leaving the service). */
 export function hush(): void {
   token++;
+  for (const done of [...live.values()]) done();
   activeLines.clear();
   try {
-    synth()?.cancel();
+    const s = synth();
+    if (s) cancelEngine(s);
   } catch {
     /* ignore */
   }
