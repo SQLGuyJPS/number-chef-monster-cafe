@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { MIN_BUTTON_CSS_PX, MIN_CELL_CSS_PX } from '../../src/app/metrics';
 import { SVG_BUDGET } from '../../src/app/svgCount';
 import { openGrownUps, startApp, tap } from './helpers';
-import { openService, tapId } from './service';
+import { finishDelivery, openService, tapId } from './service';
 
 // M4a (SPEC §10, §10.1, §14): the coin shop end to end with stand-in art.
 
@@ -17,8 +17,7 @@ async function openShop(page: Page, settle = true) {
   await tapId(page, 'shop-button');
   await expect(page.getByTestId('screen-shop')).toBeVisible();
   if (settle && (await page.getByTestId('shop-delivery').count()) > 0) {
-    await tapId(page, 'shop-crate');
-    await expect(page.getByTestId('shop-delivery')).toHaveCount(0, { timeout: 8_000 });
+    await finishDelivery(page);
   }
 }
 
@@ -77,7 +76,7 @@ test('below the price: Buy is dimmed and only gets Pip’s line', async ({ page 
   await openShop(page);
   await tapId(page, 'shop-tab-lights');
   await expect(page.getByTestId('caption')).toHaveText('Lights!');
-  await tapId(page, 'shop-tile-disco-ball');
+  await tapId(page, 'shop-tile-string-lights');
   await expect(page.getByTestId('shop-buy')).toHaveClass(/short/);
   await tapId(page, 'shop-buy');
   await expect(page.getByTestId('shop-confirm')).toHaveCount(0);
@@ -93,20 +92,24 @@ test('a crate: the first on the first visit, then held at 6 unbought, one per vi
 }) => {
   await startApp(page);
   await page.evaluate(() => window.__ncmc.earn(2000, 0));
-  // The very first visit brings crate 1 though 18 starter entries are unbought (D176).
+  // The very first visit brings crate 1 though 10 starter entries are unbought (D176, D182).
   await openShop(page, false);
   await expect(page.getByTestId('shop-delivery')).toBeVisible();
-  await expect(page.getByTestId('shop-delivery')).toHaveCount(0, { timeout: 8_000 });
-  expect((await shop(page))!.unbought).toHaveLength(20);
+  // Untouched, it opens by itself after 2 s and holds the open box 8 s (D164, D181).
+  await expect(page.getByTestId('shop-delivery')).toHaveAttribute('data-phase', 'open', { timeout: 5_000 });
+  await page.waitForTimeout(6_000);
+  await expect(page.getByTestId('shop-delivery')).toHaveAttribute('data-phase', 'open');
+  await expect(page.getByTestId('shop-delivery')).toHaveCount(0, { timeout: 4_000 });
+  expect((await shop(page))!.unbought).toHaveLength(12);
   await tapId(page, 'shop-home');
-  // 40 monsters later crate 2 is due, but 20 unbought hold it.
+  // 40 monsters later crate 2 is due, but 12 unbought hold it.
   await page.evaluate(() => window.__ncmc.earn(0, 40));
   await openShop(page);
   await expect(page.getByTestId('shop-delivery')).toHaveCount(0);
   await tapId(page, 'shop-home');
   await page.evaluate(async () => {
     const s = (await window.__ncmc.shop())!;
-    for (const k of s.unbought.slice(0, 14)) await window.__ncmc.buy(k);
+    for (const k of s.unbought.slice(0, 6)) await window.__ncmc.buy(k);
   });
   expect((await shop(page))!.unbought).toHaveLength(6);
   await openShop(page);
@@ -122,7 +125,10 @@ test('a crate: the first on the first visit, then held at 6 unbought, one per vi
   await expect(page.getByTestId('caption')).toHaveText('A delivery arrived!');
   await tap(page, page.getByTestId('shop-crate'));
   await expect(page.getByTestId('shop-delivery')).toHaveAttribute('data-phase', 'open');
-  await expect(page.getByTestId('shop-delivery')).toHaveCount(0, { timeout: 5_000 });
+  // An immediate second tap does not skip the rise (D181).
+  await tap(page, page.getByTestId('shop-crate'));
+  await expect(page.getByTestId('shop-delivery')).toHaveAttribute('data-phase', 'open');
+  await finishDelivery(page);
   const s = (await shop(page))!;
   expect(Object.keys(s.crates)).toEqual(['1', '2']);
   expect(s.unbought).toHaveLength(7);
@@ -150,7 +156,7 @@ test('grown-ups shop playtest: set the coins, send a crate, replay it, deliver a
   await page.getByTestId('playtest-coins').fill('777');
   await page.getByTestId('playtest-coins-set').click();
   await expect(page.getByTestId('playtest-note')).toContainText('777');
-  // Crate 2 is not due (no monsters served, 20 unbought), so only the request brings it.
+  // Crate 2 is not due (no monsters served, 12 unbought), so only the request brings it.
   await page.getByTestId('playtest-crate').click();
   await expect(page.getByTestId('playtest-crate')).toContainText('waiting');
   await page.getByTestId('parent-back').click();
@@ -158,7 +164,7 @@ test('grown-ups shop playtest: set the coins, send a crate, replay it, deliver a
   await openShop(page, false);
   await expect(page.getByTestId('shop-delivery')).toBeVisible();
   await expect(page.getByTestId('coin-jar')).toContainText('777');
-  await expect(page.getByTestId('shop-delivery')).toHaveCount(0, { timeout: 8_000 });
+  await finishDelivery(page);
   let s = (await shop(page))!;
   expect(Object.keys(s.crates)).toEqual(['1', '2']);
   expect(s.balance).toBe(777);
@@ -174,7 +180,8 @@ test('grown-ups shop playtest: set the coins, send a crate, replay it, deliver a
   await page.getByTestId('parent-back').click();
   await openShop(page, false);
   await expect(page.getByTestId('shop-delivery')).toBeVisible();
-  await expect(page.getByTestId('shop-delivery')).toHaveCount(0, { timeout: 8_000 });
+  // Untouched, it opens by itself after 2 s and holds the open box 8 s (D164, D181).
+  await finishDelivery(page);
   expect(Object.keys((await shop(page))!.crates)).toEqual(['1', '2']);
   await tapId(page, 'shop-home');
 

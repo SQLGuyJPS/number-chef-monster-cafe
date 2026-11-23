@@ -1,7 +1,17 @@
 import { mkdirSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { gateAnswer, startApp, tap, typeGate } from './helpers';
-import { followMe, openService, probe, ringBell, serveCorrect, serveWrong, tapId, waitPhase } from './service';
+import {
+  finishDelivery,
+  followMe,
+  openService,
+  probe,
+  ringBell,
+  serveCorrect,
+  serveWrong,
+  tapId,
+  waitPhase,
+} from './service';
 
 // Milestone screenshots (SPEC §13.5) into docs/screens/<milestone>/. Runs only when asked:
 //   npx cross-env NCMC_SCREENS=M0 playwright test screens --project=chromium-ipad-pro-11 --project=webkit-iphone-13 --project=chromium-ipad-portrait
@@ -393,8 +403,7 @@ test('M4a screenshots', async ({ page }, info) => {
   await shot('home-with-shop');
   await tapId(page, 'shop-button');
   // The first visit brings crate 1 (D176); let it play out before the shelf shots.
-  await tapId(page, 'shop-crate');
-  await expect(page.getByTestId('shop-delivery')).toHaveCount(0, { timeout: 8_000 });
+  await finishDelivery(page);
   await shot('shop-wallpaper');
   await tapId(page, 'shop-dot-wallpaper.plain.berry');
   await shot('shop-try-on');
@@ -403,7 +412,7 @@ test('M4a screenshots', async ({ page }, info) => {
   await tapId(page, 'shop-yes');
   await shot('shop-bought');
   await tapId(page, 'shop-tab-lights');
-  await tapId(page, 'shop-tile-star-chandelier');
+  await tapId(page, 'shop-tile-string-lights');
   await tapId(page, 'shop-buy');
   await shot('shop-not-enough-coins');
 
@@ -418,9 +427,9 @@ test('M4a screenshots', async ({ page }, info) => {
   await expect(page.getByTestId('shop-delivery')).toHaveAttribute('data-phase', 'closed');
   await shot('shop-delivery-closed');
   await tapId(page, 'shop-crate');
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(2200);
   await shot('shop-delivery-open');
-  await expect(page.getByTestId('shop-delivery')).toHaveCount(0, { timeout: 5_000 });
+  await finishDelivery(page);
   await shot('shop-new-entries-starred');
   // More crates over the next visits fill the wallpaper shelf to two pages.
   for (let i = 0; i < 6; i++) {
@@ -431,7 +440,7 @@ test('M4a screenshots', async ({ page }, info) => {
       for (const k of s.unbought.slice(0, Math.max(0, s.unbought.length - 5))) await window.__ncmc.buy(k);
     });
     await tapId(page, 'shop-button');
-    await expect(page.getByTestId('shop-delivery')).toHaveCount(0, { timeout: 8_000 });
+    if ((await page.getByTestId('shop-delivery').count()) > 0) await finishDelivery(page);
   }
   await tapId(page, 'shop-tab-wallpaper');
   await still();

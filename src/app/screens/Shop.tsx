@@ -42,8 +42,15 @@ import './shop.css';
 const DROP_MS = 700;
 /** It opens on a tap, or by itself this long after it lands (D164). */
 const AUTO_OPEN_MS = 2000;
-/** How long the new entries hang over the open box before the shelf shows them. */
-const RISE_MS = 1600;
+/**
+ * How long the open box and its new entries stay before the shelf shows them, unless the screen
+ * is tapped (D181). Taps in the first OPEN_TAP_GUARD_MS are ignored, so the tap (or quick second
+ * tap) that opened the box does not skip the rise.
+ */
+const OPEN_HOLD_MS = 8000;
+const OPEN_TAP_GUARD_MS = 1000;
+/** The entries rise one after the other this far apart (shop.css .shop-delivery-item). */
+const RISE_STAGGER_MS = 300;
 /** A caption stays up at least this long, for reading. */
 const CAPTION_MIN_MS = 2500;
 
@@ -95,6 +102,14 @@ export function Shop({
   );
   const [caption, setCaption] = useState('');
   const speaking = useRef(0);
+  const openedAt = useRef(0);
+  /** A tap anywhere during the delivery: a closed box opens; an open one gives way to the shelf. */
+  const tapDelivery = () =>
+    setDelivery((p) => {
+      if (p === 'closed') return 'open';
+      if (p === 'open' && performance.now() - openedAt.current >= OPEN_TAP_GUARD_MS) return null;
+      return p;
+    });
 
   /**
    * Pip's line with its caption. The caption stays at least CAPTION_MIN_MS even when speech ends
@@ -116,7 +131,8 @@ export function Shop({
     onPreview(slot, sel === equipped ? null : sel);
   }, [slot, sel, equipped, onPreview]);
 
-  // The delivery moment (D164): drop, wait for a tap or 2 s, open, then the shelf.
+  // The delivery moment (D164, D181): drop, wait for a tap or 2 s, open, hold 8 s or until a tap,
+  // then the shelf.
   useEffect(() => {
     if (delivery === 'drop') {
       const t = window.setTimeout(() => {
@@ -130,7 +146,8 @@ export function Shop({
       return () => window.clearTimeout(t);
     }
     if (delivery === 'open') {
-      const t = window.setTimeout(() => setDelivery(null), RISE_MS);
+      openedAt.current = performance.now();
+      const t = window.setTimeout(() => setDelivery(null), OPEN_HOLD_MS);
       return () => window.clearTimeout(t);
     }
     return undefined;
@@ -280,7 +297,15 @@ export function Shop({
 
       {confirm && (
         <div className="shop-confirm-layer" data-testid="shop-confirm" role="dialog" aria-modal="true">
-          <div className="shop-dim" />
+          <TapButton
+            className="shop-dim"
+            testId="shop-delivery-dim"
+            label={delivery === 'open' ? 'Back to the shop' : 'Open the box'}
+            tapKind="button"
+            onTap={tapDelivery}
+          >
+            {null}
+          </TapButton>
           <div className="shop-confirm" style={at(SHOP.confirm)}>
             <div className="shop-confirm-pic">
               <MiniStandIn look={lookFor(selEntry)} />
@@ -312,7 +337,15 @@ export function Shop({
 
       {delivery && (
         <div className="shop-delivery" data-testid="shop-delivery" data-phase={delivery}>
-          <div className="shop-dim" />
+          <TapButton
+            className="shop-dim"
+            testId="shop-delivery-dim"
+            label={delivery === 'open' ? 'Back to the shop' : 'Open the box'}
+            tapKind="button"
+            onTap={tapDelivery}
+          >
+            {null}
+          </TapButton>
           {delivery === 'open' &&
             arrived.map((k, i) => {
               const e = entryOf(k)!;
@@ -323,7 +356,7 @@ export function Shop({
                   className="shop-delivery-item"
                   style={{
                     ...at({ x: r.x + 36 + i * 128, y: r.y - 10, w: 100, h: 80 }),
-                    animationDelay: `${400 + i * 120}ms`,
+                    animationDelay: `${500 + i * RISE_STAGGER_MS}ms`,
                   }}
                 >
                   {isNone(e) ? null : <MiniStandIn look={lookFor(e)} />}
@@ -336,7 +369,7 @@ export function Shop({
             testId="shop-crate"
             label="Open the box"
             tapKind="button"
-            onTap={() => setDelivery((p) => (p === 'open' ? p : 'open'))}
+            onTap={tapDelivery}
           >
             <DeliveryBox phase={delivery === 'open' ? 'open' : 'closed'} />
           </TapButton>

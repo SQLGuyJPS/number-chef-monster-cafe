@@ -490,16 +490,18 @@
   position: absolute;
   clip-path: polygon(0 0, 100% 70%, 0 100%);
 }
+/* Both tails are centred on the bubble's middle, so a one-line bubble (≈ 50 px inside its border)
+   still holds the whole 46-px tail and nothing hangs below its bottom edge. */
 .caption::before {
   right: -36px;
-  top: calc(50% - 10px);
+  top: calc(50% - 23px);
   width: 44px;
   height: 46px;
   background: #e2d8c3;
 }
 .caption::after {
   right: -29px;
-  top: calc(50% - 5px);
+  top: calc(50% - 18px);
   width: 37px;
   height: 36px;
   background: var(--c-paper);

@@ -3,6 +3,7 @@ import {
   COLOR_FAMILIES,
   CRATE_HOLD_AT_UNBOUGHT,
   STARTER_SHELF,
+  EARLY_CRATES,
   LATER_GROUPS,
   M4_ITEMS,
   TIER_PRICE,
@@ -47,14 +48,15 @@ describe('shop catalog', () => {
     }
   });
 
-  it('opens M4 with a starter shelf that covers every slot (D151)', () => {
+  it('opens M4 with a starter shelf that, with crate 1, covers every slot (D151, D182)', () => {
     const paid = entries.filter((e) => e.price > 0);
     const keys = new Set(paid.map((e) => e.key));
     expect(new Set(STARTER_SHELF).size).toBe(STARTER_SHELF.length);
     for (const k of STARTER_SHELF) expect(keys.has(k)).toBe(true);
-    const shelfSlots = new Set(
-      paid.filter((e) => STARTER_SHELF.includes(e.key)).map((e) => e.slot),
-    );
+    for (const k of EARLY_CRATES) expect(keys.has(k) && !STARTER_SHELF.includes(k), k).toBe(true);
+    // Crate 1 always comes on the first visit (D176), so the first visit's shelf is both.
+    const firstVisit = [...STARTER_SHELF, ...EARLY_CRATES.slice(0, 2)];
+    const shelfSlots = new Set(paid.filter((e) => firstVisit.includes(e.key)).map((e) => e.slot));
     for (const slot of new Set(paid.map((e) => e.slot))) expect(shelfSlots.has(slot)).toBe(true);
     // A tier-1 entry is on the shelf, so the first service buys something.
     expect(paid.some((e) => STARTER_SHELF.includes(e.key) && e.price === TIER_PRICE[1])).toBe(true);
