@@ -34,7 +34,7 @@ export function shareOrDownload(json: string, name: string): Promise<ShareOutcom
       ok = false;
     }
     if (ok) {
-      // Files only: iOS "Save to Files" writes any title or text as a second file (D181).
+      // Files only: iOS "Save to Files" writes any title or text as a second file.
       return nav.share!({ files: [file] }).then(
         (): ShareOutcome => ({ kind: 'shared' }),
         (e: unknown): ShareOutcome =>

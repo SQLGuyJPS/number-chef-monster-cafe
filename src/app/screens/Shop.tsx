@@ -104,12 +104,16 @@ export function Shop({
   const speaking = useRef(0);
   const openedAt = useRef(0);
   /** A tap anywhere during the delivery: a closed box opens; an open one gives way to the shelf. */
-  const tapDelivery = () =>
+  const tapDelivery = () => {
+    // Stamped here too, not only in the effect, so a second tap that lands before the effect runs
+    // is still inside the guard.
+    if (delivery === 'closed') openedAt.current = performance.now();
     setDelivery((p) => {
       if (p === 'closed') return 'open';
       if (p === 'open' && performance.now() - openedAt.current >= OPEN_TAP_GUARD_MS) return null;
       return p;
     });
+  };
 
   /**
    * Pip's line with its caption. The caption stays at least CAPTION_MIN_MS even when speech ends
@@ -297,15 +301,7 @@ export function Shop({
 
       {confirm && (
         <div className="shop-confirm-layer" data-testid="shop-confirm" role="dialog" aria-modal="true">
-          <TapButton
-            className="shop-dim"
-            testId="shop-delivery-dim"
-            label={delivery === 'open' ? 'Back to the shop' : 'Open the box'}
-            tapKind="button"
-            onTap={tapDelivery}
-          >
-            {null}
-          </TapButton>
+          <div className="shop-dim" />
           <div className="shop-confirm" style={at(SHOP.confirm)}>
             <div className="shop-confirm-pic">
               <MiniStandIn look={lookFor(selEntry)} />
