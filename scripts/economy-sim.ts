@@ -21,6 +21,7 @@ import {
   expandPlanned,
   type Tier,
 } from '../src/engine/economy';
+import { CRATE_QUEUE } from '../src/engine/shop';
 import {
   DEFAULT_PROFILE,
   percentile,
@@ -73,12 +74,11 @@ const m4 = (t = tiers) => expandCatalog(M4_ITEMS, t);
 const later = (t = tiers) => expandPlanned(LATER_GROUPS, t);
 const shelf = new Set(STARTER_SHELF);
 const starter = (t = tiers) => m4(t).filter((e) => shelf.has(e.key));
-/** The rest of M4 waits in the crate queue from day one (D151). */
-const m4Wave = (t = tiers) => ({
-  id: 'm4',
-  opensWeek: 0,
-  entries: m4(t).filter((e) => e.price > 0 && !shelf.has(e.key)),
-});
+/** The rest of M4 waits in the crate queue from day one (D151), in the game's crate order (D182). */
+const m4Wave = (t = tiers) => {
+  const byKey = new Map(m4(t).map((e) => [e.key, e]));
+  return { id: 'm4', opensWeek: 0, ordered: true, entries: CRATE_QUEUE.map((k) => byKey.get(k)!) };
+};
 const CRATES: CrateRule = {
   everyMonsters: CRATE_EVERY_MONSTERS,
   size: CRATE_SIZE,

@@ -8,7 +8,7 @@ import {
   serviceEndEvent,
   type Evt,
 } from '../../src/engine/events';
-import { CRATE_HOLD_AT_UNBOUGHT, STARTER_SHELF } from '../../src/engine/economy';
+import { CRATE_HOLD_AT_UNBOUGHT, EARLY_CRATES, STARTER_SHELF } from '../../src/engine/economy';
 import { balance, earned, replay, servedMonsters, type Derived } from '../../src/engine/replay';
 import {
   CATALOG,
@@ -84,25 +84,28 @@ describe('catalog and queue (SPEC §10)', () => {
     expect(CATALOG.some((e) => e.item.includes('bell'))).toBe(false);
   });
 
-  it('every starter entry is in the catalog; the queue holds the other 33, fixed and distinct', () => {
+  it('every starter entry is in the catalog; the queue holds the other 41, fixed and distinct', () => {
     for (const k of STARTER_SHELF) expect(entryOf(k), k).toBeDefined();
-    expect(CRATE_QUEUE).toHaveLength(33);
-    expect(new Set(CRATE_QUEUE).size).toBe(33);
+    expect(CRATE_QUEUE).toHaveLength(41);
+    expect(new Set(CRATE_QUEUE).size).toBe(41);
     expect(CRATE_QUEUE.some((k) => STARTER_SHELF.includes(k))).toBe(false);
-    expect(crateEntries(1)).toEqual(CRATE_QUEUE.slice(0, 2));
-    expect(crateEntries(17)).toEqual([CRATE_QUEUE[32]]);
-    expect(crateEntries(18)).toEqual([]);
+    // The entries taken off the starter shelf come first (D182).
+    expect(CRATE_QUEUE.slice(0, EARLY_CRATES.length)).toEqual([...EARLY_CRATES]);
+    expect(crateEntries(1)).toEqual(['wallpaper.plain.berry', 'window.garden.classic']);
+    expect(crateEntries(21)).toEqual([CRATE_QUEUE[40]]);
+    expect(crateEntries(22)).toEqual([]);
   });
 
   it('a fresh café shows the free defaults and the starter shelf', () => {
     const d = replay([]);
-    expect(shelfKeys(d)).toHaveLength(18 + 6);
-    expect(unboughtOnShelf(d)).toHaveLength(18);
+    expect(shelfKeys(d)).toHaveLength(10 + 6);
+    expect(unboughtOnShelf(d)).toHaveLength(10);
     expect(equippedKey(d, 'wallpaper')).toBe('wallpaper.plain.sunny');
     expect(equippedKey(d, 'counter')).toBe(freeDefault('counter').key);
     const wall = slotShelf(d, 'wallpaper');
     expect(wall.map((i) => i.item)).toEqual(['plain', 'polka-dots', 'stripes']);
-    expect(wall[0]!.entries.map((e) => e.colorway)).toEqual(['sunny', 'berry', 'lavender']);
+    // Plain Paint's recolours come in crates now (D182).
+    expect(wall[0]!.entries.map((e) => e.colorway)).toEqual(['sunny']);
   });
 });
 
@@ -142,11 +145,11 @@ describe('buying (SPEC §10, §11.2)', () => {
 describe('crates (SPEC §10.1, D154)', () => {
   it('the first crate skips the hold (D176); later ones wait below 6 unbought', () => {
     const dv = new Device();
-    expect(unboughtOnShelf(dv.d)).toHaveLength(18);
-    // The very first visit brings crate 1, though all 18 starter entries are unbought.
+    expect(unboughtOnShelf(dv.d)).toHaveLength(10);
+    // The very first visit brings crate 1, though all 10 starter entries are unbought.
     expect(dv.visit()).toEqual({ n: 1, next: 30 });
     for (const k of crateEntries(1)) expect(shelfKeys(dv.d)).toContain(k);
-    expect(unboughtOnShelf(dv.d)).toHaveLength(20);
+    expect(unboughtOnShelf(dv.d)).toHaveLength(12);
     dv.serve(200);
     expect(dv.visit()).toBeNull();
     dv.buyDownTo(CRATE_HOLD_AT_UNBOUGHT);
@@ -206,7 +209,7 @@ describe('crates (SPEC §10.1, D154)', () => {
       if (dv.visit()) crates++;
       dv.serve(30);
     }
-    expect(crates).toBe(17);
+    expect(crates).toBe(21);
     expect(unboughtOnShelf(dv.d)).toHaveLength(0);
     expect(shelfKeys(dv.d)).toHaveLength(CATALOG.length);
   });

@@ -92,6 +92,9 @@
   display: grid;
   place-items: center;
 }
+.shop-tile-name.smaller {
+  font-size: 18px;
+}
 .shop-tile-foot {
   font-size: 30px;
   font-weight: 700;
@@ -177,6 +180,8 @@
 .shop-dim {
   position: absolute;
   inset: -1000px;
+  padding: 0;
+  border: none;
   background: var(--c-scrim);
 }
 .shop-confirm {
@@ -330,9 +335,10 @@
     opacity: 0.9;
   }
 }
-/* The two new entries rise out of the box once the flaps are open. */
+/* The two new entries rise slowly out of the box once the flaps are open (D181); the delay is
+   set per entry in Shop.tsx. */
 .shop-delivery-item {
-  animation: dbox-rise 0.5s 0.4s cubic-bezier(0.3, 1.4, 0.6, 1) both;
+  animation: dbox-rise 1.4s 0.5s cubic-bezier(0.25, 1.12, 0.5, 1) both;
 }
 @keyframes dbox-rise {
   from {

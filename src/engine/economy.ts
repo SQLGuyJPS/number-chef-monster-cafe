@@ -246,18 +246,13 @@ export const M4_ITEMS: readonly ItemDef[] = [
 ];
 
 /**
- * The M4 shop opens with this shelf (D151): the first colour of every tier 1–2 item, the tier-1
- * recolours of the free defaults, and four things to save for (D157 swapped the two staff for the
- * Tiny Robot and the Star Chandelier). Every other M4 entry arrives in
- * delivery crates, so a young child faces about 7 unbought choices, not 50.
+ * The M4 shop opens with this shelf (D151, D182): the first colour of every tier 1–2 item, ten
+ * entries. With crate 1 (always on the first visit, D176) that is 12 unbought, so crate 2 comes
+ * after about 7 buys (≈ 190 coins, about two weeks at an hour a week) instead of 15.
  */
 export const STARTER_SHELF: readonly string[] = [
-  'wallpaper.plain.berry',
-  'wallpaper.plain.lavender',
   'wallpaper.polka-dots.berry',
   'wallpaper.stripes.mint',
-  'floor.wood.honey',
-  'floor.wood.cocoa',
   'floor.checkerboard.classic',
   'floor.tiles.berry',
   'lights.string-lights.honey',
@@ -266,9 +261,20 @@ export const STARTER_SHELF: readonly string[] = [
   'counter.cookie-jar.sky',
   'wallArt.neon-open.berry',
   'wallArt.menu-board.classic',
+];
+/**
+ * The entries D182 took off the starter shelf come first in the crate queue, in this order, one
+ * recolour and one thing to save for a crate: crate 1 (the first visit) brings Plain Paint Berry
+ * and the Garden window, so every slot has something new by the end of the first visit.
+ */
+export const EARLY_CRATES: readonly string[] = [
+  'wallpaper.plain.berry',
   'window.garden.classic',
-  'lights.disco-ball.classic',
+  'floor.wood.honey',
   'counter.tiny-robot.sky',
+  'wallpaper.plain.lavender',
+  'lights.disco-ball.classic',
+  'floor.wood.cocoa',
   'lights.star-chandelier.classic',
 ];
 

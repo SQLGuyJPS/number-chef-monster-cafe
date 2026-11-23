@@ -51,6 +51,8 @@ export interface Wave {
   /** The week the update with this content reaches the device. */
   opensWeek: number;
   entries: readonly ShopEntry[];
+  /** Entries are already in crate order (the M4 queue, D182); otherwise they are interleaved. */
+  ordered?: boolean;
 }
 
 /** New stock arrives in crates of `size` items every `everyMonsters` monsters served. */
@@ -160,7 +162,7 @@ export function simulate(input: SimInput, rng: Rng): SimResult {
         continue;
       }
       const wasEmpty = queue.length === 0;
-      queue.push(...interleave(w.entries));
+      queue.push(...(w.ordered ? w.entries : interleave(w.entries)));
       if (wasEmpty) nextCrateAt = monsters; // an update brings a crate straight away
     }
   };

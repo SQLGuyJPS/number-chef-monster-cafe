@@ -62,6 +62,7 @@ E2E runs against the production build with `VITE_E2E=1`; hooks at `window.__ncmc
 
 ## Testing and screenshots
 - Unit/property: Vitest in `tests/unit`. E2E: Playwright in `tests/e2e` with touch emulation (iPad Pro 11 landscape, iPad gen 7 WebKit, iPhone 13 landscape, Pixel 7 landscape; M1 runs the narrower set in SPEC §13.5, D36). The e2e environment needs Noto Color Emoji. Playwright cannot drag by touch; use CDP `Input.dispatchTouchEvent` in Chromium only, and test the tap path everywhere.
+- WebKit projects (iPhone, iPad gen 7) are never skipped for a missing browser. If WebKit fails to launch ("Host system is missing dependencies"), run `npx playwright install-deps webkit` (system libraries, as root) and rerun; the WebKit browser itself ships with the container, so don't run `playwright install`. The cloud environment's setup script does this for new sessions.
 - At each milestone save screenshots to `docs/screens/M<n>/` (list in SPEC §13.5) and update `docs/PLAYTEST.md` with what only the owner can judge.
 - Real-device behavior (iOS audio, speech, storage eviction, silent switch, rotation, Home Screen install, emoji appearance, frame rate on a real iPad) cannot be verified here; list it in PLAYTEST.md rather than claiming it works.
 

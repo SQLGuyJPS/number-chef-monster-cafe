@@ -201,6 +201,20 @@ export async function waitPhase(page: Page, phase: string, timeout = 20_000): Pr
 
 export const tapId = (page: Page, id: string) => tap(page, page.getByTestId(id));
 
+/**
+ * Plays a shop delivery to the end the way a child would: open the box if it is still closed,
+ * then, once the opening tap's guard has passed, tap again to go to the shelf (D181).
+ */
+export async function finishDelivery(page: Page): Promise<void> {
+  const d = page.getByTestId('shop-delivery');
+  await expect(d).toHaveAttribute('data-phase', /closed|open/, { timeout: 5_000 });
+  if ((await d.getAttribute('data-phase')) === 'closed') await tapId(page, 'shop-crate');
+  await expect(d).toHaveAttribute('data-phase', 'open');
+  await page.waitForTimeout(1_100);
+  await tapId(page, 'shop-delivery-dim');
+  await expect(d).toHaveCount(0);
+}
+
 /** Brings the tray to `target` cells the way a child would: bin taps or tapping an item. */
 export async function trayTo(page: Page, target: number): Promise<void> {
   for (let i = 0; i < 25; i++) {

@@ -7,7 +7,7 @@ export type ShareOutcome = { kind: 'shared' } | { kind: 'cancelled' } | { kind: 
 
 type ShareNav = Navigator & {
   canShare?: (d: { files: File[] }) => boolean;
-  share?: (d: { files: File[]; title?: string }) => Promise<void>;
+  share?: (d: { files: File[] }) => Promise<void>;
 };
 
 function download(json: string, name: string): ShareOutcome {
@@ -34,7 +34,8 @@ export function shareOrDownload(json: string, name: string): Promise<ShareOutcom
       ok = false;
     }
     if (ok) {
-      return nav.share!({ files: [file], title: name }).then(
+      // Files only: iOS "Save to Files" writes any title or text as a second file.
+      return nav.share!({ files: [file] }).then(
         (): ShareOutcome => ({ kind: 'shared' }),
         (e: unknown): ShareOutcome =>
           // Closing the share sheet is a choice, not a failure; anything else falls back.
