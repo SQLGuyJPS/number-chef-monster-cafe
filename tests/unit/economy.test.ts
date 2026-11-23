@@ -15,10 +15,10 @@ import { mulberry32 } from '../../src/engine/rng';
 describe('shop catalog', () => {
   const entries = expandCatalog(M4_ITEMS);
 
-  it('matches SPEC §10: 51 paid entries, 2,305 coins (D148, D157, D160)', () => {
+  it('matches SPEC §10: 51 paid entries, 2,505 coins (D148, D157, D160, D177)', () => {
     const paid = entries.filter((e) => e.price > 0);
     expect(paid).toHaveLength(51);
-    expect(paid.reduce((s, e) => s + e.price, 0)).toBe(2305);
+    expect(paid.reduce((s, e) => s + e.price, 0)).toBe(2505);
     expect(entries.some((e) => e.slot === 'staff')).toBe(false);
     // The serve bell is a control the child always needs, never a shop item (D159).
     expect(entries.some((e) => e.item === 'bell')).toBe(false);
@@ -38,12 +38,12 @@ describe('shop catalog', () => {
     }
   });
 
-  it('keeps M4 to at most 3 colorways an item, each extra one cheaper than the original', () => {
+  it('keeps M4 to at most 3 colorways an item, every colorway at the item price (D177)', () => {
     for (const def of M4_ITEMS) {
       expect(def.colorways.length).toBeLessThanOrEqual(3);
       expect(new Set(def.colorways).size).toBe(def.colorways.length);
       const [first, ...rest] = entries.filter((e) => e.item === def.id && e.slot === def.slot);
-      if (!def.free) for (const e of rest) expect(e.price).toBeLessThan(first!.price);
+      if (!def.free) for (const e of rest) expect(e.price).toBe(first!.price);
     }
   });
 

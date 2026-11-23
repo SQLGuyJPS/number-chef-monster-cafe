@@ -24,6 +24,10 @@ export function getAudioContext(): AudioContext | null {
   return ctx;
 }
 
+let builtAt = -Infinity;
+/** When the context was last built (performance.now()); speech waits a moment after it (D178). */
+export const lastAudioBuildAt = (): number => builtAt;
+
 export function getAudioSessionMode(): AudioSessionMode {
   try {
     const v = localStorage.getItem('ncmc.debug.audioSession');
@@ -102,6 +106,7 @@ function build(): void {
     return;
   }
   audioStats.contextsCreated++;
+  builtAt = performance.now();
   // A fresh context counts as advancing until it has had time to prove otherwise.
   lastAdvance = { wall: performance.now(), audio: -1 };
   void ctx.resume().catch(() => undefined);

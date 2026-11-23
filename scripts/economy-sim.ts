@@ -10,7 +10,6 @@
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import {
-  COLORWAY_SHARE,
   CRATE_EVERY_MONSTERS,
   CRATE_HOLD_AT_UNBOUGHT,
   CRATE_SIZE,
@@ -141,7 +140,7 @@ out(
   '- Earning is SPEC §9 unchanged: 3 coins a monster, +5 tip for a finished service (23 for a plain 6-order service).',
 );
 out(
-  `- Tier prices: ${(Object.keys(tiers) as unknown as Tier[]).map((t) => `T${t} ${tiers[t]}`).join(' · ')}. A second or third colorway costs ${COLORWAY_SHARE * 100}% of the item (rounded to 5); colorways of a free default cost T1.`,
+  `- Tier prices: ${(Object.keys(tiers) as unknown as Tier[]).map((t) => `T${t} ${tiers[t]}`).join(' · ')}. Every colorway costs the item's price (D177); colorways of a free default cost T1.`,
 );
 out(
   '- Spending habits: **impulse** buys something random she can afford, up to 2 a sitting; **cheapest** buys the cheapest things first, as many as she can; **saver** picks a wish and buys it as soon as she can (the wish-item milestone).',

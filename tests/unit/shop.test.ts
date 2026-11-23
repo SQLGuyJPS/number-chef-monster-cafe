@@ -74,10 +74,10 @@ class Device {
 }
 
 describe('catalog and queue (SPEC §10)', () => {
-  it('51 paid entries, 2,305 coins, no bell', () => {
+  it('51 paid entries, 2,505 coins (D177), no bell', () => {
     const paid = CATALOG.filter((e) => e.price > 0);
     expect(paid).toHaveLength(51);
-    expect(paid.reduce((s, e) => s + e.price, 0)).toBe(2305);
+    expect(paid.reduce((s, e) => s + e.price, 0)).toBe(2505);
     expect(CATALOG.some((e) => e.item.includes('bell'))).toBe(false);
   });
 
