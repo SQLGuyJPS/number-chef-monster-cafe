@@ -162,6 +162,19 @@ export function MiniStandIn({ look }: { look: DecorLook }) {
 
 export type TileState = 'equipped' | 'owned' | 'forSale';
 
+/**
+ * Names with a word wider than the tile's ~102 px of text width (22 px type). A soft hyphen at a
+ * dictionary break where the halves read well ("Checker-" / "board"; the confirm card still shows
+ * the name whole); otherwise a size smaller, so the name keeps two lines and clears the price
+ * ("Chande-lier" made three). The e2e test "every item name fits inside its shelf tile" catches a
+ * new name that needs one.
+ */
+const SOFT_BREAKS: Readonly<Record<string, string>> = {
+  Checkerboard: 'Checker\u00ADboard',
+};
+const SMALLER_NAMES: ReadonlySet<string> = new Set(['Star Chandelier']);
+const tileName = (name: string): string => SOFT_BREAKS[name] ?? name;
+
 export function ItemTile({
   rect,
   look,
@@ -196,7 +209,9 @@ export function ItemTile({
       <span className="shop-tile-pic">
         {look ? <MiniStandIn look={look} /> : <span className="shop-empty" />}
       </span>
-      <span className="shop-tile-name">{name}</span>
+      <span className={`shop-tile-name${SMALLER_NAMES.has(name) ? ' smaller' : ''}`}>
+        {tileName(name)}
+      </span>
       <span className="shop-tile-foot">
         {state === 'forSale' ? (
           <Price n={price} />

@@ -247,3 +247,35 @@ test('purchases show on the Service screen, inside the SVG budget', async ({ pag
   expect(n.total).toBeLessThanOrEqual(SVG_BUDGET.total);
   expect(n.moving).toBeLessThanOrEqual(SVG_BUDGET.moving);
 });
+
+test('every item name fits inside its shelf tile, on every page of every slot', async ({ page }) => {
+  await startApp(page);
+  await openGrownUps(page);
+  await page.getByTestId('playtest-crate-all').click();
+  await page.getByTestId('playtest-crate-all').click();
+  await expect(page.getByTestId('playtest-crate-status')).toContainText('0 left');
+  await page.getByTestId('parent-back').click();
+  await openShop(page);
+  let names = 0;
+  for (const slot of ['wallpaper', 'floor', 'lights', 'window', 'counter', 'wallArt']) {
+    await tapId(page, `shop-tab-${slot}`);
+    for (let p = 0; p < 6; p++) {
+      const over = await page.evaluate(() =>
+        [...document.querySelectorAll<HTMLElement>('.shop-tile')].map((tile) => {
+          const name = tile.querySelector<HTMLElement>('.shop-tile-name')!;
+          const t = tile.getBoundingClientRect();
+          const range = document.createRange();
+          range.selectNodeContents(name);
+          const n = range.getBoundingClientRect();
+          return { name: name.textContent, out: n.left < t.left + 4 || n.right > t.right - 4 };
+        }),
+      );
+      names += over.length;
+      expect(over.filter((o) => o.out).map((o) => o.name), `${slot} page ${p + 1}`).toEqual([]);
+      const next = page.getByTestId('shop-next');
+      if ((await next.count()) === 0 || (await next.getAttribute('class'))?.includes('off')) break;
+      await tapId(page, 'shop-next');
+    }
+  }
+  expect(names).toBeGreaterThanOrEqual(30);
+});
