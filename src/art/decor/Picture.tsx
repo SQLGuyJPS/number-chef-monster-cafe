@@ -22,8 +22,10 @@ const CROP: Readonly<Record<Exclude<DecorSlot, 'staff'>, Rect>> = {
 
 /**
  * Items much smaller than their slot get a closer crop: one swag of a string, the ceiling pieces,
- * the clock. Cloud Carpet's crop is centred on one near-row cloud (650, 407 with its shadow); that
- * cloud sits low in the floor band, so floor pictures leave the counter out. Keyed `slot.item`.
+ * the clock. Patterns whose motif would land off-centre get a crop on one motif: Rainbow on one
+ * high rainbow with its clouds (535, 168; kept under the status bar's edge at y 124), Cloud Carpet
+ * on one near-row cloud (650, 407 with its shadow). That cloud sits low in the floor band, so floor
+ * pictures leave the counter out. Keyed `slot.item`.
  */
 const ITEM_CROP: Readonly<Record<string, Rect>> = {
   'lights.string-lights': { x: 825, y: 112, w: 160, h: 128 },
@@ -31,6 +33,7 @@ const ITEM_CROP: Readonly<Record<string, Rect>> = {
   'lights.disco-ball': { x: 940, y: 112, w: 120, h: 96 },
   'lights.star-chandelier': { x: 916, y: 106, w: 168, h: 134 },
   'wallArt.giant-clock': { x: 580, y: 116, w: 120, h: 96 },
+  'wallpaper.rainbow': { x: 480, y: 124, w: 110, h: 88 },
   'floor.cloud-carpet': { x: 586, y: 356, w: 128, h: 102 },
 };
 

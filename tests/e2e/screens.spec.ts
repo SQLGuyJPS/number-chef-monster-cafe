@@ -534,7 +534,7 @@ test('M4b batch screenshots', async ({ page }, info) => {
   }
 });
 
-// The shelf with every entry delivered, one shot per tab (page 1), at both sizes: the tiles show
+// The shelf with every entry delivered, one shot per tab and page, at both sizes: the tiles show
 // each entry's picture (decor/Picture.tsx).
 //   npx cross-env NCMC_SCREENS=M4b/<batch> NCMC_SHOP_TABS=wallpaper,floor,... playwright test screens --project=chromium-ipad-pro-11
 test('M4b shop shelves', async ({ page }, info) => {
@@ -564,7 +564,21 @@ test('M4b shop shelves', async ({ page }, info) => {
     for (const slot of tabs) {
       await tapId(page, `shop-tab-${slot}`);
       await page.waitForTimeout(300);
-      await page.screenshot({ path: `${dir}/shop-${slot}-${width}x${height}.png` });
+      // A tab keeps the page it was left on, so start from page 1.
+      const back = page.getByTestId('shop-back');
+      while ((await back.count()) > 0 && !(await back.getAttribute('class'))?.includes('off')) {
+        await tapId(page, 'shop-back');
+        await page.waitForTimeout(300);
+      }
+      // Every page of the shelf: page 1 is shop-<slot>-<size>.png, later ones shop-<slot>-p<n>-<size>.png.
+      for (let p = 1; ; p++) {
+        const name = p === 1 ? `shop-${slot}` : `shop-${slot}-p${p}`;
+        await page.screenshot({ path: `${dir}/${name}-${width}x${height}.png` });
+        const next = page.getByTestId('shop-next');
+        if ((await next.count()) === 0 || (await next.getAttribute('class'))?.includes('off')) break;
+        await tapId(page, 'shop-next');
+        await page.waitForTimeout(300);
+      }
     }
   }
 });
