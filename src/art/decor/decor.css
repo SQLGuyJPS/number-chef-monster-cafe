@@ -1,4 +1,4 @@
-/* Decor motion (ART_GUIDE §2.5): gentle, opacity only, and still under reduced motion. */
+/* Decor motion (ART_GUIDE §2.5): gentle, slow, never a flash; still under reduced motion. */
 .decor-twinkle {
   animation: ncmc-decor-twinkle 4s ease-in-out infinite;
 }
@@ -11,11 +11,55 @@
     opacity: 0.5;
   }
 }
+/* A soft glow that breathes deeper than a twinkle (bulb halos, candle glows). */
+.decor-glow {
+  animation: ncmc-decor-glow 3.6s ease-in-out infinite;
+}
+@keyframes ncmc-decor-glow {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+/* Paper lanterns sway a little on their strings; each sets its own transform-origin (the knot). */
+.decor-sway {
+  animation: ncmc-decor-sway 5s ease-in-out infinite;
+}
+@keyframes ncmc-decor-sway {
+  0%,
+  100% {
+    transform: rotate(-2.5deg);
+  }
+  50% {
+    transform: rotate(2.5deg);
+  }
+}
+/* Snow drifting down past a window: the flakes are drawn twice, one window-height apart. */
+.decor-snow {
+  animation: ncmc-decor-snow 16s linear infinite;
+}
+@keyframes ncmc-decor-snow {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(150px);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
-  .decor-twinkle {
+  .decor-twinkle,
+  .decor-glow,
+  .decor-sway,
+  .decor-snow {
     animation: none;
   }
 }
-html.reduce-motion .decor-twinkle {
+html.reduce-motion .decor-twinkle,
+html.reduce-motion .decor-glow,
+html.reduce-motion .decor-sway,
+html.reduce-motion .decor-snow {
   animation: none;
 }

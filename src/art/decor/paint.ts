@@ -21,3 +21,22 @@ export const CREAM = '#fffaf0';
 /** A page-unique id for a pattern: the contact sheet draws many cafés on one page. */
 export const patternId = (stem: string, ...colours: string[]): string =>
   `${stem}-${colours.map((c) => c.replace(/[^0-9a-z]/gi, '')).join('-')}`;
+
+/** A five-point star with softened points (draw with a same-colour stroke and round joins). */
+export function starPath(cx: number, cy: number, r: number): string {
+  const pts: string[] = [];
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    const rr = i % 2 ? r * 0.48 : r;
+    pts.push(`${(cx + rr * Math.cos(a)).toFixed(1)} ${(cy + rr * Math.sin(a)).toFixed(1)}`);
+  }
+  return `M${pts.join(' L')} Z`;
+}
+
+/** A full ellipse as path data, so many shapes of one colour can share one element. */
+export const ellipsePath = (cx: number, cy: number, rx: number, ry: number = rx): string =>
+  `M${(cx - rx).toFixed(1)} ${cy.toFixed(1)}a${rx} ${ry} 0 1 0 ${2 * rx} 0a${rx} ${ry} 0 1 0 ${-2 * rx} 0Z`;
+
+/** A four-point sparkle (a glint of light), curved in to its centre. */
+export const sparklePath = (cx: number, cy: number, r: number): string =>
+  `M${cx} ${cy - r}Q${cx} ${cy} ${cx + r} ${cy}Q${cx} ${cy} ${cx} ${cy + r}Q${cx} ${cy} ${cx - r} ${cy}Q${cx} ${cy} ${cx} ${cy - r}Z`;
