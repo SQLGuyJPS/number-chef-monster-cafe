@@ -5,6 +5,7 @@ import { at } from '../../game/service/ServiceParts';
 import { SHOP_DOT, type Rect } from '../metrics';
 import type { DecorSlot } from '../../engine/economy';
 import type { DecorLook } from '../../art/decor/StandIn';
+import { DecorPicture } from '../../art/decor/Picture';
 
 /** Small picture per slot for the tabs; Pip says the slot's name when one is tapped (D169). */
 export function SlotIcon({ slot }: { slot: DecorSlot }) {
@@ -139,7 +140,7 @@ export function Price({ n }: { n: number }) {
   );
 }
 
-/** Mini stand-in of an entry: its colours in a rounded swatch (M4b swaps in the real art). */
+/** Mini stand-in of an entry: its colours in a rounded swatch (the layout mocks; the shop draws DecorPicture). */
 export function MiniStandIn({ look }: { look: DecorLook }) {
   return (
     <svg viewBox="0 0 100 80" width="100%" height="100%" aria-hidden="true">
@@ -178,6 +179,7 @@ const tileName = (name: string): string => SOFT_BREAKS[name] ?? name;
 export function ItemTile({
   rect,
   look,
+  free,
   item,
   name,
   state,
@@ -188,6 +190,8 @@ export function ItemTile({
 }: {
   rect: Rect;
   look: DecorLook | null;
+  /** The slot's free default: its picture is the café as it is. */
+  free?: boolean;
   /** For the test id when there is no look (the empty defaults). */
   item?: string;
   name: string;
@@ -207,7 +211,7 @@ export function ItemTile({
       onTap={onTap}
     >
       <span className="shop-tile-pic">
-        {look ? <MiniStandIn look={look} /> : <span className="shop-empty" />}
+        {look ? <DecorPicture look={look} free={free} /> : <span className="shop-empty" />}
       </span>
       <span className={`shop-tile-name${SMALLER_NAMES.has(name) ? ' smaller' : ''}`}>
         {tileName(name)}

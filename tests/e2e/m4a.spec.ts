@@ -27,9 +27,9 @@ test('buy with confirm, live preview, equip; persists across a reload', async ({
   await openShop(page);
   await expect(page.getByTestId('screen-shop')).toHaveAttribute('data-slot', 'wallpaper');
   // Before: the café's own wall. Trying a colour on shows it in the café at once.
-  await expect(page.locator('[data-decor="wallpaper"]')).toHaveCount(0);
+  await expect(page.locator('.cafe-scene [data-decor="wallpaper"]')).toHaveCount(0);
   await tapId(page, 'shop-dot-wallpaper.plain.berry');
-  await expect(page.locator('[data-decor="wallpaper"]')).toHaveCount(1);
+  await expect(page.locator('.cafe-scene [data-decor="wallpaper"]')).toHaveCount(1);
 
   // Not yet: nothing is bought.
   await tapId(page, 'shop-buy');
@@ -57,12 +57,12 @@ test('buy with confirm, live preview, equip; persists across a reload', async ({
 
   await tapId(page, 'shop-home');
   await expect(page.getByTestId('screen-home')).toBeVisible();
-  await expect(page.locator('[data-decor="wallpaper"]')).toHaveCount(1);
+  await expect(page.locator('.cafe-scene [data-decor="wallpaper"]')).toHaveCount(1);
 
   await page.reload();
   await startApp(page);
   // Shown on Home after the reload, from the event log alone.
-  await expect(page.locator('[data-decor="wallpaper"]')).toHaveCount(1);
+  await expect(page.locator('.cafe-scene [data-decor="wallpaper"]')).toHaveCount(1);
   s = (await shop(page))!;
   expect(s.bought).toEqual(['wallpaper.plain.berry']);
   expect(s.equipped['wallpaper']).toBe('wallpaper.plain.berry');
@@ -84,7 +84,7 @@ test('below the price: Buy is dimmed and only gets Pip’s line', async ({ page 
   expect(await kinds(page)).not.toContain('buy');
   // Leaving drops the try-on: the café shows what is equipped.
   await tapId(page, 'shop-home');
-  await expect(page.locator('[data-decor="lights"]')).toHaveCount(0);
+  await expect(page.locator('.cafe-scene [data-decor="lights"]')).toHaveCount(0);
 });
 
 test('a crate: the first on the first visit, then held at 6 unbought, one per visit, recorded once', async ({
@@ -245,13 +245,16 @@ test('purchases show on the Service screen, inside the SVG budget', async ({ pag
   });
   await openService(page, { skill: 'A1', stage: 3 });
   for (const slot of ['wallpaper', 'floor', 'lights', 'window', 'counter', 'wallArt'])
-    await expect(page.locator(`[data-decor="${slot}"]`), slot).toHaveCount(1);
+    await expect(page.locator(`.cafe-scene [data-decor="${slot}"]`), slot).toHaveCount(1);
   const n = await page.evaluate(() => window.__ncmc.svgCounts());
   expect(n.total).toBeLessThanOrEqual(SVG_BUDGET.total);
   expect(n.moving).toBeLessThanOrEqual(SVG_BUDGET.moving);
 });
 
-test('every item name fits inside its shelf tile, on every page of every slot', async ({ page }) => {
+// Each tile draws its entry's picture (a cropped café, D184), so every page is also a budget check.
+test('every item name fits inside its shelf tile, and every page stays inside the SVG budget', async ({
+  page,
+}) => {
   await startApp(page);
   await openGrownUps(page);
   await page.getByTestId('playtest-crate-all').click();
@@ -275,6 +278,9 @@ test('every item name fits inside its shelf tile, on every page of every slot', 
       );
       names += over.length;
       expect(over.filter((o) => o.out).map((o) => o.name), `${slot} page ${p + 1}`).toEqual([]);
+      const n = await page.evaluate(() => window.__ncmc.svgCounts());
+      expect(n.total, `${slot} page ${p + 1}`).toBeLessThanOrEqual(SVG_BUDGET.total);
+      expect(n.moving, `${slot} page ${p + 1}`).toBeLessThanOrEqual(SVG_BUDGET.moving);
       const next = page.getByTestId('shop-next');
       if ((await next.count()) === 0 || (await next.getAttribute('class'))?.includes('off')) break;
       await tapId(page, 'shop-next');

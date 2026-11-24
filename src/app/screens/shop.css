@@ -77,6 +77,15 @@
   display: grid;
   place-items: center;
 }
+/* The entry's picture (decor/Picture.tsx): a cropped, still bit of the café, with soft corners
+   and a thin frame so it reads as a picture on the tile. */
+.shop-tile-pic .decor-picture,
+.shop-confirm-pic .decor-picture,
+.shop-delivery-item .decor-picture {
+  display: block;
+  border-radius: 12px;
+  box-shadow: 0 0 0 3px rgba(107, 74, 46, 0.25);
+}
 .shop-empty {
   width: 92px;
   height: 72px;

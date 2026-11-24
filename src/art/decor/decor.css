@@ -1,4 +1,8 @@
 /* Decor motion (ART_GUIDE §2.5): gentle, slow, never a flash; still under reduced motion. */
+/* Shop pictures (Picture.tsx) are always still: four moving cafés on a shelf would be busy. */
+.decor-still * {
+  animation: none !important;
+}
 .decor-twinkle {
   animation: ncmc-decor-twinkle 4s ease-in-out infinite;
 }
@@ -58,7 +62,8 @@
     transform: rotate(360deg);
   }
 }
-/* A goldfish swims across its bowl and turns round at each side (scaleX through zero). */
+/* A goldfish swims across its bowl and turns round at each side (scaleX through zero); 14 s,
+   which decor-blub depends on. */
 .decor-swim {
   animation: ncmc-decor-swim 14s ease-in-out infinite;
 }
@@ -77,19 +82,23 @@
     transform: translateX(-9px) scaleX(-1);
   }
 }
-/* Bubbles drift up a little and fade. */
-.decor-bubble {
-  animation: ncmc-decor-bubble 5s ease-in infinite;
+/* Bubbles from the goldfish's mouth: the same 14 s loop as decor-swim, shown only while the fish
+   slows at the right side just before it turns (the left column runs half a loop later). They rise
+   about 12 px in 2 s and fade before the surface. */
+.decor-blub {
+  animation: ncmc-decor-blub 14s linear infinite;
 }
-@keyframes ncmc-decor-bubble {
-  0% {
-    transform: translateY(6px);
+@keyframes ncmc-decor-blub {
+  0%,
+  34% {
+    transform: translateY(4px);
     opacity: 0;
   }
-  25%,
-  70% {
+  37%,
+  44% {
     opacity: 0.9;
   }
+  48%,
   100% {
     transform: translateY(-8px);
     opacity: 0;
@@ -136,7 +145,7 @@
   .decor-snow,
   .decor-turn,
   .decor-swim,
-  .decor-bubble,
+  .decor-blub,
   .decor-blink,
   .decor-wave {
     animation: none;
@@ -148,7 +157,7 @@ html.reduce-motion .decor-sway,
 html.reduce-motion .decor-snow,
 html.reduce-motion .decor-turn,
 html.reduce-motion .decor-swim,
-html.reduce-motion .decor-bubble,
+html.reduce-motion .decor-blub,
 html.reduce-motion .decor-blink,
 html.reduce-motion .decor-wave {
   animation: none;

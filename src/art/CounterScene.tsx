@@ -3,7 +3,7 @@
 // with the front door and one street window, one table with two chairs on the floor, the counter
 // top filling the bottom band. Stage coordinates (1280×720); every layer runs far past the safe box
 // so the bleed on wide phones and tall iPads is filled.
-import { BAR_H, COUNTER_Y } from '../app/metrics';
+import { BAR_H, COUNTER_Y, type Rect } from '../app/metrics';
 import type { DecorSlot } from '../engine/economy';
 import type { DecorLook } from './decor/StandIn';
 import { CounterTop } from './decor/CounterTop';
@@ -25,12 +25,26 @@ const WOOD_DARK = '#8a5a35';
 const COUNTER_TOP = '#d9a066';
 const COUNTER_GRAIN = '#c98f58';
 
-export function CounterScene({ decor = {} }: { decor?: DecorView }) {
+/**
+ * The café. With `crop`, a still picture of just that part of it, filling its box (the shop's
+ * tiles, confirm card and delivery, decor/Picture.tsx): the same drawing, so a picture always
+ * matches what the café will show.
+ */
+export function CounterScene({ decor = {}, crop }: { decor?: DecorView; crop?: Rect }) {
   // The wainscot ends and the floor starts here; the back wall is far away, so things are small.
   const FLOOR_Y = 330;
   const WAINSCOT = FLOOR_Y - 68;
+  const frame = crop
+    ? {
+        className: 'decor-picture decor-still',
+        viewBox: `${crop.x} ${crop.y} ${crop.w} ${crop.h}`,
+        width: '100%',
+        height: '100%',
+        preserveAspectRatio: 'xMidYMid slice',
+      }
+    : { className: 'cafe-scene', viewBox: '0 0 1280 720', width: 1280, height: 720 };
   return (
-    <svg className="cafe-scene" viewBox="0 0 1280 720" width="1280" height="720" aria-hidden="true">
+    <svg {...frame} aria-hidden="true">
       {/* back wall (the free Plain Paint, Sunny), wainscot, floor (the free Wood, classic): the
           same drawings the shop's recolours use (D152) */}
       {decor.wallpaper ? <Wallpaper look={decor.wallpaper} /> : <PaintedStripe a={WALL_A} b={WALL_B} />}

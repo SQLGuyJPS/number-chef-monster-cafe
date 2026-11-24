@@ -48,16 +48,18 @@ function MenuBoard() {
   const pic = CY - 6;
   // Chalk handwriting: a short wave under each picture.
   const scribble = cols
-    .map((c) => `M${c - 17} ${bottom - 12}q3 -4 6 0t6 0t6 0t6 0t6 0`)
+    .map((c) => `M${c - 15} ${bottom - 12}q3 -4 6 0t6 0t6 0t6 0t6 0`)
     .join('');
   const [a, b, c] = cols as [number, number, number];
+  // The cup with its handle is wider on the right, so its body sits a little left of the column.
+  const k = c - 3.5;
   const chalkLines = [
     // cupcake wrapper and its pleats
     `M${a - 11} ${pic + 2}L${a - 7} ${pic + 14}H${a + 7}L${a + 11} ${pic + 2}Z`,
     `M${a - 3} ${pic + 4}v8M${a + 3} ${pic + 4}v8`,
     // cup handle and steam
-    `M${c + 9} ${pic + 1}q8 0 8 5.5q0 5.5 -8 5.5`,
-    `M${c - 4} ${pic - 6}q-3 -4 0 -7q3 -3 0 -6M${c + 3} ${pic - 6}q-3 -4 0 -7q3 -3 0 -6`,
+    `M${k + 9} ${pic + 1}q8 0 8 5.5q0 5.5 -8 5.5`,
+    `M${k - 4} ${pic - 6}q-3 -4 0 -7q3 -3 0 -6M${k + 3} ${pic - 6}q-3 -4 0 -7q3 -3 0 -6`,
   ].join('');
   return (
     <g opacity={0.92}>
@@ -66,15 +68,16 @@ function MenuBoard() {
       <rect x={left} y={top + 2} width={right - left} height={bottom - top - 4} rx={4} fill="#55695f" />
       {/* cupcake: pink frosting, a cherry */}
       <path
-        d={`M${a - 13} ${pic + 2}q-2 -8 6 -10q2 -8 10 -6q7 -6 12 1q8 1 5 15Z`}
+        d={`M${a - 12} ${pic + 2}C${a - 16} ${pic - 4} ${a - 12} ${pic - 9} ${a - 7} ${pic - 8}C${a - 6} ${pic - 15} ${a + 6} ${pic - 15} ${a + 7} ${pic - 8}C${a + 12} ${pic - 9} ${a + 16} ${pic - 4} ${a + 12} ${pic + 2}Z`}
         fill={fam.berry.base}
         opacity={0.9}
       />
-      <path d={ellipsePath(a + 1, pic - 15, 3.4)} fill="#f08aa8" />
+      <path d={ellipsePath(a, pic - 15.5, 3.4)} fill="#f08aa8" />
       {/* pizza slice with its crust and pepperoni */}
-      <path d={`M${b - 15} ${pic - 9}L${b + 15} ${pic - 9}L${b} ${pic + 16}Z`} fill={fam.honey.base} opacity={0.9} />
+      {/* the slice's top follows the crust's curve, so the crust sits on it */}
+      <path d={`M${b - 15} ${pic - 9}Q${b} ${pic - 15} ${b + 15} ${pic - 9}L${b} ${pic + 16}Z`} fill={fam.honey.base} opacity={0.9} />
       <path
-        d={`M${b - 16} ${pic - 9}Q${b} ${pic - 15} ${b + 16} ${pic - 9}`}
+        d={`M${b - 15} ${pic - 9}Q${b} ${pic - 15} ${b + 15} ${pic - 9}`}
         fill="none"
         stroke={mix(fam.honey.base, fam.honey.accent, 0.5)}
         strokeWidth={5}
@@ -82,7 +85,7 @@ function MenuBoard() {
       />
       <path d={ellipsePath(b - 5, pic - 3, 3) + ellipsePath(b + 5, pic - 2, 3) + ellipsePath(b, pic + 6, 2.6)} fill="#f08aa8" />
       {/* cup */}
-      <path d={`M${c - 10} ${pic - 2}h19v11q0 6 -6 6h-7q-6 0 -6 -6Z`} fill={fam.mint.base} opacity={0.9} />
+      <path d={`M${k - 10} ${pic - 2}h19v11q0 6 -6 6h-7q-6 0 -6 -6Z`} fill={fam.mint.base} opacity={0.9} />
       <path d={chalkLines} fill="none" stroke={CREAM} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" opacity={0.9} />
       <path d={scribble} fill="none" stroke={CREAM} strokeWidth={2} strokeLinecap="round" opacity={0.6} />
       {/* a stick of chalk on the ledge */}
@@ -170,14 +173,6 @@ function GiantClock({ base, accent }: DecorLook) {
       <circle cx={CX} cy={CY} r={R - 4} fill={CREAM} />
       <circle cx={CX} cy={CY} r={R - 7} fill="none" stroke={base} strokeWidth={2} />
       <path d={marks} fill={mix(accent, INK, 0.3)} />
-      <path
-        d={`M${f(CX - 26)} ${f(CY - 16)}A31 31 0 0 1 ${f(CX - 10)} ${f(CY - 30)}`}
-        fill="none"
-        stroke="#ffffff"
-        strokeWidth={3}
-        strokeLinecap="round"
-        opacity={0.5}
-      />
       {/* ten past ten: the hands smile */}
       <path d={hand(305, 12)} stroke={dark} strokeWidth={4.5} strokeLinecap="round" />
       <path d={hand(60, 17)} stroke={dark} strokeWidth={3.2} strokeLinecap="round" />
@@ -297,9 +292,10 @@ function TrophyShelf() {
       <rect x={sx0} y={shelfY + 3} width={sx1 - sx0} height={5} rx={2} fill={WOOD_DARK} />
       <rect x={sx0} y={shelfY - 1} width={sx1 - sx0} height={7} rx={3} fill={WOOD} />
       {/* silver star on a little stand */}
-      <path d={`M${lx - 2} ${shelfY - 14}h4v13h-4ZM${lx - 10} ${shelfY - 1}l2 -6h16l2 6Z`} fill={SILVER_SHADE} />
+      {/* the stem runs up into the star, which is drawn over its top */}
+      <path d={`M${lx - 2} ${CY - 8}h4v${shelfY - 1 - (CY - 8)}h-4ZM${lx - 10} ${shelfY - 1}l2 -6h16l2 6Z`} fill={SILVER_SHADE} />
       <path d={starPath(lx, CY - 12, 14)} fill={SILVER} stroke={SILVER_SHADE} strokeWidth={2.5} strokeLinejoin="round" />
-      <path d={starPath(lx + 1.5, CY - 10.5, 6)} fill={SILVER_SHADE} opacity={0.55} />
+      <path d={starPath(lx, CY - 12, 6)} fill={SILVER_SHADE} opacity={0.55} />
       {/* gold cup: handles, bowl and its shaded side, foot on a wooden plinth, a star, the rim */}
       <rect x={CX - 14} y={shelfY - 9} width={28} height={9} rx={2} fill={WOOD_DARK} />
       <path d={foot} fill={GOLD_DARK} />

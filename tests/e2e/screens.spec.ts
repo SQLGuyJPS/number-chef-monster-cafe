@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
-import { gateAnswer, startApp, tap, typeGate } from './helpers';
+import { gateAnswer, openGrownUps, startApp, tap, typeGate } from './helpers';
 import {
   finishDelivery,
   followMe,
@@ -531,5 +531,40 @@ test('M4b batch screenshots', async ({ page }, info) => {
     await page.evaluate(() => document.fonts.ready);
     await still();
     await page.screenshot({ path: `${dir}/decor-${slot}-zoom.png`, fullPage: true });
+  }
+});
+
+// The shelf with every entry delivered, one shot per tab (page 1), at both sizes: the tiles show
+// each entry's picture (decor/Picture.tsx).
+//   npx cross-env NCMC_SCREENS=M4b/<batch> NCMC_SHOP_TABS=wallpaper,floor,... playwright test screens --project=chromium-ipad-pro-11
+test('M4b shop shelves', async ({ page }, info) => {
+  const tabs = (process.env.NCMC_SHOP_TABS ?? '').split(',').filter(Boolean);
+  test.skip(
+    !milestone?.startsWith('M4b/') || !tabs.length || info.project.name !== 'chromium-ipad-pro-11',
+    'M4b shop shots, Chromium',
+  );
+  test.setTimeout(120_000);
+  const dir = `docs/screens/${milestone}`;
+  mkdirSync(dir, { recursive: true });
+  await startApp(page);
+  await openGrownUps(page);
+  await page.getByTestId('playtest-crate-all').click();
+  await page.getByTestId('playtest-crate-all').click();
+  await expect(page.getByTestId('playtest-crate-status')).toContainText('0 left');
+  await page.getByTestId('parent-back').click();
+  await tapId(page, 'shop-button');
+  await expect(page.getByTestId('screen-shop')).toBeVisible();
+  if ((await page.getByTestId('shop-delivery').count()) > 0) await finishDelivery(page);
+  await page.addStyleTag({ content: '*{animation:none!important;transition:none!important}' });
+  for (const [width, height] of [
+    [1194, 834],
+    [844, 390],
+  ] as const) {
+    await page.setViewportSize({ width, height });
+    for (const slot of tabs) {
+      await tapId(page, `shop-tab-${slot}`);
+      await page.waitForTimeout(300);
+      await page.screenshot({ path: `${dir}/shop-${slot}-${width}x${height}.png` });
+    }
   }
 });
