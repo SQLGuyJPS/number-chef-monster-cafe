@@ -76,10 +76,11 @@ An item may go over if another stays under. What must fit is the total.
 ## 6. Batch routine (every art chat)
 1. Read this guide, the locked list (§7) and the batch's items in SPEC §10.
 2. Draw the items as components that take their colours as props, and register them in the decor table.
-3. Run `npm run check` and the budget e2e.
-4. Save the `?decor` sheets at 1194×834 and 844×390 to `docs/screens/M4b/<batch>/`, plus one Service screenshot with the batch's busiest item equipped.
-5. Report each item as house style or as an experiment (§4), then stop for the owner's verdict on each: **keep**, **tweak** (say what) or **redo**.
-6. Mark approved items as locked in §7, and write any taste the owner states into §3 or into that item's note.
+3. Give the slot its shop picture (D183): add it to `DRAWN` and `PIC_VIEW` in `src/app/screens/ShopParts.tsx`, and frame any item whose motif the window cuts in half in `PIC_ITEM_VIEW`.
+4. Run `npm run check` and the shop and budget e2e (`m4a budget`).
+5. Save the `?decor` sheets at 1194×834 and 844×390 to `docs/screens/M4b/<batch>/`, plus one Service screenshot with the batch's busiest item equipped. The screenshot command below also saves the batch's shop shelves (`shop-<slot>-p<page>`) and the Buy card.
+6. Report each item as house style or as an experiment (§4), then stop for the owner's verdict on each: **keep**, **tweak** (say what) or **redo**.
+7. Mark approved items as locked in §7, and write any taste the owner states into §3 or into that item's note.
 
 **Giving feedback (for the owner):**
 - Number your notes by item.
@@ -96,3 +97,4 @@ These are approved: don't redraw them without asking. Notes record what the owne
 - 2026-11-21: first draft (D156), from the existing café, Pip and monster art.
 - 2026-11-21: split into firm limits, house style and room to experiment, at the owner's request (D158). Lint checks only the firm limits.
 - 2026-11-23: batch 1 (wallpaper + floor) drawn in `src/art/decor/Wallpaper.tsx` and `Floor.tsx`, awaiting the owner's verdict. Tones come from `mix()` in `src/art/decor/paint.ts` (base/accent mixes, cream). The café's own wall and floor are drawn by the same components, so a recolour is the same drawing. Experiments: Starry Night (dark wall, twinkling stars), perspective on Checkerboard and Tiles. Sheets: `npx cross-env NCMC_SCREENS=M4b/<batch> NCMC_DECOR_SLOTS=<slots> NCMC_DECOR_BUSY=<keys> playwright test screens --project=chromium-ipad-pro-11`.
+- 2026-11-24: shop pictures (D183). Shelf tiles, the Buy card and the delivery box show a still crop of each item's own drawing instead of the stand-in swatch; free entries show the café's own look. Batch 1 framing: Starry Night on its moon, Rainbow on one whole rainbow, Cloud Carpet on one whole cloud.

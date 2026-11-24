@@ -23,14 +23,14 @@ import {
 } from '../../engine/shop';
 import { TapButton } from '../../game/input/TapButton';
 import { Caption, CoinJar, at } from '../../game/service/ServiceParts';
-import { lookFor, swatchOf } from '../decorLook';
+import { swatchOf } from '../decorLook';
 import { COUNTER, COUNTER_Y, SHOP, SHOP_PAGE } from '../metrics';
 import { loadedProgress } from '../progress';
 import { seeShopFresh, useShopFresh } from '../shopFresh';
 import {
   ColourDots,
+  ItemPic,
   ItemTile,
-  MiniStandIn,
   PageArrow,
   PagePips,
   Price,
@@ -242,8 +242,7 @@ export function Shop({
           <ItemTile
             key={it.item}
             rect={SHOP.tile(j)}
-            look={isNone(e) ? null : lookFor(e)}
-            item={it.item}
+            entry={e}
             name={it.name}
             state={state}
             price={e.price}
@@ -304,7 +303,7 @@ export function Shop({
           <div className="shop-dim" />
           <div className="shop-confirm" style={at(SHOP.confirm)}>
             <div className="shop-confirm-pic">
-              <MiniStandIn look={lookFor(selEntry)} />
+              <ItemPic entry={selEntry} />
             </div>
             <div className="shop-confirm-title">
               Buy {selEntry.name}? <Price n={selEntry.price} />
@@ -355,7 +354,7 @@ export function Shop({
                     animationDelay: `${500 + i * RISE_STAGGER_MS}ms`,
                   }}
                 >
-                  {isNone(e) ? null : <MiniStandIn look={lookFor(e)} />}
+                  {isNone(e) ? null : <ItemPic entry={e} />}
                 </div>
               );
             })}

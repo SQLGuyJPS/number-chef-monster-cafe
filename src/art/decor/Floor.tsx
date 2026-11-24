@@ -171,6 +171,12 @@ const ART: Record<string, (look: DecorLook) => ReactElement> = {
   'cloud-carpet': CloudCarpet,
 };
 
+/** An item's drawing alone (no slot marker), or null if it has none yet: the shop crops it. */
+export function floorArt(look: DecorLook): ReactElement | null {
+  const Art = ART[look.item];
+  return Art ? <Art {...look} /> : null;
+}
+
 /** The equipped floor, or its labelled stand-in if it has no art yet (ART_GUIDE §2.7). */
 export function Floor({ look }: { look: DecorLook }) {
   const Art = ART[look.item];

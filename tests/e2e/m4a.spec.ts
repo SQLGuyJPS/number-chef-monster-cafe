@@ -280,3 +280,42 @@ test('every item name fits inside its shelf tile, on every page of every slot', 
   }
   expect(names).toBeGreaterThanOrEqual(30);
 });
+
+test('drawn items show their real picture on the shelf and the Buy card, inside the SVG budget', async ({
+  page,
+}) => {
+  // M4b: a slot's drawn items are pictured by a crop of their own drawing, not the stand-in.
+  await startApp(page);
+  await page.evaluate(() => window.__ncmc.earn(2000, 0));
+  await openGrownUps(page);
+  await page.getByTestId('playtest-crate-all').click();
+  await page.getByTestId('playtest-crate-all').click();
+  await expect(page.getByTestId('playtest-crate-status')).toContainText('0 left');
+  await page.getByTestId('parent-back').click();
+  await openShop(page);
+  let pictured = 0;
+  for (const slot of ['wallpaper', 'floor']) {
+    await tapId(page, `shop-tab-${slot}`);
+    for (let p = 0; p < 6; p++) {
+      const tiles = await page.locator('.shop-tile').count();
+      await expect(page.locator('.shop-tile [data-pic="art"]'), `${slot} page ${p + 1}`).toHaveCount(tiles);
+      pictured += tiles;
+      const n = await page.evaluate(() => window.__ncmc.svgCounts());
+      expect(n.total).toBeLessThanOrEqual(SVG_BUDGET.total);
+      expect(n.moving).toBeLessThanOrEqual(SVG_BUDGET.moving);
+      const next = page.getByTestId('shop-next');
+      if ((await next.count()) === 0 || (await next.getAttribute('class'))?.includes('off')) break;
+      await tapId(page, 'shop-next');
+    }
+  }
+  expect(pictured).toBe(10);
+  // The café's own window is drawn too; the bought windows are still stand-ins.
+  await tapId(page, 'shop-tab-window');
+  await expect(page.locator('[data-testid="shop-tile-street"] [data-pic="art"]')).toHaveCount(1);
+  await expect(page.locator('[data-testid="shop-tile-garden"] [data-pic="stand-in"]')).toHaveCount(1);
+  // The Buy card shows the same picture, big.
+  await tapId(page, 'shop-tab-floor');
+  await tapId(page, 'shop-tile-tiles');
+  await tapId(page, 'shop-buy');
+  await expect(page.locator('[data-testid="shop-confirm"] [data-pic="art"]')).toHaveCount(1);
+});

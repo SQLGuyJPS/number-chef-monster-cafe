@@ -190,3 +190,4 @@
 | D180 | Grown-ups' playtest crates: send the next one on the next visit (no wait, no hold, pace restarts), replay the last delivery (records nothing), deliver all | SPEC §10.1, §12 | Owner wants to test deliveries repeatedly; only 17 crates in M4 |
 | D181 | Delivery: entries rise slowly (1.4 s, staggered); the open box stays 8 s or until a tap anywhere (taps in its first second ignored) | SPEC §10.1 | Owner: the opening was over too quickly |
 | D182 | Starter shelf cut to 10 (first colours of T1–T2 items); the 4 default recolours and 4 save-for items lead the crate queue, one of each a crate; 21 M4 crates | SPEC §10, §10.1 | Owner: the starter shelf was too full, crate 2 came too late |
+| D183 | Shop pictures (shelf, Buy card, delivery) are still crops of the item's own drawing; a free entry shows the café's own look; undrawn items keep the stand-in | SPEC §10 | Owner: real images on the shop tiles instead of placeholders |

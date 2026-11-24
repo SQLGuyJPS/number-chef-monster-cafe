@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
-import { gateAnswer, startApp, tap, typeGate } from './helpers';
+import { gateAnswer, openGrownUps, startApp, tap, typeGate } from './helpers';
 import {
   finishDelivery,
   followMe,
@@ -504,6 +504,48 @@ test('M4b batch screenshots', async ({ page }, info) => {
     [1194, 834],
     [844, 390],
   ] as const;
+  const arrow = (dir: string) => page.getByTestId(`shop-${dir}`);
+  const can = async (dir: string) =>
+    (await arrow(dir).count()) > 0 && !(await arrow(dir).getAttribute('class'))?.includes('off');
+  // The shelf pictures for the batch's slots, every page: every crate delivered first.
+  await openGrownUps(page);
+  await page.getByTestId('playtest-crate-all').click();
+  await page.getByTestId('playtest-crate-all').click();
+  await expect(page.getByTestId('playtest-crate-status')).toContainText('0 left');
+  await page.getByTestId('parent-back').click();
+  await tapId(page, 'shop-button');
+  await expect(page.getByTestId('screen-shop')).toBeVisible();
+  if ((await page.getByTestId('shop-delivery').count()) > 0) await finishDelivery(page);
+  await still();
+  for (const [width, height] of sizes) {
+    await page.setViewportSize({ width, height });
+    await page.waitForTimeout(300);
+    for (const slot of slots) {
+      await tapId(page, `shop-tab-${slot}`);
+      // The shelf opens on the equipped item's page; start from the first.
+      while (await can('back')) await tapId(page, 'shop-back');
+      for (let p = 1; ; p++) {
+        await page.waitForTimeout(300);
+        await page.screenshot({ path: `${dir}/shop-${slot}-p${p}-${width}x${height}.png` });
+        if (!(await can('next'))) break;
+        await tapId(page, 'shop-next');
+      }
+    }
+  }
+  // The Buy card's big picture: the last entry for sale in the batch's first slot.
+  await tapId(page, `shop-tab-${slots[0]}`);
+  while (await can('next')) await tapId(page, 'shop-next');
+  await tap(page, page.locator('.shop-tile.forSale').last());
+  await tapId(page, 'shop-buy');
+  await expect(page.getByTestId('shop-confirm')).toBeVisible();
+  for (const [width, height] of sizes) {
+    await page.setViewportSize({ width, height });
+    await page.waitForTimeout(300);
+    await page.screenshot({ path: `${dir}/shop-confirm-${width}x${height}.png` });
+  }
+  await tapId(page, 'shop-not-yet');
+  await tapId(page, 'shop-home');
+  await expect(page.getByTestId('screen-home')).toBeVisible();
   // One service, resized: a second service would first be offered "Continue dinner service?".
   await openService(page, { skill: 'A1', stage: 3, seed: 8 });
   await waitPhase(page, 'building');

@@ -216,6 +216,12 @@ const ART: Record<string, (look: DecorLook) => ReactElement> = {
   rainbow: Rainbow,
 };
 
+/** An item's drawing alone (no slot marker), or null if it has none yet: the shop crops it. */
+export function wallpaperArt(look: DecorLook): ReactElement | null {
+  const Art = ART[look.item];
+  return Art ? <Art {...look} /> : null;
+}
+
 /** The equipped wallpaper, or its labelled stand-in if it has no art yet (ART_GUIDE §2.7). */
 export function Wallpaper({ look }: { look: DecorLook }) {
   const Art = ART[look.item];

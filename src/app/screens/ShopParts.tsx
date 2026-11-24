@@ -1,10 +1,14 @@
 // Shop screen parts (SPEC §10). Geometry from SHOP in metrics.ts; styles in shop.css.
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { CAFE_DEFAULT, CAFE_WALL } from '../../art/CounterScene';
+import { floorArt } from '../../art/decor/Floor';
+import type { DecorLook } from '../../art/decor/StandIn';
+import { wallpaperArt } from '../../art/decor/Wallpaper';
+import type { DecorSlot, ShopEntry } from '../../engine/economy';
 import { TapButton } from '../../game/input/TapButton';
 import { at } from '../../game/service/ServiceParts';
+import { lookFor } from '../decorLook';
 import { SHOP_DOT, type Rect } from '../metrics';
-import type { DecorSlot } from '../../engine/economy';
-import type { DecorLook } from '../../art/decor/StandIn';
 
 /** Small picture per slot for the tabs; Pip says the slot's name when one is tapped (D169). */
 export function SlotIcon({ slot }: { slot: DecorSlot }) {
@@ -139,10 +143,10 @@ export function Price({ n }: { n: number }) {
   );
 }
 
-/** Mini stand-in of an entry: its colours in a rounded swatch (M4b swaps in the real art). */
+/** Mini stand-in of an entry with no drawing yet: its colours in a dashed swatch. */
 export function MiniStandIn({ look }: { look: DecorLook }) {
   return (
-    <svg viewBox="0 0 100 80" width="100%" height="100%" aria-hidden="true">
+    <svg viewBox="0 0 100 80" width="100%" height="100%" aria-hidden="true" data-pic="stand-in">
       <rect
         x={4}
         y={4}
@@ -157,6 +161,64 @@ export function MiniStandIn({ look }: { look: DecorLook }) {
       <circle cx={30} cy={30} r={9} fill={look.accent} opacity={0.6} />
       <circle cx={70} cy={50} r={9} fill={look.accent} opacity={0.6} />
     </svg>
+  );
+}
+
+/** The slots whose items are drawn (M4b), by item; the rest still show MiniStandIn. */
+const DRAWN: Partial<Record<DecorSlot, (look: DecorLook) => ReactElement | null>> = {
+  wallpaper: wallpaperArt,
+  floor: floorArt,
+};
+
+interface PicView {
+  cx: number;
+  y: number;
+  w: number;
+  h: number;
+  backdrop?: string;
+}
+/**
+ * Where a slot's picture looks into the café, in stage coordinates, 9:7 like the picture: a crop
+ * of the very drawing the café shows, so the tile shows what the café will.
+ */
+const PIC_VIEW: Partial<Record<DecorSlot, PicView>> = {
+  wallpaper: { cx: 640, y: 128, w: 162, h: 126 },
+  floor: { cx: 640, y: 330, w: 149, h: 116 },
+  // The window is see-through over the café's wall (CounterScene), so it gets that wall behind it.
+  window: { cx: 315, y: 123, w: 246, h: 191, backdrop: CAFE_WALL },
+};
+/** Named looks framed on their best part, with no half-cut motif at the edge. */
+const PIC_ITEM_VIEW: Readonly<Record<string, Partial<PicView>>> = {
+  'wallpaper.starry-night': { cx: 468 },
+  'wallpaper.rainbow': { cx: 531, y: 124, w: 120, h: 93 },
+  'floor.cloud-carpet': { cx: 650 },
+};
+
+/**
+ * An entry's picture on the shelf, the Buy card and in the delivery box: its real drawing where
+ * one exists (the free entry is the café's own look), else its stand-in; nothing for "No ...".
+ */
+export function ItemPic({ entry }: { entry: ShopEntry }) {
+  if (entry.item === 'none') return <span className="shop-empty" />;
+  const look = lookFor(entry);
+  const art = entry.price === 0 ? CAFE_DEFAULT[look.slot] : DRAWN[look.slot]?.(look);
+  const slotView = PIC_VIEW[look.slot];
+  if (!art || !slotView) return <MiniStandIn look={look} />;
+  const view = { ...slotView, ...PIC_ITEM_VIEW[`${look.slot}.${look.item}`] };
+  const x = view.cx - view.w / 2;
+  return (
+    <span className="shop-pic" data-pic="art">
+      <svg
+        viewBox={`${x} ${view.y} ${view.w} ${view.h}`}
+        preserveAspectRatio="xMidYMid slice"
+        width="100%"
+        height="100%"
+        aria-hidden="true"
+      >
+        {view.backdrop && <rect x={x} y={view.y} width={view.w} height={view.h} fill={view.backdrop} />}
+        {art}
+      </svg>
+    </span>
   );
 }
 
@@ -177,8 +239,7 @@ const tileName = (name: string): string => SOFT_BREAKS[name] ?? name;
 
 export function ItemTile({
   rect,
-  look,
-  item,
+  entry,
   name,
   state,
   price,
@@ -187,9 +248,8 @@ export function ItemTile({
   onTap,
 }: {
   rect: Rect;
-  look: DecorLook | null;
-  /** For the test id when there is no look (the empty defaults). */
-  item?: string;
+  /** The entry the tile shows (ShopEntry of the item: equipped, owned or first colour). */
+  entry: ShopEntry;
   name: string;
   state: TileState;
   price: number;
@@ -201,13 +261,13 @@ export function ItemTile({
     <TapButton
       className={`shop-tile ${state}${selected ? ' selected' : ''}`}
       style={at(rect)}
-      testId={`shop-tile-${item ?? look?.item ?? 'none'}`}
+      testId={`shop-tile-${entry.item}`}
       label={name}
       tapKind="button"
       onTap={onTap}
     >
       <span className="shop-tile-pic">
-        {look ? <MiniStandIn look={look} /> : <span className="shop-empty" />}
+        <ItemPic entry={entry} />
       </span>
       <span className={`shop-tile-name${SMALLER_NAMES.has(name) ? ' smaller' : ''}`}>
         {tileName(name)}

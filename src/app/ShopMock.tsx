@@ -16,7 +16,7 @@ import {
   Brush,
   ColourDots,
   ItemTile,
-  MiniStandIn,
+  ItemPic,
   PageArrow,
   PagePips,
   Price,
@@ -249,7 +249,7 @@ function Tiles({ shelf, page }: { shelf: Shelf; page: number }) {
             key={t.key}
             rect={SHOP.tile(j)}
             // The selected tile shows the colour being tried on.
-            look={t.none ? null : lookFor(i === shelf.selected ? sel : e)}
+            entry={i === shelf.selected ? sel : e}
             name={e.name}
             state={t.state}
             price={e.price}
@@ -388,7 +388,7 @@ function Confirm({ e }: { e: ShopEntry }) {
       <div className="shop-dim" />
       <div className="shop-confirm" style={at(SHOP.confirm)}>
         <div className="shop-confirm-pic">
-          <MiniStandIn look={lookFor(e)} />
+          <ItemPic entry={e} />
         </div>
         <div className="shop-confirm-title">
           Buy {e.name}? <Price n={e.price} />
@@ -460,7 +460,7 @@ function Delivery({ phase: frozen }: { phase?: DeliveryPhase }) {
               animationDelay: `${400 + i * 120}ms`,
             }}
           >
-            <MiniStandIn look={lookFor(e)} />
+            <ItemPic entry={e} />
           </div>
         ))}
       <TapButton

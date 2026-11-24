@@ -3,6 +3,7 @@
 // with the front door and one street window, one table with two chairs on the floor, the counter
 // top filling the bottom band. Stage coordinates (1280×720); every layer runs far past the safe box
 // so the bleed on wide phones and tall iPads is filled.
+import type { ReactElement } from 'react';
 import { BAR_H, COUNTER_Y } from '../app/metrics';
 import type { DecorSlot } from '../engine/economy';
 import {
@@ -27,6 +28,19 @@ const WOOD_DARK = '#8a5a35';
 const COUNTER_TOP = '#d9a066';
 const COUNTER_GRAIN = '#c98f58';
 
+/** The café's wall colour: the backing behind the door and window glass. */
+export const CAFE_WALL = WALL_A;
+
+/**
+ * The café's own look in each slot it draws (that slot's free entry, D152). The scene draws it
+ * when nothing is bought; the shop's picture of the free entry is the same drawing.
+ */
+export const CAFE_DEFAULT: Partial<Record<DecorSlot, ReactElement>> = {
+  wallpaper: <PaintedStripe a={WALL_A} b={WALL_B} />,
+  floor: <Boards {...CLASSIC_BOARDS} />,
+  window: <StreetWindow x={208} y={142} w={214} h={150} />,
+};
+
 export function CounterScene({ decor = {} }: { decor?: DecorView }) {
   // The wainscot ends and the floor starts here; the back wall is far away, so things are small.
   const FLOOR_Y = 330;
@@ -35,19 +49,19 @@ export function CounterScene({ decor = {} }: { decor?: DecorView }) {
     <svg className="cafe-scene" viewBox="0 0 1280 720" width="1280" height="720" aria-hidden="true">
       {/* back wall (the free Plain Paint, Sunny), wainscot, floor (the free Wood, classic): the
           same drawings the shop's recolours use (D152) */}
-      {decor.wallpaper ? <Wallpaper look={decor.wallpaper} /> : <PaintedStripe a={WALL_A} b={WALL_B} />}
+      {decor.wallpaper ? <Wallpaper look={decor.wallpaper} /> : CAFE_DEFAULT.wallpaper}
       <rect x={-1000} y={WAINSCOT} width={3280} height={FLOOR_Y - WAINSCOT} fill={PANEL} />
       <rect x={-1000} y={WAINSCOT - 6} width={3280} height={8} fill={TRIM} />
-      {decor.floor ? <Floor look={decor.floor} /> : <Boards {...CLASSIC_BOARDS} />}
+      {decor.floor ? <Floor look={decor.floor} /> : CAFE_DEFAULT.floor}
 
       {/* The door and window are drawn a little see-through to sit back in the room; a backing in
           the café's own wall colour keeps a bought wallpaper from showing through their glass. */}
-      <rect x={36} y={124} width={148} height={FLOOR_Y - 124} rx={5} fill={WALL_A} />
-      <rect x={31} y={119} width={158} height={12} rx={4} fill={WALL_A} />
-      <rect x={208} y={142} width={214} height={150} rx={8} fill={WALL_A} />
+      <rect x={36} y={124} width={148} height={FLOOR_Y - 124} rx={5} fill={CAFE_WALL} />
+      <rect x={31} y={119} width={158} height={12} rx={4} fill={CAFE_WALL} />
+      <rect x={208} y={142} width={214} height={150} rx={8} fill={CAFE_WALL} />
       <FrontDoor x={36} y={124} w={148} h={FLOOR_Y - 124} />
       {/* one street window beside the door (owner kept it here rather than behind the monster) */}
-      {decor.window ? <WindowStandIn look={decor.window} /> : <StreetWindow x={208} y={142} w={214} h={150} />}
+      {decor.window ? <WindowStandIn look={decor.window} /> : CAFE_DEFAULT.window}
       <TableAndChairs cx={232} floorY={FLOOR_Y} />
 
       {/* right wall: a little shelf with cups and a plant, mostly behind the ticket */}

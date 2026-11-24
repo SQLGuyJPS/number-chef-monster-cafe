@@ -77,6 +77,24 @@
   display: grid;
   place-items: center;
 }
+/* The real drawing (ShopParts ItemPic): a cropped window onto it, framed so a pale wall still
+   reads on the cream tile. */
+.shop-pic {
+  display: block;
+  width: 92%;
+  height: 90%;
+  border-radius: 12px;
+  border: 3px solid #e2d3b6;
+  overflow: hidden;
+  background: #fffaf0;
+}
+.shop-pic > svg {
+  display: block;
+}
+/* Still on the shelf: Starry Night twinkles in the café behind, not on every picture of it. */
+.shop-pic .decor-twinkle {
+  animation: none;
+}
 .shop-empty {
   width: 92px;
   height: 72px;
@@ -199,6 +217,8 @@
 .shop-confirm-pic {
   width: 220px;
   height: 176px;
+  display: grid;
+  place-items: center;
 }
 .shop-confirm-title {
   font-size: 48px;
@@ -223,6 +243,8 @@
 .shop-crate,
 .shop-delivery-item {
   position: absolute;
+  display: grid;
+  place-items: center;
 }
 /* ---- Delivery box (DeliveryBox.tsx): transforms and opacity only ---- */
 .shop-crate {

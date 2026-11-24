@@ -343,7 +343,9 @@ Every wallpaper and floor entry now has its real drawing; the other four slots a
 
 Small change to the room: the door and the street window now have a backing in the café's wall colour, so a bought wallpaper no longer shows through their glass (the default café looks the same).
 
-Not verifiable in the cloud build: the twinkle's smoothness on the real iPad, and the colours on the iPad and iPhone screens. WebKit was not available in this cloud session, so the shop e2e ran on Chromium only this time.
+- [ ] **Shop pictures (D183).** The shop tiles, the Buy card and the delivery box now show a small window onto each item's real drawing instead of the dashed swatch; the free ones show the café's own wall, floor and street window. Starry Night is framed on its moon, Rainbow on one whole rainbow, Cloud Carpet on one cloud, and the stars don't twinkle on the shelf. Can your child tell the items apart at iPhone size? Does each picture look like what the café shows when tapped? (Shots: `shop-*` in the same folder.) Notes:
+
+Not verifiable in the cloud build: the twinkle's smoothness on the real iPad, and the colours on the iPad and iPhone screens.
 
 ## M13 step 2 — Voice listening test (D139d, D143–D147; iPad first, about 45 minutes with the recording)
 
