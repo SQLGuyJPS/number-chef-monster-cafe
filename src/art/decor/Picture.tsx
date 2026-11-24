@@ -25,7 +25,10 @@ const CROP: Readonly<Record<Exclude<DecorSlot, 'staff'>, Rect>> = {
  * the clock. Patterns whose motif would land off-centre get a crop on one motif: Rainbow on one
  * high rainbow with its clouds (535, 168; kept under the status bar's edge at y 124), Cloud Carpet
  * on one near-row cloud (650, 407 with its shadow). That cloud sits low in the floor band, so floor
- * pictures leave the counter out. Keyed `slot.item`.
+ * pictures leave the counter out. Starry Night puts the crescent moon's visual centre (462.9, 181.4)
+ * on the upper-left golden point (1 − 1/φ ≈ 0.382 across and down), with a gold star near the
+ * opposite corner; 80 wide keeps the window's awning (x ≤ 430) and a half-cut dot out of it.
+ * Keyed `slot.item`.
  */
 const ITEM_CROP: Readonly<Record<string, Rect>> = {
   'lights.string-lights': { x: 825, y: 112, w: 160, h: 128 },
@@ -33,6 +36,7 @@ const ITEM_CROP: Readonly<Record<string, Rect>> = {
   'lights.disco-ball': { x: 940, y: 112, w: 120, h: 96 },
   'lights.star-chandelier': { x: 916, y: 106, w: 168, h: 134 },
   'wallArt.giant-clock': { x: 580, y: 116, w: 120, h: 96 },
+  'wallpaper.starry-night': { x: 432.3, y: 157, w: 80, h: 64 },
   'wallpaper.rainbow': { x: 480, y: 124, w: 110, h: 88 },
   'floor.cloud-carpet': { x: 586, y: 356, w: 128, h: 102 },
 };

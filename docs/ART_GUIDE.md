@@ -15,7 +15,7 @@ The guide has three parts, held to different strengths:
   - `src/art/decor/`: the decor drawn so far (wallpaper, floor, lights, window, counter-top, wall art), one file per slot.
 - **Screenshots:** `docs/screens/counter/`: Home, Menu, Service and Results at 1194×834 and 844×390.
 - **Review page:** the `?decor` contact sheet (built in M4a); add `&zoom` to see the small slots (counter-top, wall art, window) close up. Each batch saves its sheets to `docs/screens/M4b/<batch>/`.
-- **Shop pictures:** in all six slots (Wallpaper, Floor, Lights, Window, Counter top, Wall art), the shelf tiles, the confirm card and the delivery show each entry as the café cropped to its slot, still (`src/art/decor/Picture.tsx`, D184). A new item that is much smaller than its slot, or whose motif would sit off-centre (Rainbow's rainbow, Cloud Carpet's cloud), gets its own crop there.
+- **Shop pictures:** in all six slots (Wallpaper, Floor, Lights, Window, Counter top, Wall art), the shelf tiles, the confirm card and the delivery show each entry as the café cropped to its slot, still (`src/art/decor/Picture.tsx`, D184). A new item that is much smaller than its slot, or whose motif would sit off-centre or out of frame (Rainbow's rainbow, Cloud Carpet's cloud, Starry Night's moon), gets its own crop there. A single motif is centred; a motif with a partner (the moon and a star) sits on a golden point (about 0.382 across and down) with the partner near the opposite corner.
 - **Colours:**
   - `COLOR_FAMILIES` in `src/engine/economy.ts`: Sunny, Berry, Mint, Sky, Honey, Lavender and Cocoa, each a pale `base` and a stronger `accent`.
   - The scene's named colours (`WOOD`, `WOOD_DARK`, `TRIM` and others) in `CounterScene.tsx`.
