@@ -8,6 +8,7 @@ import { DECOR } from '../../app/metrics';
 import { COLOR_FAMILIES } from '../../engine/economy';
 import { CREAM, ellipsePath, mix, starPath } from './paint';
 import { WindowStandIn, type DecorLook } from './StandIn';
+import { STREET_MOCKS } from './StreetMocks';
 import './decor.css';
 
 /** The wainscot trim colour: the sill is the same wood. */
@@ -271,6 +272,8 @@ const VIEWS: Record<string, { glass: string; View: () => ReactElement }> = {
   garden: { glass: '#cfeaff', View: GardenView },
   moonlit: { glass: NIGHT, View: MoonlitView },
   snowy: { glass: '#dbe7f2', View: SnowyView },
+  // The Street redesign mocks (owner picks one; not in the catalog, shown by `?decor&mocks`).
+  ...Object.fromEntries(STREET_MOCKS.map((m) => [m.item, { glass: m.glass, View: m.View }])),
 };
 
 /** The café's own street window (the free default). */

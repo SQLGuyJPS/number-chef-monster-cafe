@@ -67,6 +67,8 @@ export interface MockOptions {
   clean: boolean;
   /** `&decor`: a labelled stand-in in every decor slot (M4a mock). */
   decor: boolean;
+  /** `&window=<item>`: that window view in place (the Street redesign mocks, M4b). */
+  window: string | null;
 }
 
 export function parseMockOptions(search: string): MockOptions {
@@ -78,6 +80,7 @@ export function parseMockOptions(search: string): MockOptions {
     line: Math.max(1, Math.min(10, Number(q.get('line')) || 5)),
     clean: q.has('clean'),
     decor: q.has('decor'),
+    window: q.get('window'),
   };
 }
 
@@ -303,7 +306,15 @@ function ServiceMock({ opts }: { opts: MockOptions }) {
       data-variant={variant}
       data-basket={basket}
     >
-      <CounterScene decor={opts.decor ? ALL_SLOTS_DECOR : {}} />
+      <CounterScene
+        decor={
+          opts.decor
+            ? ALL_SLOTS_DECOR
+            : opts.window && opts.window !== 'street'
+              ? { window: { slot: 'window', item: opts.window, name: opts.window, base: '', accent: '' } }
+              : {}
+        }
+      />
 
       {/* ---- status bar ---- */}
       <ShopDoor rect={bar.shop} />
