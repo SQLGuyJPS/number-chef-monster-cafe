@@ -28,9 +28,18 @@ const COUNTER_GRAIN = '#c98f58';
 /**
  * The café. With `crop`, a still picture of just that part of it, filling its box (the shop's
  * tiles, confirm card and delivery, decor/Picture.tsx): the same drawing, so a picture always
- * matches what the café will show.
+ * matches what the café will show. `counter={false}` leaves the counter out, for a floor picture
+ * whose crop reaches past the counter's far edge.
  */
-export function CounterScene({ decor = {}, crop }: { decor?: DecorView; crop?: Rect }) {
+export function CounterScene({
+  decor = {},
+  crop,
+  counter = true,
+}: {
+  decor?: DecorView;
+  crop?: Rect;
+  counter?: boolean;
+}) {
   // The wainscot ends and the floor starts here; the back wall is far away, so things are small.
   const FLOOR_Y = 330;
   const WAINSCOT = FLOOR_Y - 68;
@@ -74,21 +83,25 @@ export function CounterScene({ decor = {}, crop }: { decor?: DecorView; crop?: R
       {decor.wallArt && <WallArt look={decor.wallArt} />}
       {decor.lights && <Lights look={decor.lights} />}
       {/* counter: the far edge the monster stands behind, then the top the child works on */}
-      <rect x={-1000} y={COUNTER_Y} width={3280} height={16} fill={WOOD_DARK} />
-      <rect x={-1000} y={COUNTER_Y + 2} width={3280} height={4} fill="#a8744a" />
-      <rect x={-1000} y={COUNTER_Y + 16} width={3280} height={900} fill={COUNTER_TOP} />
-      {[60, 140, 230, 330].map((dy, i) => (
-        <path
-          key={dy}
-          d={`M-1000 ${COUNTER_Y + dy} C ${200 + i * 90} ${COUNTER_Y + dy - 6}, ${700 - i * 60} ${COUNTER_Y + dy + 8}, 2280 ${COUNTER_Y + dy}`}
-          fill="none"
-          stroke={COUNTER_GRAIN}
-          strokeWidth={3}
-          opacity={0.6}
-        />
-      ))}
-      <rect x={-1000} y={COUNTER_Y + 16} width={3280} height={10} fill="rgba(0,0,0,0.08)" />
-      {decor.counter && <CounterTop look={decor.counter} />}
+      {counter && (
+        <>
+          <rect x={-1000} y={COUNTER_Y} width={3280} height={16} fill={WOOD_DARK} />
+          <rect x={-1000} y={COUNTER_Y + 2} width={3280} height={4} fill="#a8744a" />
+          <rect x={-1000} y={COUNTER_Y + 16} width={3280} height={900} fill={COUNTER_TOP} />
+          {[60, 140, 230, 330].map((dy, i) => (
+            <path
+              key={dy}
+              d={`M-1000 ${COUNTER_Y + dy} C ${200 + i * 90} ${COUNTER_Y + dy - 6}, ${700 - i * 60} ${COUNTER_Y + dy + 8}, 2280 ${COUNTER_Y + dy}`}
+              fill="none"
+              stroke={COUNTER_GRAIN}
+              strokeWidth={3}
+              opacity={0.6}
+            />
+          ))}
+          <rect x={-1000} y={COUNTER_Y + 16} width={3280} height={10} fill="rgba(0,0,0,0.08)" />
+          {decor.counter && <CounterTop look={decor.counter} />}
+        </>
+      )}
 
       {/* status bar: a cream board with a wooden trim, running past the safe box */}
       <rect x={-1000} y={-600} width={3280} height={600 + BAR_H} fill="#f7e6c4" />

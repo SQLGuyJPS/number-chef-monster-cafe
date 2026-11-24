@@ -22,7 +22,8 @@ const CROP: Readonly<Record<Exclude<DecorSlot, 'staff'>, Rect>> = {
 
 /**
  * Items much smaller than their slot get a closer crop: one swag of a string, the ceiling pieces,
- * the clock. Keyed `slot.item`.
+ * the clock. Cloud Carpet's crop is centred on one near-row cloud (650, 407 with its shadow); that
+ * cloud sits low in the floor band, so floor pictures leave the counter out. Keyed `slot.item`.
  */
 const ITEM_CROP: Readonly<Record<string, Rect>> = {
   'lights.string-lights': { x: 825, y: 112, w: 160, h: 128 },
@@ -30,10 +31,17 @@ const ITEM_CROP: Readonly<Record<string, Rect>> = {
   'lights.disco-ball': { x: 940, y: 112, w: 120, h: 96 },
   'lights.star-chandelier': { x: 916, y: 106, w: 168, h: 134 },
   'wallArt.giant-clock': { x: 580, y: 116, w: 120, h: 96 },
+  'floor.cloud-carpet': { x: 586, y: 356, w: 128, h: 102 },
 };
 
 export function DecorPicture({ look, free = false }: { look: DecorLook; free?: boolean }) {
   if (look.slot === 'staff') return null;
   const crop = ITEM_CROP[`${look.slot}.${look.item}`] ?? CROP[look.slot];
-  return <CounterScene decor={free ? {} : { [look.slot]: look }} crop={crop} />;
+  return (
+    <CounterScene
+      decor={free ? {} : { [look.slot]: look }}
+      crop={crop}
+      counter={look.slot !== 'floor'}
+    />
+  );
 }
