@@ -326,6 +326,25 @@ Not verifiable in the cloud build, so only you can judge: how the shop lines sou
 
 **Voice pass after this playtest (D142):** ten new Pip lines (four shop lines and six slot names) are in `docs/VOICE_SCRIPT.md`; `npm run audio:todo` lists them as missing until you record them.
 
+## M4b batch 1 — Wallpaper and floor art (D155, D156, D158)
+
+Every wallpaper and floor entry now has its real drawing; the other four slots are still stand-ins. Look at `?decor&slot=wallpaper` and `?decor&slot=floor` (sheets saved in `docs/screens/M4b/wallpaper-floor/`, with one Service shot wearing Starry Night and Checkerboard Berry), then on the iPad in the café. Give each item **keep**, **tweak** (say what) or **redo**:
+- [ ] **Plain Paint (Berry, Lavender).** *House style.* The café's own two-tone stripe in the new colour. Notes:
+- [ ] **Polka Dots.** *House style.* Soft dots one shade deeper than the wall. Notes:
+- [ ] **Stripes.** *House style.* A wide band and a thin pinstripe, bolder than Plain Paint so the two read as different papers. Notes:
+- [ ] **Brick.** *House style.* Pale painted brick, a darker lip under each brick instead of outlines. Notes:
+- [ ] **Starry Night.** *Experiment:* a dusky blue-violet wall (the café's first dark wall), a crescent moon left of the monster, and seven stars that twinkle slowly (opacity only; still with reduced motion). Too dark for the café, or a nice treat? Keep the twinkle? Notes:
+- [ ] **Rainbow.** *House style.* Little pastel rainbows (bands from the Berry, Honey, Mint and Lavender families) on a pale sky; spaced so none sits behind the monster's head. Notes:
+- [ ] **Wood (Honey, Cocoa).** *House style.* The café's own boards with a colour stain, so it stays wood. Notes:
+- [ ] **Checkerboard (Classic, Berry, Mint).** *Experiment:* tiles in gentle perspective (seams run to a point above the room), the first depth on the café floor. Classic is cream and warm grey. Is Berry too loud behind the monster? Notes:
+- [ ] **Tiles (Berry, Sky, Mint).** *Experiment:* same perspective, pale tiles with cream grout and a small coloured diamond where four tiles meet. Notes:
+- [ ] **Cloud Carpet (Sky, Lavender, Berry).** *House style.* A wall-to-wall carpet with two rows of puffy cream clouds. Notes:
+- [ ] **One café.** With a wallpaper and floor from this batch on, does it still look like the same café, and are the monster and tray still the brightest things? Notes:
+
+Small change to the room: the door and the street window now have a backing in the café's wall colour, so a bought wallpaper no longer shows through their glass (the default café looks the same).
+
+Not verifiable in the cloud build: the twinkle's smoothness on the real iPad, and the colours on the iPad and iPhone screens. WebKit was not available in this cloud session, so the shop e2e ran on Chromium only this time.
+
 ## M13 step 2 — Voice listening test (D139d, D143–D147; iPad first, about 45 minutes with the recording)
 
 Record `docs/VOICE_SPIKE.md`, build it, push to `main`, then open the app with `?debug` on the iPad and scroll to **Voice test**. Until clips exist every button says "(TTS)" and lists what is "not recorded". Tap the screen once first so sound is on. Only you can judge these:

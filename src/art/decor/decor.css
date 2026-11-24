@@ -1,0 +1,21 @@
+/* Decor motion (ART_GUIDE §2.5): gentle, opacity only, and still under reduced motion. */
+.decor-twinkle {
+  animation: ncmc-decor-twinkle 4s ease-in-out infinite;
+}
+@keyframes ncmc-decor-twinkle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .decor-twinkle {
+    animation: none;
+  }
+}
+html.reduce-motion .decor-twinkle {
+  animation: none;
+}
