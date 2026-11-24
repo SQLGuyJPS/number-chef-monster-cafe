@@ -27,9 +27,9 @@ test('buy with confirm, live preview, equip; persists across a reload', async ({
   await openShop(page);
   await expect(page.getByTestId('screen-shop')).toHaveAttribute('data-slot', 'wallpaper');
   // Before: the café's own wall. Trying a colour on shows it in the café at once.
-  await expect(page.locator('[data-decor="wallpaper"]')).toHaveCount(0);
+  await expect(page.locator('svg.cafe-scene [data-decor="wallpaper"]')).toHaveCount(0);
   await tapId(page, 'shop-dot-wallpaper.plain.berry');
-  await expect(page.locator('[data-decor="wallpaper"]')).toHaveCount(1);
+  await expect(page.locator('svg.cafe-scene [data-decor="wallpaper"]')).toHaveCount(1);
 
   // Not yet: nothing is bought.
   await tapId(page, 'shop-buy');
@@ -57,17 +57,47 @@ test('buy with confirm, live preview, equip; persists across a reload', async ({
 
   await tapId(page, 'shop-home');
   await expect(page.getByTestId('screen-home')).toBeVisible();
-  await expect(page.locator('[data-decor="wallpaper"]')).toHaveCount(1);
+  await expect(page.locator('svg.cafe-scene [data-decor="wallpaper"]')).toHaveCount(1);
 
   await page.reload();
   await startApp(page);
   // Shown on Home after the reload, from the event log alone.
-  await expect(page.locator('[data-decor="wallpaper"]')).toHaveCount(1);
+  await expect(page.locator('svg.cafe-scene [data-decor="wallpaper"]')).toHaveCount(1);
   s = (await shop(page))!;
   expect(s.bought).toEqual(['wallpaper.plain.berry']);
   expect(s.equipped['wallpaper']).toBe('wallpaper.plain.berry');
   expect(s.balance).toBe(30);
   expect((await kinds(page)).filter((k) => k === 'buy')).toHaveLength(1);
+});
+
+test('shop pictures are the real drawings, still; items not drawn yet keep a swatch', async ({ page }) => {
+  await startApp(page);
+  await openShop(page);
+  const pic = (item: string) => page.locator(`[data-testid="shop-tile-${item}"] .decor-pic`);
+  // The free default is the café's own wall; a bought paper is its own drawing.
+  await expect(pic('plain')).toHaveCount(1);
+  await expect(pic('polka-dots')).toHaveCount(1);
+  for (const [tab, item] of [
+    ['floor', 'checkerboard'],
+    ['lights', 'string-lights'],
+    ['window', 'street'],
+    ['window', 'garden'],
+  ] as const) {
+    await tapId(page, `shop-tab-${tab}`);
+    await expect(pic(item), item).toHaveCount(1);
+  }
+  await tapId(page, 'shop-tab-counter');
+  await expect(page.getByTestId('shop-tile-flower-vase').locator('svg')).toHaveCount(1);
+  await expect(pic('flower-vase')).toHaveCount(0);
+  // Still pictures: nothing inside a tile counts against the moving budget.
+  await tapId(page, 'shop-tab-lights');
+  const moving = await page.evaluate(
+    () =>
+      document
+        .getAnimations()
+        .filter((a) => a.effect instanceof KeyframeEffect && a.effect.target?.closest('.decor-pic')).length,
+  );
+  expect(moving).toBe(0);
 });
 
 test('below the price: Buy is dimmed and only gets Pip’s line', async ({ page }) => {
@@ -84,7 +114,7 @@ test('below the price: Buy is dimmed and only gets Pip’s line', async ({ page 
   expect(await kinds(page)).not.toContain('buy');
   // Leaving drops the try-on: the café shows what is equipped.
   await tapId(page, 'shop-home');
-  await expect(page.locator('[data-decor="lights"]')).toHaveCount(0);
+  await expect(page.locator('svg.cafe-scene [data-decor="lights"]')).toHaveCount(0);
 });
 
 test('a crate: the first on the first visit, then held at 6 unbought, one per visit, recorded once', async ({
@@ -244,7 +274,7 @@ test('purchases show on the Service screen, inside the SVG budget', async ({ pag
   });
   await openService(page, { skill: 'A1', stage: 3 });
   for (const slot of ['wallpaper', 'floor', 'lights', 'window', 'counter', 'wallArt'])
-    await expect(page.locator(`[data-decor="${slot}"]`), slot).toHaveCount(1);
+    await expect(page.locator(`svg.cafe-scene [data-decor="${slot}"]`), slot).toHaveCount(1);
   const n = await page.evaluate(() => window.__ncmc.svgCounts());
   expect(n.total).toBeLessThanOrEqual(SVG_BUDGET.total);
   expect(n.moving).toBeLessThanOrEqual(SVG_BUDGET.moving);

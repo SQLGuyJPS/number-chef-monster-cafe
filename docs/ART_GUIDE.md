@@ -75,9 +75,9 @@ An item may go over if another stays under. What must fit is the total.
 
 ## 6. Batch routine (every art chat)
 1. Read this guide, the locked list (§7) and the batch's items in SPEC §10.
-2. Draw the items as components that take their colours as props, and register them in the decor table.
+2. Draw the items as components that take their colours as props, and register them in the decor table. Their shop pictures come from the same drawing (D183): check each item's crop in `CROPS` in `src/art/decor/Picture.tsx` and give it its own where the interest sits elsewhere.
 3. Run `npm run check` and the budget e2e.
-4. Save the `?decor` sheets at 1194×834 and 844×390 to `docs/screens/M4b/<batch>/`, plus one Service screenshot with the batch's busiest item equipped.
+4. Save the `?decor` sheets at 1194×834 and 844×390 to `docs/screens/M4b/<batch>/`, the slots' shop shelves (every page) and one Service screenshot with the batch's busiest item equipped (the batch screenshot test does all three).
 5. Report each item as house style or as an experiment (§4), then stop for the owner's verdict on each: **keep**, **tweak** (say what) or **redo**.
 6. Mark approved items as locked in §7, and write any taste the owner states into §3 or into that item's note.
 
@@ -97,3 +97,4 @@ These are approved: don't redraw them without asking. Notes record what the owne
 - 2026-11-21: split into firm limits, house style and room to experiment, at the owner's request (D158). Lint checks only the firm limits.
 - 2026-11-23: batch 1 (wallpaper + floor) drawn in `src/art/decor/Wallpaper.tsx` and `Floor.tsx`, awaiting the owner's verdict. Tones come from `mix()` in `src/art/decor/paint.ts` (base/accent mixes, cream). The café's own wall and floor are drawn by the same components, so a recolour is the same drawing. Experiments: Starry Night (dark wall, twinkling stars), perspective on Checkerboard and Tiles. Sheets: `npx cross-env NCMC_SCREENS=M4b/<batch> NCMC_DECOR_SLOTS=<slots> NCMC_DECOR_BUSY=<keys> playwright test screens --project=chromium-ipad-pro-11`.
 - 2026-11-24: batch 2 (lights + window) drawn in `src/art/decor/Lights.tsx` and `Window.tsx`, awaiting the owner's verdict. Lights hang in two runs of three swags (DECOR.lightsLeft/Right, past the safe box for the bleed); the single ceiling pieces (Disco Ball, Star Chandelier) hang over the right wall, above the ticket. Windows share one frame (the café's own: white frame and bar, trim sill, peach awning) and only the view changes, clipped to the glass; Street is drawn the same way. Shapes of one colour that don't move on their own share one `<path>` (helpers `ellipsePath`, `starPath`, `sparklePath` in `paint.ts`). New motion classes in `decor.css`: `decor-glow`, `decor-sway`, `decor-snow`. Experiments: Star Chandelier (warm glow, left-wall star strands), Snowy (falling snow).
+- 2026-11-24: shop pictures (tiles, confirm card, crate) are now still crops of the real drawings (D183), in `src/art/decor/Picture.tsx`; counter-top and wall art keep the swatch until drawn. The batch screenshot test also saves the shop shelves (`shop-<slot>-page-<n>`); batch 1's folder has them too.

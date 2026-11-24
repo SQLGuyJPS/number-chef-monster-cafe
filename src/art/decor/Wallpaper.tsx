@@ -205,6 +205,9 @@ const ART: Record<string, (look: DecorLook) => ReactElement> = {
   rainbow: Rainbow,
 };
 
+/** Items with a drawing (the rest fall back to their stand-in). */
+export const WALLPAPER_DRAWN: ReadonlySet<string> = new Set(Object.keys(ART));
+
 /** The equipped wallpaper, or its labelled stand-in if it has no art yet (ART_GUIDE §2.7). */
 export function Wallpaper({ look }: { look: DecorLook }) {
   const Art = ART[look.item];

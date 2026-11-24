@@ -12,11 +12,11 @@ import { Caption, CoinJar, at } from '../game/service/ServiceParts';
 import { TapButton } from '../game/input/TapButton';
 import { COUNTER, COUNTER_Y, FRONT, RESULTS4, SHOP, SHOP_PAGE } from './metrics';
 import { lookFor, swatchOf } from './decorLook';
+import { DecorPicture } from '../art/decor/Picture';
 import {
   Brush,
   ColourDots,
   ItemTile,
-  MiniStandIn,
   PageArrow,
   PagePips,
   Price,
@@ -388,7 +388,7 @@ function Confirm({ e }: { e: ShopEntry }) {
       <div className="shop-dim" />
       <div className="shop-confirm" style={at(SHOP.confirm)}>
         <div className="shop-confirm-pic">
-          <MiniStandIn look={lookFor(e)} />
+          <DecorPicture look={lookFor(e)} />
         </div>
         <div className="shop-confirm-title">
           Buy {e.name}? <Price n={e.price} />
@@ -460,7 +460,7 @@ function Delivery({ phase: frozen }: { phase?: DeliveryPhase }) {
               animationDelay: `${400 + i * 120}ms`,
             }}
           >
-            <MiniStandIn look={lookFor(e)} />
+            <DecorPicture look={lookFor(e)} />
           </div>
         ))}
       <TapButton

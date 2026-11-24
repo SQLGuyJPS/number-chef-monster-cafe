@@ -10,14 +10,12 @@ import { Boards, CLASSIC_BOARDS, Floor } from './decor/Floor';
 import { Lights } from './decor/Lights';
 import { StreetWindow, Window } from './decor/Window';
 import { PaintedStripe, Wallpaper } from './decor/Wallpaper';
+import { CAFE } from './decor/paint';
 
 /** What the café shows per slot; a missing slot draws the café's own default look. */
 export type DecorView = Partial<Record<DecorSlot, DecorLook>>;
 
-const WALL_A = '#ffe2a8';
-const WALL_B = '#fdd99a';
-const PANEL = '#f3cf92';
-const TRIM = '#e8c48a';
+const { wallA: WALL_A, wallB: WALL_B, panel: PANEL, trim: TRIM } = CAFE;
 const WOOD = '#b98352';
 const WOOD_DARK = '#8a5a35';
 const COUNTER_TOP = '#d9a066';

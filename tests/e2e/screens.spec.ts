@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
-import { gateAnswer, startApp, tap, typeGate } from './helpers';
+import { gateAnswer, openGrownUps, startApp, tap, typeGate } from './helpers';
 import {
   finishDelivery,
   followMe,
@@ -481,8 +481,9 @@ test('M4a screenshots', async ({ page }, info) => {
   }
 });
 
-// M4b art batches (ART_GUIDE §6): the batch's `?decor` sheets and one Service shot with its busiest
-// items on, at 1194×834 and 844×390, into docs/screens/M4b/<batch>/:
+// M4b art batches (ART_GUIDE §6): the batch's `?decor` sheets, its slots' shop shelves (every item
+// delivered, every page) and one Service shot with its busiest items on, at 1194×834 and 844×390,
+// into docs/screens/M4b/<batch>/:
 //   npx cross-env NCMC_SCREENS=M4b/<batch> NCMC_DECOR_SLOTS=wallpaper,floor NCMC_DECOR_BUSY=<key>,<key> playwright test screens --project=chromium-ipad-pro-11
 test('M4b batch screenshots', async ({ page }, info) => {
   // Art review is about layout and colour, not the engine: one Chromium project, both sizes.
@@ -504,6 +505,37 @@ test('M4b batch screenshots', async ({ page }, info) => {
     [1194, 834],
     [844, 390],
   ] as const;
+  // The shop shelves first (a service left open would be offered again on Home): every crate
+  // delivered, so each slot shows all its items, page by page, with their pictures.
+  await openGrownUps(page);
+  await page.getByTestId('playtest-crate-all').click();
+  await page.getByTestId('playtest-crate-all').click();
+  await expect(page.getByTestId('playtest-crate-status')).toContainText('0 left');
+  await page.getByTestId('parent-back').click();
+  await tapId(page, 'shop-button');
+  await expect(page.getByTestId('screen-shop')).toBeVisible();
+  if ((await page.getByTestId('shop-delivery').count()) > 0) await finishDelivery(page);
+  await still();
+  for (const [width, height] of sizes) {
+    await page.setViewportSize({ width, height });
+    for (const slot of slots) {
+      await tapId(page, `shop-tab-${slot}`);
+      const off = async (id: string) => {
+        const el = page.getByTestId(id);
+        return (await el.count()) === 0 || /\boff\b/.test((await el.getAttribute('class')) ?? '');
+      };
+      while (!(await off('shop-back'))) await tapId(page, 'shop-back');
+      for (let p = 1; p <= 6; p++) {
+        await page.waitForTimeout(200);
+        await page.screenshot({ path: `${dir}/shop-${slot}-page-${p}-${width}x${height}.png` });
+        if (await off('shop-next')) break;
+        await tapId(page, 'shop-next');
+      }
+    }
+  }
+  await tapId(page, 'shop-home');
+  await expect(page.getByTestId('screen-home')).toBeVisible();
+  await page.setViewportSize({ width: sizes[0][0], height: sizes[0][1] });
   // One service, resized: a second service would first be offered "Continue dinner service?".
   await openService(page, { skill: 'A1', stage: 3, seed: 8 });
   await waitPhase(page, 'building');

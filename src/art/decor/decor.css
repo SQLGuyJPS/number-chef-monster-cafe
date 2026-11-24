@@ -63,3 +63,23 @@ html.reduce-motion .decor-sway,
 html.reduce-motion .decor-snow {
   animation: none;
 }
+
+/* The shop's picture of an entry (Picture.tsx): a framed crop of the café, drawn still. */
+.decor-pic {
+  display: block;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border-radius: 12px;
+  border: 3px solid #e2d3b6;
+  overflow: hidden;
+}
+.decor-pic > svg {
+  display: block;
+}
+.decor-pic .decor-twinkle,
+.decor-pic .decor-glow,
+.decor-pic .decor-sway,
+.decor-pic .decor-snow {
+  animation: none;
+}

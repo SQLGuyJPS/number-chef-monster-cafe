@@ -18,6 +18,12 @@ export function mix(a: string, b: string, t: number): string {
 /** The room's cream (ART_GUIDE §3): whites in the café are never pure white. */
 export const CREAM = '#fffaf0';
 
+/**
+ * The café's own wall (the free Plain Paint, Sunny: two stripes), wainscot panel and trim. Shared
+ * so the shop's pictures put an item in the same room the scene draws.
+ */
+export const CAFE = { wallA: '#ffe2a8', wallB: '#fdd99a', panel: '#f3cf92', trim: '#e8c48a' } as const;
+
 /** A page-unique id for a pattern: the contact sheet draws many cafés on one page. */
 export const patternId = (stem: string, ...colours: string[]): string =>
   `${stem}-${colours.map((c) => c.replace(/[^0-9a-z]/gi, '')).join('-')}`;

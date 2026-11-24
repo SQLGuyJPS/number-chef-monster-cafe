@@ -347,6 +347,9 @@ const ART: Record<string, (look: DecorLook) => ReactElement> = {
   'star-chandelier': StarChandelier,
 };
 
+/** Items with a drawing (the rest fall back to their stand-in). */
+export const LIGHTS_DRAWN: ReadonlySet<string> = new Set(Object.keys(ART));
+
 /** The equipped lights, or their labelled stand-in if they have no art yet (ART_GUIDE §2.7). */
 export function Lights({ look }: { look: DecorLook }) {
   const Art = ART[look.item];

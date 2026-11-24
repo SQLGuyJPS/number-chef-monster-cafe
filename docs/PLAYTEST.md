@@ -361,6 +361,13 @@ Small change to the room: the free Street window is now drawn by the same frame 
 
 Not verifiable in the cloud build: the sway, twinkle and snow smoothness on the real iPad, and the colours on the iPad and iPhone screens.
 
+## M4b — Real drawings on the shop tiles (D183)
+
+The shop's pictures (each shelf tile, the confirm card, and the entries rising out of a delivery crate) now show the item's real drawing, cropped to its corner of the café, instead of the colour swatch. Counter-top and wall art keep the swatch until they're drawn. Shelves saved in `docs/screens/M4b/wallpaper-floor/` and `docs/screens/M4b/lights-window/` (`shop-<slot>-page-<n>`).
+- [ ] **Readable at phone size?** Especially the lights, which are thin things in a small picture. Notes:
+- [ ] **Still pictures.** Tiles don't twinkle or sway; tapping one tries it on in the café, which does. Would you rather the tiles move too? Notes:
+- [ ] **On the café's own wall.** Lights and windows are shown on the default wall, not on the wallpaper she has on. Notes:
+
 ## M13 step 2 — Voice listening test (D139d, D143–D147; iPad first, about 45 minutes with the recording)
 
 Record `docs/VOICE_SPIKE.md`, build it, push to `main`, then open the app with `?debug` on the iPad and scroll to **Voice test**. Until clips exist every button says "(TTS)" and lists what is "not recorded". Tap the screen once first so sound is on. Only you can judge these:

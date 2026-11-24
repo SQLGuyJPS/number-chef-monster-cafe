@@ -171,6 +171,9 @@ const ART: Record<string, (look: DecorLook) => ReactElement> = {
   'cloud-carpet': CloudCarpet,
 };
 
+/** Items with a drawing (the rest fall back to their stand-in). */
+export const FLOOR_DRAWN: ReadonlySet<string> = new Set(Object.keys(ART));
+
 /** The equipped floor, or its labelled stand-in if it has no art yet (ART_GUIDE §2.7). */
 export function Floor({ look }: { look: DecorLook }) {
   const Art = ART[look.item];

@@ -6,12 +6,12 @@
 import type { ReactElement, ReactNode } from 'react';
 import { DECOR } from '../../app/metrics';
 import { COLOR_FAMILIES } from '../../engine/economy';
-import { CREAM, ellipsePath, mix, starPath } from './paint';
+import { CAFE, CREAM, ellipsePath, mix, starPath } from './paint';
 import { WindowStandIn, type DecorLook } from './StandIn';
 import './decor.css';
 
-/** The wainscot trim colour: the sill is the same wood. */
-const TRIM = '#e8c48a';
+/** The sill is the same wood as the wainscot trim. */
+const TRIM = CAFE.trim;
 const AWNING = '#ff9f7a';
 const { w: W, h: H } = DECOR.window;
 const f = (n: number) => n.toFixed(1);
@@ -272,6 +272,9 @@ const VIEWS: Record<string, { glass: string; View: () => ReactElement }> = {
   moonlit: { glass: NIGHT, View: MoonlitView },
   snowy: { glass: '#dbe7f2', View: SnowyView },
 };
+
+/** Views with a drawing (the rest fall back to their stand-in). */
+export const WINDOW_DRAWN: ReadonlySet<string> = new Set(Object.keys(VIEWS));
 
 /** The café's own street window (the free default). */
 export function StreetWindow() {
