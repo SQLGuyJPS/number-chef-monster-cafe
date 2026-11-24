@@ -12,7 +12,7 @@ The guide has three parts, held to different strengths:
   - `src/art/CounterScene.tsx`: the café behind every child screen.
   - `src/art/Pip.tsx`: Pip.
   - `src/art/monsters/`: the monsters.
-  - `StringLights` in `src/art/CafeScene.tsx`: the only decor drawn so far, not shown in the game yet.
+  - `src/art/decor/`: the decor drawn so far (wallpaper, floor, lights, window), one file per slot.
 - **Screenshots:** `docs/screens/counter/`: Home, Menu, Service and Results at 1194×834 and 844×390.
 - **Review page:** the `?decor` contact sheet (built in M4a). Each batch saves its sheets to `docs/screens/M4b/<batch>/`.
 - **Colours:**
@@ -96,3 +96,4 @@ These are approved: don't redraw them without asking. Notes record what the owne
 - 2026-11-21: first draft (D156), from the existing café, Pip and monster art.
 - 2026-11-21: split into firm limits, house style and room to experiment, at the owner's request (D158). Lint checks only the firm limits.
 - 2026-11-23: batch 1 (wallpaper + floor) drawn in `src/art/decor/Wallpaper.tsx` and `Floor.tsx`, awaiting the owner's verdict. Tones come from `mix()` in `src/art/decor/paint.ts` (base/accent mixes, cream). The café's own wall and floor are drawn by the same components, so a recolour is the same drawing. Experiments: Starry Night (dark wall, twinkling stars), perspective on Checkerboard and Tiles. Sheets: `npx cross-env NCMC_SCREENS=M4b/<batch> NCMC_DECOR_SLOTS=<slots> NCMC_DECOR_BUSY=<keys> playwright test screens --project=chromium-ipad-pro-11`.
+- 2026-11-24: batch 2 (lights + window) drawn in `src/art/decor/Lights.tsx` and `Window.tsx`, awaiting the owner's verdict. Lights hang in two runs of three swags (DECOR.lightsLeft/Right, past the safe box for the bleed); the single ceiling pieces (Disco Ball, Star Chandelier) hang over the right wall, above the ticket. Windows share one frame (the café's own: white frame and bar, trim sill, peach awning) and only the view changes, clipped to the glass; Street is drawn the same way. Shapes of one colour that don't move on their own share one `<path>` (helpers `ellipsePath`, `starPath`, `sparklePath` in `paint.ts`). New motion classes in `decor.css`: `decor-glow`, `decor-sway`, `decor-snow`. Experiments: Star Chandelier (warm glow, left-wall star strands), Snowy (falling snow).

@@ -5,7 +5,7 @@
 import type { ReactElement } from 'react';
 import { DECOR } from '../../app/metrics';
 import { COLOR_FAMILIES } from '../../engine/economy';
-import { CREAM, mix, patternId } from './paint';
+import { CREAM, mix, patternId, starPath } from './paint';
 import { WallpaperStandIn, type DecorLook } from './StandIn';
 import './decor.css';
 
@@ -103,17 +103,6 @@ function Brick() {
       <Wall fill={`url(#${id})`} />
     </g>
   );
-}
-
-/** A five-point star with softened points (round joins on a same-colour stroke). */
-function starPath(cx: number, cy: number, r: number): string {
-  const pts: string[] = [];
-  for (let i = 0; i < 10; i++) {
-    const a = -Math.PI / 2 + (i * Math.PI) / 5;
-    const rr = i % 2 ? r * 0.48 : r;
-    pts.push(`${(cx + rr * Math.cos(a)).toFixed(1)} ${(cy + rr * Math.sin(a)).toFixed(1)}`);
-  }
-  return `M${pts.join(' L')} Z`;
 }
 
 /**

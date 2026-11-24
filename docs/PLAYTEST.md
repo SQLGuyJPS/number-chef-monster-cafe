@@ -345,6 +345,22 @@ Small change to the room: the door and the street window now have a backing in t
 
 Not verifiable in the cloud build: the twinkle's smoothness on the real iPad, and the colours on the iPad and iPhone screens. WebKit was not available in this cloud session, so the shop e2e ran on Chromium only this time.
 
+## M4b batch 2 — Lights and window art (D155, D156, D158)
+
+Every Lights and Window entry now has its real drawing; counter-top and wall art are still stand-ins. Look at `?decor&slot=lights` and `?decor&slot=window` (tap a card for one item full size; sheets saved in `docs/screens/M4b/lights-window/`, with one Service shot wearing Paper Lanterns Berry and Snowy), then on the iPad in the café. All lights hang in the two runs left and right of the wall-art spot, so nothing hangs over the monster's head. Give each item **keep**, **tweak** (say what) or **redo**:
+- [ ] **String Lights (Honey, Berry, Sky).** *House style.* Three swags a side of round bulbs in three tones of the family, each with a soft halo that slowly brightens and dims in three groups (no bulb flashes). Honey on the Sunny wall is the quietest of the three. Notes:
+- [ ] **Paper Lanterns (Berry, Mint, Honey).** *House style, plus motion:* round paper lanterns with ribs and dark caps, two per swag on strings of two lengths; each sways a little (about 2.5°) out of step with its neighbours. Keep the sway? Notes:
+- [ ] **Disco Ball.** *House style.* A mirror ball over the right wall; two sets of bright facets cross-fade so it seems to turn, and pastel glints (colours from the shared families) twinkle across both walls, none behind the monster. In Service the ticket covers the bottom of the ball. Notes:
+- [ ] **Star Chandelier.** *Experiment:* a gold ring on curved arms with five candles and four dangling stars over the right wall, matching gold stars on threads across the left wall to balance the room, and a soft warm glow behind the chandelier (the first light that seems to light the wall; it shows most on darker walls). Candle glows breathe; some stars twinkle. The stars are bolder gold with a thin gold edge, so they read on the Sunny wall. Is it special enough for 180 coins? In Service the ticket covers its lowest stars. Notes:
+- [ ] **Garden.** *House style.* Same frame and awning; a hill, a round tree, a cream picket fence, flowers in Berry, Honey and Lavender, a lavender butterfly. Notes:
+- [ ] **Moonlit.** *House style.* The Starry Night wallpaper's dusk, a round moon with a soft halo, gold stars (two twinkle), houses with warm lit windows so the dark reads as cosy. Too dark beside the door? Notes:
+- [ ] **Snowy.** *Experiment:* a snowy garden with two snow-capped pines and a snowman in a Berry scarf; snow drifts slowly down past the glass (still with reduced motion). Keep the falling snow? Notes:
+- [ ] **One café.** With lights and a window from this batch on, does it still look like the same café, and are the monster, ticket and tray still the brightest things? Notes:
+
+Small change to the room: the free Street window is now drawn by the same frame as the bought windows (it looks the same).
+
+Not verifiable in the cloud build: the sway, twinkle and snow smoothness on the real iPad, and the colours on the iPad and iPhone screens.
+
 ## M13 step 2 — Voice listening test (D139d, D143–D147; iPad first, about 45 minutes with the recording)
 
 Record `docs/VOICE_SPIKE.md`, build it, push to `main`, then open the app with `?debug` on the iPad and scroll to **Voice test**. Until clips exist every button says "(TTS)" and lists what is "not recorded". Tap the screen once first so sound is on. Only you can judge these:

@@ -5,14 +5,10 @@
 // so the bleed on wide phones and tall iPads is filled.
 import { BAR_H, COUNTER_Y } from '../app/metrics';
 import type { DecorSlot } from '../engine/economy';
-import {
-  CounterTopStandIn,
-  LightsStandIn,
-  WallArtStandIn,
-  WindowStandIn,
-  type DecorLook,
-} from './decor/StandIn';
+import { CounterTopStandIn, WallArtStandIn, type DecorLook } from './decor/StandIn';
 import { Boards, CLASSIC_BOARDS, Floor } from './decor/Floor';
+import { Lights } from './decor/Lights';
+import { StreetWindow, Window } from './decor/Window';
 import { PaintedStripe, Wallpaper } from './decor/Wallpaper';
 
 /** What the café shows per slot; a missing slot draws the café's own default look. */
@@ -47,7 +43,7 @@ export function CounterScene({ decor = {} }: { decor?: DecorView }) {
       <rect x={208} y={142} width={214} height={150} rx={8} fill={WALL_A} />
       <FrontDoor x={36} y={124} w={148} h={FLOOR_Y - 124} />
       {/* one street window beside the door (owner kept it here rather than behind the monster) */}
-      {decor.window ? <WindowStandIn look={decor.window} /> : <StreetWindow x={208} y={142} w={214} h={150} />}
+      {decor.window ? <Window look={decor.window} /> : <StreetWindow />}
       <TableAndChairs cx={232} floorY={FLOOR_Y} />
 
       {/* right wall: a little shelf with cups and a plant, mostly behind the ticket */}
@@ -60,7 +56,7 @@ export function CounterScene({ decor = {} }: { decor?: DecorView }) {
         <path d="M1216 292 q-30 -30 -14 -58 q8 24 14 30 q6 -30 22 -36 q6 30 -22 64 Z" fill="#8fbf6a" />
       </g>
       {decor.wallArt && <WallArtStandIn look={decor.wallArt} />}
-      {decor.lights && <LightsStandIn look={decor.lights} />}
+      {decor.lights && <Lights look={decor.lights} />}
       {/* counter: the far edge the monster stands behind, then the top the child works on */}
       <rect x={-1000} y={COUNTER_Y} width={3280} height={16} fill={WOOD_DARK} />
       <rect x={-1000} y={COUNTER_Y + 2} width={3280} height={4} fill="#a8744a" />
@@ -106,40 +102,6 @@ function FrontDoor({ x, y, w, h }: { x: number; y: number; w: number; h: number 
       <path d={`M${x + w / 2 - 3} ${y + 40} q-3 -4 0 -7 M${x + w / 2 + 4} ${y + 40} q-3 -4 0 -7`} stroke="#c98b55" strokeWidth={1.5} fill="none" />
       <circle cx={x + w - 24} cy={y + h * 0.62} r={6} fill="#f2c14e" stroke="#c48d22" strokeWidth={2} />
       <rect x={x - 5} y={y + h - 6} width={w + 10} height={6} rx={2} fill={WOOD_DARK} />
-    </g>
-  );
-}
-
-/** One street window: sky, the houses across the road, a tree; a striped awning edge above. */
-function StreetWindow({ x, y, w, h }: { x: number; y: number; w: number; h: number }) {
-  return (
-    <g data-slot="window" opacity={0.9}>
-      <rect x={x} y={y} width={w} height={h} rx={8} fill="#cfeaff" />
-      <circle cx={x + w - 40} cy={y + 34} r={14} fill="#fff3a6" />
-      <path d={`M${x + 20} ${y + 44} q12 -14 26 -4 q10 -10 22 0 q6 8 -4 10 h-38 q-10 -2 -6 -6 Z`} fill="#fff" />
-      <rect x={x} y={y + h * 0.5} width={60} height={h * 0.5} fill="#e9c6a8" />
-      <rect x={x + 62} y={y + h * 0.38} width={70} height={h * 0.62} fill="#d6b4c8" />
-      <rect x={x + 134} y={y + h * 0.56} width={80} height={h * 0.44} fill="#c8d6b0" />
-      {[0, 1].map((r) =>
-        [0, 1].map((c) => (
-          <rect key={`${r}${c}`} x={x + 76 + c * 26} y={y + h * 0.46 + r * 28} width={16} height={18} fill="#fffaf0" opacity={0.8} />
-        )),
-      )}
-      <circle cx={x + 30} cy={y + h * 0.48} r={20} fill="#9ccf7a" />
-      <rect x={x + 27} y={y + h * 0.56} width={6} height={30} fill="#9b6a44" />
-      <rect x={x} y={y + h - 14} width={w} height={14} fill="#bdbdbd" />
-      {/* frame and bars */}
-      <rect x={x} y={y} width={w} height={h} rx={8} fill="none" stroke="#fff" strokeWidth={9} />
-      <line x1={x + w / 2} y1={y} x2={x + w / 2} y2={y + h} stroke="#fff" strokeWidth={6} />
-      <rect x={x - 8} y={y + h - 2} width={w + 16} height={10} rx={3} fill={TRIM} />
-      {/* awning scallops */}
-      {Array.from({ length: 6 }, (_, i) => (
-        <path
-          key={i}
-          d={`M${x - 8 + i * ((w + 16) / 6)} ${y - 6} h${(w + 16) / 6} v10 a${(w + 16) / 12} 10 0 0 1 ${-(w + 16) / 6} 0 Z`}
-          fill={i % 2 ? '#fffaf0' : '#ff9f7a'}
-        />
-      ))}
     </g>
   );
 }
