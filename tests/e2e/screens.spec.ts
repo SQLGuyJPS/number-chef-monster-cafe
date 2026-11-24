@@ -523,4 +523,13 @@ test('M4b batch screenshots', async ({ page }, info) => {
       await page.screenshot({ path: `${dir}/decor-${slot}-${width}x${height}.png`, fullPage: true });
     }
   }
+  // Close-ups of the small slots (`&zoom`), once: they are for detail, not for phone size.
+  await page.setViewportSize({ width: 1194, height: 834 });
+  for (const slot of slots.filter((s) => ['counter', 'wallArt', 'window'].includes(s))) {
+    await page.goto(`./?decor&slot=${slot}&zoom`);
+    await page.getByTestId('decor-sheet').waitFor();
+    await page.evaluate(() => document.fonts.ready);
+    await still();
+    await page.screenshot({ path: `${dir}/decor-${slot}-zoom.png`, fullPage: true });
+  }
 });

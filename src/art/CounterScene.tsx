@@ -5,11 +5,13 @@
 // so the bleed on wide phones and tall iPads is filled.
 import { BAR_H, COUNTER_Y } from '../app/metrics';
 import type { DecorSlot } from '../engine/economy';
-import { CounterTopStandIn, WallArtStandIn, type DecorLook } from './decor/StandIn';
+import type { DecorLook } from './decor/StandIn';
+import { CounterTop } from './decor/CounterTop';
 import { Boards, CLASSIC_BOARDS, Floor } from './decor/Floor';
 import { Lights } from './decor/Lights';
 import { StreetWindow, Window } from './decor/Window';
 import { PaintedStripe, Wallpaper } from './decor/Wallpaper';
+import { WallArt } from './decor/WallArt';
 
 /** What the café shows per slot; a missing slot draws the café's own default look. */
 export type DecorView = Partial<Record<DecorSlot, DecorLook>>;
@@ -55,7 +57,7 @@ export function CounterScene({ decor = {} }: { decor?: DecorView }) {
         <rect x={1196} y={290} width={40} height={40} rx={6} fill="#c98b55" />
         <path d="M1216 292 q-30 -30 -14 -58 q8 24 14 30 q6 -30 22 -36 q6 30 -22 64 Z" fill="#8fbf6a" />
       </g>
-      {decor.wallArt && <WallArtStandIn look={decor.wallArt} />}
+      {decor.wallArt && <WallArt look={decor.wallArt} />}
       {decor.lights && <Lights look={decor.lights} />}
       {/* counter: the far edge the monster stands behind, then the top the child works on */}
       <rect x={-1000} y={COUNTER_Y} width={3280} height={16} fill={WOOD_DARK} />
@@ -72,7 +74,7 @@ export function CounterScene({ decor = {} }: { decor?: DecorView }) {
         />
       ))}
       <rect x={-1000} y={COUNTER_Y + 16} width={3280} height={10} fill="rgba(0,0,0,0.08)" />
-      {decor.counter && <CounterTopStandIn look={decor.counter} />}
+      {decor.counter && <CounterTop look={decor.counter} />}
 
       {/* status bar: a cream board with a wooden trim, running past the safe box */}
       <rect x={-1000} y={-600} width={3280} height={600 + BAR_H} fill="#f7e6c4" />

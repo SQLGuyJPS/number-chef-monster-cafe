@@ -230,15 +230,16 @@ test('purchases show on the Service screen, inside the SVG budget', async ({ pag
   await startApp(page);
   await page.evaluate(async () => {
     await window.__ncmc.earn(400, 3);
-    // The busiest drawn piece per slot so far (M4b batch 1: Starry Night's twinkling stars;
-    // batch 2: Paper Lanterns, twelve swaying groups, and Snowy's drifting snow).
+    // The busiest drawn piece per slot (M4b batch 1: Starry Night's twinkling stars; batch 2:
+    // Paper Lanterns, twelve swaying groups, and Snowy's drifting snow; batch 3: Tiny Robot, which
+    // blinks, waves and glows, and Monster Portraits, three real monster drawings).
     for (const k of [
       'wallpaper.starry-night.classic',
       'floor.tiles.berry',
       'lights.paper-lanterns.berry',
       'window.snowy.classic',
-      'counter.flower-vase.berry',
-      'wallArt.neon-open.berry',
+      'counter.tiny-robot.sky',
+      'wallArt.monster-portraits.classic',
     ])
       await window.__ncmc.buy(k);
   });

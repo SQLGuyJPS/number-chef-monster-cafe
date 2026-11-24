@@ -49,17 +49,107 @@
     transform: translateY(150px);
   }
 }
+/* A clock's second hand: one slow turn a minute. */
+.decor-turn {
+  animation: ncmc-decor-turn 60s linear infinite;
+}
+@keyframes ncmc-decor-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* A goldfish swims across its bowl and turns round at each side (scaleX through zero). */
+.decor-swim {
+  animation: ncmc-decor-swim 14s ease-in-out infinite;
+}
+@keyframes ncmc-decor-swim {
+  0%,
+  100% {
+    transform: translateX(-9px) scaleX(1);
+  }
+  45% {
+    transform: translateX(9px) scaleX(1);
+  }
+  50% {
+    transform: translateX(9px) scaleX(-1);
+  }
+  95% {
+    transform: translateX(-9px) scaleX(-1);
+  }
+}
+/* Bubbles drift up a little and fade. */
+.decor-bubble {
+  animation: ncmc-decor-bubble 5s ease-in infinite;
+}
+@keyframes ncmc-decor-bubble {
+  0% {
+    transform: translateY(6px);
+    opacity: 0;
+  }
+  25%,
+  70% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+}
+/* A blink now and then: the eyes close for a moment. */
+.decor-blink {
+  animation: ncmc-decor-blink 5.5s linear infinite;
+}
+@keyframes ncmc-decor-blink {
+  0%,
+  93%,
+  100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.1);
+  }
+}
+/* A small wave every few seconds, still in between; each sets its own origin (the shoulder). */
+.decor-wave {
+  animation: ncmc-decor-wave 6s ease-in-out infinite;
+}
+@keyframes ncmc-decor-wave {
+  0%,
+  55%,
+  100% {
+    transform: rotate(0deg);
+  }
+  66% {
+    transform: rotate(-18deg);
+  }
+  77% {
+    transform: rotate(6deg);
+  }
+  88% {
+    transform: rotate(-18deg);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .decor-twinkle,
   .decor-glow,
   .decor-sway,
-  .decor-snow {
+  .decor-snow,
+  .decor-turn,
+  .decor-swim,
+  .decor-bubble,
+  .decor-blink,
+  .decor-wave {
     animation: none;
   }
 }
 html.reduce-motion .decor-twinkle,
 html.reduce-motion .decor-glow,
 html.reduce-motion .decor-sway,
-html.reduce-motion .decor-snow {
+html.reduce-motion .decor-snow,
+html.reduce-motion .decor-turn,
+html.reduce-motion .decor-swim,
+html.reduce-motion .decor-bubble,
+html.reduce-motion .decor-blink,
+html.reduce-motion .decor-wave {
   animation: none;
 }

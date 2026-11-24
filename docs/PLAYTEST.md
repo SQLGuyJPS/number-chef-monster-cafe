@@ -361,6 +361,23 @@ Small change to the room: the free Street window is now drawn by the same frame 
 
 Not verifiable in the cloud build: the sway, twinkle and snow smoothness on the real iPad, and the colours on the iPad and iPhone screens.
 
+## M4b batch 3 — Counter-top and wall art (D155, D156, D158)
+
+Every Counter-top and Wall art entry now has its real drawing, so every M4 entry has real art. Look at `?decor&slot=counter` and `?decor&slot=wallArt`, and add `&zoom` to see them close up (sheets and close-ups saved in `docs/screens/M4b/counter-wallart/`, with one Service shot wearing Tiny Robot Sky and Monster Portraits), then on the iPad in the café. Counter-top pieces stand at the right end of the counter, right of the ticket; while Pip counts with her (CountTogether) the ticket slides over their tops (the flowers, the robot's antenna). Wall art hangs above the monster, between the lights. Give each item **keep**, **tweak** (say what) or **redo**:
+- [ ] **Flower Vase (Berry, Sky, Honey).** *House style.* A round-bellied vase in the colour with an accent band, three flowers (pale, strong and a cream daisy) and two leaves. Notes:
+- [ ] **Cake Stand (Berry, Mint).** *House style.* A cream stand with a layer cake: frosting in the colour dripping down, a jam layer, sprinkles, a cherry. No glass dome, so it can't be mistaken for the serve bell. Notes:
+- [ ] **Cookie Jar (Sky, Lavender).** *House style.* A ceramic crock (not glass, so it never looks like the coin jar) with a cookie label, its lid tipped up by a cookie peeking out, and one more cookie leaning on it. Notes:
+- [ ] **Fish Bowl.** *House style, plus motion:* a round bowl with pebbles in three family colours, a waterweed, and a goldfish that swims slowly side to side and turns at each side; a few bubbles rise now and then. Keep the swimming? Notes:
+- [ ] **Tiny Robot (Sky, Berry).** *Experiment:* the first decor with a face: a cream face plate with ink eyes, catch-lights and blush (Pip's face standard), a heart on its chest, an antenna bulb with a soft glow. It blinks now and then and gives a small wave every few seconds. Is it special enough for 100 coins? Too lively next to the ticket? Notes:
+- [ ] **Menu Board.** *House style.* A wooden-framed chalkboard (soft green-grey, not black) with chalk pictures of a cupcake, a pizza slice and a steaming cup, a wavy chalk "line" under each (no words), and a stick of chalk on the ledge. Too dark above the monster? Notes:
+- [ ] **Neon OPEN (Berry, Sky, Mint).** *House style, plus a glow:* the word OPEN and a border in neon tubes (pale hot core, coloured glass, soft halo) on a clear plate. Only the halo breathes, slowly; nothing flickers. Notes:
+- [ ] **Giant Clock (Honey, Lavender).** *House style, plus motion:* a round clock as tall as the spot, with a scalloped rim in the colour, dots for the hours (no numerals), hands at ten past ten, and a thin second hand that sweeps round once a minute. Keep the second hand? Honey is the quieter one on the Sunny wall. Notes:
+- [ ] **Monster Portraits.** *House style:* Chompers, Mimsy and Blobbo, drawn with their own art, in a wooden frame either side and a gold oval in the middle. They are the most colourful wall art; are they too busy above the monster's head? Rather other monsters? Notes:
+- [ ] **Trophy Shelf.** *House style.* A wooden shelf with a big gold cup (a star on it, one glint that twinkles), a silver star trophy and a blue prize rosette pinned above, gold matching the Star Chandelier. Special enough for 100 coins? Notes:
+- [ ] **One café.** With a counter-top piece and wall art from this batch on, does it still look like the same café, and are the monster, ticket and tray still the brightest things? Notes:
+
+Not verifiable in the cloud build: the swim, wave, blink and second-hand smoothness on the real iPad, and the colours on the iPad and iPhone screens. The shop's tiles still show the colour swatches, not the drawings.
+
 ## M13 step 2 — Voice listening test (D139d, D143–D147; iPad first, about 45 minutes with the recording)
 
 Record `docs/VOICE_SPIKE.md`, build it, push to `main`, then open the app with `?debug` on the iPad and scroll to **Voice test**. Until clips exist every button says "(TTS)" and lists what is "not recorded". Tap the screen once first so sound is on. Only you can judge these:

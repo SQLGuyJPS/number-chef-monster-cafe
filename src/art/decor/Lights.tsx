@@ -8,7 +8,7 @@
 import type { ReactElement } from 'react';
 import { BAR_H, DECOR } from '../../app/metrics';
 import { COLOR_FAMILIES } from '../../engine/economy';
-import { CREAM, ellipsePath, mix, sparklePath, starPath } from './paint';
+import { CREAM, GOLD, GOLD_DARK, ellipsePath, mix, sparklePath, starPath } from './paint';
 import { LightsStandIn, type DecorLook } from './StandIn';
 import './decor.css';
 
@@ -239,8 +239,6 @@ function DiscoBall() {
 
 /* ---------- Star Chandelier ---------- */
 
-const GOLD = '#ecb93f';
-const GOLD_DARK = '#c48d22';
 /** Star gold: bolder than the Starry Night stars so they read on a pale wall, with a thin gold edge. */
 const STAR = '#ffd65a';
 const STAR_EDGE = '#dba12a';

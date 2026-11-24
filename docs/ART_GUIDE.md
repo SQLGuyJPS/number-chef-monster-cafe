@@ -12,9 +12,9 @@ The guide has three parts, held to different strengths:
   - `src/art/CounterScene.tsx`: the café behind every child screen.
   - `src/art/Pip.tsx`: Pip.
   - `src/art/monsters/`: the monsters.
-  - `src/art/decor/`: the decor drawn so far (wallpaper, floor, lights, window), one file per slot.
+  - `src/art/decor/`: the decor drawn so far (wallpaper, floor, lights, window, counter-top, wall art), one file per slot.
 - **Screenshots:** `docs/screens/counter/`: Home, Menu, Service and Results at 1194×834 and 844×390.
-- **Review page:** the `?decor` contact sheet (built in M4a). Each batch saves its sheets to `docs/screens/M4b/<batch>/`.
+- **Review page:** the `?decor` contact sheet (built in M4a); add `&zoom` to see the small slots (counter-top, wall art, window) close up. Each batch saves its sheets to `docs/screens/M4b/<batch>/`.
 - **Colours:**
   - `COLOR_FAMILIES` in `src/engine/economy.ts`: Sunny, Berry, Mint, Sky, Honey, Lavender and Cocoa, each a pale `base` and a stronger `accent`.
   - The scene's named colours (`WOOD`, `WOOD_DARK`, `TRIM` and others) in `CounterScene.tsx`.
@@ -55,8 +55,8 @@ All positions are in stage coordinates (1280×720). The floor line is at y 330 a
 | Floor | Wood (classic) | from y 330 down to the counter | Mostly hidden by the counter, so put any interest near the top. |
 | Lights | None | hanging below the status bar | Keeps clear of the bar's buttons and the monster's head. |
 | Window | Street | the window beside the door (x 208, y 142, 214×150) | Usually only the view changes. A new frame is fair game if it still reads as the same window. |
-| Counter-top | Clear Counter (nothing) | *set in M4a* | Keeps clear of the tray, the bin, Pip's hat and the serve bell on both basket sides. The bell is a control, not decor (D159). |
-| Wall art | Bare Wall (nothing) | *set in M4a* | Stays quiet behind the monster's head. The Menu Board is a 20-coin item to draw (D160). |
+| Counter-top | Clear Counter (nothing) | on the counter's far edge at its right end (x 1176, y 324, 96×112), right of the ticket | Keeps clear of the tray, the bin, Pip's hat and the serve bell on both basket sides. The bell is a control, not decor (D159). During CountTogether the ticket slides over the top 36 px. |
+| Wall art | Bare Wall (nothing) | on the wall above the monster, between the two runs of lights (x 540, y 128, 200×72) | Stays quiet behind the monster's head; the tallest monster's eye stalks reach y 204. The Menu Board is a 20-coin item (D160). |
 
 M4a puts the exact positions in `src/app/metrics.ts` and draws a labelled stand-in in each slot.
 
@@ -97,3 +97,4 @@ These are approved: don't redraw them without asking. Notes record what the owne
 - 2026-11-21: split into firm limits, house style and room to experiment, at the owner's request (D158). Lint checks only the firm limits.
 - 2026-11-23: batch 1 (wallpaper + floor) drawn in `src/art/decor/Wallpaper.tsx` and `Floor.tsx`, awaiting the owner's verdict. Tones come from `mix()` in `src/art/decor/paint.ts` (base/accent mixes, cream). The café's own wall and floor are drawn by the same components, so a recolour is the same drawing. Experiments: Starry Night (dark wall, twinkling stars), perspective on Checkerboard and Tiles. Sheets: `npx cross-env NCMC_SCREENS=M4b/<batch> NCMC_DECOR_SLOTS=<slots> NCMC_DECOR_BUSY=<keys> playwright test screens --project=chromium-ipad-pro-11`.
 - 2026-11-24: batch 2 (lights + window) drawn in `src/art/decor/Lights.tsx` and `Window.tsx`, awaiting the owner's verdict. Lights hang in two runs of three swags (DECOR.lightsLeft/Right, past the safe box for the bleed); the single ceiling pieces (Disco Ball, Star Chandelier) hang over the right wall, above the ticket. Windows share one frame (the café's own: white frame and bar, trim sill, peach awning) and only the view changes, clipped to the glass; Street is drawn the same way. Shapes of one colour that don't move on their own share one `<path>` (helpers `ellipsePath`, `starPath`, `sparklePath` in `paint.ts`). New motion classes in `decor.css`: `decor-glow`, `decor-sway`, `decor-snow`. Experiments: Star Chandelier (warm glow, left-wall star strands), Snowy (falling snow).
+- 2026-11-24: batch 3 (counter-top + wall art) drawn in `src/art/decor/CounterTop.tsx` and `WallArt.tsx`, awaiting the owner's verdict. Counter-top pieces stand on the far edge strip on a soft shadow, at full opacity (the counter is nearer than the room); wall art keeps the room's 0.92 and its busy parts high. Gold and silver now live in `paint.ts` (`GOLD`, `SILVER`, …) so the chandelier, trophies and robot match; `heartPath` and the face `INK` too. Monster Portraits draws the monsters' own drawings (still: their motion classes only run inside a live monster), about 105 elements, over its 60 allowance; the counter-top pieces (14–25) make up for it. New motion classes: `decor-turn`, `decor-swim`, `decor-bubble`, `decor-blink`, `decor-wave`. Experiments: Tiny Robot (a face that blinks, and a wave), Fish Bowl (a goldfish that swims). The batch's screenshots add a `decor-<slot>-zoom.png` close-up for the small slots.

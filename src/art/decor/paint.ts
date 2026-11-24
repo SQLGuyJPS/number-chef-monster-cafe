@@ -40,3 +40,16 @@ export const ellipsePath = (cx: number, cy: number, rx: number, ry: number = rx)
 /** A four-point sparkle (a glint of light), curved in to its centre. */
 export const sparklePath = (cx: number, cy: number, r: number): string =>
   `M${cx} ${cy - r}Q${cx} ${cy} ${cx + r} ${cy}Q${cx} ${cy} ${cx} ${cy + r}Q${cx} ${cy} ${cx - r} ${cy}Q${cx} ${cy} ${cx} ${cy - r}Z`;
+
+/** Metal shared by every gold or silver piece, so the chandelier, trophies and robot match. */
+export const GOLD = '#ecb93f';
+export const GOLD_DARK = '#c48d22';
+export const SILVER = '#d3d8e6';
+export const SILVER_SHADE = '#aab1c6';
+
+/** Face ink (ART_GUIDE §3): kept for faces, as on Pip and the monsters. */
+export const INK = '#2b2b3a';
+
+/** A rounded heart centred on (cx, cy), about 2r wide. */
+export const heartPath = (cx: number, cy: number, r: number): string =>
+  `M${cx} ${cy + r * 0.9}C${cx - r * 1.5} ${cy - r * 0.1} ${cx - r * 0.7} ${cy - r * 1.2} ${cx} ${cy - r * 0.35}C${cx + r * 0.7} ${cy - r * 1.2} ${cx + r * 1.5} ${cy - r * 0.1} ${cx} ${cy + r * 0.9}Z`;
