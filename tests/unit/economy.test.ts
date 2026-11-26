@@ -16,10 +16,10 @@ import { mulberry32 } from '../../src/engine/rng';
 describe('shop catalog', () => {
   const entries = expandCatalog(M4_ITEMS);
 
-  it('matches SPEC §10: 51 paid entries, 2,505 coins (D148, D157, D160, D177)', () => {
+  it('matches SPEC §10: 55 paid entries, 2,725 coins (D148, D157, D160, D177, D185)', () => {
     const paid = entries.filter((e) => e.price > 0);
-    expect(paid).toHaveLength(51);
-    expect(paid.reduce((s, e) => s + e.price, 0)).toBe(2505);
+    expect(paid).toHaveLength(55);
+    expect(paid.reduce((s, e) => s + e.price, 0)).toBe(2725);
     expect(entries.some((e) => e.slot === 'staff')).toBe(false);
     // The serve bell is a control the child always needs, never a shop item (D159).
     expect(entries.some((e) => e.item === 'bell')).toBe(false);

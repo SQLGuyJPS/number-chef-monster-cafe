@@ -8,7 +8,7 @@ import {
   serviceEndEvent,
   type Evt,
 } from '../../src/engine/events';
-import { CRATE_HOLD_AT_UNBOUGHT, EARLY_CRATES, STARTER_SHELF } from '../../src/engine/economy';
+import { CRATE_HOLD_AT_UNBOUGHT, EARLY_CRATES, LATE_CRATES, STARTER_SHELF } from '../../src/engine/economy';
 import { balance, earned, replay, servedMonsters, type Derived } from '../../src/engine/replay';
 import {
   CATALOG,
@@ -77,23 +77,27 @@ class Device {
 }
 
 describe('catalog and queue (SPEC §10)', () => {
-  it('51 paid entries, 2,505 coins (D177), no bell', () => {
+  it('55 paid entries, 2,725 coins (D177, D185), no bell', () => {
     const paid = CATALOG.filter((e) => e.price > 0);
-    expect(paid).toHaveLength(51);
-    expect(paid.reduce((s, e) => s + e.price, 0)).toBe(2505);
+    expect(paid).toHaveLength(55);
+    expect(paid.reduce((s, e) => s + e.price, 0)).toBe(2725);
     expect(CATALOG.some((e) => e.item.includes('bell'))).toBe(false);
   });
 
-  it('every starter entry is in the catalog; the queue holds the other 41, fixed and distinct', () => {
+  it('every starter entry is in the catalog; the queue holds the other 45, fixed and distinct', () => {
     for (const k of STARTER_SHELF) expect(entryOf(k), k).toBeDefined();
-    expect(CRATE_QUEUE).toHaveLength(41);
-    expect(new Set(CRATE_QUEUE).size).toBe(41);
+    expect(CRATE_QUEUE).toHaveLength(45);
+    expect(new Set(CRATE_QUEUE).size).toBe(45);
     expect(CRATE_QUEUE.some((k) => STARTER_SHELF.includes(k))).toBe(false);
     // The entries taken off the starter shelf come first (D182).
     expect(CRATE_QUEUE.slice(0, EARLY_CRATES.length)).toEqual([...EARLY_CRATES]);
     expect(crateEntries(1)).toEqual(['wallpaper.plain.berry', 'window.garden.classic']);
-    expect(crateEntries(21)).toEqual([CRATE_QUEUE[40]]);
-    expect(crateEntries(22)).toEqual([]);
+    // Entries added since the crates shipped come last, so delivered crates never change (D185).
+    for (const k of LATE_CRATES) expect(entryOf(k)?.price, k).toBeGreaterThan(0);
+    expect(CRATE_QUEUE.slice(-LATE_CRATES.length)).toEqual([...LATE_CRATES]);
+    expect(crateEntries(21)).toEqual(['lights.paper-lanterns.honey', 'window.town-houses.classic']);
+    expect(crateEntries(23)).toEqual([CRATE_QUEUE[44]]);
+    expect(crateEntries(24)).toEqual([]);
   });
 
   it('a fresh café shows the free defaults and the starter shelf', () => {
@@ -209,7 +213,7 @@ describe('crates (SPEC §10.1, D154)', () => {
       if (dv.visit()) crates++;
       dv.serve(30);
     }
-    expect(crates).toBe(21);
+    expect(crates).toBe(23);
     expect(unboughtOnShelf(dv.d)).toHaveLength(0);
     expect(shelfKeys(dv.d)).toHaveLength(CATALOG.length);
   });

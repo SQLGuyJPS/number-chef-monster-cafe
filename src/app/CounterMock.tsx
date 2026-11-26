@@ -67,7 +67,7 @@ export interface MockOptions {
   clean: boolean;
   /** `&decor`: a labelled stand-in in every decor slot (M4a mock). */
   decor: boolean;
-  /** `&window=<item>`: that window view in place (the Street redesign mocks, M4b). */
+  /** `&window=<item>`: that window in place, to judge a view (and its motion) during play (M4b). */
   window: string | null;
 }
 

@@ -383,6 +383,17 @@ Owner notes (2026-11-24): the detail in every piece is welcome and doesn't go to
 
 Not verifiable in the cloud build: the swim, wave, blink and second-hand smoothness on the real iPad, and the colours on the iPad and iPhone screens.
 
+## M4b — The new Street and four more windows (D185)
+
+The free Street is now the Little Shops view (a bakery and a flower shop), so every café shows it straight away. Town Houses, Park, Hilltop Town and Seaside are new windows at 55 coins each. They come last in the crate queue (crates 21–23), so a device's earlier crates don't change; to see them now, use Grown-ups → *Deliver every crate now*. The Window tab now has two pages of four. Sheets are in `docs/screens/M4b/streets/`. Use `?mock&window=<id>` (`town-houses`, `park`, `hilltop-town`, `seaside`) to see one during a service.
+- [ ] **Street (Little Shops).** Is it right in play, behind the monster and the caption? Notes:
+- [ ] **The four new windows on the shelf.** Do the tile pictures read, and does 55 feel right for each? Notes:
+- [ ] **Park: the balloons sway** (*experiment*). Keep? Notes:
+- [ ] **Hilltop Town: the windmill's sails turn**, once a minute (*experiment*). Keep? Notes:
+- [ ] **Seaside: the boat rocks** (*experiment*). Keep? Notes:
+
+Not verifiable in the cloud build: how smooth the motion is on the real iPad, and the colours on the iPad and iPhone screens.
+
 ## M13 step 2 — Voice listening test (D139d, D143–D147; iPad first, about 45 minutes with the recording)
 
 Record `docs/VOICE_SPIKE.md`, build it, push to `main`, then open the app with `?debug` on the iPad and scroll to **Voice test**. Until clips exist every button says "(TTS)" and lists what is "not recorded". Tap the screen once first so sound is on. Only you can judge these:

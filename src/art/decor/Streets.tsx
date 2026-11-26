@@ -1,10 +1,12 @@
-// Street window mocks (M4b, owner 2026-11-24): five new takes on the free Street view, each a
-// different place across the road, for the owner to pick from; the others may become variants.
-// Drawn like the other views (Window.tsx): window coordinates (0..W, 0..H), clipped to the glass.
-// Shared rules for all five: the awning hides the top ~14 px, so nothing important sits there;
-// the window's middle bar (x 104–110) falls in a gap, never through a building or a face; every
-// thing stands on what holds it up; colours come from the shared families where a thing is
-// painted (houses, huts, awnings), so the street matches the shop's paints.
+// The daytime views across the road (M4b, D185): five places drawn as one set. The owner picked
+// Little Shops as the free Street; Town Houses, Park, Hilltop Town and Seaside are sold as window
+// items of their own. Drawn like the other views (Window.tsx): window coordinates (0..W, 0..H),
+// clipped to the glass. Shared rules for all five: the awning hides the top ~14 px, so nothing
+// important sits there; the window's middle bar (x 104–110) falls in a gap, never through a
+// building or a face; every thing stands on what holds it up; colours come from the shared
+// families where a thing is painted (houses, huts, awnings), so the street matches the shop's
+// paints. During play the caption bubble covers the right two-thirds of the window, so each
+// view's signature thing (and any motion) is on the left.
 import type { ReactElement } from 'react';
 import { DECOR } from '../../app/metrics';
 import { COLOR_FAMILIES, type ColorFamily } from '../../engine/economy';
@@ -277,8 +279,9 @@ function TownHousesView() {
 }
 
 // ---------------------------------------------------------------------------------------------
-// B. Little Shops: a bakery (bread and a cake in the window, a Berry awning) beside a flower shop
-// (a Mint awning, buckets of flowers outside, a cat upstairs at the window). All still.
+// B. Little Shops, the free Street: a bakery (bread and a cake in the window, a Berry awning)
+// beside a flower shop (a Mint awning, buckets of flowers outside, a cat upstairs at the window).
+// All still.
 
 /** A striped shop awning from x0 to x1 below a rail at y, scalloped like the café's own. */
 function Awning({ x0, x1, y, k, n = 6 }: { x0: number; x1: number; y: number; k: ColorFamily; n?: number }) {
@@ -587,11 +590,14 @@ function SeasideView() {
   );
 }
 
-/** The five mocks, in the order the sheet shows them (A–E). Glass is the café's sky blue. */
-export const STREET_MOCKS: readonly { item: string; name: string; glass: string; View: () => ReactElement }[] = [
-  { item: 'street-town', name: 'A · Town Houses', glass: '#cfeaff', View: TownHousesView },
-  { item: 'street-shops', name: 'B · Little Shops', glass: '#cfeaff', View: LittleShopsView },
-  { item: 'street-park', name: 'C · Park', glass: '#cfeaff', View: ParkView },
-  { item: 'street-hilltop', name: 'D · Hilltop Town', glass: '#cfeaff', View: HilltopView },
-  { item: 'street-seaside', name: 'E · Seaside', glass: '#cfeaff', View: SeasideView },
-];
+/**
+ * The views by catalog item id (economy.ts): Little Shops is the free Street (D185). The glass is
+ * the café's sky blue.
+ */
+export const STREET_VIEWS: Readonly<Record<string, () => ReactElement>> = {
+  street: LittleShopsView,
+  'town-houses': TownHousesView,
+  park: ParkView,
+  'hilltop-town': HilltopView,
+  seaside: SeasideView,
+};

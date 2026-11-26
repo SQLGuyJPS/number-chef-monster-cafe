@@ -6,7 +6,6 @@
 // writes.
 import { useState } from 'react';
 import { CounterScene } from '../art/CounterScene';
-import { STREET_MOCKS } from '../art/decor/StreetMocks';
 import type { DecorSlot, ShopEntry } from '../engine/economy';
 import { CATALOG, DECOR_SLOTS, entryOf } from '../engine/shop';
 import { lookFor } from './decorLook';
@@ -40,30 +39,8 @@ function Cafe({ e }: { e: ShopEntry }) {
   return <CounterScene decor={e.price > 0 ? { [e.slot]: lookFor(e) } : {}} />;
 }
 
-/** `&mocks`: the Street window redesign mocks beside today's Street, for the owner to pick. */
-function StreetMockCards({ cardW, region, scale }: { cardW: number; region: Rect; scale: number }) {
-  const cards = [{ item: 'street', name: 'Today · Street' }, ...STREET_MOCKS];
-  return (
-    <>
-      {cards.map((m) => (
-        <a key={m.item} className="decor-card" href={`?mock&window=${m.item}`} data-entry={m.item}>
-          <div className="decor-frame" style={{ width: cardW, height: Math.round(region.h * scale) }}>
-            <div style={{ transform: `scale(${scale}) translate(${-region.x}px, ${-region.y}px)`, transformOrigin: '0 0' }}>
-              <CounterScene
-                decor={m.item === 'street' ? {} : { window: { slot: 'window', item: m.item, name: m.name, base: '', accent: '' } }}
-              />
-            </div>
-          </div>
-          <div className="decor-label">{m.name}</div>
-        </a>
-      ))}
-    </>
-  );
-}
-
 export function DecorSheet() {
   const q = new URLSearchParams(location.search);
-  const mocks = q.has('mocks');
   const one = entryOf(q.get('key') ?? '');
   const only = q.get('slot');
   const zoom = q.has('zoom');
@@ -90,12 +67,10 @@ export function DecorSheet() {
         return (
           <section key={slot} data-testid={`decor-slot-${slot}`}>
             <h2>
-              {mocks && slot === 'window' ? 'Street mocks' : SLOT_NAMES[slot]}{' '}
-              <small>({mocks && slot === 'window' ? STREET_MOCKS.length + 1 : entries.length})</small>
+              {SLOT_NAMES[slot]} <small>({entries.length})</small>
             </h2>
             <div className="decor-grid" style={{ gridTemplateColumns: `repeat(${cols}, ${cardW}px)`, gap }}>
-              {mocks && slot === 'window' ? <StreetMockCards cardW={cardW} region={region} scale={scale} /> : null}
-              {!(mocks && slot === 'window') && entries.map((e) => (
+              {entries.map((e) => (
                 <a key={e.key} className="decor-card" href={`?decor&key=${e.key}`} data-entry={e.key}>
                   <div className="decor-frame" style={{ width: cardW, height: Math.round(region.h * scale) }}>
                     <div
