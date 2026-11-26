@@ -191,6 +191,11 @@ export const M4_ITEMS: readonly ItemDef[] = [
   { id: 'garden', slot: 'window', name: 'Garden', tier: 3, colorways: ['classic'] },
   { id: 'moonlit', slot: 'window', name: 'Moonlit', tier: 3, colorways: ['classic'] },
   { id: 'snowy', slot: 'window', name: 'Snowy', tier: 3, colorways: ['classic'] },
+  // The daytime streets drawn with the free Street (Little Shops), each sold as its own scene (D185).
+  { id: 'town-houses', slot: 'window', name: 'Town Houses', tier: 3, colorways: ['classic'] },
+  { id: 'park', slot: 'window', name: 'Park', tier: 3, colorways: ['classic'] },
+  { id: 'hilltop-town', slot: 'window', name: 'Hilltop Town', tier: 3, colorways: ['classic'] },
+  { id: 'seaside', slot: 'window', name: 'Seaside', tier: 3, colorways: ['classic'] },
   // Counter-top
   // The counter-top's default is a clear counter; the serve bell is a control, not decor (D159).
   {
@@ -276,6 +281,18 @@ export const EARLY_CRATES: readonly string[] = [
   'lights.disco-ball.classic',
   'floor.wood.cocoa',
   'lights.star-chandelier.classic',
+];
+
+/**
+ * Entries added to the M4 catalog after its crates shipped (D185): the four daytime streets drawn
+ * with the new Street. They join the end of the crate queue in this order, so the crates a device
+ * already has keep their contents.
+ */
+export const LATE_CRATES: readonly string[] = [
+  'window.town-houses.classic',
+  'window.park.classic',
+  'window.hilltop-town.classic',
+  'window.seaside.classic',
 ];
 
 /**

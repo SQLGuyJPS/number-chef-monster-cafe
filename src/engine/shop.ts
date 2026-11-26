@@ -9,6 +9,7 @@ import {
   interleave,
   M4_ITEMS,
   EARLY_CRATES,
+  LATE_CRATES,
   STARTER_SHELF,
   type DecorSlot,
   type ShopEntry,
@@ -40,17 +41,20 @@ export function freeDefault(slot: DecorSlot): ShopEntry {
 const STARTER = new Set(STARTER_SHELF);
 
 const EARLY = new Set(EARLY_CRATES);
+const LATE = new Set(LATE_CRATES);
 
 /**
- * The fixed crate order (D154, D182): the early crates first, then every other paid entry not on
- * the starter shelf, in catalog order, round-robin across items. Crate n holds entries 2n−1 and
- * 2n. Later updates append here.
+ * The fixed crate order (D154, D182, D185): the early crates first, then every other paid entry
+ * not on the starter shelf, in catalog order, round-robin across items, then the entries added
+ * since (LATE_CRATES). Crate n holds entries 2n−1 and 2n. Later updates append here, so a crate
+ * a device already has never changes.
  */
 export const CRATE_QUEUE: readonly string[] = [
   ...EARLY_CRATES,
-  ...interleave(CATALOG.filter((e) => e.price > 0 && !STARTER.has(e.key) && !EARLY.has(e.key))).map(
-    (e) => e.key,
-  ),
+  ...interleave(
+    CATALOG.filter((e) => e.price > 0 && !STARTER.has(e.key) && !EARLY.has(e.key) && !LATE.has(e.key)),
+  ).map((e) => e.key),
+  ...LATE_CRATES,
 ];
 
 /** The entries delivered by crate `n` (1-based). */

@@ -8,6 +8,7 @@ import { DECOR } from '../../app/metrics';
 import { COLOR_FAMILIES } from '../../engine/economy';
 import { CREAM, ellipsePath, mix, starPath } from './paint';
 import { WindowStandIn, type DecorLook } from './StandIn';
+import { STREET_VIEWS } from './Streets';
 import './decor.css';
 
 /** The wainscot trim colour: the sill is the same wood. */
@@ -42,30 +43,9 @@ function Frame({ glass, clipId, children }: { glass: string; clipId: string; chi
   );
 }
 
-/** A small puffy cloud, as the Street window has. */
+/** A small puffy cloud, as the Garden window has. */
 const cloud = (x: number, y: number) =>
   `M${x} ${y} q12 -14 26 -4 q10 -10 22 0 q6 8 -4 10 h-38 q-10 -2 -6 -6 Z`;
-
-/** Street (the free default): the houses across the road, a tree, the sun. */
-function StreetView() {
-  return (
-    <>
-      <circle cx={W - 40} cy={34} r={14} fill="#fff3a6" />
-      <path d={cloud(20, 44)} fill="#fff" />
-      <rect x={0} y={H * 0.5} width={60} height={H * 0.5} fill="#e9c6a8" />
-      <rect x={62} y={H * 0.38} width={70} height={H * 0.62} fill="#d6b4c8" />
-      <rect x={134} y={H * 0.56} width={80} height={H * 0.44} fill="#c8d6b0" />
-      {[0, 1].map((r) =>
-        [0, 1].map((c) => (
-          <rect key={`${r}${c}`} x={76 + c * 26} y={H * 0.46 + r * 28} width={16} height={18} fill={CREAM} opacity={0.8} />
-        )),
-      )}
-      <circle cx={30} cy={H * 0.48} r={20} fill="#9ccf7a" />
-      <rect x={27} y={H * 0.56} width={6} height={30} fill="#9b6a44" />
-      <rect x={0} y={H - 14} width={W} height={14} fill="#bdbdbd" />
-    </>
-  );
-}
 
 /** The flower colours come from the shared families, so the garden matches the shop's paints. */
 const bloom = (k: 'berry' | 'honey' | 'lavender') => mix(COLOR_FAMILIES[k].base, COLOR_FAMILIES[k].accent, 0.55);
@@ -267,18 +247,20 @@ function SnowyView() {
 }
 
 const VIEWS: Record<string, { glass: string; View: () => ReactElement }> = {
-  street: { glass: '#cfeaff', View: StreetView },
   garden: { glass: '#cfeaff', View: GardenView },
   moonlit: { glass: NIGHT, View: MoonlitView },
   snowy: { glass: '#dbe7f2', View: SnowyView },
+  // The daytime streets across the road, the free Street among them (Streets.tsx, D185).
+  ...Object.fromEntries(Object.entries(STREET_VIEWS).map(([id, View]) => [id, { glass: '#cfeaff', View }])),
 };
 
 /** The café's own street window (the free default). */
 export function StreetWindow() {
+  const street = VIEWS.street!;
   return (
     <g data-slot="window">
-      <Frame glass={VIEWS.street!.glass} clipId="win-street">
-        <StreetView />
+      <Frame glass={street.glass} clipId="win-street">
+        <street.View />
       </Frame>
     </g>
   );
