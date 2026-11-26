@@ -35,14 +35,15 @@ const base = (k: ColorFamily) => COLOR_FAMILIES[k].base;
 /** A family's tone `t` of the way from its pale base to its accent. */
 const tone = (k: ColorFamily, t: number) => mix(COLOR_FAMILIES[k].base, COLOR_FAMILIES[k].accent, t);
 
-// Path builders. Rectangles wind the same way round as ellipsePath, so shapes of one colour that
-// overlap (a cloud's puffs over its base) fill as one.
+// Path builders. Every shape winds counter-clockwise on screen, the same way round as ellipsePath,
+// so shapes of one colour that overlap in one path (a cloud's puffs over its base, a cat's ears on
+// its head) fill as one. A shape wound the other way cuts a hole where it overlaps (nonzero rule).
 const box = (x: number, y: number, w: number, h: number) => `M${f(x)} ${f(y)}v${f(h)}h${f(w)}v${f(-h)}Z`;
 const tri = (x1: number, y1: number, x2: number, y2: number, x3: number, y3: number) =>
   `M${f(x1)} ${f(y1)}L${f(x2)} ${f(y2)}L${f(x3)} ${f(y3)}Z`;
 /** An arched door or window standing on its bottom edge. */
 const arch = (x: number, y: number, w: number, h: number) =>
-  `M${f(x)} ${f(y + h)}V${f(y + w / 2)}a${f(w / 2)} ${f(w / 2)} 0 0 1 ${f(w)} 0V${f(y + h)}Z`;
+  `M${f(x + w)} ${f(y + h)}V${f(y + w / 2)}a${f(w / 2)} ${f(w / 2)} 0 0 0 ${f(-w)} 0V${f(y + h)}Z`;
 /** A puffy cloud resting on a flat base at y, about 33·s wide: three puffs over a base. */
 const puff = (x: number, y: number, s = 1) =>
   ellipsePath(x - 10 * s, y - 6 * s, 6 * s) +
@@ -93,9 +94,13 @@ function Windows({ at, arched = false, glass = GLASS }: { at: readonly Rect4[]; 
   const shape = arched ? arch : box;
   const frame = at.map(([x, y, w, h]) => shape(x - 1.5, y - 1.5, w + 3, h + 3) + box(x - 3, y + h + 1, w + 6, 2.5));
   const pane = at.map(([x, y, w, h]) => shape(x, y, w, h));
+  // The glint sits wholly inside the top-left pane: 1 px clear of the frame (under an arch, of the
+  // curve where the glint starts) and of the glazing bar below it.
   const glint = at.map(([x, y, w, h]) => {
-    const top = arched ? y + w * 0.35 : y + 1.5;
-    return `M${f(x + 1.5)} ${f(top)}h${f(w * 0.32)}l${f(-w * 0.32)} ${f(h * 0.4)}Z`;
+    const r = w / 2;
+    const top = arched ? y + r - Math.sqrt(r * r - (r - 1.5) ** 2) + 1 : y + 1.5;
+    const bottom = Math.min(top + h * 0.4, y + h * 0.55 - 1.8);
+    return `M${f(x + 1.5)} ${f(top)}h${f(w * 0.32)}L${f(x + 1.5)} ${f(bottom)}Z`;
   });
   const bars = at.map(([x, y, w, h]) => `M${f(x + w / 2)} ${f(y)}V${f(y + h)}M${f(x)} ${f(y + h * 0.55)}H${f(x + w)}`);
   return (
@@ -113,7 +118,7 @@ function Lamp({ x, foot, top }: { x: number; foot: number; top: number }) {
   return (
     <>
       <path
-        d={box(x - 1.2, top + 10, 2.4, foot - top - 10) + box(x - 3.5, foot - 3, 7, 3) + tri(x - 6, top + 3, x, top - 3, x + 6, top + 3)}
+        d={box(x - 1.2, top + 10, 2.4, foot - top - 10) + box(x - 3.5, foot - 3, 7, 3) + tri(x + 6, top + 3, x, top - 3, x - 6, top + 3)}
         fill={IRON}
       />
       <path d={box(x - 4, top + 3, 8, 7)} fill={SUN} stroke={IRON} strokeWidth={1.4} strokeLinejoin="round" />
@@ -142,9 +147,9 @@ function Cat({ x, y, colour }: { x: number; y: number; colour: string }) {
       <path d={`M${f(x + 5)} ${f(y - 1)}q7 0 6 -7q-1 -4 -4 -3`} stroke={colour} strokeWidth={2.4} strokeLinecap="round" fill="none" />
       <path
         d={
-          `M${f(x - 6)} ${f(y)}q-1 -9 4 -12h4q5 3 4 12Z` +
+          `M${f(x + 6)} ${f(y)}q1 -9 -4 -12h-4q-5 3 -4 12Z` +
           ellipsePath(x, y - 15, 5, 4.6) +
-          tri(x - 5, y - 16, x - 4.6, y - 23, x - 0.8, y - 19) +
+          tri(x - 0.8, y - 19, x - 4.6, y - 23, x - 5, y - 16) +
           tri(x + 5, y - 16, x + 4.6, y - 23, x + 0.8, y - 19)
         }
         fill={colour}
@@ -158,6 +163,8 @@ function Cat({ x, y, colour }: { x: number; y: number; colour: string }) {
 // A. Town Houses: a terrace of four gabled houses in four families, chimneys, flower boxes, a
 // street lamp, a ginger cat on the pavement and a bird on a ridge. All still.
 
+/** A gabled house front: its walls from x to x + w, its roof's top line at `peak` over the middle
+ * and at `eave` over each wall. */
 interface House {
   x: number;
   w: number;
@@ -173,19 +180,50 @@ const TOWN: readonly House[] = [
   { x: 160, w: 54, eave: 72, peak: 48, k: 'lavender' },
 ];
 
-/**
- * A gabled front: the roof is a triangle with a 2 px overhang, and the wall (with its gable) is the
- * same slope lowered by `d`, so the roof shows as an even band d px deep over the gable.
- */
+/** How far a house's roof line drops for each px out from the ridge. */
+const pitch = (h: House) => (h.eave - h.peak) / (h.w / 2);
+
+/** The wall with its gable, its top following the roof line lowered by `d` (the roof's depth). */
 function gable(h: House, d: number, ground = GROUND): string {
-  const cx = h.x + h.w / 2;
-  const k = (h.eave + 2 - h.peak) / (h.w / 2 + 2);
-  const side = h.peak + d + k * (h.w / 2);
-  return `M${f(h.x)} ${f(ground)}V${f(side)}L${f(cx)} ${f(h.peak + d)}L${f(h.x + h.w)} ${f(side)}V${f(ground)}Z`;
+  return `M${f(h.x)} ${f(ground)}V${f(h.eave + d)}L${f(h.x + h.w / 2)} ${f(h.peak + d)}L${f(h.x + h.w)} ${f(h.eave + d)}V${f(ground)}Z`;
 }
-const roof = (h: House) => tri(h.x - 2, h.eave + 2, h.x + h.w / 2, h.peak, h.x + h.w + 2, h.eave + 2);
+
+/**
+ * The roof: a band `d` deep along both slopes. An end with no house in front of it runs on down
+ * past the wall by `o` and is cut square, as eaves are. In a terrace, where the neighbour on that
+ * side stands in front, the roof runs on down until it meets the neighbour's roof and stops there,
+ * along that roof's top edge, so the two touch without overlapping (owner, 2026-11-26).
+ */
+function roof(h: House, d: number, o: number, front: { left?: House; right?: House } = {}): string {
+  const cx = h.x + h.w / 2;
+  const k = pitch(h);
+  /** Where our slope, `dd` below the top line, meets the facing slope of the neighbour n. */
+  const meet = (n: House, dd: number, side: -1 | 1) => {
+    const kn = pitch(n);
+    const cn = n.x + n.w / 2;
+    const x =
+      side < 0
+        ? (h.peak + dd + k * cx - n.peak + kn * cn) / (k + kn)
+        : (n.peak + kn * cn - h.peak - dd + k * cx) / (k + kn);
+    return [x, h.peak + dd + k * Math.abs(x - cx)] as const;
+  };
+  const end = (side: -1 | 1, dd: number) => {
+    const n = side < 0 ? front.left : front.right;
+    if (n) return meet(n, dd, side);
+    return [side < 0 ? h.x - o : h.x + h.w + o, h.eave + k * o + dd] as const;
+  };
+  const pt = ([x, y]: readonly [number, number]) => `${f(x)} ${f(y)}`;
+  return `M${pt(end(-1, 0))}L${f(cx)} ${f(h.peak)}L${pt(end(1, 0))}L${pt(end(1, d))}L${f(cx)} ${f(h.peak + d)}L${pt(end(-1, d))}Z`;
+}
 
 function TownHousesView() {
+  const [berry, honey, mint, lavender] = TOWN as [House, House, House, House];
+  const terrace: readonly { h: House; front?: { left?: House; right?: House } }[] = [
+    { h: berry, front: { right: honey } },
+    { h: mint, front: { left: honey, right: lavender } },
+    { h: honey },
+    { h: lavender },
+  ];
   const up: Rect4[] = [];
   const down: Rect4[] = [];
   const doors: [number, ColorFamily][] = [];
@@ -211,9 +249,11 @@ function TownHousesView() {
       {/* chimneys first, so the roofs they come up through overlap their feet */}
       <path d={box(36, 48, 7, 16) + box(170, 50, 7, 14)} fill={tone('cocoa', 0.35)} />
       <path d={box(35, 46, 9, 3) + box(169, 48, 9, 3)} fill={tone('cocoa', 0.6)} />
-      {TOWN.map((h) => (
+      {/* Honey and Lavender stand in front: their eaves overhang their walls. Berry and Mint are
+          drawn first, their roofs running down to meet their neighbours' roofs. */}
+      {terrace.map(({ h, front }) => (
         <g key={h.k}>
-          <path d={roof(h)} fill={tone(h.k, 0.62)} />
+          <path d={roof(h, 5, 3, front)} fill={tone(h.k, 0.62)} />
           <path d={gable(h, 5)} fill={tone(h.k, 0.22)} />
           <path d={gable(h, 8)} fill={base(h.k)} />
         </g>
@@ -256,7 +296,9 @@ function Awning({ x0, x1, y, k, n = 6 }: { x0: number; x1: number; y: number; k:
 
 function LittleShopsView() {
   const bakery = mix(base('berry'), CREAM, 0.35);
-  const florist: House = { x: 107, w: 107, eave: 54, peak: 34, k: 'mint' };
+  // The flower shop ends short of the window's edge, so its right-hand eave shows overhanging its
+  // wall; the next building along fills the gap below.
+  const florist: House = { x: 107, w: 93, eave: 51, peak: 33, k: 'mint' };
   const stems = [124, 140, 156].map((x) => `M${x - 3} 121l-1 -8M${x} 121v-10M${x + 3} 121l1 -8`).join('');
   const bunch = (dx: readonly number[], dy = 0) =>
     [124, 140, 156].map((x, i) => ellipsePath(x + dx[i]!, 110 + dy + (i % 2), 2.6)).join('');
@@ -270,41 +312,43 @@ function LittleShopsView() {
       <path d={box(-6, 48, 115, 3)} fill={CREAM} />
       <Windows at={[[15, 57, 14, 17], [47, 57, 14, 17], [79, 57, 14, 17]]} arched />
       <Awning x0={2} x1={102} y={80} k="berry" />
-      {/* its shop window: loaves and a cake on a shelf, cookies below */}
+      {/* its shop window: loaves and a cake on a shelf, cookies below. The shelf sits low enough
+          that the cake's cherry clears the top of the window. */}
       <path d={box(7, 99, 58, 23)} fill={CREAM} />
       <path d={box(9, 101, 54, 19)} fill={SHOP_INSIDE} />
-      <path d={box(9, 111, 54, 1.8)} fill={WOOD} />
-      <path d={`M13 111a5.5 5 0 0 1 11 0ZM26 111a5.5 5 0 0 1 11 0Z`} fill="#dca266" />
-      <path d={box(44, 105, 14, 6)} fill={tone('berry', 0.3)} />
-      <path d={box(47, 101.5, 8, 3.5)} fill={CREAM} />
-      <circle cx={51} cy={100.3} r={1.6} fill={tone('berry', 0.85)} />
-      <path d={[16, 26, 36, 46, 56].map((x) => ellipsePath(x, 116.5, 2.6, 2)).join('')} fill="#c98f58" />
-      <path d={tri(11, 102, 20, 102, 11, 109)} fill="#fff" opacity={0.5} />
+      <path d={box(9, 113, 54, 1.8)} fill={WOOD} />
+      <path d={`M13 113a5.5 5 0 0 1 11 0ZM26 113a5.5 5 0 0 1 11 0Z`} fill="#dca266" />
+      <path d={box(44, 108, 14, 5)} fill={tone('berry', 0.3)} />
+      <path d={box(47, 104.5, 8, 3.5)} fill={CREAM} />
+      <circle cx={51} cy={103.2} r={1.5} fill={tone('berry', 0.85)} />
+      <path d={[16, 26, 36, 46, 56].map((x) => ellipsePath(x, 117.4, 2.6, 2)).join('')} fill="#c98f58" />
+      <path d={tri(19, 102, 11, 102, 11, 107.5)} fill="#fff" opacity={0.5} />
       <path d={box(74, 98, 17, 26)} fill={tone('berry', 0.7)} />
       <path d={arch(77, 101, 11, 11)} fill={GLASS} />
+      {/* the next building along, beyond the flower shop */}
+      <path d={box(200, 70, 16, 54)} fill={base('lavender')} />
+      <path d={box(200, 70, 16, 4)} fill={tone('lavender', 0.45)} />
       {/* the flower shop: a gable, shuttered windows, a round attic window */}
-      <path d={roof(florist)} fill={tone('mint', 0.6)} />
+      <path d={roof(florist, 6, 3)} fill={tone('mint', 0.6)} />
       <path d={gable(florist, 6)} fill="#f1e6d2" />
       <path d={gable(florist, 9)} fill="#fdf4e3" />
-      <path d={box(124, 60, 5, 17) + box(147, 60, 5, 17) + box(170, 60, 5, 17) + box(193, 60, 5, 17)} fill={tone('mint', 0.55)} />
-      <Windows at={[[130, 60, 16, 17], [176, 60, 16, 17]]} />
-      <path d={ellipsePath(160.5, 46, 4.5)} fill={CREAM} />
-      <path d={ellipsePath(160.5, 46, 3)} fill={GLASS} />
+      <path d={box(117, 60, 5, 17) + box(140, 60, 5, 17) + box(163, 60, 5, 17) + box(186, 60, 5, 17)} fill={tone('mint', 0.55)} />
+      <Windows at={[[123, 60, 16, 17], [169, 60, 16, 17]]} />
+      <path d={ellipsePath(153.5, 47.5, 4.5)} fill={CREAM} />
+      <path d={ellipsePath(153.5, 47.5, 3)} fill={GLASS} />
       {/* the cat upstairs, sitting on the inside sill and looking out */}
       <path
-        d={`M133.5 76.5q0 -6 4.5 -6.5q4.5 0.5 4.5 6.5Z` + ellipsePath(138, 68.5, 3.2, 3) + tri(135, 68, 135.3, 63.5, 137.6, 66) + tri(141, 68, 140.7, 63.5, 138.4, 66)}
+        d={`M135.5 76.5q0 -6 -4.5 -6.5q-4.5 0.5 -4.5 6.5Z` + ellipsePath(131, 68.5, 3.2, 3) + tri(130.6, 66, 128.3, 63.5, 128, 68) + tri(134, 68, 133.7, 63.5, 131.4, 66)}
         fill="#8a7d92"
       />
-      <Awning x0={110} x1={212} y={80} k="mint" />
+      <Awning x0={110} x1={196} y={80} k="mint" />
+      {/* its shop window is plain glass: the flower buckets on the pavement fill it from below */}
       <path d={box(115, 99, 56, 23)} fill={CREAM} />
-      <path d={box(117, 101, 52, 19)} fill={SHOP_INSIDE} />
-      <path d={box(117, 110, 52, 1.8)} fill={WOOD} />
-      <path d={[132, 148, 164].map((x) => `M${x - 4} 110l1 -5h6l1 5Z`).join('')} fill="#d98f6a" />
-      <path d={[132, 148, 164].map((x) => ellipsePath(x, 102.5, 4.2, 3.4) + ellipsePath(x - 3, 104, 2.6) + ellipsePath(x + 3, 104, 2.6)).join('')} fill={LEAF} />
-      <path d={tri(119, 102, 128, 102, 119, 109)} fill="#fff" opacity={0.5} />
-      <path d={box(179, 98, 17, 26)} fill={tone('mint', 0.7)} />
-      <path d={arch(182, 101, 11, 11)} fill={GLASS} />
-      <path d={ellipsePath(88, 112, 1.3) + ellipsePath(193, 112, 1.3)} fill={GOLD} />
+      <path d={box(117, 101, 52, 19)} fill={GLASS} />
+      <path d={tri(127, 102, 119, 102, 119, 107.5)} fill="#fff" opacity={0.5} />
+      <path d={box(177, 98, 16, 26)} fill={tone('mint', 0.7)} />
+      <path d={arch(180, 101, 10, 11)} fill={GLASS} />
+      <path d={ellipsePath(88, 116, 1.3) + ellipsePath(190, 116, 1.3)} fill={GOLD} />
       <Road />
       {/* buckets of flowers on the pavement in front of the flower shop's window */}
       <path d={stems} stroke="#7fb85f" strokeWidth={1.6} strokeLinecap="round" />
@@ -373,7 +417,7 @@ function ParkView() {
       <g className="decor-sway" style={{ transformOrigin: '80px 88px' }}>
         <path d={balloons.map(([x, y, r]) => `M80 88Q${f((x + 80) / 2 + 2)} ${f((y + r + 88) / 2)} ${f(x)} ${f(y + r + 1.5)}`).join('')} stroke={IRON} strokeWidth={0.9} fill="none" opacity={0.8} />
         {balloons.map(([x, y, r, k]) => (
-          <path key={k} d={ellipsePath(x, y, r * 0.88, r) + tri(x - 1.6, y + r + 1.8, x, y + r - 0.6, x + 1.6, y + r + 1.8)} fill={tone(k, 0.55)} />
+          <path key={k} d={ellipsePath(x, y, r * 0.88, r) + tri(x + 1.6, y + r + 1.8, x, y + r - 0.6, x - 1.6, y + r + 1.8)} fill={tone(k, 0.55)} />
         ))}
         <path
           d={balloons.map(([x, y, r]) => `M${f(x - r * 0.55)} ${f(y - r * 0.15)}q${f(r * 0.05)} ${f(-r * 0.5)} ${f(r * 0.45)} ${f(-r * 0.6)}`).join('')}
@@ -393,18 +437,18 @@ function ParkView() {
 }
 
 // ---------------------------------------------------------------------------------------------
-// D. Hilltop Town: hills rising behind the road, a windmill on the top, a far cottage and two
-// sheep, and nearer cottages and trees behind a stone wall. The windmill is on the
-// left, which the caption bubble leaves uncovered during play. Experiment (ART_GUIDE §4): the
-// windmill's sails turn slowly (one turn a minute).
+// D. Hilltop Town: hills rising behind the road, a windmill on the top with a path winding down
+// from its door, a far cottage and two sheep, and nearer cottages and trees behind a stone wall.
+// The windmill is on the left, which the caption bubble leaves uncovered during play.
+// Experiment (ART_GUIDE §4): the windmill's sails turn slowly (one turn a minute).
 
 function HilltopView() {
   const wall = '#fbf3e4';
   const wallShade = '#ecdfc8';
-  const far: readonly [number, number, number, ColorFamily][] = [[72, 64, 15, 'honey']];
+  const far: readonly [number, number, number, ColorFamily][] = [[112, 70, 15, 'honey']];
   const sheep: readonly [number, number][] = [
-    [132, 74],
-    [146, 78],
+    [138, 78],
+    [153, 82],
   ];
   const hub = { x: 36, y: 33 };
   const blades = [0, 1, 2, 3].map((i) => {
@@ -421,6 +465,8 @@ function HilltopView() {
       <Sun x={182} y={30} />
       <Clouds at={[[80, 36, 0.7], [128, 40, 0.8]]} />
       <path d={`M-2 60C10 54 24 52 38 52S80 58 110 66S180 84 216 88V150H-2Z`} fill="#d5ebbf" />
+      {/* the path from the windmill's door, winding down the hill to the berry cottage's back */}
+      <path d={`M36 57.5C56 60 98 60 92 68S66 78 60 90`} stroke="#f4ead0" strokeWidth={3} strokeLinecap="round" fill="none" />
       {/* the windmill: a tapered tower, shaded on its right, a cap, sails turning on a hub */}
       <path d={`M28 57L31.5 33H40.5L44 57Z`} fill={wall} />
       <path d={`M36 33H40.5L44 57H36Z`} fill={wallShade} />
@@ -447,7 +493,7 @@ function HilltopView() {
       <Tree x={130} y={97} r={10} foot={114} />
       {[nearA, nearB].map((h) => (
         <g key={h.k}>
-          <path d={roof(h)} fill={tone(h.k, 0.62)} />
+          <path d={roof(h, 4, 2.5)} fill={tone(h.k, 0.62)} />
           <path d={gable(h, 4, 114)} fill={wallShade} />
           <path d={gable(h, 6.5, 114)} fill={wall} />
         </g>
