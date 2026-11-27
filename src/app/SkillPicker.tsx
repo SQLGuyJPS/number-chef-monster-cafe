@@ -2,14 +2,10 @@ import { BUILT_SKILLS } from '../engine/generators';
 import { STAGES, type Ops, type SkillId, type Stage } from '../engine/types';
 import { loadedProgress, useDerived } from './progress';
 import { configFor } from './skillConfig';
+import { SKILL_TITLES, STAGE_NAMES } from '../engine/labels';
 
-/** Support-level names for grown-ups (owner's wording, D128, D129); the S-codes stay internal. */
-export const STAGE_NAMES: Record<Stage, string> = {
-  3: 'Most help',
-  2: 'Some help',
-  1: 'Little help',
-  0: 'Least help',
-};
+export { SKILL_TITLES, STAGE_NAMES };
+
 export const STAGE_HELP: Record<Stage, string> = {
   3: 'The tray starts partially filled; Pip counts each tap aloud.',
   2: 'The tray starts partially filled; no spoken counts, a tone per tap.',
@@ -21,12 +17,6 @@ const OPS_NAMES: Record<Ops, string> = {
   both: 'addition and subtraction',
   add: 'addition only',
   sub: 'subtraction only',
-};
-/** Each built dish's name and what it asks (SPEC §1.2), so the lists read without the skill codes. */
-export const SKILL_TITLES: Partial<Record<SkillId, { name: string; asks: string }>> = {
-  A1: { name: 'A1 Little Bites', asks: 'within 5' },
-  A2: { name: 'A2 Big Bites', asks: 'within 10' },
-  A3: { name: 'A3 Perfect Ten', asks: 'pairs to 10' },
 };
 export const SKILL_NAMES: Partial<Record<SkillId, string>> = Object.fromEntries(
   Object.entries(SKILL_TITLES).map(([k, t]) => [k, `${t.name} (${t.asks})`]),

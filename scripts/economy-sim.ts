@@ -3,6 +3,9 @@
 //   --minutes 60        play minutes per week
 //   --session 15-20     minutes per sitting
 //   --service 3-4       minutes per 6-order service
+//   --between 0.5       minutes of Results and menu between services
+//   --shop 1.5          minutes in the shop at the end of a sitting
+//   (npm run play:report measures these from a backup, D189)
 //   --tiers 20,35,65,120,220   tier 1–5 prices
 //   --decor-week 7 --wardrobe-week 12 --staff-week 20   when the later waves reach the device
 //   --runs 300          seeded runs per scenario
@@ -51,6 +54,8 @@ const profile: PlayProfile = {
   minutesPerWeek: Number(flag('minutes') ?? DEFAULT_PROFILE.minutesPerWeek),
   sessionMinutes: range(flag('session'), DEFAULT_PROFILE.sessionMinutes),
   serviceMinutes: range(flag('service'), DEFAULT_PROFILE.serviceMinutes),
+  betweenServicesMinutes: Number(flag('between') ?? DEFAULT_PROFILE.betweenServicesMinutes),
+  shopMinutes: Number(flag('shop') ?? DEFAULT_PROFILE.shopMinutes),
 };
 const tierList = (flag('tiers') ?? Object.values(TIER_PRICE).join(',')).split(',').map(Number);
 const tiers = {

@@ -24,6 +24,7 @@ npm run typecheck | lint | test | test:e2e
 npm run lint:content   # generator/content/emoji/monster validation
 npm run content:table  # regenerate docs/CONTENT_REVIEW.md
 npm run economy:sim    # shop price simulation -> docs/ECONOMY_SIM.md (D150)
+npm run play:report -- <backup.json>  # measured play time per order/service/sitting, sim flags (D189)
 npm run check          # typecheck + lint + test + lint:content  (MUST be green before every commit)
 npm run audio:todo     # (from M13) write docs/VOICE_SCRIPT.md, list missing voice clips
 npm run audio:build    # (from M13) owner's recordings -> public/audio clips + manifest (D140)
