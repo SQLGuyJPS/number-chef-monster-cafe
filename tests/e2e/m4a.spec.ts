@@ -229,7 +229,8 @@ test('shop tap targets are big enough at 844×390, on every page of every slot',
 test('purchases show on the Service screen, inside the SVG budget', async ({ page }) => {
   await startApp(page);
   await page.evaluate(async () => {
-    await window.__ncmc.earn(400, 3);
+    // Enough for the six below (440 coins since Seaside moved to T4, D186).
+    await window.__ncmc.earn(500, 3);
     // The busiest drawn piece per slot (M4b batch 1: Starry Night's twinkling stars; batch 2:
     // Paper Lanterns, twelve swaying groups; batch 3: Tiny Robot, which blinks, waves and glows,
     // and Monster Portraits, three real monster drawings; D185: Seaside, the most detailed window,

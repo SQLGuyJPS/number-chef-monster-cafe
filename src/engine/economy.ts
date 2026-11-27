@@ -192,10 +192,11 @@ export const M4_ITEMS: readonly ItemDef[] = [
   { id: 'moonlit', slot: 'window', name: 'Moonlit', tier: 3, colorways: ['classic'] },
   { id: 'snowy', slot: 'window', name: 'Snowy', tier: 3, colorways: ['classic'] },
   // The daytime streets drawn with the free Street (Little Shops), each sold as its own scene (D185).
-  { id: 'town-houses', slot: 'window', name: 'Town Houses', tier: 3, colorways: ['classic'] },
-  { id: 'park', slot: 'window', name: 'Park', tier: 3, colorways: ['classic'] },
-  { id: 'hilltop-town', slot: 'window', name: 'Hilltop Town', tier: 3, colorways: ['classic'] },
-  { id: 'seaside', slot: 'window', name: 'Seaside', tier: 3, colorways: ['classic'] },
+  // Tier 4, the top décor tier: they are far more detailed than the other windows (D186).
+  { id: 'town-houses', slot: 'window', name: 'Town Houses', tier: 4, colorways: ['classic'] },
+  { id: 'park', slot: 'window', name: 'Park', tier: 4, colorways: ['classic'] },
+  { id: 'hilltop-town', slot: 'window', name: 'Hilltop Town', tier: 4, colorways: ['classic'] },
+  { id: 'seaside', slot: 'window', name: 'Seaside', tier: 4, colorways: ['classic'] },
   // Counter-top
   // The counter-top's default is a clear counter; the serve bell is a control, not decor (D159).
   {

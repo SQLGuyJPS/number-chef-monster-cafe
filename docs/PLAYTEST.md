@@ -385,12 +385,11 @@ Not verifiable in the cloud build: the swim, wave, blink and second-hand smoothn
 
 ## M4b — The new Street and four more windows (D185)
 
-The free Street is now the Little Shops view (a bakery and a flower shop), so every café shows it straight away. Town Houses, Park, Hilltop Town and Seaside are new windows at 55 coins each. They come last in the crate queue (crates 21–23), so a device's earlier crates don't change; to see them now, use Grown-ups → *Deliver every crate now*. The Window tab now has two pages of four. Sheets are in `docs/screens/M4b/streets/`, with a short video of each moving window (`window-<id>-motion.mp4`: in a service at phone size, then close up). Use `?mock&window=<id>` (`town-houses`, `park`, `hilltop-town`, `seaside`) to see one during a service.
+The free Street is now the Little Shops view (a bakery and a flower shop), so every café shows it straight away. Town Houses, Park, Hilltop Town and Seaside are new windows at 100 coins each (D186; they were 55). They come last in the crate queue (crates 21–23), so a device's earlier crates don't change; to see them now, use Grown-ups → *Deliver every crate now*. The Window tab now has two pages of four. Sheets are in `docs/screens/M4b/streets/`, with a short video of each moving window (`window-<id>-motion.mp4`: in a service at phone size, then close up). Use `?mock&window=<id>` (`town-houses`, `park`, `hilltop-town`, `seaside`) to see one during a service.
 - [ ] **Street (Little Shops).** Is it right in play, behind the monster and the caption? Notes:
-- [ ] **The four new windows on the shelf.** Do the tile pictures read, and does 55 feel right for each? Notes:
-- [ ] **Park: the balloons sway** (*experiment*). Keep? Notes:
-- [ ] **Hilltop Town: the windmill's sails turn**, once a minute (*experiment*). Keep? Notes:
-- [ ] **Seaside: the boat rocks** (*experiment*). Keep? Notes:
+- [x] **The four new windows' price.** Owner: far more detailed than the other windows, so they should cost what other top-tier pieces do. Now T4, 100 each (D186).
+- [ ] **The four new windows on the shelf.** Do the tile pictures read, and does 100 feel right now? Notes:
+- [x] **Park: the balloons sway; Hilltop Town: the windmill's sails turn; Seaside: the boat rocks.** Owner: works in all three, and is definitely not too much; so slight, and so small on screen, that it is not distracting. Kept, and very slight motion is now allowed on top-tier pieces, sparingly (D187).
 
 Not verifiable in the cloud build: how smooth the motion is on the real iPad, and the colours on the iPad and iPhone screens.
 

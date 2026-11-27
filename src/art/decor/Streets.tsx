@@ -1,6 +1,6 @@
 // The daytime views across the road (M4b, D185): five places drawn as one set. The owner picked
 // Little Shops as the free Street; Town Houses, Park, Hilltop Town and Seaside are sold as window
-// items of their own. Drawn like the other views (Window.tsx): window coordinates (0..W, 0..H),
+// items of their own, at T4 (D186). Drawn like the other views (Window.tsx): window coordinates (0..W, 0..H),
 // clipped to the glass. Shared rules for all five: the awning hides the top ~14 px, so nothing
 // important sits there; the window's middle bar (x 104–110) falls in a gap, never through a
 // building or a face; every thing stands on what holds it up; colours come from the shared
@@ -367,7 +367,7 @@ function LittleShopsView() {
 // ---------------------------------------------------------------------------------------------
 // C. Park: a little park across the road: the town's rooftops beyond, two round trees, a bench
 // with three balloons tied to it, a fountain, a hedge along the pavement, a lamp with a bird on it.
-// Experiment (ART_GUIDE §4): the balloons sway gently on their strings.
+// The balloons sway gently on their strings: the piece's one slight motion (D187, D188).
 
 /** A round tree: a trunk down to `foot`, a crown of three puffs, one highlight. */
 function Tree({ x, y, r, foot }: { x: number; y: number; r: number; foot: number }) {
@@ -443,7 +443,7 @@ function ParkView() {
 // D. Hilltop Town: hills rising behind the road, a windmill on the top with a path winding down
 // from its door, a far cottage and two sheep, and nearer cottages and trees behind a stone wall.
 // The windmill is on the left, which the caption bubble leaves uncovered during play.
-// Experiment (ART_GUIDE §4): the windmill's sails turn slowly (one turn a minute).
+// The windmill's sails turn slowly (one turn a minute): the piece's one slight motion (D187, D188).
 
 function HilltopView() {
   const wall = '#fbf3e4';
@@ -519,8 +519,8 @@ function HilltopView() {
 
 // ---------------------------------------------------------------------------------------------
 // E. Seaside: across the road the beach: six striped huts in six families, a beach ball, the sea
-// with a sailboat, a lighthouse on a green headland, two gulls. Experiment (ART_GUIDE §4): the
-// sailboat rocks gently on the water.
+// with a sailboat, a lighthouse on a green headland, two gulls. The sailboat rocks gently on
+// the water: the piece's one slight motion (D187, D188).
 
 function SeasideView() {
   const huts: readonly [number, ColorFamily][] = [
