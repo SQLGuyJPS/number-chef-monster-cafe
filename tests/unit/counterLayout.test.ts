@@ -36,8 +36,21 @@ const VARIANTS: Record<string, Rect[]> = {
   s3: [COUNTER.s3.help, COUNTER.s3.bell, COUNTER.s3.tray, COUNTER.s3.bin],
   taken: [COUNTER.s3.help, COUNTER.s3.bell, COUNTER.s3.tray, COUNTER.taken.takenAway],
   frames2: [COUNTER.frames2.help, COUNTER.frames2.bell, COUNTER.frames2.tray, COUNTER.frames2.bin],
-  s0: [COUNTER.s0.help, COUNTER.s0.bell, COUNTER.s0.peek, COUNTER.s0.display, COUNTER.s0.backspace, ...digits()],
-  cloche: [COUNTER.s3.help, COUNTER.s3.bell, COUNTER.cloche.tray, COUNTER.cloche.lid, COUNTER.cloche.bin],
+  s0: [
+    COUNTER.s0.help,
+    COUNTER.s0.bell,
+    COUNTER.s0.peek,
+    COUNTER.s0.display,
+    COUNTER.s0.backspace,
+    ...digits(),
+  ],
+  cloche: [
+    COUNTER.s3.help,
+    COUNTER.s3.bell,
+    COUNTER.cloche.tray,
+    COUNTER.cloche.lid,
+    COUNTER.cloche.bin,
+  ],
   offer: [COUNTER.s3.help, COUNTER.s3.bell, COUNTER.offer.yes, COUNTER.offer.no, COUNTER.s3.bin],
 };
 
@@ -74,13 +87,20 @@ describe('counter layout table', () => {
 
   it('buttons stay ≥ 56 CSS px and cells ≥ 44 at 844×390', () => {
     expect(CELL * PHONE_SCALE).toBeGreaterThanOrEqual(MIN_CELL_CSS_PX);
-    const buttons = [...Object.values(VARIANTS).flat().filter((r) => r.w < 400), COUNTER.bar.door];
-    for (const r of buttons) expect(Math.min(r.w, r.h) * PHONE_SCALE).toBeGreaterThanOrEqual(MIN_BUTTON_CSS_PX);
+    const buttons = [
+      ...Object.values(VARIANTS)
+        .flat()
+        .filter((r) => r.w < 400),
+      COUNTER.bar.door,
+    ];
+    for (const r of buttons)
+      expect(Math.min(r.w, r.h) * PHONE_SCALE).toBeGreaterThanOrEqual(MIN_BUTTON_CSS_PX);
   });
 
   it('status bar and room stay clear of each other and of the counter', () => {
     const { bar, scene } = COUNTER;
-    for (const r of [bar.door, bar.jar, bar.line, bar.shop]) expect(r.y + r.h).toBeLessThanOrEqual(BAR_H);
+    for (const r of [bar.door, bar.jar, bar.line, bar.shop])
+      expect(r.y + r.h).toBeLessThanOrEqual(BAR_H);
     for (const r of [scene.caption, scene.ticket, scene.bubble, scene.monsterFull]) {
       expect(r.y).toBeGreaterThanOrEqual(BAR_H);
       expect(r.y + r.h).toBeLessThanOrEqual(COUNTER_Y);
@@ -118,14 +138,17 @@ describe('service counter layout (counterLayout)', () => {
   it('every tray cell sits inside the tray, both layouts, and no two overlap', () => {
     for (const frames2 of [false, true]) {
       const L = counterLayout({ ...base, side: 'right', frames2 });
-      const cells = Array.from({ length: frames2 ? 20 : 10 }, (_, i) => cellRect(i, L.tray, L.frame));
+      const cells = Array.from({ length: frames2 ? 20 : 10 }, (_, i) =>
+        cellRect(i, L.tray, L.frame),
+      );
       for (const c of cells) {
         expect(c.x).toBeGreaterThanOrEqual(L.tray.x);
         expect(c.x + c.w).toBeLessThanOrEqual(L.tray.x + L.tray.w);
         expect(c.y + c.h).toBeLessThanOrEqual(L.tray.y + L.tray.h);
       }
       for (let i = 0; i < cells.length; i++)
-        for (let j = i + 1; j < cells.length; j++) expect(overlaps(cells[i]!, cells[j]!)).toBe(false);
+        for (let j = i + 1; j < cells.length; j++)
+          expect(overlaps(cells[i]!, cells[j]!)).toBe(false);
       expect(L.tallBin).toBe(frames2);
     }
   });

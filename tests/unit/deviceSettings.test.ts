@@ -19,7 +19,13 @@ describe('device settings', () => {
   });
 
   it('keeps valid values and drops bad ones one by one', () => {
-    const s = sanitizeSettings({ ordersPerService: 8, speechRate: 3, masterVolume: 0.5, voiceURI: 7, basketSide: 'left' });
+    const s = sanitizeSettings({
+      ordersPerService: 8,
+      speechRate: 3,
+      masterVolume: 0.5,
+      voiceURI: 7,
+      basketSide: 'left',
+    });
     expect(s.ordersPerService).toBe(8);
     expect(s.speechRate).toBe(0.85);
     expect(s.masterVolume).toBe(0.5);

@@ -79,7 +79,10 @@ describe('production build', () => {
     const sw = readFileSync(join(out, 'sw.js'), 'utf8');
     expect(sw).toContain('audio/manifest.json');
     expect(sw).not.toContain('audio-e2e');
-    const js = files.filter((f) => f.endsWith('.js')).map((f) => readFileSync(f, 'utf8')).join('\n');
+    const js = files
+      .filter((f) => f.endsWith('.js'))
+      .map((f) => readFileSync(f, 'utf8'))
+      .join('\n');
     expect(js).not.toContain('audio-e2e');
   });
 
@@ -124,7 +127,10 @@ describe('dev server', () => {
       server: { middlewareMode: true },
     });
     try {
-      const html = await server.transformIndexHtml('/', readFileSync(join(repo, 'index.html'), 'utf8'));
+      const html = await server.transformIndexHtml(
+        '/',
+        readFileSync(join(repo, 'index.html'), 'utf8'),
+      );
       expect(html).not.toContain('Content-Security-Policy');
     } finally {
       await server.close();

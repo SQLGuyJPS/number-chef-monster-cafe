@@ -179,7 +179,10 @@ describe('tray rules (SPEC §3.3)', () => {
 
   it('add mode: tapping a placed item sends the last one back to the bin; a locked item shakes (D82)', () => {
     const s = apply(add, 2, tapBin); // 5 locked + 2 placed
-    expect(tapItem(s, 5)).toEqual({ state: { ...s, filled: 6 }, effect: { kind: 'removed', index: 6, count: 6 } });
+    expect(tapItem(s, 5)).toEqual({
+      state: { ...s, filled: 6 },
+      effect: { kind: 'removed', index: 6, count: 6 },
+    });
     expect(tapItem(s, 6).effect).toEqual({ kind: 'removed', index: 6, count: 6 });
     expect(tapItem(s, 1)).toEqual({ state: s, effect: { kind: 'shakeLocked', index: 1 } });
     expect(tapItem(s, 9).effect.kind).toBe('none');

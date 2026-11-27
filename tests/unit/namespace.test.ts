@@ -32,7 +32,8 @@ export function findNameViolations(source: string): Violation[] {
     const call = m[1]!;
     const arg = m[2]!.trim();
     const literalOk = /^['"`]ncmc/.test(arg);
-    const identOk = ALLOWED_IDENTIFIERS.has(arg) || /^names\.(DB_NAME|CACHE_ID|NAME_PREFIX)$/.test(arg);
+    const identOk =
+      ALLOWED_IDENTIFIERS.has(arg) || /^names\.(DB_NAME|CACHE_ID|NAME_PREFIX)$/.test(arg);
     if (!literalOk && !identOk) out.push({ call, arg });
   }
   return out;
@@ -93,7 +94,7 @@ describe('namespace hygiene (SPEC §11.5, D18)', () => {
         'openDB(name, 1)',
         "localStorage.setItem('volume', '1')",
         "window.localStorage.getItem('x')",
-        "sessionStorage.removeItem(key)",
+        'sessionStorage.removeItem(key)',
         "new BroadcastChannel('chan')",
         'caches.delete(k)',
       ];

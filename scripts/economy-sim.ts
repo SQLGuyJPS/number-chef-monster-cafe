@@ -286,7 +286,7 @@ out('| Change | Catalog coins | Bought out (weeks) | Months |');
 out('|---|---|---|---|');
 const sens: [string, PlayProfile, Record<Tier, number>][] = [
   ['Prices × 0.8', profile, scaled(0.8)],
-  ['Prices as set (D148)', profile, tiers],
+  ['Prices as set (D148, D191)', profile, tiers],
   ['Prices × 1.2', profile, scaled(1.2)],
   ['45 min a week', { ...profile, minutesPerWeek: 45 }, tiers],
   ['90 min a week', { ...profile, minutesPerWeek: 90 }, tiers],

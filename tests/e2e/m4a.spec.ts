@@ -39,11 +39,11 @@ test('buy with confirm, live preview, equip; persists across a reload', async ({
   await expect(page.getByTestId('shop-confirm')).toHaveCount(0);
   expect(await kinds(page)).not.toContain('buy');
 
-  // Yes!: bought once, equipped, 20 coins off.
+  // Yes!: bought once, equipped, 30 coins off (D191).
   await tapId(page, 'shop-buy');
   await tapId(page, 'shop-yes');
   await expect(page.getByTestId('shop-buy')).toHaveCount(0);
-  await expect(page.getByTestId('coin-jar')).toContainText('30');
+  await expect(page.getByTestId('coin-jar')).toContainText('20');
   let s = (await shop(page))!;
   expect(s.bought).toEqual(['wallpaper.plain.berry']);
   expect(s.equipped['wallpaper']).toBe('wallpaper.plain.berry');
@@ -52,7 +52,7 @@ test('buy with confirm, live preview, equip; persists across a reload', async ({
   await tapId(page, 'shop-dot-wallpaper.plain.sunny');
   s = (await shop(page))!;
   expect(s.equipped['wallpaper']).toBe('wallpaper.plain.sunny');
-  expect(s.balance).toBe(30);
+  expect(s.balance).toBe(20);
   await tapId(page, 'shop-dot-wallpaper.plain.berry');
 
   await tapId(page, 'shop-home');
@@ -66,7 +66,7 @@ test('buy with confirm, live preview, equip; persists across a reload', async ({
   s = (await shop(page))!;
   expect(s.bought).toEqual(['wallpaper.plain.berry']);
   expect(s.equipped['wallpaper']).toBe('wallpaper.plain.berry');
-  expect(s.balance).toBe(30);
+  expect(s.balance).toBe(20);
   expect((await kinds(page)).filter((k) => k === 'buy')).toHaveLength(1);
 });
 
@@ -235,8 +235,8 @@ test('shop tap targets are big enough at 844×390, on every page of every slot',
 test('purchases show on the Service screen, inside the SVG budget', async ({ page }) => {
   await startApp(page);
   await page.evaluate(async () => {
-    // Enough for the six below (440 coins since Seaside moved to T4, D186).
-    await window.__ncmc.earn(500, 3);
+    // Enough for the six below (655 coins since prices went up by half, D191).
+    await window.__ncmc.earn(700, 3);
     // The busiest drawn piece per slot (M4b batch 1: Starry Night's twinkling stars; batch 2:
     // Paper Lanterns, twelve swaying groups; batch 3: Tiny Robot, which blinks, waves and glows,
     // and Monster Portraits, three real monster drawings; D185: Seaside, the most detailed window,

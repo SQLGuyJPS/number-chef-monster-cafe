@@ -2,7 +2,12 @@
 import { describe, expect, it } from 'vitest';
 import { uniqueVoices } from '../../src/audio/speech';
 
-const v = (voiceURI: string, name: string, lang: string, localService = true) => ({ voiceURI, name, lang, localService });
+const v = (voiceURI: string, name: string, lang: string, localService = true) => ({
+  voiceURI,
+  name,
+  lang,
+  localService,
+});
 
 describe('uniqueVoices', () => {
   const ios = [
@@ -28,7 +33,10 @@ describe('uniqueVoices', () => {
   });
 
   it('prefers the on-device voice over a network one of the same name', () => {
-    const out = uniqueVoices([v('net', 'Google US English', 'en-US', false), v('local', 'Google US English', 'en-US')]);
+    const out = uniqueVoices([
+      v('net', 'Google US English', 'en-US', false),
+      v('local', 'Google US English', 'en-US'),
+    ]);
     expect(out.map((x) => x.voiceURI)).toEqual(['local']);
   });
 

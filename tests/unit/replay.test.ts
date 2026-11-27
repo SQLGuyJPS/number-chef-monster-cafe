@@ -104,7 +104,11 @@ function randomLog(rng: Rng, n: number): Evt[] {
   let t = 1_700_000_000_000;
   for (let i = 0; i < n; i++) {
     t += rng.int(0, 3); // repeats on purpose
-    const ctx = ctxAt(t, `e${rng.int(0, 1e9).toString(36)}-${i}`, rng.chance(0.5) ? 'ipad' : 'phone');
+    const ctx = ctxAt(
+      t,
+      `e${rng.int(0, 1e9).toString(36)}-${i}`,
+      rng.chance(0.5) ? 'ipad' : 'phone',
+    );
     const svc = `s${rng.int(0, 6)}`;
     const skill = rng.pick(skills);
     const r = rng.next();
@@ -134,22 +138,42 @@ function randomLog(rng: Rng, n: number): Evt[] {
         }),
       );
     else if (r < 0.88)
-      out.push(skillConfigEvent(ctx, { skill, stage: rng.pick(STAGES), ops: rng.pick(['both', 'add', 'sub'] as const) }));
+      out.push(
+        skillConfigEvent(ctx, {
+          skill,
+          stage: rng.pick(STAGES),
+          ops: rng.pick(['both', 'add', 'sub'] as const),
+        }),
+      );
     else if (r < 0.91)
-      out.push(equipEvent(ctx, { slot: rng.pick(['floor', 'wallpaper']), items: [rng.pick(['lamp', 'rug'])] }));
+      out.push(
+        equipEvent(ctx, {
+          slot: rng.pick(['floor', 'wallpaper']),
+          items: [rng.pick(['lamp', 'rug'])],
+        }),
+      );
     else if (r < 0.92) out.push(coinAdjustEvent(ctx, { n: rng.int(-40, 40) }));
     else if (r < 0.94)
       // Two devices recording the same crate with different `next` (D154): the smaller wins.
       out.push(crateEvent(ctx, { n: rng.int(1, 3), next: rng.int(0, 90) }));
     else {
-      const buy: BuyEvt = { id: ctx.id(), t, dev: 'd', v: 1, k: 'buy', item: rng.pick(['lamp', 'rug']), price: 20 };
+      const buy: BuyEvt = {
+        id: ctx.id(),
+        t,
+        dev: 'd',
+        v: 1,
+        k: 'buy',
+        item: rng.pick(['lamp', 'rug']),
+        price: 20,
+      };
       out.push(buy);
     }
   }
   return out;
 }
 
-const sorted = (es: Evt[]) => [...es].sort((a, b) => a.t - b.t || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+const sorted = (es: Evt[]) =>
+  [...es].sort((a, b) => a.t - b.t || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 
 describe('replay ≡ incremental applyEvent (SPEC §11.2 property test)', () => {
   it('for 300 random logs, folding applyEvent in (t, id) order equals a full replay', () => {
@@ -192,10 +216,21 @@ describe('replay ≡ incremental applyEvent (SPEC §11.2 property test)', () => 
 
 describe('coins (SPEC §11.2, D31, D39)', () => {
   const end = (id: string, t: number, tip: number, partial: boolean) =>
-    serviceEndEvent(ctxAt(t, id), { svc: 's1', skill: 'A1', seed: 1, orders: 6, served: 6, tip, activeMs: 1, partial });
+    serviceEndEvent(ctxAt(t, id), {
+      svc: 's1',
+      skill: 'A1',
+      seed: 1,
+      orders: 6,
+      served: 6,
+      tip,
+      activeMs: 1,
+      partial,
+    });
 
   it('a 6-order service pays 23: six coin events plus the tip', () => {
-    const log: Evt[] = Array.from({ length: 6 }, (_, i) => coinEvent(ctxAt(i, `c${i}`), { svc: 's1', n: 3 }));
+    const log: Evt[] = Array.from({ length: 6 }, (_, i) =>
+      coinEvent(ctxAt(i, `c${i}`), { svc: 's1', n: 3 }),
+    );
     log.push(end('e', 10, 5, false));
     expect(earned(replay(log))).toBe(23);
   });
@@ -214,20 +249,43 @@ describe('coins (SPEC §11.2, D31, D39)', () => {
   });
 
   it('a killed app keeps the coins already written (no serviceEnd at all)', () => {
-    const d = replay([coinEvent(ctxAt(1, 'c1'), { svc: 's1', n: 3 }), coinEvent(ctxAt(2, 'c2'), { svc: 's1', n: 3 })]);
+    const d = replay([
+      coinEvent(ctxAt(1, 'c1'), { svc: 's1', n: 3 }),
+      coinEvent(ctxAt(2, 'c2'), { svc: 's1', n: 3 }),
+    ]);
     expect(balance(d)).toBe(6);
   });
 
   it('the same item bought twice is charged once; balance never goes below 0', () => {
-    const buy = (id: string, item: string, price: number): BuyEvt => ({ id, t: 1, dev: 'd', v: 1, k: 'buy', item, price });
-    const d = replay([coinEvent(ctxAt(0, 'c'), { svc: 's', n: 30 }), buy('b1', 'lamp', 20), buy('b2', 'lamp', 20)]);
+    const buy = (id: string, item: string, price: number): BuyEvt => ({
+      id,
+      t: 1,
+      dev: 'd',
+      v: 1,
+      k: 'buy',
+      item,
+      price,
+    });
+    const d = replay([
+      coinEvent(ctxAt(0, 'c'), { svc: 's', n: 30 }),
+      buy('b1', 'lamp', 20),
+      buy('b2', 'lamp', 20),
+    ]);
     expect(balance(d)).toBe(10);
     expect(balance(replay([buy('b1', 'lamp', 20)]))).toBe(0);
   });
 });
 
 describe('playtest coin setting (D179)', () => {
-  const buy = (id: string, t: number, item: string, price: number): BuyEvt => ({ id, t, dev: 'd', v: 1, k: 'buy', item, price });
+  const buy = (id: string, t: number, item: string, price: number): BuyEvt => ({
+    id,
+    t,
+    dev: 'd',
+    v: 1,
+    k: 'buy',
+    item,
+    price,
+  });
 
   it('coinAdjustTo sets the jar exactly, up or down, and leaves earned alone', () => {
     let log: Evt[] = [coinEvent(ctxAt(1, 'c1'), { svc: 's', n: 30 }), buy('b1', 2, 'lamp', 20)];
@@ -243,7 +301,11 @@ describe('playtest coin setting (D179)', () => {
   it('a jar in the red after a merge is set exactly too, and play adds on top', () => {
     const log: Evt[] = [buy('b1', 1, 'lamp', 20), buy('b2', 2, 'rug', 20)];
     const n = coinAdjustTo(replay(log), 50);
-    const after = [...log, coinAdjustEvent(ctxAt(3, 'a'), { n }), coinEvent(ctxAt(4, 'c'), { svc: 's', n: 3 })];
+    const after = [
+      ...log,
+      coinAdjustEvent(ctxAt(3, 'a'), { n }),
+      coinEvent(ctxAt(4, 'c'), { svc: 's', n: 3 }),
+    ];
     expect(balance(replay(after))).toBe(53);
   });
 });
@@ -263,8 +325,20 @@ describe('skillConfig (SPEC §11.2): latest t wins per skill', () => {
 describe('stats for the progress list', () => {
   it('counts attempts, first tries and assisted per skill and per fact', () => {
     const a = (id: string, t: number, outcome: Outcome) =>
-      attemptEvent(ctxAt(t, id), { svc: 's', fact: 'A1:+:2,3', skill: 'A1', stage: 1, outcome, ms: 1 });
-    const d = replay([a('1', 1, 'first'), a('2', 2, 'first'), a('3', 3, 'assisted'), a('4', 4, 'first')]);
+      attemptEvent(ctxAt(t, id), {
+        svc: 's',
+        fact: 'A1:+:2,3',
+        skill: 'A1',
+        stage: 1,
+        outcome,
+        ms: 1,
+      });
+    const d = replay([
+      a('1', 1, 'first'),
+      a('2', 2, 'first'),
+      a('3', 3, 'assisted'),
+      a('4', 4, 'first'),
+    ]);
     expect(d.skills.A1).toEqual({ problems: 4, first: 3, assisted: 1 });
     expect(d.facts['A1:+:2,3']).toEqual({ tray: 1, num: 0, seen: 4, first: 3 });
   });

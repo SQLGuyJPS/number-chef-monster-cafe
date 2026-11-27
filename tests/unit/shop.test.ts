@@ -84,10 +84,10 @@ class Device {
 }
 
 describe('catalog and queue (SPEC §10)', () => {
-  it('55 paid entries, 2,905 coins (D177, D185, D186), no bell', () => {
+  it('55 paid entries, 4,330 coins (D177, D185, D186, D191), no bell', () => {
     const paid = CATALOG.filter((e) => e.price > 0);
     expect(paid).toHaveLength(55);
-    expect(paid.reduce((s, e) => s + e.price, 0)).toBe(2905);
+    expect(paid.reduce((s, e) => s + e.price, 0)).toBe(4330);
     expect(CATALOG.some((e) => e.item.includes('bell'))).toBe(false);
   });
 
@@ -124,7 +124,7 @@ describe('buying (SPEC §10, §11.2)', () => {
   it('needs the coins, is charged once, and never lowers earned coins', () => {
     const dv = new Device();
     expect(canBuy(dv.d, 'wallpaper.plain.berry')).toBe('short');
-    dv.serve(6, 25);
+    dv.serve(6, 35);
     expect(canBuy(dv.d, 'wallpaper.plain.berry')).toBe('ok');
     const before = earned(dv.d);
     dv.buy('wallpaper.plain.berry');
@@ -132,7 +132,7 @@ describe('buying (SPEC §10, §11.2)', () => {
     expect(earned(dv.d)).toBe(before);
     expect(canBuy(dv.d, 'wallpaper.plain.berry')).toBe('owned');
     // The same purchase recorded twice (two devices, or a double tap that got through) is charged once.
-    dv.events.push(buyEvent(maker('b'), { item: 'wallpaper.plain.berry', price: 20 }));
+    dv.events.push(buyEvent(maker('b'), { item: 'wallpaper.plain.berry', price: 30 }));
     expect(balance(dv.d)).toBe(5);
     expect(canBuy(dv.d, 'wallpaper.plain.sunny')).toBe('owned');
     expect(canBuy(dv.d, 'nope')).toBe('unknown');

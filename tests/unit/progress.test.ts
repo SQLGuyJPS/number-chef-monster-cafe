@@ -29,7 +29,11 @@ describe.each(backends)('%s: event log, resume, cache, snapshot (SPEC §11.3)', 
   it('commit writes events, resume and state together; events read back without the profile column', async () => {
     const s = await make();
     const e = coinEvent(ctx, { svc: 's', n: 3 });
-    await s.commit({ events: [e], resume: { hello: 1 }, state: { throughEventCount: 1, derived: replay([e]) } });
+    await s.commit({
+      events: [e],
+      resume: { hello: 1 },
+      state: { throughEventCount: 1, derived: replay([e]) },
+    });
     expect(await s.loadEvents()).toEqual([e]);
     expect(await s.countEvents()).toBe(1);
     expect(await s.getResume()).toEqual({ hello: 1 });
@@ -45,7 +49,14 @@ describe.each(backends)('%s: event log, resume, cache, snapshot (SPEC §11.3)', 
   it('snapshot: one row, replaced by the next', async () => {
     const s = await make();
     await s.setSetting('basketSide', 'left');
-    const snap = { takenAt: 1, reason: 'reset' as const, schemaVersion: 1, deviceId: 'd', events: [], settings: await s.allSettings() };
+    const snap = {
+      takenAt: 1,
+      reason: 'reset' as const,
+      schemaVersion: 1,
+      deviceId: 'd',
+      events: [],
+      settings: await s.allSettings(),
+    };
     await s.putSnapshot(snap);
     await s.putSnapshot({ ...snap, takenAt: 2 });
     expect(await s.getSnapshot()).toEqual({ ...snap, takenAt: 2 });
@@ -73,7 +84,17 @@ describe('Progress (derived state in memory, log on disk)', () => {
   it('coins survive a killed app: a fresh load replays to the same balance', async () => {
     const s = await IdbStorage.open();
     const p = await Progress.load(s, 'dev', deps);
-    p.append([attemptEvent(ctx, { svc: 's', fact: 'A1:+:2,3', skill: 'A1', stage: 3, outcome: 'first', ms: 1 }), coinEvent(ctx, { svc: 's', n: 3 })]);
+    p.append([
+      attemptEvent(ctx, {
+        svc: 's',
+        fact: 'A1:+:2,3',
+        skill: 'A1',
+        stage: 3,
+        outcome: 'first',
+        ms: 1,
+      }),
+      coinEvent(ctx, { svc: 's', n: 3 }),
+    ]);
     p.append([coinEvent(ctx, { svc: 's', n: 3 })]);
     expect(balance(p.derived)).toBe(6);
     await p.flush();
@@ -99,7 +120,14 @@ describe('Progress (derived state in memory, log on disk)', () => {
 
   it('a cache from before the two box sets (D127) is rebuilt from the log', async () => {
     const s = new MemoryStorage();
-    const e = attemptEvent(ctx, { svc: 's', fact: 'A1:+:2,3', skill: 'A1', stage: 1, outcome: 'first', ms: 1 });
+    const e = attemptEvent(ctx, {
+      svc: 's',
+      fact: 'A1:+:2,3',
+      skill: 'A1',
+      stage: 1,
+      outcome: 'first',
+      ms: 1,
+    });
     const { shape: _shape, ...current } = replay([e]);
     const old: unknown = { ...current, facts: { 'A1:+:2,3': { box: 1, seen: 1, first: 1 } } };
     await s.commit({ events: [e], state: { throughEventCount: 1, derived: old as Derived } });
@@ -113,7 +141,7 @@ describe('Progress (derived state in memory, log on disk)', () => {
     p.append([coinEvent({ ...ctx, now: () => 2_000_000_000_000 }, { svc: 's', n: 3 })]);
     p.append([coinEvent({ ...ctx, now: () => 1_000 }, { svc: 's', n: 5 })]);
     await p.flush();
-    expect((await s.getState() as { throughEventCount: number }).throughEventCount).toBe(1);
+    expect(((await s.getState()) as { throughEventCount: number }).throughEventCount).toBe(1);
     const again = await Progress.load(s, 'dev', deps);
     expect(balance(again.derived)).toBe(8);
   });
@@ -122,7 +150,16 @@ describe('Progress (derived state in memory, log on disk)', () => {
     const s = new MemoryStorage();
     const p = await Progress.load(s, 'dev', deps);
     const end = (tip: number, partial: boolean) =>
-      serviceEndEvent(ctx, { svc: 's', skill: 'A1', seed: 1, orders: 6, served: 3, tip, activeMs: 1, partial });
+      serviceEndEvent(ctx, {
+        svc: 's',
+        skill: 'A1',
+        seed: 1,
+        orders: 6,
+        served: 3,
+        tip,
+        activeMs: 1,
+        partial,
+      });
     p.append([coinEvent(ctx, { svc: 's', n: 3 }), end(0, true)]);
     p.append([coinEvent(ctx, { svc: 's', n: 3 }), end(5, false)]);
     expect(balance(p.derived)).toBe(11);

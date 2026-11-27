@@ -78,9 +78,7 @@ describe('schema 1 → 2', () => {
     await expect(parseImport(JSON.stringify(file))).rejects.toThrow(/damaged/);
     const bad2 = [{ id: 'z', t: 1, dev: 'd', v: 1, k: 'equip', slot: 'floor', items: 'x' }];
     await expect(
-      parseImport(
-        JSON.stringify({ ...file, events: bad2, checksum: await checksumOf(bad2, {}) }),
-      ),
+      parseImport(JSON.stringify({ ...file, events: bad2, checksum: await checksumOf(bad2, {}) })),
     ).rejects.toThrow(/damaged/);
   });
 });
@@ -109,7 +107,16 @@ describe('schema 2 → 3 (D179)', () => {
 
   it('rejects a coinAdjust that is not a whole number', async () => {
     const bad = [{ id: 'z', t: 1, dev: 'd', v: 1, k: 'coinAdjust', n: 1.5 }];
-    const file = { app: APP_ID, schemaVersion: 3, deviceId: 'd', deviceLabel: '', exportedAt: 1, events: bad, settings: {}, checksum: await checksumOf(bad, {}) };
+    const file = {
+      app: APP_ID,
+      schemaVersion: 3,
+      deviceId: 'd',
+      deviceLabel: '',
+      exportedAt: 1,
+      events: bad,
+      settings: {},
+      checksum: await checksumOf(bad, {}),
+    };
     await expect(parseImport(JSON.stringify(file))).rejects.toThrow(/damaged/);
   });
 });

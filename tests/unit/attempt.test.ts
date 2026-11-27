@@ -48,7 +48,10 @@ describe('attempt state machine (SPEC §3.4)', () => {
     const no: AttemptEvent = { type: 'declineHelp' };
     expect(run(bad, done, bad, done, no).phase).toBe('building');
     expect(run(bad, done, bad, done, no, ok).outcome).toBe('fixed');
-    expect(run(bad, done, bad, done, no, bad)).toMatchObject({ phase: 'plateCount', afterPlate: 'worked' });
+    expect(run(bad, done, bad, done, no, bad)).toMatchObject({
+      phase: 'plateCount',
+      afterPlate: 'worked',
+    });
     expect(run(bad, done, bad, done, no, bad, done).phase).toBe('worked');
     expect(run(bad, done, bad, done, no, bad, done, done, ok).outcome).toBe('assisted');
     // Declining outside the offer does nothing.

@@ -37,7 +37,10 @@ describe('ESLint guard rails', () => {
   });
 
   it('engine: no React imports', { timeout: T }, async () => {
-    const out = await rules("import React from 'react';\nexport const x = React;\n", 'src/engine/x.ts');
+    const out = await rules(
+      "import React from 'react';\nexport const x = React;\n",
+      'src/engine/x.ts',
+    );
     expect(out).toContain('no-restricted-imports');
   });
 
