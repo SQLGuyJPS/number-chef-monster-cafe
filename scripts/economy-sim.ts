@@ -5,6 +5,7 @@
 //   --service 3-4       minutes per 6-order service
 //   --between 0.5       minutes of Results and menu between services
 //   --shop 1.5          minutes in the shop at the end of a sitting
+//   --crate-every 45    monsters served per delivery crate
 //   (npm run play:report measures these from a backup, D189)
 //   --tiers 20,35,65,120,220   tier 1–5 prices
 //   --decor-week 7 --wardrobe-week 12 --staff-week 20   when the later waves reach the device
@@ -85,7 +86,7 @@ const m4Wave = (t = tiers) => {
   return { id: 'm4', opensWeek: 0, ordered: true, entries: CRATE_QUEUE.map((k) => byKey.get(k)!) };
 };
 const CRATES: CrateRule = {
-  everyMonsters: CRATE_EVERY_MONSTERS,
+  everyMonsters: Number(flag('crate-every') ?? CRATE_EVERY_MONSTERS),
   size: CRATE_SIZE,
   holdAtStock: CRATE_HOLD_AT_UNBOUGHT,
 };
