@@ -1,13 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { RESUME_MAX_AGE_MS, SERVICE_TIP } from '../../src/engine/config';
 import { REGULARS } from '../../src/engine/monsters';
-import {
-  endOfStored,
-  isOfferable,
-  makeResume,
-  parseResume,
-  restorePlan,
-} from '../../src/engine/resume';
+import { endOfStored, isOfferable, makeResume, parseResume, restorePlan } from '../../src/engine/resume';
 import { buildService, withRequeue, withWarmUp } from '../../src/engine/session';
 import { mulberry32 } from '../../src/engine/rng';
 
@@ -81,16 +75,8 @@ describe('resume snapshot (SPEC §11.6, D43)', () => {
       partial: true,
     });
     // Killed during the closing line: every order served, no serviceEnd yet.
-    const all = {
-      ...snap,
-      index: snap.plan.length,
-      results: snap.plan.map(() => 'first' as const),
-    };
-    expect(endOfStored(all)).toMatchObject({
-      served: snap.plan.length,
-      tip: SERVICE_TIP,
-      partial: false,
-    });
+    const all = { ...snap, index: snap.plan.length, results: snap.plan.map(() => 'first' as const) };
+    expect(endOfStored(all)).toMatchObject({ served: snap.plan.length, tip: SERVICE_TIP, partial: false });
   });
 
   it('offered under 2 h old with orders left; not after 2 h or when finished', () => {

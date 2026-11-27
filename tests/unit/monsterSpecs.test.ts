@@ -5,9 +5,7 @@ import { DRAWINGS } from '../../src/art/monsters/roster';
 
 describe('MonsterSpec roster (SPEC §7.2)', () => {
   it('matches the engine roster: same ids and favourites, in order', () => {
-    expect(MONSTER_SPECS.map((s) => [s.id, s.favorites])).toEqual(
-      REGULARS.map((r) => [r.id, [...r.favorites]]),
-    );
+    expect(MONSTER_SPECS.map((s) => [s.id, s.favorites])).toEqual(REGULARS.map((r) => [r.id, [...r.favorites]]));
   });
   it('every spec has a hand-authored drawing and a known reaction', () => {
     for (const s of MONSTER_SPECS) {

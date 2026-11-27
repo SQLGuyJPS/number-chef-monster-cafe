@@ -113,10 +113,7 @@ describe('start watchdog (D88)', () => {
     const sp = await load();
     void sp.speakText('Five plus two cookies, please!');
     vi.advanceTimersByTime(1600);
-    expect(spoken.map((u) => u.text)).toEqual([
-      'Five plus two cookies please!',
-      'Five plus two cookies please!',
-    ]);
+    expect(spoken.map((u) => u.text)).toEqual(['Five plus two cookies please!', 'Five plus two cookies please!']);
     vi.advanceTimersByTime(3000);
     expect(spoken).toHaveLength(2);
   });
@@ -163,11 +160,7 @@ describe('spokenForm (D77)', () => {
 
 describe('WebKit cancel race (D178)', () => {
   const ipad = () =>
-    vi.stubGlobal('navigator', {
-      userAgent: 'Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15',
-      platform: 'iPad',
-      maxTouchPoints: 5,
-    });
+    vi.stubGlobal('navigator', { userAgent: 'Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15', platform: 'iPad', maxTouchPoints: 5 });
 
   it('no cancel when nothing is speaking', async () => {
     const sp = await load();
@@ -194,11 +187,7 @@ describe('WebKit cancel race (D178)', () => {
   });
 
   it('off WebKit the next line still speaks at once', async () => {
-    vi.stubGlobal('navigator', {
-      userAgent: 'Mozilla/5.0 (Linux; Android 14) Chrome/130 Mobile Safari/537.36',
-      platform: 'Linux',
-      maxTouchPoints: 5,
-    });
+    vi.stubGlobal('navigator', { userAgent: 'Mozilla/5.0 (Linux; Android 14) Chrome/130 Mobile Safari/537.36', platform: 'Linux', maxTouchPoints: 5 });
     const sp = await load();
     void sp.speakText('Wallpaper!');
     void sp.speakText('Floor!');

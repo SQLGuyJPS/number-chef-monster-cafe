@@ -44,9 +44,7 @@ describe('newId', () => {
 
   it('1000 fallback ids are unique with real getRandomValues', () => {
     const real = fakeCrypto((u) => {
-      globalThis.crypto.getRandomValues(
-        new Uint8Array(u.buffer as ArrayBuffer, u.byteOffset, u.length),
-      );
+      globalThis.crypto.getRandomValues(new Uint8Array(u.buffer as ArrayBuffer, u.byteOffset, u.length));
     });
     const ids = new Set<string>();
     for (let i = 0; i < 1000; i++) {

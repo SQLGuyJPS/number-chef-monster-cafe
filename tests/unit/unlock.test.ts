@@ -73,9 +73,7 @@ describe('ensureAudio (D87)', () => {
 
   it('ignores a `speaking` flag stuck longer than any line can last (D88)', async () => {
     const m = await fresh();
-    (window as unknown as { speechSynthesis: { speaking: boolean } }).speechSynthesis = {
-      speaking: true,
-    };
+    (window as unknown as { speechSynthesis: { speaking: boolean } }).speechSynthesis = { speaking: true };
     FakeCtx.made[0]!.state = 'interrupted';
     m.ensureAudio();
     now += 5000;

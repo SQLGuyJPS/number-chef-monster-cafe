@@ -41,12 +41,7 @@ function rig(problems: string[], stage: Stage) {
     clearTimeout: () => {},
   };
   const monsters = ['blobbo', 'gruffles', 'zibbit', 'mimsy', 'chompers', 'wobbleton'];
-  const orders: Order[] = problems.map((d, i) => ({
-    problem: find(d),
-    food: 'cookie',
-    stage,
-    monster: monsters[i]!,
-  }));
+  const orders: Order[] = problems.map((d, i) => ({ problem: find(d), food: 'cookie', stage, monster: monsters[i]! }));
   const c = new ServiceController({ orders, svc: 's', dev: 'd', onDone: () => {} }, deps);
   const tick = async (n = 1) => {
     for (let i = 0; i < n; i++) {
@@ -77,22 +72,10 @@ describe('missing-number forms: the orange group is the answer (D104)', () => {
   });
 
   it('the monster eats the answer: the orange group, the taken-away row, or the whole plate', () => {
-    expect(eatenPlate(toTrayTask(find('7+?=10'), 3), 3)).toEqual({
-      source: 'tray',
-      from: 7,
-      count: 3,
-    });
+    expect(eatenPlate(toTrayTask(find('7+?=10'), 3), 3)).toEqual({ source: 'tray', from: 7, count: 3 });
     expect(eatenPlate(toTrayTask(find('10−?=6'), 2), 4)).toEqual({ source: 'taken', count: 4 });
-    expect(eatenPlate(toTrayTask(find('7+?=10'), 1), 3)).toEqual({
-      source: 'tray',
-      from: 0,
-      count: 3,
-    });
-    expect(eatenPlate(toTrayTask(find('10−4=?'), 3), 6)).toEqual({
-      source: 'tray',
-      from: 0,
-      count: 6,
-    });
+    expect(eatenPlate(toTrayTask(find('7+?=10'), 1), 3)).toEqual({ source: 'tray', from: 0, count: 3 });
+    expect(eatenPlate(toTrayTask(find('10−4=?'), 3), 6)).toEqual({ source: 'tray', from: 0, count: 6 });
     expect(eatenPlate(toTrayTask(find('7+?=10'), 0), 3, true)).toEqual({ source: 'pad', count: 3 });
   });
 
@@ -153,7 +136,7 @@ describe('service controller on missing-number forms', () => {
     expect(c.getView().eat?.plate).toEqual({ source: 'tray', from: 7, count: 3 });
   });
 
-  it("S1: Worked plays in the bubble; the child's tray stays empty, then FollowMe builds the answer", async () => {
+  it('S1: Worked plays in the bubble; the child\'s tray stays empty, then FollowMe builds the answer', async () => {
     const { c, tick } = rig(['7+?=10', '9+?=10'], 1);
     c.start();
     await tick();

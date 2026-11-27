@@ -27,34 +27,8 @@ const ev = (id: string, t: number, extra: Partial<Evt> = {}): Evt =>
 
 const LOG: Evt[] = [
   ev('a', 100),
-  {
-    id: 'b',
-    t: 200,
-    dev: 'devA',
-    v: 1,
-    k: 'attempt',
-    svc: 's1',
-    fact: 'A1:+:1,2',
-    skill: 'A1',
-    stage: 3,
-    outcome: 'first',
-    ms: 900,
-  },
-  {
-    id: 'c',
-    t: 300,
-    dev: 'devA',
-    v: 1,
-    k: 'serviceEnd',
-    svc: 's1',
-    skill: 'A1',
-    seed: 7,
-    orders: 6,
-    served: 6,
-    tip: 5,
-    activeMs: 1000,
-    partial: false,
-  },
+  { id: 'b', t: 200, dev: 'devA', v: 1, k: 'attempt', svc: 's1', fact: 'A1:+:1,2', skill: 'A1', stage: 3, outcome: 'first', ms: 900 },
+  { id: 'c', t: 300, dev: 'devA', v: 1, k: 'serviceEnd', svc: 's1', skill: 'A1', seed: 7, orders: 6, served: 6, tip: 5, activeMs: 1000, partial: false },
   { id: 'd', t: 400, dev: 'devA', v: 1, k: 'skillConfig', skill: 'A2', stage: 0, ops: 'sub' },
 ];
 
@@ -73,9 +47,7 @@ const backends: Array<[string, () => Promise<Storage>]> = [
 
 describe('export file (SPEC §11.6, D136)', () => {
   it('names the file by local date', () => {
-    expect(exportFileName(new Date(2026, 10, 9, 15).getTime())).toBe(
-      'number-chef-backup-2026-11-09.json',
-    );
+    expect(exportFileName(new Date(2026, 10, 9, 15).getTime())).toBe('number-chef-backup-2026-11-09.json');
   });
 
   it('checksum is the hex SHA-256 of {events, settings}', async () => {
@@ -174,24 +146,18 @@ describe('import validation', () => {
   it('rejects text that is not a backup', async () => {
     await expect(parseImport('not json')).rejects.toBeInstanceOf(ImportError);
     await expect(parseImport('{"app":"other"}')).rejects.toThrow("isn't a Number Chef backup");
-    await expect(
-      parseImport(JSON.stringify({ ...(await good()), app: 'someone-else' })),
-    ).rejects.toBeInstanceOf(ImportError);
+    await expect(parseImport(JSON.stringify({ ...(await good()), app: 'someone-else' }))).rejects.toBeInstanceOf(ImportError);
   });
 
   it('refuses a newer schema with a clear message', async () => {
-    await expect(
-      parseImport(JSON.stringify({ ...(await good()), schemaVersion: 4 })),
-    ).rejects.toThrow(/newer app version/);
+    await expect(parseImport(JSON.stringify({ ...(await good()), schemaVersion: 4 }))).rejects.toThrow(/newer app version/);
   });
 
   it('rejects a damaged event', async () => {
     const bad = [{ ...LOG[0], k: 'coin', n: 'three' }];
     await expect(parseImport(JSON.stringify(await good(bad)))).rejects.toThrow(/damaged/);
     const unknown = [{ ...LOG[0], k: 'teleport' }];
-    await expect(parseImport(JSON.stringify(await good(unknown)))).rejects.toBeInstanceOf(
-      ImportError,
-    );
+    await expect(parseImport(JSON.stringify(await good(unknown)))).rejects.toBeInstanceOf(ImportError);
   });
 
   it('flags a checksum mismatch without refusing (the parent confirms twice)', async () => {

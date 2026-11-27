@@ -19,11 +19,7 @@ function rig(extra: Partial<ServiceOptions> = {}) {
   let timers: (() => void)[] = [];
   const done: ServiceSummary[] = [];
   const deps: ServiceDeps = {
-    speak: (t, who, m) => (
-      checkSpeaker(t, who),
-      log.push(`say:${who ?? 'monster'}:${m ?? ''}:${lineText(t)}`),
-      Promise.resolve()
-    ),
+    speak: (t, who, m) => (checkSpeaker(t, who), log.push(`say:${who ?? 'monster'}:${m ?? ''}:${lineText(t)}`), Promise.resolve()),
     countAloud: (t) => void log.push(`count:${lineText(t)}`),
     hush: () => {},
     sfx: {
@@ -38,11 +34,7 @@ function rig(extra: Partial<ServiceOptions> = {}) {
       coin: () => void log.push('coin'),
       arrive: () => void log.push('arrive'),
     },
-    lines: (m) => ({
-      arrive: `hello from ${m}`,
-      thanks: `thanks from ${m}`,
-      burps: m === 'chompers',
-    }),
+    lines: (m) => ({ arrive: `hello from ${m}`, thanks: `thanks from ${m}`, burps: m === 'chompers' }),
     now: () => (clock += 1000), // past the bell's double-press guard
     wall: () => 0,
     newId: () => 'x',
@@ -62,14 +54,7 @@ function rig(extra: Partial<ServiceOptions> = {}) {
   }).orders;
   const coins: number[] = [];
   const c = new ServiceController(
-    {
-      orders,
-      svc: 's',
-      dev: 'd',
-      onDone: (s) => void done.push(s),
-      onCoins: (n) => void coins.push(n),
-      ...extra,
-    },
+    { orders, svc: 's', dev: 'd', onDone: (s) => void done.push(s), onCoins: (n) => void coins.push(n), ...extra },
     deps,
   );
   const tick = async () => {
@@ -91,9 +76,7 @@ describe('eat sequence (SPEC §5.6, D101)', () => {
     c.start();
     expect(log).toEqual(['arrive']); // the boing before any word (D109)
     await tick();
-    expect(
-      log.some((l) => l.endsWith(`:${orders[0]!.monster}:hello from ${orders[0]!.monster}`)),
-    ).toBe(true);
+    expect(log.some((l) => l.endsWith(`:${orders[0]!.monster}:hello from ${orders[0]!.monster}`))).toBe(true);
     serveRight();
     log.length = 0; // the building taps' counts
     const steps = new Set<string>();
@@ -112,9 +95,7 @@ describe('eat sequence (SPEC §5.6, D101)', () => {
     expect(log.filter((l) => l === 'coin')).toHaveLength(3);
     // No sound effect while a line plays (D109): the crunch after the answer, the tings after the thanks.
     const at = (f: (l: string) => boolean) => log.findIndex(f);
-    expect(at((l) => l === 'munch')).toBeGreaterThan(
-      at((l) => l.toLowerCase().endsWith(`:${said}!`)),
-    );
+    expect(at((l) => l === 'munch')).toBeGreaterThan(at((l) => l.toLowerCase().endsWith(`:${said}!`)));
     expect(at((l) => l === 'coin')).toBeGreaterThan(at((l) => l.includes('thanks from')));
     expect(c.getView().landed).toBe(3);
 
@@ -127,11 +108,7 @@ describe('eat sequence (SPEC §5.6, D101)', () => {
     expect(done[0]!.coins).toBe(11);
     // The eaten plate stays off the tray through the closing line (it used to reappear).
     expect(c.getView().finished).toBe(true);
-    expect(c.getView().eaten).toEqual({
-      source: 'tray',
-      from: 0,
-      count: orders[1]!.problem.answer,
-    });
+    expect(c.getView().eaten).toEqual({ source: 'tray', from: 0, count: orders[1]!.problem.answer });
   });
 
   it('a tap skips the flight, chewing and reaction', async () => {
