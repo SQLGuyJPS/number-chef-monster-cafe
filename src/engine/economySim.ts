@@ -26,12 +26,17 @@ export interface PlayProfile {
   minMinutesToStart: number;
 }
 
+/**
+ * Measured in the first backup (D189, D191): a 6-order service took 1.4–2 min (the guess was 3–4),
+ * and with Results, the menu and mid-sitting shop visits a sitting earned about 495 coins an hour;
+ * 1 min between services reproduces that. Sittings and minutes a week are still guesses.
+ */
 export const DEFAULT_PROFILE: PlayProfile = {
   minutesPerWeek: 60,
   sessionMinutes: [15, 20],
-  serviceMinutes: [3, 4],
+  serviceMinutes: [1.4, 2],
   orders: 6,
-  betweenServicesMinutes: 0.5,
+  betweenServicesMinutes: 1,
   shopMinutes: 1.5,
   requeueOne: 0.2,
   requeueTwo: 0.05,
@@ -173,7 +178,11 @@ export function simulate(input: SimInput, rng: Rng): SimResult {
     // `everyMonsters` after this one was due, so waiting for the shop visit doesn't stretch the
     // pace; after a hold or a long gap it is due at the next visit (the event's `next`).
     // The very first crate skips the hold (D176).
-    if (queue.length > 0 && monsters >= nextCrateAt && (delivered === 0 || unowned().length < hold)) {
+    if (
+      queue.length > 0 &&
+      monsters >= nextCrateAt &&
+      (delivered === 0 || unowned().length < hold)
+    ) {
       delivered++;
       for (const e of queue.splice(0, input.crates.size)) shop.set(e.key, e);
       nextCrateAt = Math.max(nextCrateAt + input.crates.everyMonsters, monsters + 1);

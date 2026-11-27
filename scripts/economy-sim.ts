@@ -3,6 +3,10 @@
 //   --minutes 60        play minutes per week
 //   --session 15-20     minutes per sitting
 //   --service 3-4       minutes per 6-order service
+//   --between 0.5       minutes of Results and menu between services
+//   --shop 1.5          minutes in the shop at the end of a sitting
+//   --crate-every 45    monsters served per delivery crate
+//   (npm run play:report measures these from a backup, D189)
 //   --tiers 20,35,65,120,220   tier 1–5 prices
 //   --decor-week 7 --wardrobe-week 12 --staff-week 20   when the later waves reach the device
 //   --runs 300          seeded runs per scenario
@@ -51,6 +55,8 @@ const profile: PlayProfile = {
   minutesPerWeek: Number(flag('minutes') ?? DEFAULT_PROFILE.minutesPerWeek),
   sessionMinutes: range(flag('session'), DEFAULT_PROFILE.sessionMinutes),
   serviceMinutes: range(flag('service'), DEFAULT_PROFILE.serviceMinutes),
+  betweenServicesMinutes: Number(flag('between') ?? DEFAULT_PROFILE.betweenServicesMinutes),
+  shopMinutes: Number(flag('shop') ?? DEFAULT_PROFILE.shopMinutes),
 };
 const tierList = (flag('tiers') ?? Object.values(TIER_PRICE).join(',')).split(',').map(Number);
 const tiers = {
@@ -80,7 +86,7 @@ const m4Wave = (t = tiers) => {
   return { id: 'm4', opensWeek: 0, ordered: true, entries: CRATE_QUEUE.map((k) => byKey.get(k)!) };
 };
 const CRATES: CrateRule = {
-  everyMonsters: CRATE_EVERY_MONSTERS,
+  everyMonsters: Number(flag('crate-every') ?? CRATE_EVERY_MONSTERS),
   size: CRATE_SIZE,
   holdAtStock: CRATE_HOLD_AT_UNBOUGHT,
 };
@@ -280,7 +286,7 @@ out('| Change | Catalog coins | Bought out (weeks) | Months |');
 out('|---|---|---|---|');
 const sens: [string, PlayProfile, Record<Tier, number>][] = [
   ['Prices × 0.8', profile, scaled(0.8)],
-  ['Prices as set (D148)', profile, tiers],
+  ['Prices as set (D148, D191)', profile, tiers],
   ['Prices × 1.2', profile, scaled(1.2)],
   ['45 min a week', { ...profile, minutesPerWeek: 45 }, tiers],
   ['90 min a week', { ...profile, minutesPerWeek: 90 }, tiers],
@@ -356,6 +362,7 @@ const rules: CrateRule[] = [
   { everyMonsters: 120, size: 4 },
   { everyMonsters: 30, size: 2, holdAtStock: 6 },
   { everyMonsters: 40, size: 2, holdAtStock: 6 },
+  { everyMonsters: 45, size: 2, holdAtStock: 6 },
   { everyMonsters: 45, size: 3, holdAtStock: 6 },
 ];
 for (const crates of rules) {
@@ -371,7 +378,7 @@ for (const crates of rules) {
   const done = rs.map((r) => r.allBoughtOutWeek);
   const empty = rs.map((r) => (100 * r.emptyShopSessions) / Math.max(1, r.activeSessions));
   out(
-    `| ${crates.size} every ${crates.everyMonsters} monsters${crates.holdAtStock ? `, held while ${crates.holdAtStock}+ unbought` : ''}${crates.everyMonsters === 30 && crates.size === 2 && crates.holdAtStock ? ' **(chosen, D149, D151)**' : ''} (≈ every ${((crates.everyMonsters / monstersWeek) * 7).toFixed(1)} days) | ${Object.keys(WAVE_WEEKS).reduce((n, id) => n + Math.ceil(lat.filter((e) => e.wave === id).length / crates.size), 0)} | ${months(med(done))} (${months(percentile(done, 10))}–${months(percentile(done, 90))}) | ${fmt(med(rs.map((r) => r.meanStock)))} | ${fmt(med(empty), 0)}% | ${fmt(
+    `| ${crates.size} every ${crates.everyMonsters} monsters${crates.holdAtStock ? `, held while ${crates.holdAtStock}+ unbought` : ''}${crates.everyMonsters === CRATE_EVERY_MONSTERS && crates.size === 2 && crates.holdAtStock ? ' **(chosen, D151, D190)**' : ''} (≈ every ${((crates.everyMonsters / monstersWeek) * 7).toFixed(1)} days) | ${Object.keys(WAVE_WEEKS).reduce((n, id) => n + Math.ceil(lat.filter((e) => e.wave === id).length / crates.size), 0)} | ${months(med(done))} (${months(percentile(done, 10))}–${months(percentile(done, 90))}) | ${fmt(med(rs.map((r) => r.meanStock)))} | ${fmt(med(empty), 0)}% | ${fmt(
       percentile(
         rs.map((r) => r.longestDry),
         90,

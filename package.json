@@ -19,6 +19,7 @@
     "lint:content": "tsx scripts/lint-content.ts",
     "content:table": "tsx scripts/content-table.ts",
     "economy:sim": "tsx scripts/economy-sim.ts",
+    "play:report": "tsx scripts/play-report.ts",
     "icons": "tsx scripts/make-icons.ts",
     "check": "npm run typecheck && npm run lint && npm run test && npm run lint:content",
     "audio:todo": "tsx scripts/audio-todo.ts",

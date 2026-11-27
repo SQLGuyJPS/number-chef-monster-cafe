@@ -19,7 +19,6 @@ const milestone = process.env.NCMC_SCREENS;
 
 test.skip(!milestone, 'set NCMC_SCREENS=M<n> to capture milestone screenshots');
 
-
 /**
  * Freezing animations mid-flight leaves the flying copies where they started (two burgers both on
  * the tray and in the taken-away row), so a frozen shot waits for item flights to land first.
@@ -76,7 +75,9 @@ test('service screenshots', async ({ page }, info) => {
   const tag = `${vp.width}x${vp.height}`;
   const shot = async (name: string) => {
     await landFlights(page);
-    await page.addStyleTag({ content: '*{animation:none!important;transition:none!important}' }).catch(() => undefined);
+    await page
+      .addStyleTag({ content: '*{animation:none!important;transition:none!important}' })
+      .catch(() => undefined);
     await page.screenshot({ path: `${dir}/${name}-${tag}.png` });
   };
 
@@ -142,7 +143,9 @@ test('M2 screenshots', async ({ page }, info) => {
   const vp = page.viewportSize()!;
   const tag = `${vp.width}x${vp.height}`;
   const still = () =>
-    page.addStyleTag({ content: '*{animation:none!important;transition:none!important}' }).catch(() => undefined);
+    page
+      .addStyleTag({ content: '*{animation:none!important;transition:none!important}' })
+      .catch(() => undefined);
   const shot = async (name: string, freeze = true) => {
     if (freeze) {
       await landFlights(page);
@@ -193,7 +196,14 @@ test('M2 screenshots', async ({ page }, info) => {
   await page.waitForTimeout(500);
   await shot('service-eat-react', false);
 
-  await openService(page, { skill: 'A2', stage: 1, ops: 'both', seed: 3, warmUp: true, timeScale: 1 });
+  await openService(page, {
+    skill: 'A2',
+    stage: 1,
+    ops: 'both',
+    seed: 3,
+    warmUp: true,
+    timeScale: 1,
+  });
   // Real time: greeting and order are read first, then 4 s without a touch.
   await expect(page.getByTestId('ghost-hand')).toBeVisible({ timeout: 15_000 });
   await shot('service-warmup-ghost');
@@ -220,7 +230,9 @@ test('counter layout screenshots', async ({ page }, info) => {
   const tag = `${vp.width}x${vp.height}`;
   const shot = async (name: string) => {
     await landFlights(page);
-    await page.addStyleTag({ content: '*{animation:none!important;transition:none!important}' }).catch(() => undefined);
+    await page
+      .addStyleTag({ content: '*{animation:none!important;transition:none!important}' })
+      .catch(() => undefined);
     await page.screenshot({ path: `${dir}/${name}-${tag}.png` });
   };
 
@@ -309,7 +321,10 @@ test('M3a screenshots', async ({ page }, info) => {
 const M3B_SHOTS = ['chromium-ipad-pro-11', 'webkit-iphone-13', 'webkit-iphone-portrait'];
 
 test('M3b screenshots', async ({ page }, info) => {
-  test.skip(milestone !== 'M3b' || !M3B_SHOTS.includes(info.project.name), 'M3b shots: iPad, phone landscape and portrait');
+  test.skip(
+    milestone !== 'M3b' || !M3B_SHOTS.includes(info.project.name),
+    'M3b shots: iPad, phone landscape and portrait',
+  );
   test.setTimeout(120_000);
   const dir = `docs/screens/${milestone}`;
   mkdirSync(dir, { recursive: true });
@@ -372,10 +387,22 @@ test('M3b screenshots', async ({ page }, info) => {
   await section('export-result', 'export-done', 'center');
   const changed = JSON.parse(file) as { settings: Record<string, unknown> };
   changed.settings['ordersPerService'] = 4;
-  await page.getByTestId('import-file').setInputFiles({ name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(changed)) });
+  await page
+    .getByTestId('import-file')
+    .setInputFiles({
+      name: 'backup.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(changed)),
+    });
   await page.getByTestId('checksum-warning').waitFor();
   await section('checksum-warning', 'import-checksum', 'center');
-  await page.getByTestId('import-file').setInputFiles({ name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(file) });
+  await page
+    .getByTestId('import-file')
+    .setInputFiles({
+      name: 'backup.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(file),
+    });
   await page.getByTestId('import-summary').waitFor();
   await section('import-summary', 'import-summary', 'center');
   await page.getByTestId('import-confirm').click();
@@ -386,7 +413,10 @@ test('M3b screenshots', async ({ page }, info) => {
 // M4a (SPEC §10, §13.5): Home and Results with Shop, the shop's states, a delivery, purchases in
 // the service, and the `?decor` contact sheet (D156), at 1194×834 and 844×390.
 test('M4a screenshots', async ({ page }, info) => {
-  test.skip(milestone !== 'M4a' || !SERVICE_SHOTS.includes(info.project.name), 'M4a shots at 1194×834 and 844×390');
+  test.skip(
+    milestone !== 'M4a' || !SERVICE_SHOTS.includes(info.project.name),
+    'M4a shots at 1194×834 and 844×390',
+  );
   test.setTimeout(180_000);
   const dir = `docs/screens/${milestone}`;
   mkdirSync(dir, { recursive: true });
@@ -419,7 +449,7 @@ test('M4a screenshots', async ({ page }, info) => {
   // Weeks later: most of the starter shelf bought, a crate due.
   await tapId(page, 'shop-home');
   await page.evaluate(async () => {
-    await window.__ncmc.earn(2000, 120);
+    await window.__ncmc.earn(3000, 120);
     const s = (await window.__ncmc.shop())!;
     for (const k of s.unbought.slice(0, s.unbought.length - 5)) await window.__ncmc.buy(k);
   });
@@ -435,9 +465,10 @@ test('M4a screenshots', async ({ page }, info) => {
   for (let i = 0; i < 6; i++) {
     await tapId(page, 'shop-home');
     await page.evaluate(async () => {
-      await window.__ncmc.earn(0, 30);
+      await window.__ncmc.earn(0, 45);
       const s = (await window.__ncmc.shop())!;
-      for (const k of s.unbought.slice(0, Math.max(0, s.unbought.length - 5))) await window.__ncmc.buy(k);
+      for (const k of s.unbought.slice(0, Math.max(0, s.unbought.length - 5)))
+        await window.__ncmc.buy(k);
     });
     await tapId(page, 'shop-button');
     if ((await page.getByTestId('shop-delivery').count()) > 0) await finishDelivery(page);
@@ -486,7 +517,10 @@ test('M4a screenshots', async ({ page }, info) => {
 //   npx cross-env NCMC_SCREENS=M4b/<batch> NCMC_DECOR_SLOTS=wallpaper,floor NCMC_DECOR_BUSY=<key>,<key> playwright test screens --project=chromium-ipad-pro-11
 test('M4b batch screenshots', async ({ page }, info) => {
   // Art review is about layout and colour, not the engine: one Chromium project, both sizes.
-  test.skip(!milestone?.startsWith('M4b/') || info.project.name !== 'chromium-ipad-pro-11', 'M4b shots, Chromium');
+  test.skip(
+    !milestone?.startsWith('M4b/') || info.project.name !== 'chromium-ipad-pro-11',
+    'M4b shots, Chromium',
+  );
   test.setTimeout(180_000);
   const dir = `docs/screens/${milestone}`;
   mkdirSync(dir, { recursive: true });
@@ -520,7 +554,10 @@ test('M4b batch screenshots', async ({ page }, info) => {
       await page.getByTestId('decor-sheet').waitFor();
       await page.evaluate(() => document.fonts.ready);
       await still();
-      await page.screenshot({ path: `${dir}/decor-${slot}-${width}x${height}.png`, fullPage: true });
+      await page.screenshot({
+        path: `${dir}/decor-${slot}-${width}x${height}.png`,
+        fullPage: true,
+      });
     }
   }
   // Close-ups of the small slots (`&zoom`), once: they are for detail, not for phone size.
@@ -575,7 +612,8 @@ test('M4b shop shelves', async ({ page }, info) => {
         const name = p === 1 ? `shop-${slot}` : `shop-${slot}-p${p}`;
         await page.screenshot({ path: `${dir}/${name}-${width}x${height}.png` });
         const next = page.getByTestId('shop-next');
-        if ((await next.count()) === 0 || (await next.getAttribute('class'))?.includes('off')) break;
+        if ((await next.count()) === 0 || (await next.getAttribute('class'))?.includes('off'))
+          break;
         await tapId(page, 'shop-next');
         await page.waitForTimeout(300);
       }

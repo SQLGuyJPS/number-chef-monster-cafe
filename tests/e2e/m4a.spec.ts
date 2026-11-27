@@ -39,11 +39,11 @@ test('buy with confirm, live preview, equip; persists across a reload', async ({
   await expect(page.getByTestId('shop-confirm')).toHaveCount(0);
   expect(await kinds(page)).not.toContain('buy');
 
-  // Yes!: bought once, equipped, 20 coins off.
+  // Yes!: bought once, equipped, 30 coins off (D191).
   await tapId(page, 'shop-buy');
   await tapId(page, 'shop-yes');
   await expect(page.getByTestId('shop-buy')).toHaveCount(0);
-  await expect(page.getByTestId('coin-jar')).toContainText('30');
+  await expect(page.getByTestId('coin-jar')).toContainText('20');
   let s = (await shop(page))!;
   expect(s.bought).toEqual(['wallpaper.plain.berry']);
   expect(s.equipped['wallpaper']).toBe('wallpaper.plain.berry');
@@ -52,7 +52,7 @@ test('buy with confirm, live preview, equip; persists across a reload', async ({
   await tapId(page, 'shop-dot-wallpaper.plain.sunny');
   s = (await shop(page))!;
   expect(s.equipped['wallpaper']).toBe('wallpaper.plain.sunny');
-  expect(s.balance).toBe(30);
+  expect(s.balance).toBe(20);
   await tapId(page, 'shop-dot-wallpaper.plain.berry');
 
   await tapId(page, 'shop-home');
@@ -66,7 +66,7 @@ test('buy with confirm, live preview, equip; persists across a reload', async ({
   s = (await shop(page))!;
   expect(s.bought).toEqual(['wallpaper.plain.berry']);
   expect(s.equipped['wallpaper']).toBe('wallpaper.plain.berry');
-  expect(s.balance).toBe(30);
+  expect(s.balance).toBe(20);
   expect((await kinds(page)).filter((k) => k === 'buy')).toHaveLength(1);
 });
 
@@ -96,14 +96,16 @@ test('a crate: the first on the first visit, then held at 6 unbought, one per vi
   await openShop(page, false);
   await expect(page.getByTestId('shop-delivery')).toBeVisible();
   // Untouched, it opens by itself after 2 s and holds the open box 8 s (D164, D181).
-  await expect(page.getByTestId('shop-delivery')).toHaveAttribute('data-phase', 'open', { timeout: 5_000 });
+  await expect(page.getByTestId('shop-delivery')).toHaveAttribute('data-phase', 'open', {
+    timeout: 5_000,
+  });
   await page.waitForTimeout(6_000);
   await expect(page.getByTestId('shop-delivery')).toHaveAttribute('data-phase', 'open');
   await expect(page.getByTestId('shop-delivery')).toHaveCount(0, { timeout: 4_000 });
   expect((await shop(page))!.unbought).toHaveLength(12);
   await tapId(page, 'shop-home');
-  // 40 monsters later crate 2 is due, but 12 unbought hold it.
-  await page.evaluate(() => window.__ncmc.earn(0, 40));
+  // 50 monsters later crate 2 is due (every 45, D190), but 12 unbought hold it.
+  await page.evaluate(() => window.__ncmc.earn(0, 50));
   await openShop(page);
   await expect(page.getByTestId('shop-delivery')).toHaveCount(0);
   await tapId(page, 'shop-home');
@@ -146,7 +148,9 @@ test('a crate: the first on the first visit, then held at 6 unbought, one per vi
   expect((await kinds(page)).filter((k) => k === 'crate')).toHaveLength(2);
 });
 
-test('grown-ups shop playtest: set the coins, send a crate, replay it, deliver all (D179, D180)', async ({ page }) => {
+test('grown-ups shop playtest: set the coins, send a crate, replay it, deliver all (D179, D180)', async ({
+  page,
+}) => {
   await startApp(page);
   await page.evaluate(() => window.__ncmc.earn(50, 0));
   await openShop(page); // crate 1 (D176)
@@ -197,7 +201,9 @@ test('grown-ups shop playtest: set the coins, send a crate, replay it, deliver a
   expect((await kinds(page)).filter((k) => k === 'coinAdjust')).toHaveLength(1);
 });
 
-test('shop tap targets are big enough at 844×390, on every page of every slot', async ({ page }, info) => {
+test('shop tap targets are big enough at 844×390, on every page of every slot', async ({
+  page,
+}, info) => {
   test.skip(info.project.name !== 'webkit-iphone-13', 'tap sizes are asserted at 844×390');
   await startApp(page);
   await page.evaluate(() => window.__ncmc.earn(50, 3));
@@ -229,8 +235,8 @@ test('shop tap targets are big enough at 844×390, on every page of every slot',
 test('purchases show on the Service screen, inside the SVG budget', async ({ page }) => {
   await startApp(page);
   await page.evaluate(async () => {
-    // Enough for the six below (440 coins since Seaside moved to T4, D186).
-    await window.__ncmc.earn(500, 3);
+    // Enough for the six below (655 coins since prices went up by half, D191).
+    await window.__ncmc.earn(700, 3);
     // The busiest drawn piece per slot (M4b batch 1: Starry Night's twinkling stars; batch 2:
     // Paper Lanterns, twelve swaying groups; batch 3: Tiny Robot, which blinks, waves and glows,
     // and Monster Portraits, three real monster drawings; D185: Seaside, the most detailed window,
@@ -279,7 +285,10 @@ test('every item name fits inside its shelf tile, and every page stays inside th
         }),
       );
       names += over.length;
-      expect(over.filter((o) => o.out).map((o) => o.name), `${slot} page ${p + 1}`).toEqual([]);
+      expect(
+        over.filter((o) => o.out).map((o) => o.name),
+        `${slot} page ${p + 1}`,
+      ).toEqual([]);
       const n = await page.evaluate(() => window.__ncmc.svgCounts());
       expect(n.total, `${slot} page ${p + 1}`).toBeLessThanOrEqual(SVG_BUDGET.total);
       expect(n.moving, `${slot} page ${p + 1}`).toBeLessThanOrEqual(SVG_BUDGET.moving);

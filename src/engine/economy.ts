@@ -9,12 +9,14 @@ export type MonsterSlot = 'hat' | 'skin' | 'accessory';
 export type ShopSlot = DecorSlot | MonsterSlot;
 
 /**
- * Price tiers, sized against what a child earns (about 23 coins a service, 4 services a sitting):
- * 1 ≈ one service, 2 ≈ two services, 3 ≈ most of a sitting, 4 ≈ two sittings, 5 ≈ most of a week
- * at an hour a week. Young children save for at most a week or two, so tier 5 stays under that.
+ * Price tiers, sized against what a child earns at the measured pace (D189, D191: about 23 coins
+ * a service, five or six services a 15–20 min sitting): 1 ≈ two services, 2 ≈ half a sitting,
+ * 3 ≈ most of a sitting, 4 ≈ a sitting, 5 ≈ two sittings, about half a week at an hour a week.
+ * Young children save for at most a week or two, so tier 5 stays under that. 1.5× the first
+ * prices (20, 30, 55, 100, 180), because she plays 1.5× as fast as first assumed.
  */
 export type Tier = 1 | 2 | 3 | 4 | 5;
-export const TIER_PRICE: Readonly<Record<Tier, number>> = { 1: 20, 2: 30, 3: 55, 4: 100, 5: 180 };
+export const TIER_PRICE: Readonly<Record<Tier, number>> = { 1: 30, 2: 45, 3: 80, 4: 150, 5: 270 };
 
 /**
  * Colour families shared across slots, so a Berry wallpaper, Berry tiles and Berry lanterns match.
@@ -297,12 +299,13 @@ export const LATE_CRATES: readonly string[] = [
 ];
 
 /**
- * Delivery crates (SPEC §10.1, D149, D151): 2 entries every 30 monsters served, held while 6 or
- * more unbought entries are in the shop. A crate is worth about what the child earns between
- * crates (about 3.8 coins a monster), so the shelf neither empties nor piles up.
+ * Delivery crates (SPEC §10.1, D149, D151): 2 entries every 45 monsters served (D190; 30 before),
+ * held while 6 or more unbought entries are in the shop. Measured play (D189) showed services
+ * taking half the simulated time, so at 30 the crates, not the prices, emptied the shop in about
+ * 7 weeks of an hour a week.
  */
 export const CRATE_SIZE = 2;
-export const CRATE_EVERY_MONSTERS = 30;
+export const CRATE_EVERY_MONSTERS = 45;
 export const CRATE_HOLD_AT_UNBOUGHT = 6;
 
 /**

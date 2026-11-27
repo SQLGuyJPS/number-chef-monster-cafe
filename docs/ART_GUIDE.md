@@ -25,7 +25,7 @@ The guide has three parts, held to different strengths:
 2. **It reads at phone size.** Judge every piece at 844×390, where the stage is about half size. Detail smaller than about 6 stage px disappears.
 3. **Colours are shared across the café.** An item with colorways is drawn once and takes its colours as props (`{base, accent}`), so a new colorway costs no new drawing. The same colour family must look like the same family in every slot.
 4. **It fits the element budget.** The screen may hold at most 4,800 SVG elements, 650 of them moving (`SVG_BUDGET`, D113). The busiest choice of one item per slot, plus a full service, must stay within that. `budget.spec.ts` enforces it.
-5. **Motion is gentle and optional.** Nothing flashes or strobes. With reduced motion on, every piece is drawn still. Animation must never slow down or get in the way of play. Very slight motion (§3) is for pieces at tier 2 (30 coins) and up, never tier 1 or the free defaults, one moving thing per piece at most (D187, D188).
+5. **Motion is gentle and optional.** Nothing flashes or strobes. With reduced motion on, every piece is drawn still. Animation must never slow down or get in the way of play. Very slight motion (§3) is for pieces at tier 2 (45 coins, D191) and up, never tier 1 or the free defaults, one moving thing per piece at most (D187, D188).
 6. **It's safe and kind for a young child.** Nothing scary, no words or numbers the child would need to read, no brand names or logos, and nothing copied from an existing game or character.
 7. **It has a slot and a fallback.** A piece draws inside its slot (§5), runs past the safe box where it is a wall or floor layer, and falls back to the labelled stand-in shape if it's missing.
 
@@ -98,7 +98,7 @@ An item may go over if another stays under. What must fit is the total.
 ## 7. Locked items
 These are approved: don't redraw them without asking. Notes record what the owner liked about each.
 - **Street (Little Shops)**, the free window (D185, 2026-11-26): a bakery and a flower shop under striped awnings, a cat upstairs. Picked from five daytime streets after one round of fixes (roofs that overhang, a cherry that fits its window, flowers fronting the flower shop).
-- **Town Houses, Park, Hilltop Town, Seaside** (D185, 2026-11-26): drawn with the Street and sold as their own windows, at T4 (100) because they are far more detailed than the other windows (D186). Their motion is kept (D187): Park's balloons sway, Hilltop Town's windmill turns, Seaside's boat rocks. The owner saw them move in play and found the motion slight enough not to distract.
+- **Town Houses, Park, Hilltop Town, Seaside** (D185, 2026-11-26): drawn with the Street and sold as their own windows, at T4 (150 since D191) because they are far more detailed than the other windows (D186). Their motion is kept (D187): Park's balloons sway, Hilltop Town's windmill turns, Seaside's boat rocks. The owner saw them move in play and found the motion slight enough not to distract.
 
 ## 8. Change notes
 - 2026-11-21: first draft (D156), from the existing café, Pip and monster art.
