@@ -52,7 +52,9 @@ const LATE = new Set(LATE_CRATES);
 export const CRATE_QUEUE: readonly string[] = [
   ...EARLY_CRATES,
   ...interleave(
-    CATALOG.filter((e) => e.price > 0 && !STARTER.has(e.key) && !EARLY.has(e.key) && !LATE.has(e.key)),
+    CATALOG.filter(
+      (e) => e.price > 0 && !STARTER.has(e.key) && !EARLY.has(e.key) && !LATE.has(e.key),
+    ),
   ).map((e) => e.key),
   ...LATE_CRATES,
 ];
@@ -83,14 +85,13 @@ export function shelfKeys(d: Derived): string[] {
 }
 
 /** Paid entries on the shelf not yet bought: the hold counts these (CRATE_HOLD_AT_UNBOUGHT). */
-export const unboughtOnShelf = (d: Derived): string[] =>
-  shelfKeys(d).filter((k) => !isOwned(d, k));
+export const unboughtOnShelf = (d: Derived): string[] => shelfKeys(d).filter((k) => !isOwned(d, k));
 
 /**
  * The crate to record on this shop visit, or null (SPEC §11.2, D154): one per visit, if queued
  * entries remain, the monsters served have reached the due point (the first crate is due at
  * once), and fewer than 6 unbought entries are on the shelf. The very first crate skips the hold
- * (D176), so the delivery moment is part of her first shop visit, not ~450 coins later. `next` keeps the pace at 30 monsters
+ * (D176), so the delivery moment is part of her first shop visit, not ~450 coins later. `next` keeps the pace at CRATE_EVERY_MONSTERS
  * from the due point, but never in the past, so a backlog arrives one visit at a time.
  */
 export function dueCrate(d: Derived): { n: number; next: number } | null {
@@ -107,7 +108,7 @@ export function dueCrate(d: Derived): { n: number; next: number } | null {
 
 /**
  * A crate the parent sent from the playtest tools (D180): the next one in the queue, skipping the
- * 30-monster wait and the hold, with the pace restarted from now (`next` = served + 30). Null once
+ * monster wait and the hold, with the pace restarted from now (`next` = served + CRATE_EVERY_MONSTERS). Null once
  * the queue is empty.
  */
 export function forcedCrate(d: Derived): { n: number; next: number } | null {

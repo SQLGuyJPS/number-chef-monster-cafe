@@ -361,6 +361,7 @@ const rules: CrateRule[] = [
   { everyMonsters: 120, size: 4 },
   { everyMonsters: 30, size: 2, holdAtStock: 6 },
   { everyMonsters: 40, size: 2, holdAtStock: 6 },
+  { everyMonsters: 45, size: 2, holdAtStock: 6 },
   { everyMonsters: 45, size: 3, holdAtStock: 6 },
 ];
 for (const crates of rules) {
@@ -376,7 +377,7 @@ for (const crates of rules) {
   const done = rs.map((r) => r.allBoughtOutWeek);
   const empty = rs.map((r) => (100 * r.emptyShopSessions) / Math.max(1, r.activeSessions));
   out(
-    `| ${crates.size} every ${crates.everyMonsters} monsters${crates.holdAtStock ? `, held while ${crates.holdAtStock}+ unbought` : ''}${crates.everyMonsters === 30 && crates.size === 2 && crates.holdAtStock ? ' **(chosen, D149, D151)**' : ''} (≈ every ${((crates.everyMonsters / monstersWeek) * 7).toFixed(1)} days) | ${Object.keys(WAVE_WEEKS).reduce((n, id) => n + Math.ceil(lat.filter((e) => e.wave === id).length / crates.size), 0)} | ${months(med(done))} (${months(percentile(done, 10))}–${months(percentile(done, 90))}) | ${fmt(med(rs.map((r) => r.meanStock)))} | ${fmt(med(empty), 0)}% | ${fmt(
+    `| ${crates.size} every ${crates.everyMonsters} monsters${crates.holdAtStock ? `, held while ${crates.holdAtStock}+ unbought` : ''}${crates.everyMonsters === CRATE_EVERY_MONSTERS && crates.size === 2 && crates.holdAtStock ? ' **(chosen, D151, D190)**' : ''} (≈ every ${((crates.everyMonsters / monstersWeek) * 7).toFixed(1)} days) | ${Object.keys(WAVE_WEEKS).reduce((n, id) => n + Math.ceil(lat.filter((e) => e.wave === id).length / crates.size), 0)} | ${months(med(done))} (${months(percentile(done, 10))}–${months(percentile(done, 90))}) | ${fmt(med(rs.map((r) => r.meanStock)))} | ${fmt(med(empty), 0)}% | ${fmt(
       percentile(
         rs.map((r) => r.longestDry),
         90,

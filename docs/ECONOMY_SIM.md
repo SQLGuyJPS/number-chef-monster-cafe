@@ -90,9 +90,9 @@ M4 opens with a starter shelf of 10 entries (280 coins); the other 45 arrive in 
 
 | Setup | Habit | First purchase: end of sitting / after services | Bought out (weeks) | Bought out (months) | Mean unbought items on the shelf | Sittings ending with a purchase | Longest dry spell (sittings, 90th pct) |
 |---|---|---|---|---|---|---|---|
-| Starter shelf + crates | impulse | 1 / 4 | 9.6 (9.3–9.7) | 2.2 | 4.5 | 100% | 1 |
-| Starter shelf + crates | cheapest | 1 / 4 | 9.6 (9.3–9.7) | 2.2 | 4.1 | 93% | 2 |
-| Starter shelf + crates | saver | 1 / 4 | 9.6 (9.3–9.7) | 2.2 | 5.0 | 94% | 2 |
+| Starter shelf + crates | impulse | 1 / 4 | 12.4 (12.0–12.6) | 2.9 | 2.4 | 67% | 0 |
+| Starter shelf + crates | cheapest | 1 / 4 | 12.0 (11.8–12.3) | 2.8 | 2.1 | 67% | 1 |
+| Starter shelf + crates | saver | 1 / 4 | 12.0 (11.9–12.3) | 2.8 | 2.3 | 68% | 2 |
 | All on day one | impulse | 1 / 4 | 9.6 (9.3–9.7) | 2.2 | 26.3 | 97% | 1 |
 | All on day one | cheapest | 1 / 4 | 9.6 (9.3–9.7) | 2.2 | 19.4 | 91% | 2 |
 | All on day one | saver | 1 / 4 | 9.6 (9.3–9.7) | 2.2 | 28.3 | 93% | 1 |
@@ -101,13 +101,13 @@ M4 opens with a starter shelf of 10 entries (280 coins); the other 45 arrive in 
 
 | Change | Catalog coins | Bought out (weeks) | Months |
 |---|---|---|---|
-| Prices × 0.8 | 2,350 | 9.0 (8.8–9.3) | 2.1 |
-| Prices as set (D148) | 2,905 | 9.6 (9.3–9.7) | 2.2 |
-| Prices × 1.2 | 3,460 | 11.3 (11.3–11.6) | 2.6 |
-| 45 min a week | 2,905 | 12.8 (12.4–12.9) | 2.9 |
-| 90 min a week | 2,905 | 6.2 (6.2–6.3) | 1.4 |
-| Services take 4–5 min | 2,905 | 11.7 (11.6–12.0) | 2.7 |
-| 8 orders a service | 2,905 | 9.7 (9.3–9.9) | 2.2 |
+| Prices × 0.8 | 2,350 | 12.4 (12.0–12.6) | 2.9 |
+| Prices as set (D148) | 2,905 | 12.4 (12.0–12.6) | 2.9 |
+| Prices × 1.2 | 3,460 | 12.6 (12.3–12.7) | 2.9 |
+| 45 min a week | 2,905 | 16.3 (15.9–16.5) | 3.8 |
+| 90 min a week | 2,905 | 8.0 (8.0–8.2) | 1.8 |
+| Services take 4–5 min | 2,905 | 15.0 (14.8–15.4) | 3.5 |
+| 8 orders a service | 2,905 | 12.0 (11.9–12.4) | 2.8 |
 
 ## Later content (planned counts, not designed yet)
 
@@ -140,8 +140,9 @@ Shop-stock, waiting and dry-spell columns count from the decor wave on; a later 
 | 3 every 90 monsters (≈ every 7.4 days) | 42 | 13.5 (13.4–13.6) | 1.1 | 46% | 0 |
 | 4 every 90 monsters (≈ every 7.4 days) | 32 | 10.2 (10.1–10.2) | 1.6 | 45% | 1 |
 | 4 every 120 monsters (≈ every 9.8 days) | 32 | 13.4 (13.3–13.5) | 1.2 | 59% | 0 |
-| 2 every 30 monsters, held while 6+ unbought **(chosen, D149, D151)** (≈ every 2.5 days) | 62 | 10.1 (10.1–10.2) | 5.5 | 0% | 2 |
+| 2 every 30 monsters, held while 6+ unbought (≈ every 2.5 days) | 62 | 10.1 (10.1–10.2) | 5.5 | 0% | 2 |
 | 2 every 40 monsters, held while 6+ unbought (≈ every 3.3 days) | 62 | 9.9 (9.8–10.0) | 1.5 | 33% | 2 |
+| 2 every 45 monsters, held while 6+ unbought **(chosen, D151, D190)** (≈ every 3.7 days) | 62 | 10.3 (10.2–10.5) | 1.1 | 45% | 0 |
 | 3 every 45 monsters, held while 6+ unbought (≈ every 3.7 days) | 42 | 10.1 (10.0–10.2) | 6.2 | 0% | 2 |
 | No crates (each wave all at once) | — | 10.1 (10.1–10.2) | 35.2 | 0% | 2 |
 

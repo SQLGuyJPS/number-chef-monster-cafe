@@ -393,6 +393,12 @@ The free Street is now the Little Shops view (a bakery and a flower shop), so ev
 
 Not verifiable in the cloud build: how smooth the motion is on the real iPad, and the colours on the iPad and iPhone screens.
 
+## Shop pace — crates every 45 monsters (D190)
+
+Her first backup (37 min of play) showed a 6-order service taking about 1.4–1.9 min, half what the economy simulation assumed, so coins came about 1.5× as fast (D189). Crates now come every 45 monsters instead of 30 (2 items each, still one per shop visit and held while 6 or more unbought things wait). A crate already recorded keeps the due point it was given, so the next one on her devices may still come at the old pace once; after that, 45. Measure again with `npm run play:report -- <backup.json>` after a week or two.
+- [ ] **Shelf.** Does the shelf ever feel empty, with coins piling up and nothing new to buy? Or still emptying too fast? Notes:
+
+
 ## M13 step 2 — Voice listening test (D139d, D143–D147; iPad first, about 45 minutes with the recording)
 
 Record `docs/VOICE_SPIKE.md`, build it, push to `main`, then open the app with `?debug` on the iPad and scroll to **Voice test**. Until clips exist every button says "(TTS)" and lists what is "not recorded". Tap the screen once first so sound is on. Only you can judge these:

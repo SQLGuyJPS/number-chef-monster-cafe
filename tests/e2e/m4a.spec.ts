@@ -96,14 +96,16 @@ test('a crate: the first on the first visit, then held at 6 unbought, one per vi
   await openShop(page, false);
   await expect(page.getByTestId('shop-delivery')).toBeVisible();
   // Untouched, it opens by itself after 2 s and holds the open box 8 s (D164, D181).
-  await expect(page.getByTestId('shop-delivery')).toHaveAttribute('data-phase', 'open', { timeout: 5_000 });
+  await expect(page.getByTestId('shop-delivery')).toHaveAttribute('data-phase', 'open', {
+    timeout: 5_000,
+  });
   await page.waitForTimeout(6_000);
   await expect(page.getByTestId('shop-delivery')).toHaveAttribute('data-phase', 'open');
   await expect(page.getByTestId('shop-delivery')).toHaveCount(0, { timeout: 4_000 });
   expect((await shop(page))!.unbought).toHaveLength(12);
   await tapId(page, 'shop-home');
-  // 40 monsters later crate 2 is due, but 12 unbought hold it.
-  await page.evaluate(() => window.__ncmc.earn(0, 40));
+  // 50 monsters later crate 2 is due (every 45, D190), but 12 unbought hold it.
+  await page.evaluate(() => window.__ncmc.earn(0, 50));
   await openShop(page);
   await expect(page.getByTestId('shop-delivery')).toHaveCount(0);
   await tapId(page, 'shop-home');
@@ -146,7 +148,9 @@ test('a crate: the first on the first visit, then held at 6 unbought, one per vi
   expect((await kinds(page)).filter((k) => k === 'crate')).toHaveLength(2);
 });
 
-test('grown-ups shop playtest: set the coins, send a crate, replay it, deliver all (D179, D180)', async ({ page }) => {
+test('grown-ups shop playtest: set the coins, send a crate, replay it, deliver all (D179, D180)', async ({
+  page,
+}) => {
   await startApp(page);
   await page.evaluate(() => window.__ncmc.earn(50, 0));
   await openShop(page); // crate 1 (D176)
@@ -197,7 +201,9 @@ test('grown-ups shop playtest: set the coins, send a crate, replay it, deliver a
   expect((await kinds(page)).filter((k) => k === 'coinAdjust')).toHaveLength(1);
 });
 
-test('shop tap targets are big enough at 844×390, on every page of every slot', async ({ page }, info) => {
+test('shop tap targets are big enough at 844×390, on every page of every slot', async ({
+  page,
+}, info) => {
   test.skip(info.project.name !== 'webkit-iphone-13', 'tap sizes are asserted at 844×390');
   await startApp(page);
   await page.evaluate(() => window.__ncmc.earn(50, 3));
@@ -279,7 +285,10 @@ test('every item name fits inside its shelf tile, and every page stays inside th
         }),
       );
       names += over.length;
-      expect(over.filter((o) => o.out).map((o) => o.name), `${slot} page ${p + 1}`).toEqual([]);
+      expect(
+        over.filter((o) => o.out).map((o) => o.name),
+        `${slot} page ${p + 1}`,
+      ).toEqual([]);
       const n = await page.evaluate(() => window.__ncmc.svgCounts());
       expect(n.total, `${slot} page ${p + 1}`).toBeLessThanOrEqual(SVG_BUDGET.total);
       expect(n.moving, `${slot} page ${p + 1}`).toBeLessThanOrEqual(SVG_BUDGET.moving);

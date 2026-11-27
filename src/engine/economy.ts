@@ -297,12 +297,13 @@ export const LATE_CRATES: readonly string[] = [
 ];
 
 /**
- * Delivery crates (SPEC §10.1, D149, D151): 2 entries every 30 monsters served, held while 6 or
- * more unbought entries are in the shop. A crate is worth about what the child earns between
- * crates (about 3.8 coins a monster), so the shelf neither empties nor piles up.
+ * Delivery crates (SPEC §10.1, D149, D151): 2 entries every 45 monsters served (D190; 30 before),
+ * held while 6 or more unbought entries are in the shop. Measured play (D189) showed services
+ * taking half the simulated time, so at 30 the crates, not the prices, emptied the shop in about
+ * 7 weeks of an hour a week.
  */
 export const CRATE_SIZE = 2;
-export const CRATE_EVERY_MONSTERS = 30;
+export const CRATE_EVERY_MONSTERS = 45;
 export const CRATE_HOLD_AT_UNBOUGHT = 6;
 
 /**

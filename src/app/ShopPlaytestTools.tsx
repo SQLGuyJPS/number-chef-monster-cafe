@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { CRATE_EVERY_MONSTERS } from '../engine/economy';
 import { balance, servedMonsters } from '../engine/replay';
 import { cratesLeft, deliveredCrates } from '../engine/shop';
 import { loadedProgress, useDerived } from './progress';
@@ -27,7 +28,8 @@ export function ShopPlaytestTools() {
 
   const value = draft ?? String(coins);
   const target = Number(value);
-  const valid = value.trim() !== '' && Number.isInteger(target) && target >= 0 && target <= MAX_COINS;
+  const valid =
+    value.trim() !== '' && Number.isInteger(target) && target >= 0 && target <= MAX_COINS;
 
   const setCoins = () => {
     if (!valid) return;
@@ -52,8 +54,9 @@ export function ShopPlaytestTools() {
     <section data-testid="shop-playtest">
       <h2>Shop playtest</h2>
       <p>
-        For trying the shop quickly. These change the progress log like play does: coins set here and things bought
-        with them stay (only Reset or Replace undoes them), and crates sent here are delivered for good.
+        For trying the shop quickly. These change the progress log like play does: coins set here
+        and things bought with them stay (only Reset or Replace undoes them), and crates sent here
+        are delivered for good.
       </p>
 
       <h3>Coins in the jar</h3>
@@ -97,7 +100,12 @@ export function ShopPlaytestTools() {
       </p>
       <p>
         {request === 'crate' ? (
-          <button type="button" className="parent-button" data-testid="playtest-crate" onClick={() => setShopPlaytest(null)}>
+          <button
+            type="button"
+            className="parent-button"
+            data-testid="playtest-crate"
+            onClick={() => setShopPlaytest(null)}
+          >
             Crate waiting for the next shop visit (tap to cancel)
           </button>
         ) : (
@@ -114,7 +122,12 @@ export function ShopPlaytestTools() {
       </p>
       <p>
         {request === 'replay' ? (
-          <button type="button" className="parent-button" data-testid="playtest-replay" onClick={() => setShopPlaytest(null)}>
+          <button
+            type="button"
+            className="parent-button"
+            data-testid="playtest-replay"
+            onClick={() => setShopPlaytest(null)}
+          >
             Replay waiting for the next shop visit (tap to cancel)
           </button>
         ) : (
@@ -130,9 +143,10 @@ export function ShopPlaytestTools() {
         )}
       </p>
       <p className="parent-note">
-        A sent crate skips the 30-monster wait and the hold at 6 unbought; the next one is then due 30 monsters from
-        now. A replay shows the last crate arriving again and records nothing. Either one is used up on the next shop
-        visit, and forgotten if the app is closed first.
+        A sent crate skips the {CRATE_EVERY_MONSTERS}-monster wait and the hold at 6 unbought; the
+        next one is then due {CRATE_EVERY_MONSTERS} monsters from now. A replay shows the last crate
+        arriving again and records nothing. Either one is used up on the next shop visit, and
+        forgotten if the app is closed first.
       </p>
       <p>
         <button
@@ -147,7 +161,12 @@ export function ShopPlaytestTools() {
         {allConfirm && (
           <>
             {' '}
-            <button type="button" className="parent-button" data-testid="playtest-crate-all-cancel" onClick={() => setAllConfirm(false)}>
+            <button
+              type="button"
+              className="parent-button"
+              data-testid="playtest-crate-all-cancel"
+              onClick={() => setAllConfirm(false)}
+            >
               Cancel
             </button>
           </>

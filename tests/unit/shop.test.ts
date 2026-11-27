@@ -8,7 +8,13 @@ import {
   serviceEndEvent,
   type Evt,
 } from '../../src/engine/events';
-import { CRATE_HOLD_AT_UNBOUGHT, EARLY_CRATES, LATE_CRATES, STARTER_SHELF } from '../../src/engine/economy';
+import {
+  CRATE_EVERY_MONSTERS as C,
+  CRATE_HOLD_AT_UNBOUGHT,
+  EARLY_CRATES,
+  LATE_CRATES,
+  STARTER_SHELF,
+} from '../../src/engine/economy';
 import { balance, earned, replay, servedMonsters, type Derived } from '../../src/engine/replay';
 import {
   CATALOG,
@@ -64,7 +70,8 @@ class Device {
   }
   buy(key: string) {
     const e = entryOf(key)!;
-    if (canBuy(this.d, key) === 'ok') this.events.push(buyEvent(this.ctx, { item: key, price: e.price }));
+    if (canBuy(this.d, key) === 'ok')
+      this.events.push(buyEvent(this.ctx, { item: key, price: e.price }));
   }
   /** Buys from the shelf until at most `left` unbought entries remain. */
   buyDownTo(left: number) {
@@ -151,7 +158,7 @@ describe('crates (SPEC §10.1, D154)', () => {
     const dv = new Device();
     expect(unboughtOnShelf(dv.d)).toHaveLength(10);
     // The very first visit brings crate 1, though all 10 starter entries are unbought.
-    expect(dv.visit()).toEqual({ n: 1, next: 30 });
+    expect(dv.visit()).toEqual({ n: 1, next: C });
     for (const k of crateEntries(1)) expect(shelfKeys(dv.d)).toContain(k);
     expect(unboughtOnShelf(dv.d)).toHaveLength(12);
     dv.serve(200);
@@ -175,33 +182,33 @@ describe('crates (SPEC §10.1, D154)', () => {
     expect(dv.visit()).toBeNull();
     dv.serve(1);
     expect(dv.visit()?.n).toBe(2);
-    // Then the usual pace again: 30 monsters from that due point.
-    dv.serve(29);
+    // Then the usual pace again: C monsters from that due point.
+    dv.serve(C - 1);
     expect(dv.visit()).toBeNull();
     dv.serve(1);
     expect(dv.visit()?.n).toBe(3);
     // Six unbought now: the hold stops the backlog.
-    dv.serve(30);
+    dv.serve(C);
     expect(dv.visit()).toBeNull();
     expect(unboughtOnShelf(dv.d)).toHaveLength(6);
   });
 
-  it('keeps a pace of 30 monsters from the due point, not from the visit', () => {
+  it('keeps a pace of C monsters from the due point, not from the visit', () => {
     const dv = new Device();
     dv.buyDownTo(0);
-    // The first crate is due at once; the second 30 monsters after that.
-    expect(dv.visit()).toEqual({ n: 1, next: 30 });
+    // The first crate is due at once; the second C monsters after that.
+    expect(dv.visit()).toEqual({ n: 1, next: C });
     dv.buyDownTo(0);
-    dv.serve(29);
+    dv.serve(C - 1);
     expect(dv.visit()).toBeNull();
     dv.serve(1);
-    expect(dv.visit()).toEqual({ n: 2, next: 60 });
+    expect(dv.visit()).toEqual({ n: 2, next: 2 * C });
     dv.buyDownTo(0);
-    dv.serve(35); // a visit 5 monsters late: the next is still due at 90, not 95
-    expect(dv.visit()).toEqual({ n: 3, next: 90 });
+    dv.serve(C + 5); // a visit 5 monsters late: the next is still due at 3C, not 3C + 5
+    expect(dv.visit()).toEqual({ n: 3, next: 3 * C });
     dv.buyDownTo(0);
-    dv.serve(100); // a long gap: one crate now, the next at the following monster
-    expect(dv.visit()).toEqual({ n: 4, next: 166 });
+    dv.serve(4 * C); // a long gap: one crate now, the next at the following monster
+    expect(dv.visit()).toEqual({ n: 4, next: 6 * C + 5 + 1 });
   });
 
   it('stops when the queue is empty', () => {
@@ -211,7 +218,7 @@ describe('crates (SPEC §10.1, D154)', () => {
     for (let i = 0; i < 40; i++) {
       dv.buyDownTo(0);
       if (dv.visit()) crates++;
-      dv.serve(30);
+      dv.serve(C);
     }
     expect(crates).toBe(23);
     expect(unboughtOnShelf(dv.d)).toHaveLength(0);
@@ -260,24 +267,25 @@ describe('crates (SPEC §10.1, D154)', () => {
 });
 
 describe('playtest crates (D180)', () => {
-  it('a sent crate skips the wait and the hold, and the pace restarts 30 monsters from now', () => {
+  it('a sent crate skips the wait and the hold, and the pace restarts C monsters from now', () => {
     const dev = new Device();
     expect(dev.visit()?.n).toBe(1);
     dev.serve(4);
     expect(dueCrate(dev.d)).toBeNull(); // the wait (and the hold: 20 unbought)
     expect(unboughtOnShelf(dev.d).length).toBeGreaterThanOrEqual(CRATE_HOLD_AT_UNBOUGHT);
     const c = forcedCrate(dev.d)!;
-    expect(c).toEqual({ n: 2, next: 34 });
+    expect(c).toEqual({ n: 2, next: 4 + C });
     dev.events.push(crateEvent(dev.ctx, c));
     expect(deliveredCrates(dev.d)).toEqual([1, 2]);
-    expect(dev.d.crates[2]).toBe(34);
+    expect(dev.d.crates[2]).toBe(4 + C);
   });
 
   it('runs out with the queue: every crate sent leaves none and nothing more to force', () => {
     const dev = new Device();
     const total = Math.ceil(CRATE_QUEUE.length / 2);
     expect(cratesLeft(dev.d)).toBe(total);
-    for (let c = forcedCrate(dev.d); c; c = forcedCrate(dev.d)) dev.events.push(crateEvent(dev.ctx, c));
+    for (let c = forcedCrate(dev.d); c; c = forcedCrate(dev.d))
+      dev.events.push(crateEvent(dev.ctx, c));
     expect(deliveredCrates(dev.d)).toHaveLength(total);
     expect(cratesLeft(dev.d)).toBe(0);
     expect(dueCrate(dev.d)).toBeNull();
